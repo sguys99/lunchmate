@@ -12,7 +12,7 @@
 | 개발 도메인 (프로덕션) | `https://lunchmate-kr.vercel.app` (`lunchmate.vercel.app`은 타인이 사용 중이라 변경) |
 | 로컬 개발 주소 | `http://localhost:3000` |
 | Supabase 리전 | 서울 `ap-northeast-2` |
-| Supabase Auth 콜백 (카카오, 네이버, 구글 공통) | `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → **Supabase 생성 후 채움** |
+| Supabase Auth 콜백 (카카오, 네이버, 구글 공통) | `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback` (2026-10-28 확정) |
 | 로그인 provider | 구글은 Supabase 내장, 카카오(`custom:kakao`)와 네이버(`custom:naver`)는 Supabase 커스텀 OIDC provider (T0.14, T0.20, 2026-10-28 확정) |
 
 - 모든 콘솔에 위 두 주소(`https://lunchmate-kr.vercel.app`, `http://localhost:3000`)를 **정확한 주소로** 등록합니다. `*.vercel.app` 같은 와일드카드는 쓰지 않습니다(PRD 14.1, tasks T0.5).
@@ -84,7 +84,7 @@
   - `SUPABASE_PROJECT_REF`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`를 `.env.local`에 기록
   - Auth 설정: Site URL `https://lunchmate-kr.vercel.app`, Redirect URLs에 `https://lunchmate-kr.vercel.app`과 `http://localhost:3000`의 로그인 복귀 경로(정확한 경로는 4단계 인증 구현에서 확정, 와일드카드 미사용)
   - provider 등록 자리 준비와 값 안내(비밀값 입력은 사용자가 2.1절대로 직접)
-- Supabase 생성이 끝나면 Claude가 **콜백 URL** `https://<ref>.supabase.co/auth/v1/callback`을 알려드립니다. 그 값을 카카오(3.3), 네이버(4.1), 구글(5.3)에 넣습니다.
+- Supabase 개발 프로젝트 `lunchmate-dev`(ref `shgpenqvdlvbpynzgfes`, 서울)를 만들었습니다. **콜백 URL** `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback`을 카카오(3.3), 네이버(4.1), 구글(5.3)에 넣습니다.
 
 ### 2.1 로그인 provider 등록 (사용자가 대시보드에서 직접, T0.14, T0.20)
 
@@ -125,7 +125,7 @@
 
 1. **카카오 로그인 > 사용 설정**에서 상태를 **ON**. (OFF면 `KOE004` 오류) 같은 화면의 **OpenID Connect**도 **ON**으로 둡니다(커스텀 OIDC provider 전제, T0.20). [콘솔에서 확인: 메뉴 위치]
 2. **앱 > 플랫폼 키 > REST API 키**를 엽니다.
-   - **리다이렉트 URI**: `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → **Supabase 생성 후 채움**. (틀리면 `KOE006` 오류)
+   - **리다이렉트 URI**: `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback` (2026-10-28 확정). (틀리면 `KOE006` 오류)
    - **클라이언트 시크릿**: 코드를 생성하고 활성화 상태를 **사용함**으로 둡니다.
 3. **카카오 로그인 > 동의항목 > 개인정보**에서 아래 두 개만 설정합니다.
    - 닉네임(`profile_nickname`): 필수 동의
@@ -160,7 +160,7 @@
 | 제공 정보 선택 | **별명**, **프로필 사진**만. 이름, 이메일, 성별, 생일, 연령대, 휴대전화번호는 선택하지 않음. 필수/추가 구분은 별명 필수, 프로필 사진 추가를 기본안으로 [콘솔에서 확인] |
 | 로그인 오픈 API 서비스 환경 | **PC 웹** (모바일 웹 별도 항목이 있으면 함께 추가) [콘솔에서 확인] |
 | 서비스 URL | `https://lunchmate-kr.vercel.app` (대표 URL. 여러 개를 받으면 `http://localhost:3000`도 추가) [콘솔에서 확인] |
-| 네이버 로그인 Callback URL | **Supabase 콜백** `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → Supabase 생성 후 채움 (커스텀 OIDC provider 방식, T0.14) |
+| 네이버 로그인 Callback URL | **Supabase 콜백** `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback` (2026-10-28 확정) (커스텀 OIDC provider 방식, T0.14) |
 | 로고 이미지 | 서비스를 대표하는 아이콘 (검수 항목) |
 
 ### 4.2 받을 값
@@ -204,7 +204,7 @@
 
 1. **Clients > Create client**, 애플리케이션 유형 **웹 애플리케이션**, 이름 `lunchmate-web`.
 2. **승인된 JavaScript 원본**: `https://lunchmate-kr.vercel.app`, `http://localhost:3000` (경로 없이)
-3. **승인된 리디렉션 URI**: `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → **Supabase 생성 후 채움**
+3. **승인된 리디렉션 URI**: `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback` (2026-10-28 확정)
 4. 받을 값
    - 클라이언트 ID, 클라이언트 보안 비밀번호 → `.env.local`에 넣지 않고 Supabase 대시보드 내장 Google provider에 직접 입력(2.1절).
    - 비밀번호는 생성 직후에만 전체가 보일 수 있으니 바로 Supabase에 입력합니다.

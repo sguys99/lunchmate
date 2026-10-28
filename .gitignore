@@ -46,3 +46,7 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /blob-report/
+
+# supabase CLI 링크 상태 (supabase/.gitignore와 중복 보호)
+supabase/.temp/
+supabase/.branches/

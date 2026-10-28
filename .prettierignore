@@ -28,3 +28,6 @@ src/styles/tokens.css
 skills-lock.json
 .mcp.json
 pnpm-workspace.yaml
+
+# Supabase 생성 타입 (pnpm db:types)
+src/lib/supabase/types.ts

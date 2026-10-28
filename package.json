@@ -21,6 +21,9 @@
     "postbuild": "node scripts/check-client-secrets.mjs",
     "check:secrets": "node scripts/check-client-secrets.mjs",
     "lint:copy": "node scripts/check-copy.ts",
+    "db:push": "supabase db push",
+    "db:types": "node scripts/db-types.mjs",
+    "db:migration:new": "supabase migration new",
     "prepare": "git config core.hooksPath .githooks",
     "analyze": "next analyze --output --snapshot latest",
     "bundle:report": "node scripts/bundle-report.mjs"
