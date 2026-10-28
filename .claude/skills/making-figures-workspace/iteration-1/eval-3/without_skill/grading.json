@@ -1,0 +1,120 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 2-6-6.py, 2-6-6.svg, 2-6-6.v.svg, _render/qa/2-6-6*.png, docs/figures.yml의 2-6-6 항목, vol2-agent/ch06/notes.md 검수 블록이 모두 있다",
+      "passed": false,
+      "evidence": "2-6-6.v.svg 없음(epub_variant: none). 나머지(py, svg, qa PNG 7장, figures.yml 항목, notes.md 검수 블록)는 있음"
+    },
+    {
+      "text": "[자동] F2 2-6-6.py를 다시 실행해도 두 SVG의 해시가 같거나 차이가 id와 날짜뿐이다",
+      "passed": true,
+      "evidence": "shasum -c 2-6-6.svg OK. 세로 변형은 원래 없음"
+    },
+    {
+      "text": "[자동] L1 -W error::UserWarning으로 실행해 경고가 없고 figlib lint와 figkit lint가 모두 OK다",
+      "passed": false,
+      "evidence": "-W error::UserWarning 종료 코드 0, figlib lint OK. figkit lint는 '오류 1: 글자가 바깥 여백을 넘음: 단계 수(5.2절)'로 실패"
+    },
+    {
+      "text": "[자동] L2 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "금지 기호 0(본문 판, alt, 캡션)"
+    },
+    {
+      "text": "[자동] C1 두 판 모두에 칩 0.358과 라벨 p = 0.99, p = 0.95, p = 0.9가 있다",
+      "passed": false,
+      "evidence": "본문 판에는 정본 문자열 4/4가 있으나 세로 변형이 없어 '두 판 모두'를 충족하지 못함"
+    },
+    {
+      "text": "[자동] C2 0.36, 0.82, 0.60 같은 줄인 자릿수, 0.598이나 두 자리 0.59 같은 정본과 다른 값, p = 0.90, 백분율, N6-1이나 E6-1 ID가 0건이고 Q21 명령의 정본 밖 소수가 눈금 0.0, 0.5, 1.0뿐이다",
+      "passed": true,
+      "evidence": "금지 패턴 0건, Q21 정본 밖 소수는 0.0, 1.0뿐"
+    },
+    {
+      "text": "[자동] C3 숫자 칩이 1~3개, 강조 칩 2개 이하이고 모두 N6-1 행과 일치한다(Q20)",
+      "passed": true,
+      "evidence": "Q20: 칩 0.599, 0.358 두 개 N6-1 일치, 강조 칩 2개"
+    },
+    {
+      "text": "[자동] W1 본문 640 × 320, 세로 변형 폭 360, 높이 720 이하다",
+      "passed": false,
+      "evidence": "본문 640 x 480(기대 320), 세로 변형 없음"
+    },
+    {
+      "text": "[자동] W2 본문 그림 영역이 x 104~432, y 88~264에서 ±8 안이다",
+      "passed": false,
+      "evidence": "plot=(88, 88, 472, 424). BOX 0/1"
+    },
+    {
+      "text": "[자동] W3 세로 변형 그림 영역이 x 64~264, y 128~320에서 ±8 안이다",
+      "passed": false,
+      "evidence": "세로 변형 없음"
+    },
+    {
+      "text": "[자동] A1 title이 '그림 2-6-6 '으로 시작하고 세로 변형은 ' (EPUB 세로 변형)'으로 끝나며 두 SVG의 desc가 alt와 같다",
+      "passed": false,
+      "evidence": "본문 title과 desc = alt는 통과. 세로 변형 title을 확인할 판이 없음"
+    },
+    {
+      "text": "[사람] A2 alt가 가로축과 세로축, 세 선의 p, 0.358을 포함한 핵심 숫자 2~4개, 추세, 메시지 결론을 담고 색 이름이 없다",
+      "passed": false,
+      "evidence": "축, 세 p, 추세, 결론, 색 이름 없음은 통과. 숫자가 0.774, 0.599, 0.358, 0.818, 0.122 다섯 개로 2~4개 초과"
+    },
+    {
+      "text": "[자동] A3 figures.yml 캡션의 caveat나 reading에 '독립'이 있다",
+      "passed": true,
+      "evidence": "caveat '단계마다 같은 성공률 p로 독립적으로 성공한다고 가정했습니다.'"
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: C, source.canon에 N6-1, epub_variant: manual, refresh: null, status는 rendered나 reviewed다",
+      "passed": false,
+      "evidence": "kind C, canon N6-1, refresh null, status reviewed는 맞으나 epub_variant: none(기대 manual)"
+    },
+    {
+      "text": "[사람] H1 캡션 없이 5초 안에 '단계가 늘수록 성공률이 떨어지고 0.95여도 20단계면 0.358'이 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "PNG만 보고 '단계가 늘수록 성공률이 떨어지고 p = 0.95도 20단계면 0.358'로 읽힘"
+    },
+    {
+      "text": "[사람] H2 첫 시선이 p = 0.95 강조 선과 칩 0.358에 가고 gray에서 강조 선이 가장 진하며 다른 두 선이 선 종류로 갈린다(Q10, Q11, Q14)",
+      "passed": false,
+      "evidence": "강조 선이 가장 진하나 맥락 선 둘이 같은 회색 실선이라 선 종류로 갈리지 않음"
+    },
+    {
+      "text": "[사람] H3 시안 1-5-5 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지와 chart-guide.md 6장 기준에서 어긋난 번호가 없다(범례 없음, 눈금 3~5개, 다른 선 ink 계조)",
+      "passed": false,
+      "evidence": "캔버스 640 x 480, 그림 영역 88~472로 1-5-5 판과 다름. 맥락 선 ink 계조 없음. 범례 없음, 눈금 3개는 같음"
+    },
+    {
+      "text": "[사람] H4 protan, deutan에서 강조 선이 다른 선과 뭉치지 않는다(Q15)",
+      "passed": true,
+      "evidence": "protan, deutan에서 강조 선 파랑, 맥락 선 회색으로 뭉치지 않음"
+    },
+    {
+      "text": "[사람] H5 본문 w328에서 칩이 작아지는 점과 세로 변형 사유가 note에 있고, 세로 변형 w328에서 칩과 끝 라벨이 읽힌다(Q3, Q17, Q18)",
+      "passed": false,
+      "evidence": "note에 7.2 CSS px는 적었으나 세로 변형을 만들지 않음. v.w328 PNG가 없어 판정 불가"
+    },
+    {
+      "text": "[사람] H6 곡선이 네 점을 잇는 꺾은선이 아니라 식에서 그린 매끄러운 선이고 점은 정본 x 네 곳에만 있다",
+      "passed": false,
+      "evidence": "곡선은 매끄럽고 정본 점 12개는 맞음. 그러나 지시선 점이 7단계 선 위에 accent 채움 점으로 찍혀 정본 밖 x에 데이터 점처럼 보임"
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 각 줄이 실제 PNG와 맞는다",
+      "passed": true,
+      "evidence": "notes.md 줄(강조 선 하나, 회색조와 색약에서 하나로 보임, w328 7.2 CSS px)이 PNG와 맞음. 저자 확인: '경고 0'이라 적었으나 sheet 하단에 FQ-V 참고 줄이 있고 figkit lint 오류도 기록에 없음"
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 13,
+    "total": 21,
+    "pass_rate": 0.38
+  },
+  "timing": {
+    "total_tokens": 143515,
+    "duration_ms": 272138,
+    "total_duration_seconds": 272.1
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 2-6-6.py, 2-6-6.svg, 2-6-6.v.svg, _render/qa/2-6-6*.png, docs/figures.yml의 2-6-6 항목, vol2-agent/ch06/notes.md 검수 블록이 모두 있다",
+      "passed": true,
+      "evidence": "2-6-6.py, 2-6-6.svg, 2-6-6.v.svg, _render/qa/2-6-6*.png 15장(본문, 세로 변형 각 컬러, gray, protan, deutan, dark, w328, sheet와 v.w360), docs/figures.yml 2-6-6 항목, notes.md '그림 2-6-6 시각 검수' 블록 모두 있음. check_figures --root 오류 0, 경고 2(F90 설계서 없음, 예상된 경고)"
+    },
+    {
+      "text": "[자동] F2 2-6-6.py를 다시 실행해도 두 SVG의 해시가 같거나 차이가 id와 날짜뿐이다",
+      "passed": true,
+      "evidence": "shasum 기록 뒤 .venv/bin/python 2-6-6.py 재실행, shasum -c 두 SVG 모두 OK(바이트 단위 같음)"
+    },
+    {
+      "text": "[자동] L1 -W error::UserWarning으로 실행해 경고가 없고 figlib lint와 figkit lint가 모두 OK다",
+      "passed": true,
+      "evidence": "-W error::UserWarning 실행 종료 코드 0. figkit lint 두 판 OK, figlib lint 두 판 OK"
+    },
+    {
+      "text": "[자동] L2 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "README 판정 블록 '금지 기호' 두 판 통과, 캡션과 alt, message 금지 기호도 통과"
+    },
+    {
+      "text": "[자동] C1 두 판 모두에 칩 0.358과 라벨 p = 0.99, p = 0.95, p = 0.9가 있다",
+      "passed": true,
+      "evidence": "정본 문자열 4/4(0.358, p = 0.99, p = 0.95, p = 0.9)가 2-6-6.svg와 2-6-6.v.svg 모두 통과"
+    },
+    {
+      "text": "[자동] C2 0.36, 0.82, 0.60 같은 줄인 자릿수, 0.598이나 두 자리 0.59 같은 정본과 다른 값, p = 0.90, 백분율, N6-1이나 E6-1 ID가 0건이고 Q21 명령의 정본 밖 소수가 눈금 0.0, 0.5, 1.0뿐이다",
+      "passed": true,
+      "evidence": "금지 패턴 15개 두 판, alt와 캡션 모두 0건. Q21 명령의 정본 행에 없는 소수는 0.0, 1.0뿐(0.5는 정본 행에 있어 출력 안 됨)"
+    },
+    {
+      "text": "[자동] C3 숫자 칩이 1~3개, 강조 칩 2개 이하이고 모두 N6-1 행과 일치한다(Q20)",
+      "passed": true,
+      "evidence": "Q20: 칩 2개(N6-1 0.599 일치, N6-1 0.358 일치), 둘 다 강조 칩. 사례 5.1절이 둘째 칩으로 0.599를 허용"
+    },
+    {
+      "text": "[자동] W1 본문 640 × 320, 세로 변형 폭 360, 높이 720 이하다",
+      "passed": true,
+      "evidence": "본문 640 x 320, 세로 변형 360 x 392(높이 720 이하, 8의 배수, 사례 기대 368에서 +24로 허용 ±48 안)"
+    },
+    {
+      "text": "[자동] W2 본문 그림 영역이 x 104~432, y 88~264에서 ±8 안이다",
+      "passed": false,
+      "evidence": "BOX 104,88,328,176 대조 0/1. 소스 LAYOUT body plot=(104, 88, 432, 240)이라 영역 아래가 240(기대 264에서 24 벗어남). 가로축 제목 '단계 수' 자리를 만들려고 examples/example-log-n6-1.py의 240을 따랐다고 docstring과 note에 적음. 사례 기대는 눈금에 '단계'를 붙이거나 축 제목을 두더라도 1-5-5 판(264)을 지키는 것"
+    },
+    {
+      "text": "[자동] W3 세로 변형 그림 영역이 x 64~264, y 128~320에서 ±8 안이다",
+      "passed": true,
+      "evidence": "BOXV 64,128,200,192 대조 1/1"
+    },
+    {
+      "text": "[자동] A1 title이 '그림 2-6-6 '으로 시작하고 세로 변형은 ' (EPUB 세로 변형)'으로 끝나며 두 SVG의 desc가 alt와 같다",
+      "passed": true,
+      "evidence": "title '그림 2-6-6 단계 수와 전체 성공률', 세로 변형은 ' (EPUB 세로 변형)'으로 끝남. 두 SVG의 desc = figures.yml alt 통과"
+    },
+    {
+      "text": "[사람] A2 alt가 가로축과 세로축, 세 선의 p, 0.358을 포함한 핵심 숫자 2~4개, 추세, 메시지 결론을 담고 색 이름이 없다",
+      "passed": false,
+      "evidence": "가로축(단계 수 1~20), 세로축(전체 성공률), 세 선의 p, 추세, 결론(곱으로 줄어듦)은 있고 색 이름 없음. 그러나 숫자가 0.904, 0.818, 0.122, 0.599, 0.358 다섯 개로 기준 2~4개를 넘음"
+    },
+    {
+      "text": "[자동] A3 figures.yml 캡션의 caveat나 reading에 '독립'이 있다",
+      "passed": true,
+      "evidence": "caveat '단계마다 성공 여부가 서로 독립이라고 가정해 계산한 값입니다.' 5.4절 한 줄 명령 통과"
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: C, source.canon에 N6-1, epub_variant: manual, refresh: null, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "kind: C, source.canon [N6-1], source.kind own, epub_variant: manual, refresh: null, status: reviewed 모두 통과"
+    },
+    {
+      "text": "[사람] H1 캡션 없이 5초 안에 '단계가 늘수록 성공률이 떨어지고 0.95여도 20단계면 0.358'이 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "message를 보기 전 컬러 PNG만 보고 적은 문장: '단계가 늘수록 세 선 모두 떨어지고, p = 0.95도 20단계면 0.358까지 내려간다'. 기대 문장과 같음"
+    },
+    {
+      "text": "[사람] H2 첫 시선이 p = 0.95 강조 선과 칩 0.358에 가고 gray에서 강조 선이 가장 진하며 다른 두 선이 선 종류로 갈린다(Q10, Q11, Q14)",
+      "passed": false,
+      "evidence": "첫 시선은 accent 선과 칩 0.358로 가고 gray에서 강조 선이 가장 진함(통과 부분). 그러나 gray PNG에서 p = 0.99와 p = 0.9 두 선이 같은 회색 1px 실선이라 선 종류로 갈리지 않음(파선, 점선 없음). 선 끝 라벨로만 구분됨. 저자 확인: 시안 1-5-5도 맥락 선 둘이 같은 ink-400 실선이고 patterns.md P15도 '나머지는 ink-400'이라 기준끼리 어긋남"
+    },
+    {
+      "text": "[사람] H3 시안 1-5-5 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지와 chart-guide.md 6장 기준에서 어긋난 번호가 없다(범례 없음, 눈금 3~5개, 다른 선 ink 계조)",
+      "passed": false,
+      "evidence": "1-5-5 PNG와 대조: 머리줄(1), 범례 없음(9), 눈금 3개, 선 굵기 1과 1.5(6), 글자 크기 14 한 종(10)은 같음. 어긋남: chart-guide 6장 '계열이 셋이면 ink-600, ink-400으로 한 단계씩 낮춤'과 기대 문장의 '다른 선 ink 계조'를 어김(두 맥락 선 모두 #8c929b). 또 1-5-5에 없는 가로축 제목을 넣어 그림 영역 아래가 240으로 올라가 판이 달라짐. 저자 확인: 1-5-5 자체도 맥락 선 둘이 같은 회색"
+    },
+    {
+      "text": "[사람] H4 protan, deutan에서 강조 선이 다른 선과 뭉치지 않는다(Q15)",
+      "passed": true,
+      "evidence": "protan, deutan에서 강조 선이 파랑으로 바뀌고 두 맥락 선은 회색으로 남아 뭉치지 않음. 칩 테두리도 파랑으로 같이 묶임"
+    },
+    {
+      "text": "[사람] H5 본문 w328에서 칩이 작아지는 점과 세로 변형 사유가 note에 있고, 세로 변형 w328에서 칩과 끝 라벨이 읽힌다(Q3, Q17, Q18)",
+      "passed": true,
+      "evidence": "figures.yml note와 notes.md w328 줄에 '칩과 선 이름이 약 7.2 CSS px라 360 사본을 둠'이 있음. v.w328 PNG에서 칩 0.599, 0.358과 끝 라벨 p = 0.99, 0.95, 0.9가 읽힘. 저자 확인: 세로 변형의 0.358 칩이 점 위로 약 40 떠 있어 0.5 보조선에 걸치고 어느 점의 값인지 연결이 약함"
+    },
+    {
+      "text": "[사람] H6 곡선이 네 점을 잇는 꺾은선이 아니라 식에서 그린 매끄러운 선이고 점은 정본 x 네 곳에만 있다",
+      "passed": false,
+      "evidence": "곡선은 정수 1~20에서 p^n을 계산한 20점 꺾은선이라 PNG에서 매끄럽게 보임(통과 부분). 그러나 (1) 1단계 점을 생략해 정본 점이 선마다 3개, 모두 9개(기대 12개). (2) 메시지 지시선 점(반지름 3, accent 채움)이 본문 15단계, 세로 변형 3단계에 찍혀 데이터 점(반지름 3.5, accent 채움)과 구분되지 않음. 결과적으로 정본 밖 x에 데이터처럼 보이는 점이 생김. 실행 자신도 notes.md에서 '데이터 점으로 오해될 여지'를 저자 확인으로 남김"
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 각 줄이 실제 PNG와 맞는다",
+      "passed": true,
+      "evidence": "notes.md의 png, gray, protan과 deutan, w328, dark 줄을 PNG와 대조: 강조 선이 가장 진함, 맥락 선 속 빈 점, 색약에서 파랑, w328 7.2 CSS px, dark 카드 테두리 모두 맞음. 지시선 점 문제도 저자 확인으로 정직하게 적음. 단, '세 선은 선 끝 라벨로 갈림'은 선 종류 구분이 없다는 사실을 돌려 말한 것(저자 확인)"
+    }
+  ],
+  "summary": {
+    "passed": 16,
+    "failed": 5,
+    "total": 21,
+    "pass_rate": 0.76
+  },
+  "timing": {
+    "total_tokens": 165622,
+    "duration_ms": 388827,
+    "total_duration_seconds": 388.8
+  }
+}

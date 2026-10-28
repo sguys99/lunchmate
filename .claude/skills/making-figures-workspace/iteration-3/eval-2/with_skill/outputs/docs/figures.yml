@@ -1,0 +1,25 @@
+- id: "1-4-4"
+  vol: 1
+  chapter: 4
+  section: "4.2"
+  kind: S
+  spec: "러닝 예문에서 \"안\"이 다른 토큰을 보는 연결선. 띠 폭 = 가중치"
+  source_file: vol1-llm/ch04/figures/1-4-4.build.py
+  output_file: vol1-llm/ch04/figures/1-4-4.svg
+  message: "'안'은 '왔어요'를 가장 많이 봅니다"
+  accent: "왔어요로 가는 연결 띠, 숫자 칩 0.576"
+  role: 숫자
+  epub_variant: manual
+  caption:
+    title: "'안'이 다른 토큰을 보는 정도"
+    reading: "띠가 굵을수록 가중치가 크고, 세 띠를 합한 굵기는 쿼리 상자 한 변과 같습니다."
+    caveat: "계산을 보이려고 문장을 상자가, 안, 왔어요 세 토큰으로 줄였습니다."
+  alt: "토큰 '안'이 상자가, 안, 왔어요를 얼마나 보는지를 연결 띠의 굵기로 나타냈습니다. 가중치는 상자가 0.140, 안 0.284, 왔어요 0.576이고 세 띠의 굵기를 합하면 쿼리 상자 한 변과 같습니다. 가장 굵은 띠가 왔어요로 이어져, '안'은 '왔어요'를 가장 많이 봅니다."
+  source:
+    kind: own
+    refs: []
+    line: null
+    canon: [N4-2]
+  refresh: null
+  status: reviewed
+  note: "P8 가중치 띠. 가중치 1.0 = 80, 띠 면 ink-200, 메시지 띠만 accent(style-guide 6.12절). 세로 변형은 본문 폭 328에서 토큰 이름이 약 8 CSS px라 만듦(choose-type.md 5장 3번), 360 x 320. 세로 변형 상자 72, 88 폭에서 figkit 최소 폭 120 UserWarning 2건(P8 세로 변형 실측 치수라 유지, lint 경고 0). 러닝 예문 토큰 분할은 1-2-1 미확정이라 정본 N4-2 토큰 셋만 씀. QA 2026-10-15 통과(Q1~Q27)"

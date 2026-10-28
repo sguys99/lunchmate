@@ -1,0 +1,133 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 1-4-3.mmd, 1-4-3.svg, 1-4-3.v.svg와 그 소스, _render/qa/1-4-3*.png, docs/figures.yml의 1-4-3 항목, vol1-llm/ch04/notes.md 검수 블록이 모두 있다",
+      "passed": false,
+      "evidence": "파일은 모두 있으나 notes.md에 '그림 1-4-3 시각 검수' 블록(qa-checklist 5.3절 서식)이 없음. '제작과 검수 기록'에 만든 파일, 판단 기록, 자동 검사 결과만 있고 png, gray, 색약, w328, dark 줄이 없음."
+    },
+    {
+      "text": "[자동] F2 1-4-3.mmd를 render.sh로 다시 렌더링한 SVG가 제출한 1-4-3.svg와 바이트 단위로 같고, 세로 변형 소스를 다시 실행해도 해시가 같다",
+      "passed": true,
+      "evidence": "render.sh 재렌더링 cmp 'M 재현 같음'. 1-4-3.v.build.py 재실행 후 shasum -c OK."
+    },
+    {
+      "text": "[자동] L1 figkit lint 오류 0이고, 본문 경고는 Mermaid 배치 격자 경고뿐이며 그 사유가 기록돼 있다. 세로 변형은 경고 0이다",
+      "passed": false,
+      "evidence": "figkit lint 오류 0, 경고 3(격자 이탈 (113,80), (277,80), (354,416), Mermaid 배치). 세로 변형 OK. 그러나 경고 사유가 figures.yml note와 notes.md 어디에도 없음."
+    },
+    {
+      "text": "[자동] L2 그림 글자, title, desc, 캡션, alt, message에 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "자동 블록: 두 SVG와 캡션, alt, message 금지 기호 0."
+    },
+    {
+      "text": "[자동] C1 본문과 세로 변형 모두에 [1, 2], [1, 0], [0, 1], [1, 1], [0.5, 0.5], [1, 2, 3], 0.707, 1.414, 2.121, 0.140, 0.284, 0.576, 0.428, 0.572가 있다",
+      "passed": true,
+      "evidence": "자동 블록: 본문 14/14, 세로 변형 14/14."
+    },
+    {
+      "text": "[자동] C2 두 자리 가중치(0.14, 0.28, 0.58), 백분율(57.6), N4-2 ID, '주문한'이나 '아직', d_k나 d = 64 같은 정본 밖 패턴이 0건이다",
+      "passed": true,
+      "evidence": "자동 블록: 금지 패턴 0(SVG, alt, 캡션)."
+    },
+    {
+      "text": "[자동] W1 본문은 640 × 640(또는 480), 세로 변형은 폭 360, 높이 720 이하 8의 배수다",
+      "passed": true,
+      "evidence": "본문 640 x 640, 세로 변형 360 x 680."
+    },
+    {
+      "text": "[자동] W2 본문 단계 상자 4개가 x 88, 240 × 64, y 192, 304, 416, 528에서 ±16 안이고 입력 둘이 y 80, 값 상자가 y 416에 있다",
+      "passed": true,
+      "evidence": "자동 블록: 본문 구도 상자 7/7(단계 x 88 폭 240, y 192~528). 주의: 노드 글자가 docs/style-board/mermaid-sample.mmd(금지 목록 밖)와 같아 시안과 거의 같은 배치."
+    },
+    {
+      "text": "[자동] W3 세로 변형 단계 상자 4개가 x 16 폭 328, 입력 상자 3개가 x 56 폭 288이다(±16)",
+      "passed": true,
+      "evidence": "자동 블록: 세로 변형 구도 상자 7/7."
+    },
+    {
+      "text": "[자동] A1 SVG title이 '그림 1-4-3 '으로 시작하고 세로 변형은 ' (EPUB 세로 변형)'으로 끝나며, 두 SVG의 desc가 figures.yml alt와 글자 단위로 같다",
+      "passed": true,
+      "evidence": "title '그림 1-4-3 어텐션 계산의 네 단계', 세로 변형 끝 '(EPUB 세로 변형)', desc = alt 두 판 모두 통과."
+    },
+    {
+      "text": "[자동] A2 alt가 2~4문장, 300자 이하, 문장당 100자 이하이고 색 이름, '이 그림은', 큰따옴표가 없다",
+      "passed": true,
+      "evidence": "alt 4문장 240자, 금지어와 큰따옴표 없음."
+    },
+    {
+      "text": "[사람] A2 alt 첫 문장에 단계 수와 네 단계 이름(점수, 크기 조정, softmax, 가중합)이 순서대로 있고 마지막 문장이 메시지와 같은 결론이다",
+      "passed": true,
+      "evidence": "alt 첫 문장 '점수, 크기 조정, softmax, 가중합의 네 단계 흐름도', 마지막 문장이 메시지와 같음."
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: M, source.canon에 N4-2, epub_variant: manual, message 40자 이하 마침표 없음, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "kind M, canon [N4-1, N4-2](N4-2 포함), epub_variant manual, message 27자, status reviewed. 저자 확인: N4-1을 canon에 함께 넣음, figures.yml 머리에 사본 주석."
+    },
+    {
+      "text": "[사람] H1 캡션 없이 컬러 PNG만 보고 5초 안에 ''안'은 '왔어요'를 가장 많이 본다'는 뜻이 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "컬러 PNG만으로 '안의 가중치가 세 번째 키 왔어요에 0.576으로 가장 크다'가 읽힘. 메시지와 같은 뜻."
+    },
+    {
+      "text": "[사람] H2 첫 시선이 03 가중치 메시지 상자와 0.576에 가고, gray PNG에서도 테두리 굵기와 밑줄로 강조가 한 곳에 남는다(Q10, Q11)",
+      "passed": true,
+      "evidence": "첫 시선 03 가중치 상자와 0.576 밑줄. gray에서도 한 곳."
+    },
+    {
+      "text": "[사람] H3 시안 1-4-3 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지 기준에서 어긋난 번호가 없다",
+      "passed": true,
+      "evidence": "시안 PNG와 거의 같음(단계 240 x 64, 머리줄, 정렬, 강조, 개념색 띠, 글자 2종). 어긋난 번호 없음."
+    },
+    {
+      "text": "[사람] H4 gray에서 q, k, v가 실선, 파선, 점선 띠로 갈리고 protan, deutan에서 강조가 개념색과 뭉치지 않는다(Q14, Q15)",
+      "passed": true,
+      "evidence": "gray 실선, 파선, 점선 갈림. protan, deutan에서 강조 밑줄이 띠와 뭉치지 않음."
+    },
+    {
+      "text": "[사람] H5 세로 변형 w328 PNG에서 모든 값 줄이 읽히고 숫자, 강조, 대상 이름이 본문과 같다(Q17, Q18)",
+      "passed": true,
+      "evidence": "세로 변형 w328 12.8 CSS px, 값 줄 모두 읽힘. 숫자와 강조, 대상 이름 같음."
+    },
+    {
+      "text": "[사람] H6 키는 01 단계로, 값은 04 단계로 들어가는 연결이 보이고 화살표가 상자를 관통하지 않는다(Q9)",
+      "passed": true,
+      "evidence": "키 → 01, 값 → 04 연결이 보이고 관통 없음."
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 png, gray, 색약, w328, dark 줄이 실제 PNG와 맞는다",
+      "passed": false,
+      "evidence": "notes.md에 png, gray, 색약, w328, dark 줄이 없어 PNG와 대조할 기록이 없음. 유일한 시각 기록 '본문판 폭 328에서 7.2 CSS px'는 시트와 맞지만 나머지 판정 줄이 빠짐."
+    }
+  ],
+  "summary": {
+    "passed": 17,
+    "failed": 3,
+    "total": 20,
+    "pass_rate": 0.85
+  },
+  "timing": {
+    "total_tokens": 132470,
+    "duration_ms": 206778,
+    "total_duration_seconds": 206.8
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "docs/style-board/mermaid-sample.mmd, B-flow.*, figkit-sample.build.py, index.html이 승인 시안 1-4-3과 같은 노드 글자를 담고 있지만 README 4단계 금지 목록에 없음. without_skill이 이 글자를 그대로 써 구도 항목(W2, H3)을 통과해 기준선이 오염됨."
+      },
+      {
+        "reason": "README 자동 판정의 check_figures --root 명령이 '장 폴더에 index.md 없음'으로 즉시 멈춤. 2단계에서 vol1-llm/ch04/index.md를 $O에 링크하거나 명령 설명을 고쳐야 함."
+      },
+      {
+        "assertion": "[사람] H3",
+        "reason": "9장 12가지가 '단계 상자끼리 같은 크기'만 보므로 시안보다 40px 좁은 상자도 통과. 시안 대비 단계 이름과 보조 연산 문구 유지 여부는 어떤 항목도 보지 않음(C1은 숫자만)."
+      },
+      {
+        "reason": "F2 S 재현 명령이 산출 파일을 제자리에서 덮어씀. 해시가 같으면 무해하지만 다르면 제출본이 사라지므로 --out 임시 경로가 안전."
+      }
+    ]
+  },
+  "grader_notes": "README 7단계: with_skill notes.md에 '같은 종류 시안(M 1-4-3)은 이번 작업에서 열지 않기로' 기록, without_skill은 금지 시안 언급 없음. 트랜스크립트는 없어 notes 기록으로만 확인, 두 실행 모두 유효로 판정."
+}

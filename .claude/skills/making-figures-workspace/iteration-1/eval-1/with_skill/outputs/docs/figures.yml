@@ -1,0 +1,25 @@
+- id: "1-4-3"
+  vol: 1
+  chapter: 4
+  section: "4.2"
+  kind: M
+  spec: "어텐션 계산 4단계 흐름도(N4-2 숫자를 각 단계에 표기)"
+  source_file: vol1-llm/ch04/figures/1-4-3.mmd
+  output_file: vol1-llm/ch04/figures/1-4-3.svg
+  message: "'안'은 '왔어요'의 정보를 가장 많이 가져옵니다"
+  accent: "03 softmax 메시지 상자와 가중치 0.576 밑줄"
+  role: 숫자
+  epub_variant: manual
+  caption:
+    title: "토큰 '안'의 어텐션 계산 네 단계"
+    reading: "첫 단계부터 따라가면 점수가 합이 1인 가중치로 바뀌고, 그 가중치로 값을 섞어 출력이 나옵니다."
+    caveat: "계산을 보이려고 문장을 상자가, 안, 왔어요 세 토큰과 2차원 벡터로 줄였습니다."
+  alt: "토큰 '안'의 어텐션 계산을 내적 점수, 루트 2로 나누기, softmax, 가중합의 네 단계 흐름도로 나타냈습니다. 쿼리 [1, 2]와 세 키의 내적 점수 [1, 2, 3]을 루트 2로 나누면 [0.707, 1.414, 2.121]이 됩니다. softmax를 거친 가중치는 상자가 0.140, 안 0.284, 왔어요 0.576이고, 이 가중치로 값을 섞은 출력은 [0.428, 0.572]입니다. 가중치가 가장 큰 왔어요의 정보를 '안'이 가장 많이 가져옵니다."
+  source:
+    kind: own
+    refs: []
+    line: null
+    canon: [N4-2]
+  refresh: null
+  status: reviewed
+  note: "세로 변형은 S(1-4-3.v.build.py). 사유: 360 렌더링 내용 폭 448px가 328 초과(--variant 실측, 방향은 이미 TB). 본문 lint 경고 2건은 Mermaid 배치 격자 이탈(입력 상자 x 106, 291). QA 2026-10-15 통과(Q1~Q27, Q24~Q27 해당 없음)"

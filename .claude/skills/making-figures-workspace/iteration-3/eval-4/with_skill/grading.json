@@ -1,0 +1,154 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 3-8-1.build.py, 3-8-1.svg, _render/qa/3-8-1*.png, docs/figures.yml의 3-8-1 항목, vol3-physical-ai/ch08/notes.md 검수 블록이 모두 있다(세로 변형은 epub_variant가 manual일 때)",
+      "passed": true,
+      "evidence": "F1 ls: build.py, svg, v.svg, _render/qa/ PNG 15장, docs/figures.yml 3-8-1 항목, ch08/notes.md '그림 3-8-1 시각 검수' 블록 모두 있음. epub_variant manual이라 3-8-1.v.svg도 있음"
+    },
+    {
+      "text": "[자동] F2 3-8-1.build.py를 다시 실행해도 SVG 해시가 같다",
+      "passed": true,
+      "evidence": "F2 README 명령으로 소스를 ${TMPDIR}/g3-f4/f2.* 임시 미러에 복사해 재실행: '3-8-1 재현 같음', '3-8-1.v 재현 같음'(cmp 바이트 일치)"
+    },
+    {
+      "text": "[자동] L1 figkit lint 오류 0, 경고 0이다(개념색 수, 부품 수 경고 포함)",
+      "passed": true,
+      "evidence": "figkit lint 두 판 모두 OK(오류 0, 경고 0). check_figures --root는 오류 0, 경고 3(F90 설계서 없음 2건, F14 원고 미참조 1건, 둘 다 시험 환경 탓)"
+    },
+    {
+      "text": "[자동] L2 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "자동 블록 '3-8-1.svg 금지 기호', '3-8-1.v.svg 금지 기호', '캡션 금지 기호' 모두 통과"
+    },
+    {
+      "text": "[자동] C1 System 2, System 1, 잠재 표현, 약 7~9 Hz, 200 Hz, VLM, 액션이 그림 글자에 있다",
+      "passed": true,
+      "evidence": "자동 블록 정본 문자열 7/7(본문, 세로 둘 다). 출력 라벨 '액션', 그림 글자에 '행동' 없음"
+    },
+    {
+      "text": "[자동] C2 그림 글자, alt, 캡션(title, reading, caveat) 모두에서 SI 단위 공백 누락, 7-9 같은 하이픈 범위, '약' 없는 7~9, 8 Hz처럼 줄인 값, 1 kHz와 S0, Helix나 GR00T 같은 회사, 모델명, 7B와 80M 같은 모델 크기, N8-1 ID, 22.2나 28.6 같은 중간값, '약 200 Hz', 설계서에 없는 센서 구성(관절, 로봇 상태, 손목), 액션의 옛 표기 '행동'('행동 복제' 제외)이 0건이고 그림 안 '기준일'이 0건이다",
+      "passed": true,
+      "evidence": "자동 블록 '금지 패턴'(두 판)과 'alt와 캡션 금지 패턴' 통과. BAN의 행동(?! ?복제), 약 ?200 ?Hz, 기준일, Helix, Figure, 관절 등 0건"
+    },
+    {
+      "text": "[자동] C3 숫자 칩이 0~1개이고 Hz가 든 칩이 없으며, 칩이 있으면 약 22~29번이고 N8-1과 일치한다",
+      "passed": true,
+      "evidence": "자동 블록 숫자 칩 0개(두 판). Hz 칩 없음"
+    },
+    {
+      "text": "[자동] W1 본문 640 × 320(480 아님: P9는 하위 모듈 3개 이상일 때만 480이고 이 그림은 모듈 둘), 세로 변형이 있으면 폭 360(400 아님), 높이 720 이하다",
+      "passed": true,
+      "evidence": "자동 블록 '3-8-1.svg 폭과 높이 640 x 320'(BH=320), '3-8-1.v.svg 폭과 높이 360 x 472'(VW=360) 통과"
+    },
+    {
+      "text": "[자동] W2 x 24 폭 160 높이 48 입력 상자 3개, x 232 폭 176 모듈 상자 2개, x 456 폭 160 높이 48 출력 상자 1개가 ±8 안이다",
+      "passed": true,
+      "evidence": "자동 블록 '구도 상자 6/6'(TOL 8). 실측 입력 x 24 160x48 셋, 모듈 x 232 176x112와 176x64, 출력 x 456 160x48. P9 모듈 둘 본문 기본안 좌표 그대로(y 56, 120, 216, 224)"
+    },
+    {
+      "text": "[사람] W3 세로 변형이 있으면 두 칸 행 x 16과 192 152 × 48(사이 24), 모듈 상자 x 16 328 × 64, 출력 x 16 152 × 48이고 강조 대상이 본문과 같다",
+      "passed": true,
+      "evidence": "outputs/vol3-physical-ai/ch08/figures/_render/qa/3-8-1.v.sheet.png와 SVG 실측: 두 칸 행 x 16과 192 152x48(사이 24) 두 행, 모듈 x 16 328x64 둘, 출력 x 16 152x48. 강조 대상은 본문 화살표와 같은 잠재 표현 연결이며 세로에서는 P9 규정대로 둘째 입력 행 오른쪽 칸 accent 상자. 와이어프레임과 일치"
+    },
+    {
+      "text": "[자동] A1 title이 '그림 3-8-1 '로 시작하고 desc가 alt와 글자 단위로 같다",
+      "passed": true,
+      "evidence": "자동 블록 title 서식, desc = alt 통과(두 판). title '그림 3-8-1 이중 시스템 VLA'"
+    },
+    {
+      "text": "[사람] A2 alt가 입력, 두 모듈, 잠재 표현, 액션의 흐름과 두 주기를 약 7~9 Hz, 200 Hz 그대로 담고 회사명과 색 이름이 없다",
+      "passed": true,
+      "evidence": "alt 3문장 206자: 입력(장면과 지시, 고속 센서 입력), System 2 VLM, System 1 작은 정책, 잠재 표현 연결, 액션 출력의 흐름과 '약 7~9 Hz', '200 Hz' 그대로. 회사명, 색 이름 없음"
+    },
+    {
+      "text": "[사람] A3 caveat가 주기는 한 사례의 공개값이며 제품마다 다르다는 뜻이고, 캡션에 🔄 기준일: 2026년 10월.이 붙으며, 캡션에 [@key]를 넣었다면 장 references.yml에 키가 없다는 사실을 보고했다",
+      "passed": true,
+      "evidence": "caveat '주기는 한 대표 사례의 공개값이며 제품마다 다릅니다.'(사례 5.1절 기대와 같은 뜻). notes.md 이미지 줄 캡션 끝에 '🔄 기준일: 2026년 10월.'. 캡션에 [@key] 없음. source.kind own, line null로 출처 줄 없음은 사례 7장 메모 5의 기본 동작과 같고, figure2025helix를 data 출처 줄로 바꿀지는 notes.md와 note에 저자 확인으로 올림(키를 지어 넣지 않음). 기대와 맞음"
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: S, source.canon에 N8-1, refresh.as_of가 2026-10이고 refresh.ledger가 있으며, epub_variant가 manual이나 none, message 40자 이하 마침표 없음, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "자동 블록 kind = S, canon N8-1, refresh = 2026-10(ledger 'vol3 10장 / 8.3 Figure Helix'), epub_variant manual, status reviewed, 'message 38자, 마침표 없음' 모두 통과"
+    },
+    {
+      "text": "[사람] Y1 note에 세로 변형 판단과 주기를 칩으로 쓰지 않은 사유가 있다",
+      "passed": true,
+      "evidence": "note: 세로 변형 판단(w328에서 주기 문자열 8.2 CSS px라 핵심인 주기 대비가 작게 읽힘)과 '주기는 🔄 관리표 값이라 숫자 칩 없이 상자 안 글자로 씀'이 모두 있음"
+    },
+    {
+      "text": "[사람] H1 캡션 없이 5초 안에 '느린 쪽이 생각하고 빠른 쪽이 움직이며 둘을 잠재 표현이 잇는다'가 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "outputs/vol3-physical-ai/ch08/figures/_render/qa/3-8-1.png를 message 보기 전에 읽은 문장: '장면과 지시를 받는 느린 System 2가 잠재 표현으로 빠른 System 1에 넘기고, System 1이 센서 입력과 함께 액션을 낸다'. 느림/빠름, 잠재 표현 연결이 모두 5초 안에 읽힘. 저자 확인: 입력 라벨이 사례 와이어프레임의 '이미지 입력', '언어 지시'가 아니라 설계서 8.2절 문구 '장면', '지시'(정당한 선택이나 라벨 표기 저자 확인)"
+    },
+    {
+      "text": "[사람] H2 첫 시선이 figures.yml accent에 적힌 대상 하나에 가고 gray에서도 한 곳에 남는다(Q10, Q11)",
+      "passed": true,
+      "evidence": "outputs/vol3-physical-ai/ch08/figures/_render/qa/3-8-1.png 첫 시선이 accent 화살표와 600 '잠재 표현' 라벨 한 곳(accent 필드와 같음). 3-8-1.gray.png에서도 굵은 라벨로 한 곳에 남음. 세로 gray는 회색 면 상자로 더 뚜렷함. 저자 확인: 본문 gray에서 화살표가 다른 화살표와 굵기 차이가 작아 라벨 굵기에 기대는 정도"
+    },
+    {
+      "text": "[사람] H3 시안 1-4-4 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지 기준에서 어긋난 번호가 없다(정렬선 5개 이하, 같은 크기 입력 상자, 오른쪽 빈 곳, 상자 면 흰색)",
+      "passed": true,
+      "evidence": "outputs/vol3-physical-ai/ch08/figures/_render/qa/3-8-1.png와 ${TMPDIR}/g3-f4/draft/1-4-4.png를 나란히 봄. 2번 왼쪽 끝 x 3개(24, 232, 456), 3번 입력 상자 모두 160x48, 7번 x 440~616 위쪽 빈 곳, 11번 상자 면 흰색이고 개념색은 왼쪽 띠에만, 5번 입출력 라벨 ink-600 400. 4번(강조가 흐름 끝)만 어긋나지만 P9 표 '강조' 행과 design-rules 1장 4번 '강조 자리는 패턴이 정한 자리를 따른다', 사례 5.1절 강조 기본안이 모두 이 자리를 정해 실행자 판단이 맞음. 저자 확인: design-rules 9장 4번, 6.2절 '결과 자리'와 P9의 '연결 강조'가 문서끼리 어긋나니 9장 4번에 패턴 예외를 적을지"
+    },
+    {
+      "text": "[사람] H4 고속 센서 입력이 회색(ink) 상자이고 개념색이 3개 이하이며 gray와 색약 PNG에서 입력과 액션이 띠 모양이나 라벨로 갈린다(Q14, Q15)",
+      "passed": true,
+      "evidence": "outputs/vol3-physical-ai/ch08/figures/_render/qa/3-8-1.gray.png, protan, deutan: 고속 센서 입력은 띠 없는 회색 입력 상자, 개념색은 장면(이미지 노랑 이중선), 지시(텍스트 진한 실선), 액션(자주 쇄선) 3개. gray에서 띠 모양과 라벨로 갈림. 색약에서 강조는 파랑으로 바뀌나 라벨과 굵기로 한 곳"
+    },
+    {
+      "text": "[사람] H5 본문 w328에서 주기 글자의 가독성이 기록돼 있고, 세로 변형이 있으면 w328에서 모두 읽힌다(Q17, Q18)",
+      "passed": true,
+      "evidence": "outputs/vol3-physical-ai/ch08/figures/_render/qa/3-8-1.w328.png: 시트 06 칸 가장 작은 글자 7.2 CSS px(머리줄 14), notes.md에 본문 주기 글자 8.2 CSS px로 작게 읽혀 세로 변형을 만들었다고 기록. 3-8-1.v.w328.png와 시트 06 칸에서 모든 글자가 읽힘(FQ-SIZE 12.8 CSS px, 기준 10.9)"
+    },
+    {
+      "text": "[사람] H6 로봇 실루엣과 demo- 칸이 없고, 넣었다면 robots.svg 부품만 쓰고 Q24 저자 확인으로 올렸다",
+      "passed": true,
+      "evidence": "두 판 PNG에 로봇 실루엣 없음, demo- 칸 없음"
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 각 줄이 실제 PNG와 맞는다",
+      "passed": true,
+      "evidence": "notes.md 줄 대조: 치수 실측(SVG와 일치), png 강조 한 덩어리(본문 1곳, 세로 화살표 둘과 상자로 3곳, PNG와 맞음), gray 띠 구분(이중선, 진한 실선, 쇄선, 띠 없음 맞음), protan/deutan 강조 파랑 변화(맞음), dark 카드(맞음), w328 8.2 CSS px(16 x 328 / 640 계산 맞음). 세로 w328 '14.6 CSS px'는 본문 16 기준이고 시트의 최솟값 12.8(머리줄 14)과 기준이 다르나 판정은 같아 통과"
+    }
+  ],
+  "summary": {
+    "passed": 22,
+    "failed": 0,
+    "total": 22,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 208436,
+    "duration_ms": 328716,
+    "total_duration_seconds": 328.7
+  },
+  "claims": [
+    {
+      "claim": "강조가 흐름 끝이 아니라 가운데 연결에 있어 세련됨 기준 4번과 어긋나지만 패턴 문서가 정한 자리라 두었다",
+      "type": "quality",
+      "verified": true,
+      "evidence": "patterns.md P9 강조 행, design-rules 1장 4번, 사례 5.1절 강조 기본안이 모두 잠재 표현 연결을 지정"
+    },
+    {
+      "claim": "금지 파일을 보지 않았다",
+      "type": "process",
+      "verified": true,
+      "evidence": "사례 4는 README 금지 목록 대상이 아니고 시안이 없음. 1-4-4는 실행도 볼 수 있는 대조 시안"
+    },
+    {
+      "claim": "lint와 figure_qa 오류 0, 경고 0",
+      "type": "factual",
+      "verified": true,
+      "evidence": "채점자 재실행 결과 같음"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [
+      "출처 줄 처리(own 유지 또는 figure2025helix data 줄)",
+      "design-rules 9장 4번과 P9 강조 자리 불일치",
+      "입력 라벨 '장면', '지시' 대 와이어프레임 '이미지 입력', '언어 지시'"
+    ],
+    "workarounds": []
+  }
+}

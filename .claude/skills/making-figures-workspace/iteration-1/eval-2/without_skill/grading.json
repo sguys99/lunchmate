@@ -1,0 +1,143 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 1-4-4.build.py, 1-4-4.svg, 1-4-4.v.svg, _render/qa/1-4-4*.png, docs/figures.yml의 1-4-4 항목, notes.md 검수 블록이 모두 있다",
+      "passed": true,
+      "evidence": "파일 모두 있음(build.py, svg, v.svg, figures.yml 항목, notes.md '## 그림 1-4-4 검수 기록', _render/qa PNG 15장). 검수 블록 제목이 스킬 서식('시각 검수')과 다름. check_figures --root는 index.md 없음으로 멈춤(도구 한계)."
+    },
+    {
+      "text": "[자동] F2 1-4-4.build.py를 다시 실행해도 두 SVG의 해시가 같다",
+      "passed": true,
+      "evidence": "재실행 뒤 shasum -c 두 파일 OK."
+    },
+    {
+      "text": "[자동] L1 figkit lint가 두 SVG 모두 OK(오류 0, 경고 0)다",
+      "passed": true,
+      "evidence": "figkit lint 두 파일 'OK'."
+    },
+    {
+      "text": "[자동] L2 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "금지 기호 통과."
+    },
+    {
+      "text": "[자동] C1 숫자 칩이 0.140, 0.284, 0.576 셋이고 data-canon이 N4-2이며 qa-checklist Q20 명령에서 모두 일치한다",
+      "passed": true,
+      "evidence": "Q20 두 SVG 칩 3개 모두 '일치', data-canon N4-2."
+    },
+    {
+      "text": "[자동] C2 두 자리 가중치, 백분율, N4-2 ID, '주문한'이나 '아직'이 0건이고 stroke-width 값이 1, 1.5, 2.5, 4 밖으로 나오지 않는다",
+      "passed": false,
+      "evidence": "금지 패턴 실패: 두 SVG와 alt에 '주문한', '아직'이 있음(파선 상자와 '계산 제외'로 그림). stroke-width는 1, 1.5뿐이라 그 부분은 통과."
+    },
+    {
+      "text": "[자동] C3 띠 path의 출발 쪽 폭을 80으로 나눈 값이 0.140, 0.284, 0.576과 ±0.01 안이다",
+      "passed": true,
+      "evidence": "README의 띠 폭 한 줄 명령은 가로 배치(M18x)만 잡아 출력 없음. path를 직접 읽으면 출발 변 y 88에서 x 392~403.2, 403.2~425.92, 425.92~472로 폭 11.2, 22.72, 46.08 = 가중치 0.140, 0.284, 0.576. 세로 변형도 같음. 내용상 통과."
+    },
+    {
+      "text": "[자동] W1 본문 640 × 320, 세로 변형 360 × 320이다",
+      "passed": false,
+      "evidence": "본문 640 x 320은 맞지만 세로 변형이 360 x 296."
+    },
+    {
+      "text": "[자동] W2 본문 쿼리 상자(48, 136, 136 × 80), 키 상자 3개(x 384, 120 × 48, y 88, 152, 216), 칩 3개(x 520, 56 × 24)가 ±8 안이다",
+      "passed": false,
+      "evidence": "BOX '구도 상자 0/7'. 쿼리 '안'을 위(392,56, 80x32)에 두고 다섯 토큰을 아래 한 줄(y 224, 80x32)에 늘어놓은 세로 흐름 구도."
+    },
+    {
+      "text": "[자동] W3 세로 변형 쿼리 상자(16, 136, 72 × 80), 키 상자 3개(x 184, 88 × 48), 칩 3개(x 280)가 ±8 안이다",
+      "passed": false,
+      "evidence": "BOXV '구도 상자 1/7'(칩 x 280 y 100 하나만 우연히 맞음)."
+    },
+    {
+      "text": "[자동] A1 title이 '그림 1-4-4 '로 시작하고 두 SVG의 desc가 alt와 글자 단위로 같다",
+      "passed": true,
+      "evidence": "title '그림 1-4-4 '안'의 어텐션 가중치', desc = alt 두 SVG 통과."
+    },
+    {
+      "text": "[사람] A2 alt가 세 토큰 가중치를 이름 값 짝으로 읽고 굵기가 가중치라는 뜻, 합이 1이라는 말, 메시지 결론을 담는다",
+      "passed": true,
+      "evidence": "alt 4문장 176자. '상자가 0.140, 안 0.284, 왔어요 0.576', '띠 폭이 가중치', '합은 1', 마지막 문장 메시지. 다만 '주문한', '아직'이 들어가 C2 금지 패턴에 걸림(C2에서 감점)."
+    },
+    {
+      "text": "[사람] A3 캡션 읽는 법이 띠 굵기의 뜻을 알려 주고 caveat가 문장을 세 토큰으로 줄인 사실을 밝힌다",
+      "passed": true,
+      "evidence": "reading '띠가 넓을수록 그 토큰을 많이 보며'로 시각 부호를 알려 줌. caveat '손계산은 세 토큰만으로 했습니다'는 세 토큰으로 줄였다는 뜻을 밝힘. 그림 자체는 다섯 토큰을 그렸으므로 '줄인 사실'과 그림이 어긋나는 점은 저자 확인."
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: S, source.canon에 N4-2, epub_variant: manual, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "kind S, canon [N4-2], epub_variant manual, status rendered."
+    },
+    {
+      "text": "[사람] Y1 spec이 설계서 명세 행('띠 폭 = 가중치')과 같다",
+      "passed": true,
+      "evidence": "spec이 설계서 명세 행과 같음."
+    },
+    {
+      "text": "[사람] H1 캡션 없이 5초 안에 ''안'은 '왔어요'를 가장 많이 본다'가 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "메시지 글이 그림 안에 없지만 컬러 PNG만 보고 적은 문장 ''안'에서 가장 넓은 띠가 '왔어요'로 간다'가 5초 안에 나옴. 계산 제외 토큰 둘이 시선을 나눔(저자 확인)."
+    },
+    {
+      "text": "[사람] H2 첫 시선이 맨 아래 띠와 칩 0.576에 가고 gray에서 강조 띠가 가장 진하고 넓다(Q10, Q11)",
+      "passed": true,
+      "evidence": "첫 시선은 보라 띠와 칩 0.576. gray에서 강조 띠가 가장 진하고 넓음."
+    },
+    {
+      "text": "[사람] H3 시안 1-4-4 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지 기준에서 어긋난 번호가 없다(정렬선 3줄, 같은 크기 키 상자와 칩, 다른 띠 ink-200, 지시선 1개)",
+      "passed": false,
+      "evidence": "시안과 구도가 다름. 9장 어긋남: 2번(왼쪽 끝 x가 56, 168, 280, 392, 504로 5줄 이상, 열 머리 정렬선 없음), 7번(빈 곳을 지시선 글 자리로 쓰지 않음, 메시지 지시선 없음), 11번(토큰 상자 면이 ink-100 회색 채움, 쿼리 q, 키 k 개념색 띠 없음). 정본에 없는 토큰 2개 추가로 밀도도 시안보다 높음."
+    },
+    {
+      "text": "[사람] H4 protan, deutan에서 강조 띠와 키 띠가 면적, 칩 테두리, 파선 띠로 갈린다(Q15)",
+      "passed": false,
+      "evidence": "protan, deutan에서 강조 띠(파랑)와 키 띠(회색)는 면적과 칩 테두리로는 갈리지만, 기대가 요구한 키 파선 띠가 없음(개념색 띠를 아예 넣지 않음)."
+    },
+    {
+      "text": "[사람] H5 세로 변형 w328에서 칩 숫자와 토큰 이름이 읽힌다(Q17, Q18)",
+      "passed": true,
+      "evidence": "v.w328에서 칩 숫자와 토큰 이름이 읽힘(12.8 CSS px)."
+    },
+    {
+      "text": "[사람] H6 세 띠가 쿼리 상자 오른쪽 변을 겹침과 틈 없이 채워 합 = 1이 모양으로 보인다",
+      "passed": true,
+      "evidence": "출발 변 x 392~472(쿼리 상자 아래 변 80)을 세 띠가 겹침, 틈 없이 채움. 세로 변형도 y 176~256 채움."
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 각 줄이 실제 PNG와 맞는다",
+      "passed": true,
+      "evidence": "notes.md의 크기(360 x 296), 칩 일치, 강조 두 곳, w328 약 7 px, 흑백, 색약 서술이 PNG와 맞음. Q12 문장 기록은 없음."
+    }
+  ],
+  "summary": {
+    "passed": 16,
+    "failed": 6,
+    "total": 22,
+    "pass_rate": 0.73
+  },
+  "timing": {
+    "total_tokens": 176755,
+    "duration_ms": 303906,
+    "total_duration_seconds": 303.9
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "[자동] C3",
+        "reason": "README 띠 폭 한 줄 명령이 'M18x' 가로 배치만 잡아 세로 흐름 띠나 세로 변형은 출력이 없음. 출력 0줄을 실패로 보고하게 하거나 data-weight 속성과 path 폭을 함께 대조하도록 바꾸기를 제안."
+      },
+      {
+        "assertion": "[자동] F1",
+        "reason": "check_figures --root가 산출 폴더에 index.md가 없어 바로 멈춤. README 2단계 심볼릭 링크에 vol1-llm/ch04/index.md를 더하거나 --no-manuscript 옵션 필요."
+      },
+      {
+        "reason": "with_skill이 시안 좌표를 소수점까지 재현한 것은 patterns.md P8에 시안 실측 치수가 실려 있어서임. 이 사례는 '굵기를 띠 폭으로 옮기는 판단'보다 '참조 치수 복사'를 재게 되므로, 시안 치수가 references에 없는 사례 3, 4의 결과와 함께 봐야 변별력이 생김."
+      },
+      {
+        "reason": "상자 테두리 색(ink-200 대 ink-600)처럼 시안과 달라도 12가지 기준에 걸리지 않는 차이를 잡는 항목이 없음. 9장 5번을 '비강조 상자 테두리도 ink-200'까지 구체화하면 H3가 변별력을 얻음."
+      }
+    ]
+  }
+}

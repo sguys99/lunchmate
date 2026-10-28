@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" width="640" height="320" role="img" aria-labelledby="f381-t f381-d" font-family="Pretendard, 'Pretendard Variable', -apple-system, 'Apple SD Gothic Neo', sans-serif" style="font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'">
+  <title id="f381-t">그림 3-8-1 이중 시스템 VLA</title>
+  <desc id="f381-d">System 2는 장면과 지시를, System 1은 잠재 표현과 고속 센서 입력을 받아 액션을 내는 두 모듈 구조를 블록으로 나타냈습니다. System 2는 VLM이며 약 7~9 Hz로 느리게, System 1은 작은 정책이며 200 Hz로 빠르게 돌아갑니다. 두 모듈은 잠재 표현 하나로 이어져, 느린 System 2가 잠재 표현으로 빠른 System 1을 이끕니다.</desc>
+  <defs><marker id="f381-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1.5 L8,5 L1,8.5" fill="none" stroke="#59606B" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter"/></marker>
+<marker id="f381-arr-accent" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1.5 L8,5 L1,8.5" fill="none" stroke="#5844BC" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter"/></marker></defs>
+  <rect width="640" height="320" fill="#FFFFFF"/>
+  <text x="24" y="24" font-size="14" font-weight="500" fill="#6B727D" letter-spacing="0.56">그림 3-8-1</text>
+  <text x="616" y="24" font-size="14" fill="#6B727D" text-anchor="end">이중 시스템 VLA</text>
+  <line x1="24" y1="32.5" x2="616" y2="32.5" stroke="#1F2329" stroke-width="1"/>
+  <g transform="translate(0,8)">
+  <g data-canon="N8-1">
+  <rect x="24.5" y="56.5" width="159" height="47" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1"/>
+  <line x1="24.75" y1="56" x2="24.75" y2="104" stroke="#886C1D" stroke-width="1.5"/><line x1="27.25" y1="56" x2="27.25" y2="104" stroke="#886C1D" stroke-width="1.5"/>
+  <text x="40" y="86" font-size="16" fill="#59606B">장면</text>
+  <rect x="24.5" y="120.5" width="159" height="47" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1"/>
+  <line x1="26" y1="120" x2="26" y2="168" stroke="#1F2329" stroke-width="4"/>
+  <text x="40" y="150" font-size="16" fill="#59606B">지시</text>
+  <rect x="232.5" y="56.5" width="175" height="111" fill="#FFFFFF" stroke="#59606B" stroke-width="1"/>
+  <text x="248" y="107" font-size="16" fill="#1F2329"><tspan font-weight="600">System 2</tspan> VLM</text>
+  <text x="248" y="129" font-size="16" fill="#1F2329"><tspan font-weight="500">약 7~9 Hz</tspan>, 느림</text>
+  <rect x="232.5" y="216.5" width="175" height="63" fill="#FFFFFF" stroke="#59606B" stroke-width="1"/>
+  <text x="248" y="243" font-size="16" fill="#1F2329"><tspan font-weight="600">System 1</tspan> 작은 정책</text>
+  <text x="248" y="265" font-size="16" fill="#1F2329"><tspan font-weight="500">200 Hz</tspan>, 빠름</text>
+  <rect x="24.5" y="224.5" width="159" height="47" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1"/>
+  <text x="40" y="254" font-size="16" fill="#59606B">고속 센서 입력</text>
+  <rect x="456.5" y="224.5" width="159" height="47" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1"/>
+  <line x1="458" y1="224" x2="458" y2="272" stroke="#88407B" stroke-width="4" stroke-dasharray="9 3 1.5 3"/>
+  <text x="472" y="254" font-size="16" fill="#59606B">액션</text>
+  <path d="M184,80.5 H226" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f381-arr)"/>
+  <path d="M184,144.5 H226" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f381-arr)"/>
+  <path d="M184,248.5 H226" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f381-arr)"/>
+  <path d="M408,248.5 H450" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f381-arr)"/>
+  <path d="M320.75,168 V210" fill="none" stroke="#5844BC" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#f381-arr-accent)"/>
+  <text x="328" y="196" font-size="16" font-weight="600" fill="#1F2329">잠재 표현</text>
+  </g>
+  </g>
+</svg>

@@ -1,0 +1,25 @@
+- id: "1-4-3"
+  vol: 1
+  chapter: 4
+  section: "4.2"
+  kind: M
+  spec: "어텐션 계산 4단계 흐름도(N4-2 숫자를 각 단계에 표기)"
+  source_file: vol1-llm/ch04/figures/1-4-3.mmd
+  output_file: vol1-llm/ch04/figures/1-4-3.svg
+  message: "'안'은 '왔어요'의 정보를 가장 많이 가져옵니다"
+  accent: "03 가중치 메시지 상자, 0.576 밑줄"
+  role: 숫자
+  epub_variant: manual
+  caption:
+    title: "어텐션 계산의 네 단계"
+    reading: "첫 단계부터 따라가면 '안'의 점수가 가중치로 바뀌고, 그 가중치로 값을 섞어 출력이 나옵니다."
+    caveat: null
+  alt: "토큰 '안'의 어텐션 계산을 점수, 크기 조정, softmax, 가중합의 네 단계 흐름도로 나타냈습니다. 점수 1, 2, 3은 루트 2로 나누면 0.707, 1.414, 2.121이 되고, softmax를 거친 가중치는 상자가 0.140, 안 0.284, 왔어요 0.576입니다. 이 가중치로 값을 섞은 출력은 0.428과 0.572로, '안'은 '왔어요'의 정보를 가장 많이 가져옵니다."
+  source:
+    kind: own
+    refs: []
+    line: null
+    canon: [N4-2]
+  refresh: null
+  status: reviewed
+  note: "세로 변형은 S(1-4-3.v.build.py). 사유: 내용 폭 458px가 캔버스 내용 폭 328px를 넘음(--variant 360 렌더링). 단계 이름은 승인 시안 용어(점수, 크기 조정, 가중치, 가중합)로, 설계서 4.2절의 '나누기'를 '크기 조정'으로 씀. QA 2026-10-15 통과(Q1~Q27), 경고 사유: Mermaid 배치 격자 3건"

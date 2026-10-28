@@ -1,0 +1,30 @@
+# 그림 기록부(스키마: docs/style-guide.md 8.6절)
+
+- id: "3-8-1"
+  vol: 3
+  chapter: 8
+  section: "8.2"
+  kind: S
+  spec: "이중 시스템 개념도: System 2(VLM, 느림) → 잠재 표현 → System 1(작은 정책, 빠름) → 행동, 각각의 입력과 주기. 주기 표기는 N8-1 문자열(System 2 약 7~9 Hz, System 1 200 Hz). 🔄 관리표 Figure Helix 행 값이므로 캡션에 기준일을 붙임. 고속 센서 입력은 회색(ink), 개념색은 3개 이하"
+  source_file: vol3-physical-ai/ch08/figures/3-8-1.build.py
+  output_file: vol3-physical-ai/ch08/figures/3-8-1.svg
+  message: "느린 System 2의 잠재 표현을 빠른 System 1이 행동으로 바꿉니다"
+  accent: "잠재 표현 상자(accent 테두리와 면)"
+  role: 구조
+  epub_variant: manual
+  caption:
+    title: "이중 시스템 VLA의 구조(개념도)"
+    reading: "System 2부터 잠재 표현, System 1 순서로 따라가며 두 모듈의 입력과 주기를 비교합니다."
+    caveat: "주기는 한 대표 사례의 공개값이며 제품마다 다릅니다."
+  alt: "이중 시스템 VLA를 System 2, 잠재 표현, System 1, 행동으로 이어지는 블록도로 나타냈습니다. VLM인 System 2는 장면과 지시를 받아 약 7~9 Hz로 느리게 잠재 표현을 냅니다. 작은 정책인 System 1은 이 잠재 표현과 고속 센서 입력을 받아 200 Hz로 빠르게 행동을 냅니다. 느린 System 2의 잠재 표현을 빠른 System 1이 행동으로 바꿉니다."
+  source:
+    kind: own
+    refs: []
+    line: null
+    canon: [N8-1]
+  refresh:
+    as_of: "2026-10"
+    ledger: "vol3 10장 / 8.3 Figure Helix"
+    recheck: "Figure 공식 발표"
+  status: reviewed
+  note: "P9 두 단(모듈 둘과 잠재 표현을 세로로 쌓음)이라 캔버스 480(P9 기본 320). 세로 변형은 선택(폭 328에서 라벨 8.2 CSS px, choose-type 5장 3번), 폭 360. 세로 변형 두 칸 행은 P9 와이어프레임 156 x 48, 사이 16이 8 격자 밖이라 152 x 48, 사이 24로 두고, 출력 행동도 본문 판처럼 입력과 같은 크기(152 x 48)로 둠(와이어프레임 328이면 lint 같은 종류 상자 크기 다름 경고). 주기는 🔄 관리표 값이라 숫자 칩 없이 모듈 상자 글자로 표기. 메시지 지시선 없이 강조 상자로 대신함(design-rules 9장 8번). 출처 키 figure2025helix가 ch08 references.yml에 없어 source.kind own, 캡션과 alt에 회사명, 모델명 없음(researcher 몫으로 보고). QA 2026-10-15 통과(Q1~Q27, 해당 없음 Q20, Q24, Q26), lint 경고 0"

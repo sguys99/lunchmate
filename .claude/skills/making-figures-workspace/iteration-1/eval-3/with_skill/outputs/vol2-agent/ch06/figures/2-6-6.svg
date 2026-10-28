@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="320" viewBox="0 0 640 320" font-family="Pretendard, 'Pretendard Variable', sans-serif" style="font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'" role="img" aria-labelledby="fig-t fig-d">
+ <title id="fig-t">그림 2-6-6 단계 수와 전체 성공률</title>
+ <desc id="fig-d">단계마다 서로 독립적으로 성공률 p로 성공한다고 할 때, 단계 수 1~20에 따른 전체 성공률을 p = 0.99, 0.95, 0.9 세 선으로 나타냈습니다. p = 0.99는 10단계 0.904, 20단계 0.818로 완만히 줄고, p = 0.9는 20단계에 0.122까지 떨어집니다. p = 0.95는 10단계 0.599를 거쳐 20단계 0.358까지 내려가, 단계가 쌓일수록 전체 성공률이 곱으로 줄어듭니다.</desc>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <rect width="640" height="320" fill="#FFFFFF" />
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 320  L 640 320  L 640 0  L 0 0  z " style="fill: #ffffff" />
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 104.5 240.5  L 432.5 240.5  L 432.5 88.5  L 104.5 88.5  L 104.5 240.5  z " style="fill: none" />
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="md7143002c2" d="M 0 0  L 0 4  " style="stroke: #1f2329" />
+      </defs>
+      <g>
+       <use xlink:href="#md7143002c2" x="120.5" y="240.5" style="fill: #1f2329; stroke: #1f2329" />
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 14px; text-anchor: middle; fill: #6b727d" x="120.5" y="265.823242">1</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#md7143002c2" x="184.5" y="240.5" style="fill: #1f2329; stroke: #1f2329" />
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 14px; text-anchor: middle; fill: #6b727d" x="184.5" y="265.823242">5</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#md7143002c2" x="264.5" y="240.5" style="fill: #1f2329; stroke: #1f2329" />
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 14px; text-anchor: middle; fill: #6b727d" x="264.5" y="265.823242">10</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#md7143002c2" x="424.5" y="240.5" style="fill: #1f2329; stroke: #1f2329" />
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 14px; text-anchor: middle; fill: #6b727d" x="424.5" y="265.823242">20</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_5">
+      <path d="M 104.5 240.5  L 432.5 240.5  " clip-path="url(#p52630a6e0d)" style="fill: none; stroke: #b4b9c0; stroke-linejoin: miter" />
+     </g>
+     <g id="line2d_6" />
+     <g id="text_5">
+      <text style="font-size: 14px; text-anchor: end; fill: #6b727d" x="96.5" y="247.161621">0.0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_7">
+      <path d="M 104.5 164.5  L 432.5 164.5  " clip-path="url(#p52630a6e0d)" style="fill: none; stroke: #b4b9c0; stroke-linejoin: miter" />
+     </g>
+     <g id="line2d_8" />
+     <g id="text_6">
+      <text style="font-size: 14px; text-anchor: end; fill: #6b727d" x="96.5" y="171.161621">0.5</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_9">
+      <path d="M 104.5 88.5  L 432.5 88.5  " clip-path="url(#p52630a6e0d)" style="fill: none; stroke: #b4b9c0; stroke-linejoin: miter" />
+     </g>
+     <g id="line2d_10" />
+     <g id="text_7">
+      <text style="font-size: 14px; text-anchor: end; fill: #6b727d" x="96.5" y="95.161621">1.0</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 104.5 240.5  L 432.5 240.5  " style="fill: none; stroke: #1f2329; stroke-linejoin: miter; stroke-linecap: square" />
+   </g>
+   <g id="line2d_11">
+    <path d="M 120.5 90.02  L 136.5 91.5248  L 152.5 93.014552  L 168.5 94.489406  L 184.5 95.948  L 200.5 97.395017  L 216.5 98.826067  L 232.5 100.242806  L 248.5 101.645378  L 264.5 103.092  L 280.5 104.408585  L 296.5 105.769499  L 312.5 107.116805  L 328.5 108.450636  L 344.5 109.77113  L 360.5 111.078419  L 376.5 112.372635  L 392.5 113.653908  L 408.5 114.922369  L 424.5 116.164  " style="fill: none; stroke: #8c929b; stroke-linejoin: miter" />
+    <defs>
+     <path id="m3b9e3bd4aa" d="M 0 2.5  C 0.663008 2.5 1.29895 2.236584 1.767767 1.767767  C 2.236584 1.29895 2.5 0.663008 2.5 0  C 2.5 -0.663008 2.236584 -1.29895 1.767767 -1.767767  C 1.29895 -2.236584 0.663008 -2.5 0 -2.5  C -0.663008 -2.5 -1.29895 -2.236584 -1.767767 -1.767767  C -2.236584 -1.29895 -2.5 -0.663008 -2.5 0  C -2.5 0.663008 -2.236584 1.29895 -1.767767 1.767767  C -1.29895 2.236584 -0.663008 2.5 0 2.5  z " style="stroke: #8c929b" />
+    </defs>
+    <g>
+     <use xlink:href="#m3b9e3bd4aa" x="184.5" y="95.948" style="fill: #ffffff; stroke: #8c929b" />
+     <use xlink:href="#m3b9e3bd4aa" x="264.5" y="103.092" style="fill: #ffffff; stroke: #8c929b" />
+     <use xlink:href="#m3b9e3bd4aa" x="424.5" y="116.164" style="fill: #ffffff; stroke: #8c929b" />
+    </g>
+   </g>
+   <g id="line2d_12">
+    <path d="M 120.5 103.7  L 136.5 117.38  L 152.5 129.692  L 168.5 140.7728  L 184.5 150.82  L 200.5 159.720968  L 216.5 167.798871  L 232.5 175.068984  L 248.5 181.612086  L 264.5 187.452  L 280.5 192.800789  L 296.5 197.57071  L 312.5 201.863639  L 328.5 205.727275  L 344.5 209.204548  L 360.5 212.334093  L 376.5 215.150684  L 392.5 217.685615  L 408.5 219.967054  L 424.5 221.956  " style="fill: none; stroke: #8c929b; stroke-linejoin: miter" />
+    <g>
+     <use xlink:href="#m3b9e3bd4aa" x="184.5" y="150.82" style="fill: #ffffff; stroke: #8c929b" />
+     <use xlink:href="#m3b9e3bd4aa" x="264.5" y="187.452" style="fill: #ffffff; stroke: #8c929b" />
+     <use xlink:href="#m3b9e3bd4aa" x="424.5" y="221.956" style="fill: #ffffff; stroke: #8c929b" />
+    </g>
+   </g>
+   <g id="line2d_13">
+    <path d="M 120.5 96.1  L 136.5 103.32  L 152.5 110.179  L 168.5 116.69505  L 184.5 122.852  L 200.5 128.766033  L 216.5 134.352731  L 232.5 139.660094  L 248.5 144.70209  L 264.5 149.452  L 280.5 154.042386  L 296.5 158.365267  L 312.5 162.472003  L 328.5 166.373403  L 344.5 170.079733  L 360.5 173.600746  L 376.5 176.945709  L 392.5 180.123424  L 408.5 183.142252  L 424.5 186.084  " style="fill: none; stroke: #5844bc; stroke-width: 1.5; stroke-linejoin: miter" />
+    <defs>
+     <path id="m7d5f8d28e3" d="M 0 3.5  C 0.928211 3.5 1.81853 3.131218 2.474874 2.474874  C 3.131218 1.81853 3.5 0.928211 3.5 0  C 3.5 -0.928211 3.131218 -1.81853 2.474874 -2.474874  C 1.81853 -3.131218 0.928211 -3.5 0 -3.5  C -0.928211 -3.5 -1.81853 -3.131218 -2.474874 -2.474874  C -3.131218 -1.81853 -3.5 -0.928211 -3.5 0  C -3.5 0.928211 -3.131218 1.81853 -2.474874 2.474874  C -1.81853 3.131218 -0.928211 3.5 0 3.5  z " />
+    </defs>
+    <g>
+     <use xlink:href="#m7d5f8d28e3" x="184.5" y="122.852" style="fill: #5844bc" />
+     <use xlink:href="#m7d5f8d28e3" x="264.5" y="149.452" style="fill: #5844bc" />
+     <use xlink:href="#m7d5f8d28e3" x="424.5" y="186.084" style="fill: #5844bc" />
+    </g>
+   </g>
+  </g>
+  <g class="num-chip" data-canon="N6-1">
+   <path d="M 268.75 114.75  L 323.25 114.75  L 323.25 137.25  L 268.75 137.25  z " style="fill: #efefff; stroke: #5844bc; stroke-width: 1.5; stroke-linejoin: miter" />
+   <text style="font-weight: 600; font-size: 14px; text-anchor: middle; fill: #1f2329" x="296" y="131">0.599</text>
+  </g>
+  <g class="num-chip" data-canon="N6-1">
+   <path d="M 436.75 174.75  L 491.25 174.75  L 491.25 197.25  L 436.75 197.25  z " style="fill: #efefff; stroke: #5844bc; stroke-width: 1.5; stroke-linejoin: miter" />
+   <text style="font-weight: 600; font-size: 14px; text-anchor: middle; fill: #1f2329" x="464" y="191">0.358</text>
+  </g>
+  <g id="line2d_14">
+   <path d="M 344.5 167.079733  L 344.5 143.079733  " style="fill: none; stroke: #59606b; stroke-linejoin: miter" />
+  </g>
+  <g id="line2d_15">
+   <path d="M 24 32.5  L 616 32.5  " style="fill: none; stroke: #1f2329; stroke-linejoin: miter" />
+  </g>
+  <g id="patch_4">
+   <path d="M 344.5 167.079733  C 345.295609 167.079733 346.05874 167.395832 346.62132 167.958413  C 347.183901 168.520993 347.5 169.284124 347.5 170.079733  C 347.5 170.875342 347.183901 171.638473 346.62132 172.201053  C 346.05874 172.763634 345.295609 173.079733 344.5 173.079733  C 343.704391 173.079733 342.94126 172.763634 342.37868 172.201053  C 341.816099 171.638473 341.5 170.875342 341.5 170.079733  C 341.5 169.284124 341.816099 168.520993 342.37868 167.958413  C 342.94126 167.395832 343.704391 167.079733 344.5 167.079733  z " style="fill: #5844bc" />
+  </g>
+  <g>
+   <text style="font-weight: 500; font-size: 14px; text-anchor: start; fill: #6b727d" x="24" y="24" letter-spacing="0.56">그림 2-6-6</text>
+  </g>
+  <g id="text_8">
+   <text style="font-size: 14px; text-anchor: end; fill: #6b727d" x="616" y="24">단계 수와 전체 성공률</text>
+  </g>
+  <g id="text_9">
+   <text style="font-size: 14px; text-anchor: end; fill: #59606b" x="96" y="73">전체 성공률</text>
+  </g>
+  <g id="text_10">
+   <text style="font-size: 14px; text-anchor: end; fill: #59606b" x="432.5" y="288">단계 수</text>
+  </g>
+  <g id="text_11">
+   <text style="font-size: 14px; text-anchor: start; fill: #59606b" x="435" y="121.164">p = 0.99</text>
+  </g>
+  <g id="text_12">
+   <text style="font-weight: 600; font-size: 14px; text-anchor: start; fill: #1f2329" x="500" y="191.084">p = 0.95</text>
+  </g>
+  <g id="text_13">
+   <text style="font-size: 14px; text-anchor: start; fill: #59606b" x="435" y="226.956">p = 0.9</text>
+  </g>
+  <g id="text_14">
+   <text style="font-weight: 600; font-size: 14px; text-anchor: start; fill: #1f2329" x="352.5" y="148.079733">단계가 쌓일수록 곱으로 줄어듭니다</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p52630a6e0d">
+   <rect x="104.5" y="88.5" width="328" height="152" />
+  </clipPath>
+ </defs>
+</svg>

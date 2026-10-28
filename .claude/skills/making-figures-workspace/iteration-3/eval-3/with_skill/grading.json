@@ -1,0 +1,140 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 2-6-6.py, 2-6-6.svg, 2-6-6.v.svg, _render/qa/2-6-6*.png, docs/figures.yml의 2-6-6 항목, vol2-agent/ch06/notes.md 검수 블록이 모두 있다",
+      "passed": true,
+      "evidence": "ls: 2-6-6.py, 2-6-6.svg, 2-6-6.v.svg, _render/qa/2-6-6*.png 15장, docs/figures.yml 2-6-6 항목, notes.md '그림 2-6-6 시각 검수 (2026-10-15, making-figures)' 블록 모두 있음. check_figures --root 오류 0, 경고 3(F90 둘은 설계서 없음, F14는 원고 6.5절이 아직 없어 예상된 경고)"
+    },
+    {
+      "text": "[자동] F2 2-6-6.py를 다시 실행해도 두 SVG의 해시가 같거나 차이가 id와 날짜뿐이다",
+      "passed": true,
+      "evidence": "README F2 절차를 ${TMPDIR}/g3-f3/f2.* 미러(pwd -P로 푼 경로)에서 재현. cmp 결과 2-6-6 재현 같음, 2-6-6.v 재현 같음(바이트 단위)"
+    },
+    {
+      "text": "[자동] L1 -W error::UserWarning으로 실행해 경고가 없고 figlib lint와 figkit lint가 모두 OK다",
+      "passed": true,
+      "evidence": "미러에서 -W error::UserWarning으로 2-6-6.py 실행 종료 코드 0, 경고 없음(figlib chip 경고도 없음). figkit lint 두 판 OK, figlib lint 두 판 OK"
+    },
+    {
+      "text": "[자동] L2 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "README 판정 블록: 두 판 '금지 기호' 통과, '캡션 금지 기호'(캡션, alt, message) 통과"
+    },
+    {
+      "text": "[자동] C1 두 판 모두에 칩 0.358과 라벨 p = 0.99, p = 0.95, p = 0.9가 있다",
+      "passed": true,
+      "evidence": "정본 문자열 4/4(0.358, p = 0.99, p = 0.95, p = 0.9)가 2-6-6.svg와 2-6-6.v.svg 모두 통과"
+    },
+    {
+      "text": "[자동] C2 0.36, 0.82, 0.60 같은 줄인 자릿수, 0.598이나 두 자리 0.59 같은 정본과 다른 값, p = 0.90, 백분율, N6-1이나 E6-1 ID가 0건이고 Q21 명령의 정본 밖 소수가 눈금 0.0, 0.5, 1.0뿐이다",
+      "passed": true,
+      "evidence": "BAN 15개 패턴이 두 판, alt와 캡션 모두 0건. Q21 명령(C=N6-1): 두 판 모두 정본 행에 없는 소수는 0.0, 1.0뿐(0.5는 정본 행 문자열에 들어 있어 출력 안 됨)"
+    },
+    {
+      "text": "[자동] C3 숫자 칩이 1~3개, 강조 칩 2개 이하이고 모두 N6-1 행과 일치한다(Q20)",
+      "passed": true,
+      "evidence": "Q20 명령: 두 판 모두 칩 2개 'N6-1 0.599 일치', 'N6-1 0.358 일치', 둘 다 accent 칩. 사례 5.1절이 둘째 칩 0.599를 허용. 새 기준 칩과 점 거리(칩 바깥 끝에서 점 중심, 실측 계산): 본문 0.599는 10단계 p = 0.95 점까지 11.4, 0.358은 20단계 점까지 12.8, 세로 변형 0.599는 12.6, 0.358은 12.8로 모두 16 이하이고 가장 가까운 데이터 점이 그 점(다음 점은 19.9 이상). 저자 확인: 본문 0.358 칩 x 437~491이 와이어프레임 제안 x 약 424~480보다 오른쪽으로 약 12 밀림(점과 겹치지 않으려면 불가피, 거리 기준은 지킴)"
+    },
+    {
+      "text": "[자동] W1 본문 640 × 320, 세로 변형 폭 360, 높이 720 이하다",
+      "passed": true,
+      "evidence": "본문 640 x 320, 세로 변형 360 x 368(1-5-5.v와 같음, 8의 배수, 720 이하)"
+    },
+    {
+      "text": "[자동] W2 본문 그림 영역이 x 104~432, y 88~264에서 ±8 안이다",
+      "passed": true,
+      "evidence": "BOX 104,88,328,176 대조 1/1. 소스 LAYOUT body plot=(104, 88, 432, 264)"
+    },
+    {
+      "text": "[자동] W3 세로 변형 그림 영역이 지시선 수와 상관없이 x 64~264, y 128~320에서 ±8 안이다",
+      "passed": true,
+      "evidence": "BOXV 64,128,200,192 대조 1/1. 소스 LAYOUT v plot=(64, 128, 264, 320), 주석에 'P15, 1-5-5.v 실측 판'이라 적음. 지시선 0개인데도 판을 줄이지 않고 영역 위(y 약 40~110)를 빈 여백으로 둠. 2회차 실패(x 56~272, y 88~280)가 닫힘"
+    },
+    {
+      "text": "[자동] A1 title이 '그림 2-6-6 '으로 시작하고 세로 변형은 ' (EPUB 세로 변형)'으로 끝나며 두 SVG의 desc가 alt와 같다",
+      "passed": true,
+      "evidence": "title '그림 2-6-6 단계 수와 전체 성공률', 세로 변형은 ' (EPUB 세로 변형)'으로 끝남. 두 SVG desc = figures.yml alt 통과"
+    },
+    {
+      "text": "[자동] A2 alt의 결과 소수가 계열 이름 숫자(0.99, 0.95, 0.9)를 빼고 2~4개다",
+      "passed": true,
+      "evidence": "ALTNUM=2-4, ALTSKIP='0.99;;0.95;;0.9': 'alt 결과 소수 3개(기준 2-4)'(0.358, 0.599, 0.818). alt 4문장 253자"
+    },
+    {
+      "text": "[사람] A2 alt가 가로축과 세로축, 세 선의 p, 0.358을 포함한 핵심 숫자 2~4개, 추세, 메시지 결론을 담고 색 이름이 없다",
+      "passed": true,
+      "evidence": "alt 4문장: 가로축(단계 수 1에서 20), 세로축(전체 성공률), 세 선 p = 0.99, 0.95, 0.9, 핵심 숫자 0.599, 0.358, 0.818(0.358 포함 3개), 추세('내려가고', 'p가 낮을수록 더 가파르게'), 결론('0.95여도 20단계면 0.358로 떨어집니다'), 독립 가정까지 담음. 색 이름 없음. PNG의 칩 값과 일치"
+    },
+    {
+      "text": "[자동] A3 figures.yml 캡션의 caveat나 reading에 '독립'이 있다",
+      "passed": true,
+      "evidence": "caveat '단계마다 같은 성공률로 서로 독립적으로 성공한다고 가정했습니다.' 사례 5.4절 한 줄 명령 '통과'"
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: C, source.canon에 N6-1, epub_variant: manual, refresh: null, message 40자 이하 마침표 없음, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "kind: C, source.canon [N6-1], source.kind own, epub_variant: manual, refresh: null, status: reviewed, 'message 37자, 마침표 없음' 모두 판정 블록 통과. message '단계 성공률이 0.95여도 20단계면 전체 성공률은 0.358입니다'"
+    },
+    {
+      "text": "[사람] H1 캡션 없이 5초 안에 '단계가 늘수록 성공률이 떨어지고 0.95여도 20단계면 0.358'이 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "outputs/vol2-agent/ch06/figures/_render/qa/2-6-6.png를 message 대조 전 인상으로 읽음: '단계가 늘면 세 곡선이 모두 떨어지고, p = 0.95도 20단계에서 0.358까지 내려간다'. 기대 문장과 같은 뜻. 단, 채점 순서상 figures.yml을 먼저 출력해 message를 본 뒤 PNG를 열었으므로 완전한 맹검은 아님"
+    },
+    {
+      "text": "[사람] H2 첫 시선이 p = 0.95 강조 선과 칩 0.358에 가고 gray에서 강조 선이 가장 진하며 다른 두 선이 선 종류로 갈린다(Q10, Q11, Q14)",
+      "passed": true,
+      "evidence": "outputs/vol2-agent/ch06/figures/_render/qa/2-6-6.png에서 첫 시선이 accent 1.5 실선(채운 점)과 칩 0.358, 0.599로 감. 2-6-6.sheet.png 흑백 칸에서 강조 선이 가장 진하고 굵으며 p = 0.99는 파선, p = 0.9는 점선(속 빈 점)으로 갈림"
+    },
+    {
+      "text": "[사람] H3 시안 1-5-5 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지와 chart-guide.md 6장 기준에서 어긋난 번호가 없다(범례 없음, 눈금 3~5개, 다른 선 ink 계조)",
+      "passed": true,
+      "evidence": "${TMPDIR}/g3-f3/draft/1-5-5.png와 나란히 대조: 1 머리줄 같음, 5 맥락 선 ink 계조(600 파선, 400 점선, chart-guide 4.2절 rank 규칙), 6 선 굵기 1과 1.5, 8 지시선 0개(허용), 9 범례 없음, 10 글자 14 한 종에 굵기로 위계, 세로 눈금 3개, 가로 눈금 4개. 어긋난 번호 없음. 저자 확인: 가로 눈금 '1단계'처럼 단위를 매 눈금에 붙임(style-guide 6.5절과 겹침, 실행도 저자 확인으로 남김)"
+    },
+    {
+      "text": "[사람] H4 protan, deutan에서 강조 선이 다른 선과 뭉치지 않는다(Q15)",
+      "passed": true,
+      "evidence": "2-6-6.sheet.png와 2-6-6.v.sheet.png의 제1색약, 제2색약 칸에서 강조 선과 칩 테두리가 파랑으로 바뀌고 두 맥락 선은 회색 파선, 점선으로 남아 뭉치지 않음"
+    },
+    {
+      "text": "[사람] H5 본문 w328에서 칩이 작아지는 점과 세로 변형 사유가 note에 있고, 세로 변형 w328에서 칩과 끝 라벨이 읽힌다(Q3, Q17, Q18)",
+      "passed": true,
+      "evidence": "figures.yml note에 '폭 328에서 칩 숫자가 7.2 CSS px라 360 x 368 사본', 본문 시트 06칸도 7.2 CSS px. outputs/vol2-agent/ch06/figures/_render/qa/2-6-6.v.sheet.png 06칸(폭 328, 12.8 CSS px)에서 칩 0.599, 0.358과 끝 라벨 셋이 읽힘. 저자 확인: 세로 변형 0.358 칩(y 217~239)이 0.5 보조선(y 224)에 걸침, 2회차와 같은 관찰"
+    },
+    {
+      "text": "[사람] H6 곡선이 네 점을 잇는 꺾은선이 아니라 식에서 그린 매끄러운 선이고 점은 정본 x 네 곳에만 있다",
+      "passed": true,
+      "evidence": "소스가 p^n을 n = 1~20, 0.25 간격 77점으로 계산하고 markevery로 정본 x 네 곳에만 점을 찍음. PNG에서 세 곡선 모두 매끄럽고 점은 선마다 4개, 모두 12개. 1단계 근처 세 점에 라벨 없음"
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 각 줄이 실제 PNG와 맞는다",
+      "passed": true,
+      "evidence": "notes.md 각 줄을 PNG와 대조: png(강조 선과 칩 먼저, 1단계 세 점 겹치지 않음), gray(파선, 점선), protan과 deutan(파랑, 한 덩어리), w328(7.2 CSS px), v(1단계와 5단계 눈금 글자 겹치지 않음, 높이 368), dark(카드 테두리), 칩 56 x 24 둘(본문 x 236, 436, SVG 실측 236.75, 436.75와 맞음), 세로 변형 10단계 칩을 오른쪽 위로 옮긴 이력도 PNG와 맞음. 저자 확인: 세로 변형 0.358 칩이 0.5 보조선에 걸친 점은 기록에 없음"
+    }
+  ],
+  "summary": {
+    "passed": 22,
+    "failed": 0,
+    "total": 22,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 207484,
+    "duration_ms": 332876,
+    "total_duration_seconds": 332.9
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "[사람] H2 첫 시선이 p = 0.95 강조 선과 칩 0.358에 가고 gray에서 강조 선이 가장 진하며 다른 두 선이 선 종류로 갈린다(Q10, Q11, Q14)",
+        "reason": "H2는 칩 0.599도 accent라 첫 시선이 둘로 나뉠 수 있는데 강조 칩 개수(2개 이하)만 봅니다. 둘째 강조 칩을 둘 때 첫 시선이 흐려지지 않는지 따로 묻는 문장이 있으면 변별력이 생깁니다"
+      },
+      {
+        "reason": "칩과 점 거리 16 이하는 사례 md 5.2절 표에만 있고 expectations 문장에는 없습니다. C3나 W2에 '칩 가장 가까운 변에서 점 중심까지 16 이하'를 넣어야 회차 간에 자동으로 잴 수 있어요"
+      },
+      {
+        "reason": "세로 변형 칩이 보조선에 걸치는 관찰이 2회차부터 이어지는데 보는 항목이 없습니다. figlib chip이 보조선과 겹치면 경고하게 하거나 H5에 한 줄 더할 만합니다"
+      }
+    ],
+    "overall": "2회차 유일한 실패 W3가 닫혀 22항목 모두 통과입니다. 새 칩 거리 기준도 네 칩 모두 16 이하예요"
+  }
+}

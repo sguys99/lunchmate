@@ -1,0 +1,150 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 1-4-3.mmd, 1-4-3.svg, 1-4-3.v.svg와 그 소스, _render/qa/1-4-3*.png, docs/figures.yml의 1-4-3 항목, vol1-llm/ch04/notes.md 검수 블록이 모두 있다",
+      "passed": true,
+      "evidence": "ls로 1-4-3.mmd, .svg, .v.svg, .v.build.py, _render/qa/ PNG 15장, docs/figures.yml 1-4-3 항목, notes.md '그림 1-4-3 시각 검수' 블록 확인. check_figures --root는 오류 0, 경고 3(F90 설계서 없음 2건, F14 원고 미참조 1건, 시험 폴더라 예상된 경고)."
+    },
+    {
+      "text": "[자동] F2 1-4-3.mmd를 render.sh로 다시 렌더링한 SVG가 제출한 1-4-3.svg와 바이트 단위로 같고, 세로 변형 소스를 다시 실행해도 해시가 같다",
+      "passed": true,
+      "evidence": "render.sh로 ${TMPDIR}/g2-f1/1-4-3.re.svg에 다시 렌더링해 cmp 'M 재현 같음'. 1-4-3.v.build.py를 ${TMPDIR}/g2-f1/f2.* 임시 미러에 복사해 실행, '1-4-3.v 재현 같음'(제출본은 덮지 않음)."
+    },
+    {
+      "text": "[자동] L1 figkit lint 오류 0이고, 본문 경고는 Mermaid 배치 격자 경고뿐이며 그 사유가 기록돼 있다. 세로 변형은 경고 0이다",
+      "passed": true,
+      "evidence": "figkit lint: 본문 오류 0, 경고 3(격자 이탈 rect (113,80), (277,80), (354,416), 모두 Mermaid 배치). 사유가 figures.yml note('경고 사유: Mermaid 배치 격자 3건')와 notes.md lint 줄에 있음. 세로 변형 OK(경고 0). 승인 시안 1-4-3.svg lint도 같은 3건."
+    },
+    {
+      "text": "[자동] L2 그림 글자, title, desc, 캡션, alt, message에 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): 두 SVG 금지 기호 통과, 캡션 금지 기호(caption, alt, message) 통과."
+    },
+    {
+      "text": "[자동] C1 본문과 세로 변형 모두에 [1, 2], [1, 0], [0, 1], [1, 1], [0.5, 0.5], [1, 2, 3], 0.707, 1.414, 2.121, 0.140, 0.284, 0.576, 0.428, 0.572가 있다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): 1-4-3.svg 정본 문자열 14/14, 1-4-3.v.svg 14/14."
+    },
+    {
+      "text": "[자동] C2 두 자리 가중치(0.14, 0.28, 0.58), 백분율(57.6), N4-2 ID, '주문한'이나 '아직', d_k나 d = 64 같은 정본 밖 패턴이 0건이다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): 두 SVG 금지 패턴 0, alt와 캡션 금지 패턴 0."
+    },
+    {
+      "text": "[자동] W1 본문은 640 × 640(또는 480), 세로 변형은 폭 360, 높이 720 이하 8의 배수다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): 본문 640 x 640, 세로 변형 360 x 696(720 이하, 8의 배수). 시안 세로 변형은 680으로 16 차이(사례 md 허용 ±48)."
+    },
+    {
+      "text": "[자동] W2 본문 단계 상자 4개가 x 88, 240 × 64, y 192, 304, 416, 528에서 ±16 안이고 입력 둘이 y 80, 값 상자가 y 416에 있다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): 1-4-3.svg 구도 상자 7/7. 본문 SVG가 승인 시안 docs/style-board/final/1-4-3.svg와 cmp로 바이트 단위 동일. 1회차 실패(폭 200) 해소. 단, mermaid-guide.md 2장에 시안 .mmd 전체가 본보기로 실려 있어 재현 결과임(판정 의미는 summary 참조)."
+    },
+    {
+      "text": "[자동] W3 세로 변형 단계 상자 4개가 x 16 폭 328, 입력 상자 3개가 x 56 폭 288이다(±16)",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): 1-4-3.v.svg 구도 상자 7/7(단계 x 16 폭 328, 입력 x 56 폭 288). 시안과 달리 figkit으로 새로 짠 소스이며 입력 사이 간격 24(시안 16), 단계 y 240부터(시안 232)."
+    },
+    {
+      "text": "[자동] A1 SVG title이 '그림 1-4-3 '으로 시작하고 세로 변형은 ' (EPUB 세로 변형)'으로 끝나며, 두 SVG의 desc가 figures.yml alt와 글자 단위로 같다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): 두 SVG title 서식 통과('그림 1-4-3 어텐션 계산 4단계', 세로 변형은 '(EPUB 세로 변형)'), desc = alt 두 판 모두 통과."
+    },
+    {
+      "text": "[자동] A2 alt가 2~4문장, 300자 이하, 문장당 100자 이하이고 색 이름, '이 그림은', 큰따옴표가 없다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): alt 3문장 217자, 문장당 100자 이하, 금지어와 큰따옴표 없음."
+    },
+    {
+      "text": "[사람] A2 alt 첫 문장에 단계 수와 네 단계 이름(점수, 크기 조정, softmax, 가중합)이 순서대로 있고 마지막 문장이 메시지와 같은 결론이다",
+      "passed": true,
+      "evidence": "alt 첫 문장 '점수, 크기 조정, softmax, 가중합의 네 단계 흐름도로 나타냈습니다'로 단계 수와 이름 순서 일치. 마지막 문장 ''안'은 '왔어요'의 정보를 가장 많이 가져옵니다'는 message와 같은 결론. 1회차 실패 해소. alt와 캡션이 시안 figures.yml과 글자 단위로 같고, mermaid-guide.md 72행 accDescr와 같아 옮겨 쓴 것(README 7항에 따라 감점 아님)."
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: M, source.canon에 N4-2, epub_variant: manual, message 40자 이하 마침표 없음, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "자동 블록(사례 md 5.4절 변수 줄, 29항목 실패 0): kind M, source.canon [N4-2], epub_variant manual, message 27자 마침표 없음, status reviewed, refresh null."
+    },
+    {
+      "text": "[사람] H1 캡션 없이 컬러 PNG만 보고 5초 안에 ''안'은 '왔어요'를 가장 많이 본다'는 뜻이 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "컬러 PNG(1-4-3.png, sheet 01)에서 읽은 문장: ''안'의 가중치는 세 번째 키 왔어요에 0.576으로 가장 크고, 그 가중치로 값을 섞어 출력이 나온다'. message와 같은 뜻. 절차 위반 고지: 자동 판정 중 figures.yml을 먼저 읽어 message를 본 뒤 PNG를 열었음. 저자 확인: 시안과 같이 0.576과 '왔어요'의 대응을 키 상자의 토큰 순서로 맞춰야 하는 구조."
+    },
+    {
+      "text": "[사람] H2 첫 시선이 03 가중치 메시지 상자와 0.576에 가고, gray PNG에서도 테두리 굵기와 밑줄로 강조가 한 곳에 남는다(Q10, Q11)",
+      "passed": true,
+      "evidence": "컬러 PNG 첫 시선이 03 가중치 상자(굵은 ink 테두리, 옅은 면)와 0.576 밑줄. gray(sheet 02)에서도 굵은 테두리와 밑줄이 한 곳에만 남음. 세로 변형 gray도 같음."
+    },
+    {
+      "text": "[사람] H3 시안 1-4-3 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지 기준에서 어긋난 번호가 없다",
+      "passed": true,
+      "evidence": "시안 PNG(${TMPDIR}/g2-f1/draft/qa/에 figure_qa로 다시 만듦)와 대조. 본문은 SVG 바이트 동일이라 12가지 모두 같음. 세로 변형도 머리줄, 척추 x 40, 단계 328 x 64 피치 96, 입력 288 들여쓰기, 강조 한 덩어리, 선 1과 1.5, 글자 14와 16 두 크기로 어긋남 없음. 차이는 입력 사이 간격 24 대 16과 높이 696 대 680뿐이라 기준 위반 아님."
+    },
+    {
+      "text": "[사람] H4 gray에서 q, k, v가 실선, 파선, 점선 띠로 갈리고 protan, deutan에서 강조가 개념색과 뭉치지 않는다(Q14, Q15)",
+      "passed": true,
+      "evidence": "gray에서 q 실선, k 파선, v 점선 띠로 갈림. protan, deutan(sheet 03, 04)에서 키 띠는 올리브, 0.576 밑줄은 파랑 계열로 위치가 떨어져 있어 개념색과 뭉치지 않음. 세로 변형도 같음."
+    },
+    {
+      "text": "[사람] H5 세로 변형 w328 PNG에서 모든 값 줄이 읽히고 숫자, 강조, 대상 이름이 본문과 같다(Q17, Q18)",
+      "passed": true,
+      "evidence": "1-4-3.v.w328(가장 작은 글자 12.8 CSS px, 기준 10.9)에서 값 줄 모두 읽힘. 숫자, 03 강조와 0.576 밑줄, 머리줄 '어텐션 계산 4단계'가 본문과 같음. 본문 w328은 7.2 CSS px라 세로 변형 사용이 맞음."
+    },
+    {
+      "text": "[사람] H6 키는 01 단계로, 값은 04 단계로 들어가는 연결이 보이고 화살표가 상자를 관통하지 않는다(Q9)",
+      "passed": true,
+      "evidence": "본문 PNG: 쿼리와 키가 01로, 값 v가 04로 꺾임 1회로 들어감. 세로 변형은 척추 x 40에서 q, k가 01로, v가 04로 합류. 화살표가 상자를 지나지 않음."
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 png, gray, 색약, w328, dark 줄이 실제 PNG와 맞는다",
+      "passed": true,
+      "evidence": "notes.md 줄 대조: lint 경고 좌표 3건이 실측과 일치, png(첫 시선 03과 0.576), gray(실선, 파선, 점선), protan/deutan(올리브), w328(본문 라벨 8.2로 세로 변형, 세로 12.8), v.w360/v.w328(높이 696), dark(테두리 보임)가 PNG와 맞음. 치수 줄(주 열 x 88 240 x 64, 세로 328, 입력 288)도 SVG 실측과 맞음. 다만 '--variant 360 내용 폭 458px'는 choose-type.md 선례 값과 같아 이번에 실측했는지는 트랜스크립트가 없어 확인 못 함(저자 확인)."
+    }
+  ],
+  "summary": {
+    "passed": 20,
+    "failed": 0,
+    "total": 20,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 165320,
+    "duration_ms": 228585,
+    "total_duration_seconds": 228.6
+  },
+  "claims": [
+    {
+      "claim": "본문 판은 시안과 같은 경고 수",
+      "type": "factual",
+      "verified": true,
+      "evidence": "시안 lint도 같은 3건, qa-checklist Q7에 '시안 1-4-3도 3건'으로 실려 있음"
+    },
+    {
+      "claim": "--variant 360에서 내용 폭 458px",
+      "type": "process",
+      "verified": false,
+      "evidence": "choose-type.md 175, 210행 선례 값과 같음. 트랜스크립트가 없어 실측 여부 미확인"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "[자동] W2, [자동] C1, [사람] A2, [사람] H3(본문)",
+        "reason": "개정 mermaid-guide.md 2장에 시안 1-4-3.mmd 전체(노드 글자, accDescr)가 본보기로 실려, 본문 SVG와 alt, 캡션이 시안과 바이트 단위로 같게 나왔습니다. 이 항목들은 이제 '재현'을 재며, 스킬이 새 그림에서 폭과 이름을 바르게 정하는지는 가리지 못합니다. 판정력을 되살리려면 보류 사례(예시에 없는 M 흐름도)를 하나 더 두거나, 사례 1을 회귀 시험으로 분류하세요."
+      },
+      {
+        "assertion": "[자동] W3, [사람] H5",
+        "reason": "세로 변형은 시안 소스가 스킬에 없고 새로 짜서 시안과 좌표가 달랐는데도 통과했습니다. 이번 회차에서 실제 판단력을 잰 것은 세로 변형, 검수 기록, figures.yml 쪽입니다."
+      },
+      {
+        "reason": "figure_qa.py --sheet를 임시 경로 SVG에 돌리면 출력이 ${TMPDIR}/figqa/로 가서 병렬 채점자끼리 섞입니다(이번에 1-4-4 PNG가 같은 폴더에 있었음). README 사람 판정 1항에 출력 폴더 지정 방법을 적으면 좋겠습니다."
+      }
+    ],
+    "overall": "자동 29항목과 사람 판정 모두 통과. 다만 본문 판 통과는 스킬 예시 복사에 기댄 것이라 1회차 대비 개선 폭을 과대평가하지 않도록 주의가 필요합니다."
+  }
+}

@@ -1,0 +1,25 @@
+- id: "1-4-4"
+  vol: 1
+  chapter: 4
+  section: "4.2"
+  kind: S
+  spec: "러닝 예문에서 \"안\"이 다른 토큰을 보는 연결선. 띠 폭 = 가중치"
+  source_file: vol1-llm/ch04/figures/1-4-4.build.py
+  output_file: vol1-llm/ch04/figures/1-4-4.svg
+  message: "'안'은 '왔어요'를 가장 많이 봅니다"
+  accent: "왔어요로 가는 연결 띠, 숫자 칩 0.576"
+  role: 숫자
+  epub_variant: manual
+  caption:
+    title: "'안'이 다른 토큰을 보는 정도"
+    reading: "띠가 굵을수록 가중치가 크고, 세 띠의 굵기를 합하면 쿼리 상자 한 변과 같습니다."
+    caveat: "계산을 보이려고 문장을 상자가, 안, 왔어요 세 토큰으로 줄였습니다."
+  alt: "토큰 '안'이 상자가, 안, 왔어요를 얼마나 보는지를 연결 띠의 굵기로 나타냈습니다. 가중치는 상자가 0.140, 안 0.284, 왔어요 0.576이고 셋을 더하면 1입니다. 가장 굵은 띠가 왔어요로 이어져, '안'은 '왔어요'를 가장 많이 봅니다."
+  source:
+    kind: own
+    refs: []
+    line: null
+    canon: [N4-2]
+  refresh: null
+  status: reviewed
+  note: "P8 가중치 띠(1-4-4 실측 치수). 선 굵기 대신 면(띠) 폭으로 그림, 가중치 1.0 = 80(style-guide 6.12절). 세로 변형 사유: 본문 640을 표시 폭 328로 줄이면 열 머리와 토큰 이름이 7.2~8.2 CSS px(choose-type.md 5장 3번). figkit 빌드 경고 '상자 폭 72, 88가 최소 폭 120보다 작음' 4건은 P8 세로 변형 실측 치수를 따른 결과. QA 2026-10-15 통과(Q1~Q27), lint 오류 0 경고 0."

@@ -1,0 +1,167 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 3-8-1.build.py, 3-8-1.svg, _render/qa/3-8-1*.png, docs/figures.yml의 3-8-1 항목, vol3-physical-ai/ch08/notes.md 검수 블록이 모두 있다(세로 변형은 epub_variant가 manual일 때)",
+      "passed": true,
+      "evidence": "F1 산출물 모두 있음. ls로 3-8-1.build.py, 3-8-1.svg, 3-8-1.v.svg, _render/qa/ PNG 15장, docs/figures.yml 3-8-1 항목, ch08/notes.md '그림 3-8-1 시각 검수' 블록 확인. epub_variant: manual이라 v.svg도 필요하며 있음. check_figures.py --root 오류 0, 경고 3(F90 둘은 설계서 부재로 예상된 것, F14는 원고 미참조로 시험 환경상 정상)."
+    },
+    {
+      "text": "[자동] F2 3-8-1.build.py를 다시 실행해도 SVG 해시가 같다",
+      "passed": true,
+      "evidence": "F2 build.py를 ${TMPDIR}/g2-f4 임시 미러에 복사해 다시 실행. 3-8-1.svg sha1 d334e557...와 3-8-1.v.svg sha1 1861988d...가 제출본과 cmp 바이트 단위로 같음."
+    },
+    {
+      "text": "[자동] L1 figkit lint 오류 0, 경고 0이다(개념색 수, 부품 수 경고 포함)",
+      "passed": true,
+      "evidence": "L1 figkit.py lint 3-8-1.svg: OK, 3-8-1.v.svg: OK(오류 0, 경고 0). 재실행 출력도 lint: OK."
+    },
+    {
+      "text": "[자동] L2 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "L2 자동 블록 '금지 기호' 본문, 세로 변형 모두 통과, '캡션 금지 기호'(캡션, alt, message) 통과."
+    },
+    {
+      "text": "[자동] C1 System 2, System 1, 잠재 표현, 약 7~9 Hz, 200 Hz, VLM, 행동이 그림 글자에 있다",
+      "passed": true,
+      "evidence": "C1 자동 블록 정본 문자열 3-8-1.svg 7/7, 3-8-1.v.svg 7/7."
+    },
+    {
+      "text": "[자동] C2 그림 글자, alt, 캡션(title, reading, caveat) 모두에서 SI 단위 공백 누락, 7-9 같은 하이픈 범위, '약' 없는 7~9, 8 Hz처럼 줄인 값, 1 kHz와 S0, Helix나 GR00T 같은 회사, 모델명, 7B와 80M 같은 모델 크기, N8-1 ID, 22.2나 28.6 같은 중간값, '약 200 Hz', 설계서에 없는 센서 구성(관절, 로봇 상태, 손목)이 0건이고 그림 안 '기준일'이 0건이다",
+      "passed": true,
+      "evidence": "C2 개정 BAN(관절, 로봇 상태, 손목 포함)으로 그림 글자 두 판 모두 '금지 패턴' 통과, 'alt와 캡션 금지 패턴' 통과. caveat '주기는 한 대표 사례의 공개값이며 제품마다 다릅니다.'로 1회차의 Figure Helix 없음. 센서 입력은 '고속 센서 입력' 그대로. 오염 영향: 실행자가 grep으로 본 docs/skill-trial-3.8.md 85~88, 119, 149행에 1회차 실패 내용이 있어 이 항목 통과에 영향을 줬을 수 있음. 다만 같은 내용이 개정 스킬 references에도 있어 둘을 가를 수 없음."
+    },
+    {
+      "text": "[자동] C3 숫자 칩이 0~1개이고 Hz가 든 칩이 없으며, 칩이 있으면 약 22~29번이고 N8-1과 일치한다",
+      "passed": true,
+      "evidence": "C3 숫자 칩 두 판 모두 0개. 주기는 모듈 상자 둘째 줄 보통 글자('느림, 약 7~9 Hz', '빠름, 200 Hz')."
+    },
+    {
+      "text": "[자동] W1 본문 640 × 320(또는 480), 세로 변형이 있으면 폭 360(400 아님), 높이 720 이하다",
+      "passed": true,
+      "evidence": "W1 본문 640 x 480(문구가 480 허용), 세로 변형 360 x 472(VW=360 통과, 8의 배수, 720 이하). 단 480의 사유 'P9 두 단(모듈 둘과 잠재 표현을 세로로 쌓음)'은 patterns.md P9 캔버스 행 '강조를 보이려고 상자 단을 하나 더 넣어 480으로 키우지 않음'과 어긋남. 문구상 통과로 두되 남은 개선 1순위로 보고. 오염 영향: 실행자가 grep으로 본 docs/skill-trial-3.8.md 85~88, 119, 149행에 1회차 실패 내용이 있어 이 항목 통과에 영향을 줬을 수 있음. 다만 같은 내용이 개정 스킬 references에도 있어 둘을 가를 수 없음."
+    },
+    {
+      "text": "[자동] W2 x 24 폭 160 높이 48 입력 상자 3개, x 232 폭 176 모듈 상자 2개, x 456 폭 160 높이 48 출력 상자 1개가 ±8 안이다",
+      "passed": true,
+      "evidence": "W2 자동 BOX 대조 6/6(TOL 8). 입력 x 24 160 x 48 셋, 모듈 x 232 폭 176 둘(176 x 112), 출력 x 456 160 x 48. 1회차 실패 원인이던 센서 입력 160 x 64가 48로 돌아옴. 참고로 와이어프레임의 System 1 176 x 64 대신 112로 System 2와 맞춤(BOX가 높이 *라 자동은 못 봄). 오염 영향: 실행자가 grep으로 본 docs/skill-trial-3.8.md 85~88, 119, 149행에 1회차 실패 내용이 있어 이 항목 통과에 영향을 줬을 수 있음. 다만 같은 내용이 개정 스킬 references에도 있어 둘을 가를 수 없음."
+    },
+    {
+      "text": "[사람] W3 세로 변형이 있으면 두 칸 행 x 16과 188 폭 156, 모듈 상자 x 16 폭 328이고 강조 대상이 본문과 같다",
+      "passed": true,
+      "evidence": "W3 v.sheet.png와 소스 확인. 두 칸 행 x 16과 192, 152 x 48(기대 16, 188, 156과 차 4, 허용 8 안), 모듈 x 16 328 x 64 둘, 강조 대상은 본문과 같은 잠재 표현 상자(둘째 입력 행 오른쪽 칸). 입력은 모두 위에서 들어와 1회차의 방향 뒤집힘 없음. 출력은 와이어프레임 328 x 48 대신 152 x 48. 채점자가 임시 경로에서 확인한 결과 P9 문서 값 156, 188은 figkit.box가 FigkitError('상자 폭 156가 8의 배수가 아닙니다')로 막고, 출력 328 x 48을 x 16 열 152 입력과 두면 lint '같은 종류 상자 크기 다름' 경고가 나므로 실행자의 변경은 문서와 도구 충돌을 피한 정당한 판단. 오염 영향: 실행자가 grep으로 본 docs/skill-trial-3.8.md 85~88, 119, 149행에 1회차 실패 내용이 있어 이 항목 통과에 영향을 줬을 수 있음. 다만 같은 내용이 개정 스킬 references에도 있어 둘을 가를 수 없음."
+    },
+    {
+      "text": "[자동] A1 title이 '그림 3-8-1 '로 시작하고 desc가 alt와 글자 단위로 같다",
+      "passed": true,
+      "evidence": "A1 자동 블록 title 서식, desc = alt 두 판 모두 통과. title '그림 3-8-1 이중 시스템 VLA'."
+    },
+    {
+      "text": "[사람] A2 alt가 입력, 두 모듈, 잠재 표현, 행동의 흐름과 두 주기를 약 7~9 Hz, 200 Hz 그대로 담고 회사명과 색 이름이 없다",
+      "passed": true,
+      "evidence": "A2 alt 4문장 217자. 장면과 지시 입력, System 2(VLM), 잠재 표현, 고속 센서 입력, System 1(작은 정책), 행동의 흐름과 '약 7~9 Hz', '200 Hz'를 그대로 담음. 회사명, 색 이름 없음. 오염 영향: 실행자가 grep으로 본 docs/skill-trial-3.8.md 85~88, 119, 149행에 1회차 실패 내용이 있어 이 항목 통과에 영향을 줬을 수 있음. 다만 같은 내용이 개정 스킬 references에도 있어 둘을 가를 수 없음."
+    },
+    {
+      "text": "[사람] A3 caveat가 주기는 한 사례의 공개값이며 제품마다 다르다는 뜻이고, 캡션에 🔄 기준일: 2026년 10월.이 붙으며, 캡션에 [@key]를 넣었다면 장 references.yml에 키가 없다는 사실을 보고했다",
+      "passed": true,
+      "evidence": "A3 caveat '주기는 한 대표 사례의 공개값이며 제품마다 다릅니다.' notes.md 이미지 줄 캡션 끝에 '🔄 기준일: 2026년 10월.' 있음. 캡션에 [@key] 없음, figure2025helix 키 부재를 note와 notes.md '남은 일'에 보고. 이 caveat 문구는 caption-alt.md 75행 예시와 글자 단위로 같음(오염 문서 149행에도 같은 뜻 있음)."
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: S, source.canon에 N8-1, refresh.as_of가 2026-10이고 refresh.ledger가 있으며, epub_variant가 manual이나 none, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "Y1 자동 블록 kind = S, canon N8-1, refresh.as_of 2026-10과 ledger 'vol3 10장 / 8.3 Figure Helix', epub_variant manual, status reviewed 모두 통과. 참고: 같은 블록의 'message 42자' 항목은 실패(사례 md 5.1절 40자 이하). 이 expectation 문구에는 없어 판정에 넣지 않고 eval_feedback에 적음."
+    },
+    {
+      "text": "[사람] Y1 note에 세로 변형 판단과 주기를 칩으로 쓰지 않은 사유가 있다",
+      "passed": true,
+      "evidence": "Y1 note에 세로 변형 판단(폭 328에서 라벨 8.2 CSS px, 선택, 폭 360, 152/24로 바꾼 사유)과 '주기는 🔄 관리표 값이라 숫자 칩 없이 모듈 상자 글자로 표기'가 있음."
+    },
+    {
+      "text": "[사람] H1 캡션 없이 5초 안에 '느린 쪽이 생각하고 빠른 쪽이 움직이며 둘을 잠재 표현이 잇는다'가 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "H1 message를 보기 전 3-8-1.png만 보고 적은 문장: '느리게 도는 System 2가 장면과 지시로 잠재 표현을 만들고, 빠르게 도는 System 1이 그것과 센서 입력으로 행동을 낸다.' 기대 문장과 같은 뜻."
+    },
+    {
+      "text": "[사람] H2 첫 시선이 figures.yml accent에 적힌 대상 하나에 가고 gray에서도 한 곳에 남는다(Q10, Q11)",
+      "passed": true,
+      "evidence": "H2 accent '잠재 표현 상자'. png에서 유일한 tint 면과 1.5 테두리라 첫 시선이 감. gray에서 회색 면과 굵은 테두리로 한 곳에 남음, protan, deutan에서도 파랑 계열 한 곳."
+    },
+    {
+      "text": "[사람] H3 시안 1-4-4 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지 기준에서 어긋난 번호가 없다(정렬선 5개 이하, 같은 크기 입력 상자, 오른쪽 빈 곳, 상자 면 흰색)",
+      "passed": true,
+      "evidence": "H3 1-4-4 PNG(임시 경로에 figure_qa로 렌더링)와 나란히 봄. 2번 정렬선 3개(24, 232, 456), 3번 입력 상자 셋 160 x 48 같음, 7번 오른쪽 위 x 440~616 비어 있음, 11번 상자 면 흰색이고 개념색은 왼쪽 띠에만. 1, 5, 6, 10번도 맞음. 저자 확인: 480 캔버스와 System 1 176 x 112로 상자 안과 아래쪽 빈 곳이 큼, 지시선 없음(8번은 0개 허용)."
+    },
+    {
+      "text": "[사람] H4 고속 센서 입력이 회색(ink) 상자이고 개념색이 3개 이하이며 gray와 색약 PNG에서 입력과 행동이 띠 모양이나 라벨로 갈린다(Q14, Q15)",
+      "passed": true,
+      "evidence": "H4 고속 센서 입력은 띠 없는 ink-200 입력 상자. 개념색 3개(장면 노랑, 지시 검정 계열 텍스트, 행동 자주). gray에서 장면 이중 실선, 지시 실선, 행동 1점 쇄선 띠로 갈림, 색약 PNG도 같음."
+    },
+    {
+      "text": "[사람] H5 본문 w328에서 주기 글자의 가독성이 기록돼 있고, 세로 변형이 있으면 w328에서 모두 읽힌다(Q17, Q18)",
+      "passed": true,
+      "evidence": "H5 notes.md에 'w328: 라벨 8.2 CSS px로 작아 세로 변형을 둡니다' 기록. v.w328.png에서 모든 글자 읽힘(가장 작은 글자 12.8 CSS px, FQ-SIZE 기준 10.9 이상)."
+    },
+    {
+      "text": "[사람] H6 로봇 실루엣과 demo- 칸이 없고, 넣었다면 robots.svg 부품만 쓰고 Q24 저자 확인으로 올렸다",
+      "passed": true,
+      "evidence": "H6 본문과 세로 변형 PNG 모두 로봇 실루엣, demo- 칸 없음."
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 각 줄이 실제 PNG와 맞는다",
+      "passed": true,
+      "evidence": "H7 notes.md 각 줄을 PNG와 SVG로 대조: 치수(본문 160 x 48 셋, 176 x 112 둘, 176 x 48, 세로 변형 152 x 48 다섯, 328 x 64 둘), 왼쪽 끝 x 값, 높이 472, 가장 작은 글자 12.8, gray와 색약 묘사가 실제와 맞음. 1회차의 '어긋남 없음' 허위 기록이 해소됨. 오염 영향: 실행자가 grep으로 본 docs/skill-trial-3.8.md 85~88, 119, 149행에 1회차 실패 내용이 있어 이 항목 통과에 영향을 줬을 수 있음. 다만 같은 내용이 개정 스킬 references에도 있어 둘을 가를 수 없음."
+    }
+  ],
+  "summary": {
+    "passed": 22,
+    "failed": 0,
+    "total": 22,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "executor_duration_seconds": 306.7,
+    "total_duration_seconds": 306.7
+  },
+  "execution_metrics": {
+    "total_tokens": 192143
+  },
+  "claims": [
+    {
+      "claim": "P9 와이어프레임 156 x 48, 사이 16은 8 격자 밖이라 figkit이 막는다",
+      "type": "factual",
+      "verified": true,
+      "evidence": "임시 경로 시험에서 FigkitError 재현. x 188도 8의 배수 아님"
+    },
+    {
+      "claim": "출력 328 x 48이면 lint 같은 종류 상자 크기 다름 경고",
+      "type": "factual",
+      "verified": true,
+      "evidence": "임시 SVG lint에서 경고 1건 재현"
+    },
+    {
+      "claim": "480은 P9 두 단이라 필요",
+      "type": "quality",
+      "verified": false,
+      "evidence": "patterns.md P9 캔버스 행은 강조용 상자 단 추가로 480을 만들지 말라고 함. 본문은 accent 화살표와 600 라벨로 320 가능"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "[자동] Y1 figures.yml 항목이 kind: S, source.canon에 N8-1, refresh.as_of가 2026-10이고 refresh.ledger가 있으며, epub_variant가 manual이나 none, status는 rendered나 reviewed다",
+        "reason": "자동 블록의 message 40자 검사가 실패(42자)했는데 어느 expectation에도 묶이지 않아 pass_rate에 반영되지 않음. Y1 또는 H1 문구에 'message 40자 이하'를 넣어야 함."
+      },
+      {
+        "assertion": "[자동] W1 본문 640 × 320(또는 480), 세로 변형이 있으면 폭 360(400 아님), 높이 720 이하다",
+        "reason": "W1이 480을 사유만 있으면 통과시켜, P9가 금지한 '강조용 상자 단 추가로 480' 사유도 통과함. 480 허용 조건(하위 모듈 3개 이상)을 문구에 적거나 사람 판정으로 옮길 것."
+      },
+      {
+        "assertion": "[사람] W3 세로 변형이 있으면 두 칸 행 x 16과 188 폭 156, 모듈 상자 x 16 폭 328이고 강조 대상이 본문과 같다",
+        "reason": "W3 기대 값(x 188, 폭 156)과 patterns.md P9 세로 변형 값이 8 격자 밖이라 figkit이 거부함. 152 x 48(x 16, 192, 사이 24)로 문서와 사례 md를 고쳐야 함. 출력 328 x 48도 lint 경고를 부르므로 152 x 48 왼쪽 칸 또는 출력을 다른 종류 상자로 정할 것."
+      },
+      {
+        "reason": "BOX의 모듈 높이가 *라 System 1 176 x 64 기대와 112의 차이를 아무 항목도 보지 않음. 의도된 자유라면 사례 md 5.2절에 '두 모듈 같은 높이도 허용'을 적을 것."
+      }
+    ],
+    "overall": "변별력은 대체로 좋으나 message 길이와 480 사유가 판정에서 빠지고, 패턴 문서 치수와 figkit 규칙이 충돌함."
+  }
+}

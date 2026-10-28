@@ -1,0 +1,107 @@
+{
+  "skill_name": "researching-chapter",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "1권 4장 리서치 해 줘. references.yml 채우고 🔄 항목도 확인해 줘.",
+      "expected_output": "vol1-llm/ch04/references.yml(장 파일)에 설계서 출처 키 5개(vaswani2017, alammar2018, he2016, ba2016, su2021)가 설계서 순서와 철자 그대로 key와 claims만으로 들어가고, 서지는 docs/references-master.yml(서지 마스터)에 한 번만 모두 status: unverified로 들어간다. 설계서 ✅/◐는 서지 마스터 check(matched/unchecked)로 옮겨지고, he2016은 학회 연도 2016과 arXiv 2015 note, alammar2018은 explainer tier 3이다. 사례 후보 ①②는 연 원문이 있으면 새 키 제안으로, 없으면 '찾지 못함'으로 보고된다. 1권 9장에 4.x 행이 없으므로 '이 장 🔄 행 없음'. notes.md 끝에 리서치 보고(요약 수치, 키 표, 사람 확인 요청), 응답은 다섯 줄 이내. 설계서와 원고는 바뀌지 않는다. 세부는 evals/case-1-4-sources.md.",
+      "files": [
+        "../../../CLAUDE.md",
+        "../../../docs/design-vol1-llm.md",
+        "../../../vol1-llm/ch04/references.yml",
+        "../../../vol1-llm/ch04/index.md",
+        "../../../docs/references-master.yml"
+      ],
+      "expectations": [
+        "[자동] Y1 references-schema.md 9장 점검 명령(서지 마스터와 장 파일)의 마지막 줄이 OK다",
+        "[자동] Y2 장 파일 머리 주석 두 줄이 그대로 있고 최상위 키가 references 하나다",
+        "[자동] Y3 서지 마스터의 모든 항목이 status: unverified, verified_by: null, verified_at: null이다",
+        "[자동] Y4 what, conditions, note 필드와 notes.md 리서치 보고에 금지 기호 7종이 0개다",
+        "[자동] Y5 장 파일 항목에 key, claims, note 밖의 필드(서지 필드)가 없고 모든 키가 서지 마스터에 있다",
+        "[자동] K1 키 대조 명령의 '빠짐'과 '마스터 없음'이 0줄이고 vaswani2017, alammar2018, he2016, ba2016, su2021이 철자 그대로 있다",
+        "[자동] K2 설계서 키 5개의 순서가 설계서 '출처 키' 줄 순서와 같다",
+        "[자동] K3 서지 마스터의 vaswani2017이 kind: paper, tier: 1, id arXiv:1706.03762, url https://arxiv.org/abs/1706.03762, venue NeurIPS, year 2017이다",
+        "[자동] K4 서지 마스터의 he2016이 year 2016, venue CVPR이고 note에 arXiv 초판 2015가 있다",
+        "[자동] K5 서지 마스터의 alammar2018이 kind: explainer, tier: 3이다",
+        "[사람] K6 ✅ 키는 matched이고 accessed가 다시 연 날 또는 2026-10-12(대조 방법 note 포함)이며, alammar2018은 열어서 확인했을 때만 matched다",
+        "[자동] K7 arXiv 주소에 /pdf/가 없다",
+        "[사람] K8 그림 1-4-6용 claims가 있으면 locator가 원 논문 그림 번호이거나 '확인 못 함'이며 지어낸 번호가 없다",
+        "[사람] C1 사례 후보 ①, ②가 키 표 또는 '찾지 못함'에 모두 나온다",
+        "[사람] C2 새 키를 넣었다면 실행 기록에서 그 주소를 연 흔적이 있고, kind가 알맞으며, 새 키 제안 표에 설계서 서식 인용, 상태 기호, 넣을 절(1권 12.2절)이 있다",
+        "[자동] C3 새 키 이름이 영문 소문자, 숫자, 하이픈만으로 되어 있다",
+        "[사람] C4 열지 못한 사례 출처는 서지 마스터와 장 파일 어디에도 없고 '찾지 못함'에 찾아본 곳과 [출처 필요: ...] 권고가 있다",
+        "[사람] C5 설계서 후보 밖 사례를 새로 고르지 않았다",
+        "[자동] R1 보고서에 '이 장 🔄 행 없음'과 1권 9장 확인이 적혀 있다",
+        "[사람] R2 4장용 관리표 행을 새로 만들자는 제안이 없다",
+        "[자동] R3 이 장 키의 서지 마스터 항목에 refresh 묶음이 없다",
+        "[자동] B1 vol1-llm/ch04/index.md와 저장소 docs/ 아래 파일(references-master.yml 포함)의 체크섬이 그대로다. 출력은 outputs/ 아래에만 있다",
+        "[자동] B2 보고서에 요약 수치, 키 표, 사람 확인 요청 제목이 있고 사람 확인 요청 표가 비어 있지 않다",
+        "[사람] B3 응답 요약이 다섯 줄 이내이고 항목 수, unverified, 찾지 못함 수, 🔄 결과를 담는다"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "2권 7장 🔄 항목 재확인하고 갱신할 게 있으면 제안해 줘. 원고는 아직 없어.",
+      "expected_output": "2권 관리표(설계서 10장)에서 위치 칸에 7장 절이 있는 6행(7.3 MCP 사양, 7.3 MCP Apps, 7.3과 7.4 AAIF, 7.4 A2A, 7.5 Agent Skills, 7.5 박스 결제와 커머스 프로토콜)이 R-2-7-01부터 요약표에 한 줄씩 나오고, 갱신 제안과 충돌마다 현재 값(셀 원문 그대로), 제안 값(셀 전체), 근거(확인 기준 칸의 공식 출처), 영향 범위 다섯 칸을 갖춘 카드가 있다. A2A의 '2025년 12월 합류'는 제안 값에 오르지 않는다. 근거로 쓴 🔄 키는 서지 마스터 docs/references-master.yml에 refresh 묶음(as_of 2026-10 그대로)과 함께 status: unverified로, vol2-agent/ch07/references.yml에는 key와 claims로 들어간다. 설계서, 원고, volatile.yml은 바뀌지 않는다. 세부는 evals/case-2-7-refresh.md.",
+      "files": [
+        "../../../CLAUDE.md",
+        "../../../docs/design-vol2-agent.md",
+        "../../../vol2-agent/ch07/references.yml",
+        "../../../docs/references-master.yml"
+      ],
+      "expectations": [
+        "[자동] T1 요약표에 대상 6행이 모두 있고 각 줄의 판정이 변화 없음, 갱신 제안, 충돌, 확인 실패 중 하나이며 확인일과 근거 키가 있다",
+        "[자동] T2 ID가 R-2-7-01부터 순번이다",
+        "[자동] T3 갱신 제안과 충돌마다 판정, 현재 값, 제안 값(또는 선택지), 바뀌는 부분, 근거, 교차 확인, 영향 범위, 요청 칸을 갖춘 카드가 있다",
+        "[자동] T4 카드의 현재 값이 설계서 10장 셀과 글자 단위로 같다",
+        "[사람] T5 제안 값이 셀 전체 문장이고 설계서 관리표 문체와 날짜 서식을 따른다",
+        "[사람] T6 근거가 확인 기준 칸의 공식 출처이고, 2차 자료로만 확인한 새 정보에는 (2차) 표시가 있다",
+        "[자동] T7 영향 범위에 원고, 그림, 정본, 다른 권 관리표, references.yml 다섯 칸이 있다",
+        "[자동] J1 A2A 카드나 요약에서 '2025년 12월' AAIF 합류가 제안 값으로 오르지 않는다",
+        "[사람] J2 열지 못한 확인 기준은 확인 실패와 사유로 적혀 있고 기억으로 변화 없음을 주지 않았다",
+        "[사람] J3 버전과 날짜가 공식 발표일 기준이고 보도일과 섞이지 않았다",
+        "[자동] F1 근거로 쓴 🔄 키의 서지 마스터 항목에 refresh 묶음이 있고 ledger가 'vol2 10장 / 7.' 꼴로 시작한다",
+        "[자동] F2 refresh.as_of가 모두 2026-10이다",
+        "[사람] F3 설계서 ⚠ 키를 넣었다면 원문을 열지 못한 경우 check: secondary 그대로다",
+        "[자동] F4 references-schema.md 9장 점검 명령의 마지막 줄이 OK이고 서지 마스터의 모든 항목이 status: unverified이며 장 파일에 서지 필드가 없다",
+        "[자동] B1 저장소의 docs/design-vol2-agent.md, docs/design-vol1-llm.md, docs/references-master.yml 체크섬이 그대로다",
+        "[자동] B2 vol2-agent/ch07/index.md가 바뀌지 않았다",
+        "[자동] B3 docs/volatile.yml이 바뀌지 않았다",
+        "[자동] B4 보고서와 카드에 금지 기호 7종이 0개다"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "3권 12장 사례 박스에 쓸 수치 출처 확인해 줘. goldman2024humanoid, bofa2025humanoid, gxo-agility-2024, gxo-digit-2025.",
+      "expected_output": "서지 마스터 docs/references-master.yml에 네 키가 status: unverified로, vol3-physical-ai/ch12/references.yml에 key와 claims로 들어간다. goldman2024humanoid는 report tier 2, 회사 발표는 원문을 열었으면 official tier 2, 보도뿐이면 press tier 4와 secondary다. 숫자를 받치는 장 파일 항목마다 claims(where, what, locator, value 원문 표기 그대로, conditions에 발표 기준과 기준 연도, 없는 조건은 '공개되지 않음')가 있고, tier 4 숫자는 claims.crosscheck가 있거나 단일 보도라 쓰지 말라는 note가 있다. N12-1의 6만 달러는 출처 수치로 적지 않는다. 보고서 키 표의 '원고에서' 칸이 발표 기준, 쓰지 않음, [출처 필요] 유지를 구분하고, 3권 관리표 12.3과 12.3, 12.5 행이 R-3-12 요약표에 있다. 설계서와 원고는 바뀌지 않는다. 세부는 evals/case-3-12-press-numbers.md.",
+      "files": [
+        "../../../CLAUDE.md",
+        "../../../docs/design-vol3-physical-ai.md",
+        "../../../vol3-physical-ai/ch12/references.yml",
+        "../../../docs/references-master.yml"
+      ],
+      "expectations": [
+        "[자동] P1 서지 마스터의 goldman2024humanoid가 kind: report, tier: 2이고 published가 2024-02로 시작한다",
+        "[사람] P2 gxo-agility-2024는 회사 원문을 열었으면 official, tier 2, matched이고, 보도만 봤으면 press, tier 4, secondary와 사유가 있다",
+        "[사람] P3 gxo-digit-2025는 회사 원문을 찾았으면 원문을 키로 쓰고 보도를 crosscheck로 내렸고, 보도뿐이면 press, tier 4다",
+        "[사람] P4 bofa2025humanoid는 원문을 열지 못했으면 check: secondary와 사유 note가 있고 사람 확인 요청 1~2순위다",
+        "[자동] N1 숫자를 받치는 장 파일 항목마다 claims에 where, what, locator, value가 있다",
+        "[사람] N2 value가 원문 표기와 단위 그대로이고 환산, 반올림, 원화 변환이 없다",
+        "[사람] N3 시장 전망과 회사 발표 수치의 conditions에 발표 기준과 기준 연도가 있다",
+        "[사람] N4 운반 실적 수치의 conditions에 원문에 없는 기간, 대수, 작업 조건이 '공개되지 않음'으로 적혀 있다",
+        "[자동] N5 서지 마스터에서 tier 4인 키의 value가 있는 claims는 모두 claims.crosscheck가 있다(점검 명령 통과)",
+        "[사람] N6 매체마다 숫자가 갈리면 어느 쪽도 value로 고르지 않고 보고서에 둘 다 적었다",
+        "[사람] N7 N12-1의 구매가 6만 달러를 goldman2024humanoid의 수치로 적지 않았다",
+        "[사람] R1 키 표 '원고에서' 칸이 발표 기준, 쓰지 않음, [출처 필요] 유지를 구분한다",
+        "[자동] R2 🔄 요약표에 3권 관리표 '휴머노이드 가격과 전망'과 '배치 사례' 행이 R-3-12 ID로 있다",
+        "[사람] R3 관리표의 (2차) 값을 원문으로 확인했으면 (2차)를 떼는 갱신 제안 카드가 있고, 아니면 변화 없음 또는 확인 실패다",
+        "[사람] R4 사람 확인 요청이 research-report.md 9장 순서를 따른다",
+        "[사람] R5 회사명과 제품명은 박스와 사례에서만 쓴다는 제약을 writer 전달 사항에 적었다",
+        "[자동] Y1 references-schema.md 9장 점검 명령의 마지막 줄이 OK다(장 파일에 서지 필드 없음, 키가 모두 서지 마스터에 있음)",
+        "[자동] Y2 서지 마스터의 모든 항목이 status: unverified다",
+        "[자동] Y3 저장소 docs/ 아래 파일(references-master.yml 포함)과 vol3-physical-ai/ch12/index.md의 체크섬이 그대로다",
+        "[자동] Y4 what, note, 보고서에 금지 기호 7종이 0개다"
+      ]
+    }
+  ]
+}

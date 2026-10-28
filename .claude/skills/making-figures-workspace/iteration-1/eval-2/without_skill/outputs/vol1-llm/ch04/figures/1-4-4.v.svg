@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 296" width="360" height="296" role="img" aria-labelledby="f144v-t f144v-d" font-family="Pretendard, 'Pretendard Variable', -apple-system, 'Apple SD Gothic Neo', sans-serif" style="font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'">
+  <title id="f144v-t">그림 1-4-4 '안'의 어텐션 가중치 (EPUB 세로 변형)</title>
+  <desc id="f144v-d">러닝 예문 '주문한 상자가 아직 안 왔어요'에서 토큰 '안'이 다른 토큰을 보는 정도를 띠로 나타냈고, 띠 폭이 가중치입니다. 손계산에 쓴 세 토큰의 가중치는 상자가 0.140, 안 0.284, 왔어요 0.576이고 합은 1입니다. '주문한'과 '아직'은 계산에서 뺐습니다. '안'은 '왔어요'를 가장 많이 봅니다.</desc>
+    <rect width="360" height="296" fill="#FFFFFF"/>
+  <text x="16" y="24" font-size="14" font-weight="500" fill="#6B727D" letter-spacing="0.56">그림 1-4-4</text>
+  <text x="344" y="24" font-size="14" fill="#6B727D" text-anchor="end">'안'의 어텐션 가중치</text>
+  <line x1="16" y1="32.5" x2="344" y2="32.5" stroke="#1F2329" stroke-width="1"/>
+  <g class="attention-bands" data-canon="N4-2">
+  <path class="band" data-token="상자가" data-weight="0.140" d="M72.00,176.00 C132.00,176.00 132.00,114.40 192.00,114.40 L192.00,125.60 C132.00,125.60 132.00,187.20 72.00,187.20 Z" fill="#C9CDD3" stroke="#FFFFFF" stroke-width="1" stroke-linejoin="round"/>
+  <path class="band" data-token="안" data-weight="0.284" d="M72.00,187.20 C132.00,187.20 132.00,204.64 192.00,204.64 L192.00,227.36 C132.00,227.36 132.00,209.92 72.00,209.92 Z" fill="#C9CDD3" stroke="#FFFFFF" stroke-width="1" stroke-linejoin="round"/>
+  <path class="band band-msg" data-token="왔어요" data-weight="0.576" d="M72.00,209.92 C132.00,209.92 132.00,240.96 192.00,240.96 L192.00,287.04 C132.00,287.04 132.00,256.00 72.00,256.00 Z" fill="#5844BC" stroke="#FFFFFF" stroke-width="1" stroke-linejoin="round"/>
+  </g>
+  <rect x="16.5" y="176.5" width="55" height="79" fill="#F0F1F2" stroke="#C9CDD3" stroke-width="1"/><text x="44" y="222" font-size="16" font-weight="500" fill="#1F2329" text-anchor="middle">안</text>
+  <text x="16" y="164" font-size="14" fill="#59606B">보는 토큰</text>
+  <rect class="token-off" x="192.5" y="56.5" width="79" height="31" fill="#FFFFFF" stroke="#8C929B" stroke-width="1" stroke-dasharray="4 3"/><text x="232" y="78" font-size="16" font-weight="500" fill="#6B727D" text-anchor="middle">주문한</text>
+  <rect x="192.5" y="104.5" width="79" height="31" fill="#F0F1F2" stroke="#C9CDD3" stroke-width="1"/><text x="232" y="126" font-size="16" font-weight="500" fill="#1F2329" text-anchor="middle">상자가</text>
+  <rect class="token-off" x="192.5" y="152.5" width="79" height="31" fill="#FFFFFF" stroke="#8C929B" stroke-width="1" stroke-dasharray="4 3"/><text x="232" y="174" font-size="16" font-weight="500" fill="#6B727D" text-anchor="middle">아직</text>
+  <rect x="192.5" y="200.5" width="79" height="31" fill="#F0F1F2" stroke="#C9CDD3" stroke-width="1"/><text x="232" y="222" font-size="16" font-weight="500" fill="#1F2329" text-anchor="middle">안</text>
+  <rect x="192.5" y="248.5" width="79" height="31" fill="#F0F1F2" stroke="#C9CDD3" stroke-width="1"/><text x="232" y="270" font-size="16" font-weight="500" fill="#1F2329" text-anchor="middle">왔어요</text>
+  <text x="288" y="77" font-size="14" fill="#6B727D">계산 제외</text>
+  <g class="num-chip" data-canon="N4-2"><rect x="288.5" y="108.5" width="55" height="23" fill="#FFFFFF" stroke="#1F2329" stroke-width="1"/><text x="296.808" y="125" font-size="14" font-weight="600" fill="#1F2329">0.140</text></g>
+  <text x="288" y="173" font-size="14" fill="#6B727D">계산 제외</text>
+  <g class="num-chip" data-canon="N4-2"><rect x="288.5" y="204.5" width="55" height="23" fill="#FFFFFF" stroke="#1F2329" stroke-width="1"/><text x="296.808" y="221" font-size="14" font-weight="600" fill="#1F2329">0.284</text></g>
+  <g class="num-chip" data-canon="N4-2"><rect x="288.75" y="252.75" width="54.5" height="22.5" fill="#EFEFFF" stroke="#5844BC" stroke-width="1.5"/><text x="296.808" y="269" font-size="14" font-weight="600" fill="#1F2329">0.576</text></g>
+</svg>

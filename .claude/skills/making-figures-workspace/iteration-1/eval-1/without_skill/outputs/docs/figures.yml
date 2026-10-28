@@ -1,0 +1,26 @@
+# 그림 1-4-3 기록부 항목(docs/figures.yml에 붙일 사본). 스키마: docs/style-guide.md 8.6절
+- id: "1-4-3"
+  vol: 1
+  chapter: 4
+  section: "4.2"
+  kind: M
+  spec: "어텐션 계산 4단계 흐름도(N4-2 숫자를 각 단계에 표기)"
+  source_file: vol1-llm/ch04/figures/1-4-3.mmd
+  output_file: vol1-llm/ch04/figures/1-4-3.svg
+  message: "'안'은 '왔어요'의 정보를 가장 많이 가져옵니다"
+  accent: "03 가중치 상자(메시지 상자), 가중치 0.576"
+  role: 숫자
+  epub_variant: manual
+  caption:
+    title: "어텐션 계산의 네 단계"
+    reading: "첫 단계부터 따라가면 '안'의 점수가 가중치로 바뀌고, 그 가중치로 값을 섞어 출력이 나옵니다."
+    caveat: null
+  alt: "토큰 '안'의 어텐션 계산을 점수, 크기 조정, softmax, 가중합의 네 단계 흐름도로 나타냈습니다. '안'의 쿼리와 세 토큰의 키를 곱한 점수 1, 2, 3을 루트 2로 나누면 0.707, 1.414, 2.121이 됩니다. softmax를 거친 가중치는 상자가 0.140, 안 0.284, 왔어요 0.576이고, 이 가중치로 값을 섞은 출력은 0.428과 0.572입니다. '안'은 '왔어요'의 정보를 가장 많이 가져옵니다."
+  source:
+    kind: own
+    refs: []
+    line: null
+    canon: [N4-1, N4-2]
+  refresh: null
+  status: reviewed
+  note: "본문판은 폭 328에서 가장 작은 글자가 7.2 CSS px라 정본 숫자를 읽기 어려워 세로 변형(5.11절 선택 조건)을 1-4-3.v.build.py(figkit, 360 × 680)로 손으로 그림. Mermaid 세로 변형은 입력 상자가 한 행에 붙어 내용 폭 328을 넘어(369px, 460px) 쓰지 않음. 토큰 이름 상자가, 안, 왔어요는 설계서 E4-3 문구를 따랐고 그림 1-2-1 확정 뒤 대조 필요."

@@ -1,0 +1,29 @@
+# docs/figures.yml 사본(이 실행의 출력). 스키마: docs/style-guide.md 8.6절.
+- id: "3-8-1"
+  vol: 3
+  chapter: 8
+  section: "8.2"
+  kind: S
+  spec: "이중 시스템 개념도: System 2(VLM, 느림) → 잠재 표현 → System 1(작은 정책, 빠름) → 행동, 각각의 입력과 주기. 주기 표기는 N8-1 문자열(System 2 약 7~9 Hz, System 1 200 Hz). 🔄 관리표 Figure Helix 행 값이므로 캡션에 기준일을 붙임. 고속 센서 입력은 회색(ink), 개념색은 3개 이하"
+  source_file: vol3-physical-ai/ch08/figures/3-8-1.build.py
+  output_file: vol3-physical-ai/ch08/figures/3-8-1.svg
+  message: "System 2의 잠재 표현을 빠른 System 1이 행동으로 바꿉니다"
+  accent: "System 1 상자(메시지 상자). 주기 값이 🔄라 강조 칩 없음"
+  role: 구조
+  epub_variant: manual
+  caption:
+    title: "이중 시스템 VLA의 구조와 갱신 주기"
+    reading: "System 1은 System 2의 잠재 표현과 고속 센서 입력을 합쳐 행동으로 바꾸며, 훨씬 자주 갱신합니다."
+    caveat: "주기는 Helix의 공개값이며 제품마다 다릅니다."
+  alt: "이중 시스템 VLA의 두 모듈과 각자의 입력, 갱신 주기를 구조도로 나타냈습니다. System 2(VLM)는 카메라 이미지와 언어 지시를 받아 약 7~9 Hz로 잠재 표현을 냅니다. System 1(작은 정책)은 이 잠재 표현과 고속 센서 입력을 함께 받아 200 Hz로 행동을 냅니다. 느리게 생각하는 System 2의 결과를 빠른 System 1이 행동으로 바꿉니다."
+  source:
+    kind: data
+    refs: [figure2025helix]
+    line: "자료: Figure AI의 Helix 발표 수치로 재구성[@figure2025helix]."
+    canon: [N8-1]
+  refresh:
+    as_of: "2026-10"
+    ledger: "vol3 10장 / 8.3 Figure Helix"
+    recheck: "Figure 공식 발표"
+  status: reviewed
+  note: "세로 변형(5.11절 선택): 폭 328에서 입력 칩과 느림, 빠름 풀이(14)가 약 7 CSS px로 작아져 360 × 584 사본을 둠. 갱신 주기는 세로 변형에서 모듈 상자 셋째 줄로 옮김(같은 문자열). 저자 확인: figure2025helix 키가 ch08 references.yml에 아직 없음(S22), accent 대신 메시지 상자 처리, 제목에 (개념도) 미부착."

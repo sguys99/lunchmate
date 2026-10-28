@@ -1,0 +1,28 @@
+- id: "3-8-1"
+  vol: 3
+  chapter: 8
+  section: "8.2"
+  kind: S
+  spec: "이중 시스템 개념도: System 2(VLM, 느림) → 잠재 표현 → System 1(작은 정책, 빠름) → 액션, 각각의 입력과 주기. 주기 표기는 N8-1 문자열(System 2 약 7~9 Hz, System 1 200 Hz). 🔄 관리표 Figure Helix 행 값이므로 캡션에 기준일을 붙임. 고속 센서 입력은 회색(ink), 개념색은 3개 이하"
+  source_file: vol3-physical-ai/ch08/figures/3-8-1.build.py
+  output_file: vol3-physical-ai/ch08/figures/3-8-1.svg
+  message: "느린 System 2가 잠재 표현으로 빠른 System 1을 이끕니다"
+  accent: "System 2에서 System 1로 가는 잠재 표현 연결(1.5 화살표와 600 라벨, 세로 변형은 잠재 표현 상자)"
+  role: 구조
+  epub_variant: manual
+  caption:
+    title: "이중 시스템 VLA의 두 모듈과 주기(개념도)"
+    reading: "System 2에서 시작해 잠재 표현을 따라가면, 느린 판단이 빠른 System 1의 액션으로 이어집니다."
+    caveat: "주기는 한 대표 사례의 공개값이며 제품마다 다릅니다."
+  alt: "System 2는 장면과 지시를, System 1은 잠재 표현과 고속 센서 입력을 받아 액션을 내는 두 모듈 구조를 블록으로 나타냈습니다. System 2는 VLM이며 약 7~9 Hz로 느리게, System 1은 작은 정책이며 200 Hz로 빠르게 돌아갑니다. 두 모듈은 잠재 표현 하나로 이어져, 느린 System 2가 잠재 표현으로 빠른 System 1을 이끕니다."
+  source:
+    kind: own
+    refs: []
+    line: null
+    canon: [N8-1]
+  refresh:
+    as_of: "2026-10"
+    ledger: "vol3 10장 / 8.3 Figure Helix"
+    recheck: "Figure 공식 발표"
+  status: reviewed
+  note: "P9 입출력 블록 모듈 둘(본문 640 x 320, 세로 360 x 472). 세로 변형은 선택(choose-type 5장 3번): 폭 328에서 주기 문자열이 8.2 CSS px라 메시지의 핵심인 주기 대비가 작게 읽힘. 세로 변형은 잠재 표현을 accent 상자로 그림(patterns P9). 주기는 🔄 관리표 값이라 숫자 칩 없이 상자 안 글자로 씀. 출처 줄 없이 own으로 둠(N8-1 근거 figure2025helix는 본문 인용), 저자 확인 대상. QA 2026-10-15 통과(Q1~Q27), 저자 확인: 출처 줄 처리 notes.md 참고"

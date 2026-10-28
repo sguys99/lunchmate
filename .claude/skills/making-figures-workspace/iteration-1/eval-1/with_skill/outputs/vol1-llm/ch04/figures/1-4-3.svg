@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640" role="img" aria-labelledby="f143-t f143-d" font-family="Pretendard, 'Pretendard Variable', sans-serif" style="font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'">
+  <title id="f143-t">그림 1-4-3 어텐션 계산 4단계</title>
+  <desc id="f143-d">토큰 '안'의 어텐션 계산을 내적 점수, 루트 2로 나누기, softmax, 가중합의 네 단계 흐름도로 나타냈습니다. 쿼리 [1, 2]와 세 키의 내적 점수 [1, 2, 3]을 루트 2로 나누면 [0.707, 1.414, 2.121]이 됩니다. softmax를 거친 가중치는 상자가 0.140, 안 0.284, 왔어요 0.576이고, 이 가중치로 값을 섞은 출력은 [0.428, 0.572]입니다. 가중치가 가장 큰 왔어요의 정보를 '안'이 가장 많이 가져옵니다.</desc>
+  <defs><marker id="f143-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1.5 L8,5 L1,8.5" fill="none" stroke="#59606B" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter"/></marker></defs>
+  <rect width="640" height="640" fill="#FFFFFF"/>
+  <text x="24" y="24" font-size="14" font-weight="500" fill="#6B727D" letter-spacing="0.56">그림 1-4-3</text>
+  <text x="616" y="24" font-size="14" fill="#6B727D" text-anchor="end">어텐션 계산 4단계</text>
+  <line x1="24" y1="32.5" x2="616" y2="32.5" stroke="#1F2329" stroke-width="1"/>
+  <path d="M173.5,144 V186" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f143-arr)"/>
+  <path d="M382.5,144 V158.5 H217.5 V186" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f143-arr)"/>
+  <path d="M195.5,256 V298" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f143-arr)"/>
+  <path d="M195.5,368 V410" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f143-arr)"/>
+  <path d="M195.5,480 V522" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f143-arr)"/>
+  <path d="M444.5,480 V494.5 H246.5 V522" fill="none" stroke="#59606B" stroke-width="1" stroke-linejoin="miter" marker-end="url(#f143-arr)"/>
+  <g data-node="q" class="c-query">
+  <rect x="106.5" y="80.5" width="135" height="63" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1"/>
+  <line x1="108" y1="80" x2="108" y2="144" stroke="#1D5187" stroke-width="4"/>
+  <text x="122" y="107" font-size="16" fill="#1F2329"><tspan font-weight="600">쿼리 q</tspan> 토큰 '안'</text>
+  <text x="122" y="129" font-size="16" fill="#1F2329"><tspan font-weight="500">[1, 2]</tspan></text>
+  </g>
+  <g data-node="k" class="c-key">
+  <rect x="291.5" y="80.5" width="183" height="63" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1"/>
+  <line x1="293" y1="80" x2="293" y2="144" stroke="#B2611C" stroke-width="4" stroke-dasharray="7.5 4.5"/>
+  <text x="307" y="107" font-size="16" fill="#1F2329"><tspan font-weight="600">키 K</tspan> 상자가, 안, 왔어요</text>
+  <text x="307" y="129" font-size="16" fill="#1F2329"><tspan font-weight="500">[1, 0], [0, 1], [1, 1]</tspan></text>
+  </g>
+  <g data-node="s1">
+  <rect x="96.5" y="192.5" width="199" height="63" fill="#FFFFFF" stroke="#59606B" stroke-width="1"/>
+  <text x="112" y="219" font-size="16" fill="#1F2329"><tspan font-weight="600">01 내적 점수</tspan></text>
+  <text x="112" y="241" font-size="16" fill="#1F2329"><tspan font-weight="500">[1, 2, 3]</tspan></text>
+  </g>
+  <g data-node="s2">
+  <rect x="96.5" y="304.5" width="199" height="63" fill="#FFFFFF" stroke="#59606B" stroke-width="1"/>
+  <text x="112" y="331" font-size="16" fill="#1F2329"><tspan font-weight="600">02 √2로 나누기</tspan></text>
+  <text x="112" y="353" font-size="16" fill="#1F2329"><tspan font-weight="500">[0.707, 1.414, 2.121]</tspan></text>
+  </g>
+  <g data-node="s3">
+  <rect x="96.75" y="416.75" width="198.5" height="62.5" fill="#F7F7F5" stroke="#1F2329" stroke-width="1.5"/>
+  <text x="112" y="443" font-size="16" fill="#1F2329"><tspan font-weight="600">03 softmax</tspan></text>
+  <text x="112" y="465" font-size="16" fill="#1F2329"><tspan font-weight="500">[0.140, 0.284,</tspan> <tspan font-weight="600" fill="#5844BC" text-decoration="underline">0.576</tspan><tspan font-weight="500">]</tspan></text>
+  </g>
+  <g data-node="v" class="c-value">
+  <rect x="344.5" y="416.5" width="199" height="63" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1"/>
+  <line x1="346" y1="418" x2="346" y2="478" stroke="#127367" stroke-width="4" stroke-dasharray="0.1 6.3" stroke-linecap="round"/>
+  <text x="360" y="443" font-size="16" fill="#1F2329"><tspan font-weight="600">값 V</tspan></text>
+  <text x="360" y="465" font-size="16" fill="#1F2329"><tspan font-weight="500">[1, 0], [0, 1], [0.5, 0.5]</tspan></text>
+  </g>
+  <g data-node="s4">
+  <rect x="96.5" y="528.5" width="199" height="63" fill="#FFFFFF" stroke="#59606B" stroke-width="1"/>
+  <text x="112" y="555" font-size="16" fill="#1F2329"><tspan font-weight="600">04 가중합</tspan></text>
+  <text x="112" y="577" font-size="16" fill="#1F2329"><tspan font-weight="500">[0.428, 0.572]</tspan></text>
+  </g>
+</svg>

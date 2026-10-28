@@ -1,0 +1,140 @@
+{
+  "expectations": [
+    {
+      "text": "[자동] F1 3-8-1.build.py, 3-8-1.svg, _render/qa/3-8-1*.png, docs/figures.yml의 3-8-1 항목, vol3-physical-ai/ch08/notes.md 검수 블록이 모두 있다(세로 변형은 epub_variant가 manual일 때)",
+      "passed": true,
+      "evidence": "3-8-1.build.py, 3-8-1.svg, 3-8-1.v.svg(epub_variant: manual), _render/qa/3-8-1*.png 15장, docs/figures.yml 3-8-1 항목, ch08/notes.md '그림 3-8-1 시각 검수' 블록이 모두 있음. check_figures --root: 오류 0, 경고 2(F90 설계서 없음, 예상된 경고)."
+    },
+    {
+      "text": "[자동] F2 3-8-1.build.py를 다시 실행해도 SVG 해시가 같다",
+      "passed": true,
+      "evidence": "제출본을 TMPDIR/grade-f4/with_skill에 백업하고 shasum 기록 뒤 build.py 재실행, shasum -c 결과 3-8-1.svg OK, 3-8-1.v.svg OK."
+    },
+    {
+      "text": "[자동] L1 figkit lint 오류 0, 경고 0이다(개념색 수, 부품 수 경고 포함)",
+      "passed": true,
+      "evidence": "figkit lint: '3-8-1.svg 640 x 480 lint: OK', '3-8-1.v.svg 400 x 488 lint: OK'. 오류, 경고 없음."
+    },
+    {
+      "text": "[자동] L2 금지 기호 7종이 0개다",
+      "passed": true,
+      "evidence": "사례 python 블록: 두 SVG 모두 '금지 기호' 통과, 캡션 금지 기호 통과."
+    },
+    {
+      "text": "[자동] C1 System 2, System 1, 잠재 표현, 약 7~9 Hz, 200 Hz, VLM, 행동이 그림 글자에 있다",
+      "passed": true,
+      "evidence": "두 SVG 모두 '정본 문자열 7/7' 통과(System 2, System 1, 잠재 표현, 약 7~9 Hz, 200 Hz, VLM, 행동)."
+    },
+    {
+      "text": "[자동] C2 SI 단위 공백 누락, 7-9 같은 하이픈 범위, '약' 없는 7~9, 8 Hz처럼 줄인 값, 1 kHz와 S0, Helix나 GR00T 같은 회사, 모델명, 7B와 80M 같은 모델 크기, N8-1 ID, 22.2나 28.6 같은 중간값, '약 200 Hz', 그림 안 '기준일'이 0건이다",
+      "passed": false,
+      "evidence": "그림 글자는 금지 패턴 0건이지만 'alt와 캡션 금지 패턴' 실패(Helix | Figure): caveat가 '주기는 Figure Helix의 공개값이며 제품마다 다릅니다.'. 추가로 고속 센서 입력에 '영상, 관절 상태'를 붙여 설계서에 없는 구성을 그림과 alt에 넣음(사례 md 6장 실패 예, 7장 메모 3)."
+    },
+    {
+      "text": "[자동] C3 숫자 칩이 0~1개이고 Hz가 든 칩이 없으며, 칩이 있으면 약 22~29번이고 N8-1과 일치한다",
+      "passed": true,
+      "evidence": "두 SVG 모두 숫자 칩 0개. 주기는 모듈 상자 셋째 줄 보통 글자."
+    },
+    {
+      "text": "[자동] W1 본문 640 × 320(또는 480), 세로 변형이 있으면 폭 360, 높이 720 이하다",
+      "passed": false,
+      "evidence": "본문 640 x 480(허용). 세로 변형이 400 x 488로 폭 360이 아님. note 사유는 '지시선 글(168)이 360 폭에 들어가지 않아 폭 400'. 자동 블록은 W<=400이라 통과로 찍히지만 expectation 문구(폭 360) 기준으로 실패. 저자 확인: 판정 블록과 expectation 문구의 상한 불일치."
+    },
+    {
+      "text": "[자동] W2 x 24 폭 160 높이 48 입력 상자 3개, x 232 폭 176 모듈 상자 2개, x 456 폭 160 높이 48 출력 상자 1개가 ±8 안이다",
+      "passed": false,
+      "evidence": "BOX 대조 5/6, 빠짐 '24,*,160,48'. 고속 센서 입력 상자가 x 24 폭 160 높이 64(rect 24.5,304.5,159x63)로 두 줄 라벨 때문에 높이가 맞지 않음. 모듈 2개(232, 176), 출력(456, 160 x 48)은 맞음."
+    },
+    {
+      "text": "[사람] W3 세로 변형이 있으면 두 칸 행 x 16과 188 폭 156, 모듈 상자 x 16 폭 328이고 강조 대상이 본문과 같다",
+      "passed": false,
+      "evidence": "3-8-1.v.png: 모듈 사슬이 x 16 폭 160, 입력이 오른쪽 열 x 208 폭 176이고 화살표가 오른쪽에서 왼쪽으로 들어감. 기대 구도(두 칸 행 x 16과 188 폭 156, 모듈 x 16 폭 328)와 다르고 P9 세로 변형 규칙('폭 328로 넓힙니다')도 어김. 강조 대상(잠재 표현 accent 상자)은 본문과 같음."
+    },
+    {
+      "text": "[자동] A1 title이 '그림 3-8-1 '로 시작하고 desc가 alt와 글자 단위로 같다",
+      "passed": true,
+      "evidence": "두 SVG title이 '그림 3-8-1 이중 시스템 VLA'로 시작(세로 변형은 '(EPUB 세로 변형)'로 끝남), desc = alt 통과."
+    },
+    {
+      "text": "[사람] A2 alt가 입력, 두 모듈, 잠재 표현, 행동의 흐름과 두 주기를 약 7~9 Hz, 200 Hz 그대로 담고 회사명과 색 이름이 없다",
+      "passed": true,
+      "evidence": "alt 4문장 229자. 입력(카메라 영상, 언어 지시, 고속 센서 입력), System 2와 System 1, 잠재 표현, 행동의 흐름과 '약 7~9 Hz', '200 Hz'를 그대로 담음. 회사명, 색 이름 없음. 저자 확인: '(영상, 관절 상태)'는 설계서에 없는 구체화."
+    },
+    {
+      "text": "[사람] A3 caveat가 주기는 한 사례의 공개값이며 제품마다 다르다는 뜻이고, 캡션에 🔄 기준일: 2026년 10월.이 붙으며, 캡션에 [@key]를 넣었다면 장 references.yml에 키가 없다는 사실을 보고했다",
+      "passed": true,
+      "evidence": "caveat '주기는 Figure Helix의 공개값이며 제품마다 다릅니다.'는 한 사례의 공개값이며 제품마다 다르다는 뜻. notes.md 이미지 줄 캡션 끝에 '🔄 기준일: 2026년 10월.'. [@key]는 넣지 않았고 figure2025helix 키 부재를 note와 notes.md 저자 확인으로 보고함. 회사명 노출은 C2에서 감점."
+    },
+    {
+      "text": "[자동] Y1 figures.yml 항목이 kind: S, source.canon에 N8-1, refresh.as_of가 2026-10이고 refresh.ledger가 있으며, epub_variant가 manual이나 none, status는 rendered나 reviewed다",
+      "passed": true,
+      "evidence": "kind: S, source.canon [N8-1], source.kind own, refresh.as_of '2026-10', ledger 'vol3 10장 / 8.3 Figure Helix', epub_variant manual, status reviewed. 자동 블록 해당 항목 모두 통과."
+    },
+    {
+      "text": "[사람] Y1 note에 세로 변형 판단과 주기를 칩으로 쓰지 않은 사유가 있다",
+      "passed": true,
+      "evidence": "note에 '세로 변형(5.11절 선택): 폭 328에서 주기와 모듈 라벨이 8.2 CSS px로 작아져 ... 둠'과 '주기 값은 🔄 관리표 값이라 숫자 칩 없음'이 있음. 저자 확인: 캔버스 480을 고른 사유는 note에 없음(사례 md 5.2절은 480이면 사유를 note에 적게 함)."
+    },
+    {
+      "text": "[사람] H1 캡션 없이 5초 안에 '느린 쪽이 생각하고 빠른 쪽이 움직이며 둘을 잠재 표현이 잇는다'가 읽힌다(Q12)",
+      "passed": true,
+      "evidence": "message를 보기 전 컬러 PNG만 보고 적은 문장: '위의 느린 System 2가 잠재 표현을 거쳐 아래의 빠른 System 1로 이어지고, System 1이 행동을 낸다.' 느림/빠름 라벨과 잠재 표현 상자, 지시선 '느린 생각과 빠른 손을 잇습니다'로 기대 문장과 같은 뜻이 5초 안에 읽힘."
+    },
+    {
+      "text": "[사람] H2 첫 시선이 figures.yml accent에 적힌 대상 하나에 가고 gray에서도 한 곳에 남는다(Q10, Q11)",
+      "passed": true,
+      "evidence": "accent 필드는 잠재 표현 상자와 지시선. 컬러 PNG에서 첫 시선이 보라 tint 상자로 감. gray PNG에서도 1.5 테두리와 옅은 회색 면으로 한 곳만 남음. protan, deutan에서는 파랑 계열로 바뀌나 한 곳."
+    },
+    {
+      "text": "[사람] H3 시안 1-4-4 PNG와 나란히 놓았을 때 design-rules.md 9장 12가지 기준에서 어긋난 번호가 없다(정렬선 5개 이하, 같은 크기 입력 상자, 오른쪽 빈 곳, 상자 면 흰색)",
+      "passed": false,
+      "evidence": "1-4-4 기준 대조: 3번 위반(같은 역할 입력 상자 중 고속 센서 입력만 160 x 64, 나머지 160 x 48). 2번 정렬선 24, 232, 444(지시선 글), 456으로 5개 이하 통과, 7번 오른쪽 위 빈 곳 남김 통과, 11번 상자 면 흰색 통과(accent 상자 tint는 강조라 허용), 10번 글자 14, 16 통과. 저자 확인: 480 캔버스 아래 여백 약 88로 위아래 무게가 비고, 모듈 상자 아래쪽 약 40이 빈 채 남음."
+    },
+    {
+      "text": "[사람] H4 고속 센서 입력이 회색(ink) 상자이고 개념색이 3개 이하이며 gray와 색약 PNG에서 입력과 행동이 띠 모양이나 라벨로 갈린다(Q14, Q15)",
+      "passed": true,
+      "evidence": "고속 센서 입력은 띠 없는 회색(ink) 상자. 개념색은 카메라 영상(이미지 노랑 띠), 언어 지시(텍스트 진한 띠), 행동(자주 1점 쇄선 띠) 3개. gray PNG에서 이중 실선, 실선, 쇄선 띠와 라벨로 갈림."
+    },
+    {
+      "text": "[사람] H5 본문 w328에서 주기 글자의 가독성이 기록돼 있고, 세로 변형이 있으면 w328에서 모두 읽힌다(Q17, Q18)",
+      "passed": true,
+      "evidence": "notes.md w328 줄에 '모듈 라벨과 주기가 8.2 CSS px라 세로 변형 사용', 'v.w328은 가장 작은 글자 11.5 CSS px' 기록. 3-8-1.v.w328.png를 열어 보니 모든 글자가 읽힘."
+    },
+    {
+      "text": "[사람] H6 로봇 실루엣과 demo- 칸이 없고, 넣었다면 robots.svg 부품만 쓰고 Q24 저자 확인으로 올렸다",
+      "passed": true,
+      "evidence": "로봇 실루엣, demo- 칸 없음. notes.md에 Q24, Q26 해당 없음 기록."
+    },
+    {
+      "text": "[사람] H7 notes.md 검수 기록의 각 줄이 실제 PNG와 맞는다",
+      "passed": false,
+      "evidence": "notes.md '세련됨' 줄이 '같은 역할 상자 같은 크기(입력 160 × 48, ...) ... 9장 12개 중 어긋남 없음'이라 적었지만 PNG와 SVG에서 고속 센서 입력은 160 x 64. 판정 줄 '통과(고침 0)'와 'QA ... Q1~Q27 통과'도 이 어긋남을 빠뜨림. 나머지 줄(gray 띠 구분, dark, w328 값)은 PNG와 맞음."
+    }
+  ],
+  "summary": {
+    "passed": 16,
+    "failed": 6,
+    "total": 22,
+    "pass_rate": 0.73
+  },
+  "timing": {
+    "executor_duration_seconds": 355.2,
+    "total_duration_seconds": 355.2
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "[자동] W1 본문 640 × 320(또는 480), 세로 변형이 있으면 폭 360, 높이 720 이하다",
+        "reason": "자동 블록은 세로 변형 W<=400을 통과시키는데 expectation은 폭 360이라 기계 판정과 문구가 어긋남. 하나로 맞춰야 함."
+      },
+      {
+        "assertion": "[자동] C2 SI 단위 공백 누락, 7-9 같은 하이픈 범위, '약' 없는 7~9, 8 Hz처럼 줄인 값, 1 kHz와 S0, Helix나 GR00T 같은 회사, 모델명, 7B와 80M 같은 모델 크기, N8-1 ID, 22.2나 28.6 같은 중간값, '약 200 Hz', 그림 안 '기준일'이 0건이다",
+        "reason": "C2 문구는 '그림 글자'처럼 읽히지만 자동 블록은 alt와 캡션까지 봄. 캡션 caveat의 회사명이 C2로 걸린다는 점을 문구에 적어야 함. 센서 입력 구체화(관절 상태, 로봇 상태)를 잡는 BAN 패턴도 없음."
+      },
+      {
+        "reason": "두 실행 모두 센서 입력을 설계서에 없는 구성으로 구체화했는데 이를 직접 잡는 expectation이 없음. BAN에 '관절|로봇 상태|손목' 같은 패턴 추가 제안."
+      }
+    ],
+    "overall": "W 묶음과 C2의 판정 범위를 문구와 자동 블록에서 맞추면 변별력이 좋아짐."
+  }
+}
