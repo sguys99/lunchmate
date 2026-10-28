@@ -188,7 +188,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
   - [x] 폴더 구조에 `DESIGN.md`, `src/copy`, `scripts`, 문서 파일 추가, `tokens.css`는 생성물로 표기
   - [x] 커밋 규칙: PRD ID 없는 작업은 작업 ID 사용
 - [x] T0.3 PRD 정정 (10/28): 중간점이 들어간 UI 예문(7장 설명 문장, PLACE-07 웨이팅 표시, 8.3 카드 예시, PARTY-04)과 해요체 단일 문구를 2.2절 규칙에 맞게 고쳤습니다. 문서 서술용 중간점은 그대로 둡니다. 함께 고친 것: `plan.md` 참조, 시안 수와 순서, 포인트 컬러(8.2, Q6), PR 미리보기 전제, 14장 단계표, 다양성 적용 순서, 공개 프로필 뷰, 탈퇴 삭제 범위, 지표용 이벤트 3종.
-- [ ] T0.4 `docs/design-decisions.md`, `docs/research-notes.md`, `docs/design/bundle-log.md` 빈 파일 생성
+- [x] T0.4 `docs/design-decisions.md`, `docs/research-notes.md`, `docs/design/bundle-log.md` 빈 파일 생성
 
 #### 0.2 외부 등록 (도메인 확정 후, 검수 기간이 긴 것부터)
 
