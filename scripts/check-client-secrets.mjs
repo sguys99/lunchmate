@@ -2,7 +2,10 @@
 // 사용: pnpm build 이후 node scripts/check-client-secrets.mjs (Node 24 내장 기능만 사용)
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { SERVER_ENV_KEYS } from "../src/lib/env/keys.ts";
+import {
+  PUBLIC_VALUE_SERVER_KEYS,
+  SERVER_ENV_KEYS,
+} from "../src/lib/env/keys.ts";
 
 const root = process.cwd();
 const staticDir = join(root, ".next", "static");
@@ -39,10 +42,15 @@ const nameRes = SERVER_ENV_KEYS.map((k) => ({
   re: new RegExp(`(?<![A-Z0-9_])${k}(?![A-Z0-9_])`),
 }));
 // 값 검사: 너무 짧은 값("1" 등)은 오탐이 많아 8자 이상만 본다.
-const values = SERVER_ENV_KEYS.map((k) => ({
-  key: k,
-  value: process.env[k]?.trim(),
-})).filter((v) => v.value && v.value.length >= 8);
+// 값이 공개 정보인 키(PUBLIC_VALUE_SERVER_KEYS)는 값 비교에서 제외한다.
+const values = SERVER_ENV_KEYS.filter(
+  (k) => !PUBLIC_VALUE_SERVER_KEYS.includes(k),
+)
+  .map((k) => ({
+    key: k,
+    value: process.env[k]?.trim(),
+  }))
+  .filter((v) => v.value && v.value.length >= 8);
 
 const findings = [];
 let scanned = 0;

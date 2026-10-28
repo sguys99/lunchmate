@@ -10,6 +10,13 @@ export const SERVER_ENV_KEYS = [
   "NAVER_LOGIN_CLIENT_SECRET",
 ] as const;
 
+/**
+ * 이름은 서버 전용이지만 값 자체는 공개 정보인 키. 유출 검사에서 값 비교만 건너뛴다(이름 검사는 유지).
+ * SUPABASE_PROJECT_REF는 NEXT_PUBLIC_SUPABASE_URL(https://<ref>.supabase.co)에 이미 들어 있다.
+ */
+export const PUBLIC_VALUE_SERVER_KEYS: readonly (typeof SERVER_ENV_KEYS)[number][] =
+  ["SUPABASE_PROJECT_REF"];
+
 /** 브라우저에 공개되는 키. NEXT_PUBLIC_ 접두사만 허용한다. */
 export const CLIENT_ENV_KEYS = [
   "NEXT_PUBLIC_SITE_URL",
