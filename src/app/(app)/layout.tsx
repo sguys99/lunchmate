@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppShell, BottomTabBar, TabBarView } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/sonner";
+import { AnalyticsPageviews } from "@/lib/analytics/provider";
 import { isEnabled } from "@/lib/flags";
 import { MotionProvider } from "@/lib/motion";
 import { QueryProvider } from "@/lib/query";
@@ -34,6 +35,9 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           {children}
         </AppShell>
         <Toaster />
+        <Suspense fallback={null}>
+          <AnalyticsPageviews />
+        </Suspense>
       </MotionProvider>
     </QueryProvider>
   );
