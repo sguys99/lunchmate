@@ -23,8 +23,9 @@ import {
   DrawerViewport,
 } from "@/components/ui/drawer";
 import {
-  MOCK_PLACES,
+  getMockPlace,
   type MockPlace,
+  type MockPlaceId,
   type MockPoll,
 } from "@/features/design-lab/mock";
 import { categoryLabel } from "@/features/place/categories";
@@ -331,7 +332,7 @@ function PollSection({
 }) {
   const headingId = useId();
   const reduced = usePrefersReducedMotion();
-  const [myVote, setMyVote] = useState<string | null>(poll.myVotePlaceId);
+  const [myVote, setMyVote] = useState<MockPlaceId | null>(poll.myVotePlaceId);
   // 첫 렌더는 0에서 시작해 실제 값으로 굴러가게 한다(NumberFlow는 값이 바뀔 때만 움직인다).
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -386,8 +387,7 @@ function PollSection({
         className="mt-6 flex flex-col"
       >
         {votes.map((c) => {
-          const place = MOCK_PLACES.find((p) => p.id === c.placeId);
-          if (!place) return null;
+          const place = getMockPlace(c.placeId);
           const isMine = myVote === c.placeId;
           const isTop = top > 0 && c.votes === top;
           const ratio =

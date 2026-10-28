@@ -275,13 +275,6 @@ export function SkeletonBlock({ className }: { className?: string }) {
 
 /* ---------- 상태 메시지 (빈, 오류, 오프라인) ---------- */
 
-/** 공용 문구의 body는 "상황 문장. 다음 안내 문장." 구성이다. 첫 문장을 세리프 제목으로, 나머지를 보조 줄로 나눈다. */
-export function splitMessage(body: string): [string, string] {
-  const at = body.indexOf(". ");
-  if (at < 0) return [body.replace(/\.$/, ""), ""];
-  return [body.slice(0, at), body.slice(at + 2)];
-}
-
 const STATE_ICON: Record<"error" | "offline", LucideIcon> = {
   error: CloudOff,
   offline: WifiOff,
@@ -308,7 +301,6 @@ export function StateMessage({
   motion: DesignMotionTokens;
   headingLevel?: "h2" | "h3";
 }) {
-  const [lead, rest] = splitMessage(body);
   const Heading = headingLevel;
   return (
     <div
@@ -321,12 +313,9 @@ export function StateMessage({
         <StateGlyph Icon={STATE_ICON[kind]} />
       )}
       <Heading className="mt-3 type-heading text-balance break-keep">
-        <span className="sr-only">{title}. </span>
-        {lead}
+        {title}
       </Heading>
-      {rest ? (
-        <p className="mt-3 type-body-sm text-muted-foreground">{rest}</p>
-      ) : null}
+      <p className="mt-3 type-body-sm text-muted-foreground">{body}</p>
       <PressButton
         motion={motion}
         className={cn(

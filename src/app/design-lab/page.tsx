@@ -45,6 +45,12 @@ export default function DesignLabPage() {
         </Link>
       </Section>
 
+      <Section title={copy.tokensLink} body={copy.tokensBody}>
+        <Link href="/design-lab/system/tokens" className={linkClass}>
+          {copy.tokensLink}
+        </Link>
+      </Section>
+
       <Section title={copy.screensTitle} body={copy.screensBody}>
         <ul className="flex flex-col gap-2">
           {DESIGN_IDS.map((id) => (

@@ -40,19 +40,3 @@ export function kstHHMM(date: Date): string {
   const { hour, minute } = getKstParts(date);
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
-
-/**
- * 상태 문구의 제목과 본문이 같은 말을 되풀이할 때(본문 첫 문장이 제목으로 끝남),
- * 더 구체적인 본문 첫 문장을 제목으로 올리고 나머지를 본문으로 쓴다.
- * 예: "도보 10분 안에 조건에 맞는 식당이 없습니다." + "15분까지 넓혀볼까요?"
- */
-export function splitMessage(
-  title: string,
-  body: string,
-): { heading: string; detail: string } {
-  const cut = body.indexOf(". ");
-  if (cut === -1) return { heading: title, detail: body };
-  const first = body.slice(0, cut);
-  if (!first.endsWith(title)) return { heading: title, detail: body };
-  return { heading: first, detail: body.slice(cut + 2) };
-}

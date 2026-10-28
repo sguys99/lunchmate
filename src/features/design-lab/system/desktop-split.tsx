@@ -1,5 +1,8 @@
 // 데스크톱 2단 공용 배치 (CLAUDE.md 6.2): 화면 컨테이너 1024px 이상에서 좌 리스트 + 우 지도.
 // 열 비율은 시안 토큰 --lm-layout-desktop-columns. 모바일에서는 리스트만 보이고 지도 자리는 숨긴다.
+// 지도 칸은 리스트와 같이 스크롤되지 않게 sticky top-0 + 화면 높이(100dvh)로 고정한다.
+// self-start라야 칸이 리스트 높이로 늘어나지 않고 sticky가 동작한다. 스크롤 컨테이너가 문서든
+// 스위처 상자(DesignScope overflow-y-auto)든 가장 가까운 스크롤 조상 기준으로 붙는다.
 import type { ReactNode } from "react";
 import { designLabCopy } from "@/copy/design-lab";
 import { cn } from "@/lib/utils";
@@ -22,7 +25,7 @@ export function DesktopSplit({
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col">{list}</div>
-      <div className="hidden min-h-0 desktop:flex desktop:flex-col">
+      <div className="hidden min-h-0 desktop:sticky desktop:top-0 desktop:flex desktop:h-dvh desktop:flex-col desktop:self-start">
         {map ?? <MapPlaceholder />}
       </div>
     </div>

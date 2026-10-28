@@ -35,8 +35,9 @@ import {
 import { IllustrationA } from "@/features/design-lab/illustrations/a";
 import {
   MOCK_DETAIL_PLACE,
-  MOCK_PLACES,
+  getMockPlace,
   type MockPlace,
+  type MockPlaceId,
   type MockPoll,
 } from "@/features/design-lab/mock";
 import { categoryLabel } from "@/features/place/categories";
@@ -49,7 +50,7 @@ import { springOf, staggerOf, usePrefersReducedMotion } from "../motion";
 import { getSheetContent, type SheetContent } from "../states";
 import { ACTIVE_TAB_BY_SCREEN } from "../tabs";
 import type { DesignMotionTokens, DesignScreenProps } from "../types";
-import { kstHHMM, splitMessage } from "./format";
+import { kstHHMM } from "./format";
 import {
   DesktopNav,
   MapSurface,
@@ -73,10 +74,6 @@ const PIN_SPOTS = [
   { x: 74, y: 30 },
 ] as const;
 
-function placeById(id: string): MockPlace {
-  return MOCK_PLACES.find((p) => p.id === id) ?? MOCK_DETAIL_PLACE;
-}
-
 export function SheetScreenA({ state, tokens }: DesignScreenProps) {
   const content = getSheetContent(state);
   const container = useDesignPortalContainer();
@@ -88,7 +85,7 @@ export function SheetScreenA({ state, tokens }: DesignScreenProps) {
   const pins: MapPin[] = ("poll" in content ? content.poll.candidates : []).map(
     (c, i) => ({
       id: c.placeId,
-      name: placeById(c.placeId).name,
+      name: getMockPlace(c.placeId).name,
       ...PIN_SPOTS[i % PIN_SPOTS.length]!,
     }),
   );
@@ -214,7 +211,6 @@ function SheetBody({
     return <SheetSkeleton label={content.label} closeSlot={closeSlot} />;
   }
   if (!("place" in content)) {
-    const { heading, detail } = splitMessage(content.title, content.body);
     return (
       <div className="flex flex-col gap-5 pb-2">
         <div className="flex items-start gap-4">
@@ -225,8 +221,8 @@ function SheetBody({
             />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
-            <Title className="type-heading">{heading}</Title>
-            <p className="type-body-sm text-muted-foreground">{detail}</p>
+            <Title className="type-heading">{content.title}</Title>
+            <p className="type-body-sm text-muted-foreground">{content.body}</p>
           </div>
           {closeSlot}
         </div>
@@ -422,7 +418,7 @@ function PollPanel({
   const barTransition = reduced ? { duration: 0 } : springOf(motion, "bar");
   const stagger = staggerOf(motion);
 
-  const vote = (id: string) => {
+  const vote = (id: MockPlaceId) => {
     setVotes((v) => {
       const next = { ...v };
       if (myVote) next[myVote] = Math.max(0, (next[myVote] ?? 0) - 1);
@@ -458,7 +454,7 @@ function PollPanel({
       ) : null}
       <ul className="flex flex-col">
         {poll.candidates.map((c, i) => {
-          const p = placeById(c.placeId);
+          const p = getMockPlace(c.placeId);
           const n = votes[c.placeId] ?? 0;
           const leader = n > 0 && n === top;
           const mine = myVote === c.placeId;

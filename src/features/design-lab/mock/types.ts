@@ -1,5 +1,6 @@
 // design-lab 목업 데이터 타입 (T1.10). 실제 카카오 데이터는 쓰지 않는다 (CLAUDE.md 7장).
 import type { CategorySlug } from "@/features/place/categories";
+import type { MockPlaceId } from "./places";
 
 /** 최대 2개까지 담는 목록 (태그, 상태 배지). 타입에서 개수를 막는다. */
 export type UpToTwo<T> = readonly [] | readonly [T] | readonly [T, T];
@@ -60,7 +61,8 @@ export type MockHomeScenario = {
 };
 
 export type MockPollCandidate = {
-  placeId: string;
+  /** 목업 식당 id. 타입으로 고정해 getMockPlace()가 항상 찾게 한다 */
+  placeId: MockPlaceId;
   votes: number;
   /** POLL-13 참여자 기피 경고 플래그 (누구인지, 무엇인지는 없음) */
   avoidWarning: boolean;
@@ -76,6 +78,6 @@ export type MockPoll = {
   deadlineAt: string;
   /** 시연 기준 현재 시각 (ISO 고정값). 실제 시계 대신 이 값으로 남은 시간을 계산한다 */
   mockNow: string;
-  myVotePlaceId: string | null;
+  myVotePlaceId: MockPlaceId | null;
   candidates: readonly MockPollCandidate[];
 };

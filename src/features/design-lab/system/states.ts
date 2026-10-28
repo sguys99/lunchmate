@@ -12,7 +12,10 @@ import {
   type MockPoll,
 } from "@/features/design-lab/mock";
 
-/** 문구만 있는 상태 화면 (빈 상태, 오류, 오프라인). action은 버튼 라벨 */
+/**
+ * 문구만 있는 상태 화면 (빈 상태, 오류, 오프라인).
+ * title: 지금 상태(짧은 습니다체 문장, 마침표 없음), body: 다음 행동 안내(title을 되풀이하지 않음), action: 버튼 라벨
+ */
 export type StateMessage = {
   title: string;
   body: string;
@@ -35,8 +38,8 @@ export function getHomeContent(state: DesignState): HomeContent {
       const { walkLimitMinutes, expandToMinutes } = MOCK_HOME_EMPTY;
       return {
         kind: "empty",
-        title: homeCopy.states.empty.title,
-        body: homeCopy.states.empty.body(walkLimitMinutes, expandToMinutes),
+        title: homeCopy.states.empty.title(walkLimitMinutes),
+        body: homeCopy.states.empty.body(expandToMinutes),
         action: homeCopy.states.empty.action(expandToMinutes),
       };
     }

@@ -6,7 +6,7 @@
 // docs/design/candidates/*.DESIGN.md를 넣었다. (design-lab은 프로덕션에서 꺼져 있어 실제로 읽힐 일은 거의 없다.)
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { parseDesignDoc } from "@/lib/design/schema";
+import { parseDesignDoc, type DesignFrontmatter } from "@/lib/design/schema";
 import {
   DESIGN_IDS,
   type DesignId,
@@ -15,10 +15,11 @@ import {
 } from "./types";
 
 const cacheById = new Map<DesignId, DesignScreenTokens>();
+const docById = new Map<DesignId, DesignFrontmatter>();
 
-/** 시안 하나의 JS용 토큰. 같은 프로세스에서는 한 번만 읽는다. */
-export function getDesignTokens(id: DesignId): DesignScreenTokens {
-  const hit = cacheById.get(id);
+/** 시안 DESIGN.md 프런트매터 전체 (견본표 페이지용). 같은 프로세스에서는 한 번만 읽는다. */
+export function getDesignFrontmatter(id: DesignId): DesignFrontmatter {
+  const hit = docById.get(id);
   if (hit) return hit;
   const file = path.join(
     process.cwd(),
@@ -26,6 +27,15 @@ export function getDesignTokens(id: DesignId): DesignScreenTokens {
     `${id}.DESIGN.md`,
   );
   const { tokens } = parseDesignDoc(readFileSync(file, "utf8"));
+  docById.set(id, tokens);
+  return tokens;
+}
+
+/** 시안 하나의 JS용 토큰. 같은 프로세스에서는 한 번만 읽는다. */
+export function getDesignTokens(id: DesignId): DesignScreenTokens {
+  const hit = cacheById.get(id);
+  if (hit) return hit;
+  const tokens = getDesignFrontmatter(id);
   const { id: metaId, name, concept, mood } = tokens.meta;
   const value: DesignScreenTokens = {
     meta: { id: metaId, name, concept, mood },

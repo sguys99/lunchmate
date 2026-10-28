@@ -9,6 +9,9 @@
  *   --base-url <url>   기본 http://localhost:3000. 응답이 없으면 `pnpm dev`를 띄우고 끝나면 종료한다.
  *   --out <dir>        기본 docs/design/shots. 실제 저장은 <dir>/<YYYY-MM-DD, KST>/
  *   --full-page <bool> 기본 true. false면 뷰포트 영역만 캡처
+ *                      화면형 시안(하단 탭, 하단 액션, 지도 칸이 sticky인 /design-lab/system/<a|b|c>/<home|sheet>)은
+ *                      false로 찍는다. fullPage는 뷰포트를 늘리지 않고 이어 붙이므로 sticky 요소가 첫 뷰포트
+ *                      위치(화면 중간)에 찍힌다. 문서형 페이지(/design-lab/system/tokens 견본표)는 기본값 true.
  *   --states           4상태(loading, empty, error, offline)도 함께 캡처
  *   --wait <ms>        페이지 준비 후 추가 대기. 기본 300
  *

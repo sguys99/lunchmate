@@ -39,7 +39,7 @@ import { loadDomMax, springOf, staggerOf, tweenOf } from "../motion";
 import { getHomeContent, type HomeContent } from "../states";
 import { ACTIVE_TAB_BY_SCREEN } from "../tabs";
 import type { DesignMotionTokens, DesignScreenProps } from "../types";
-import { homeContext, splitMessage } from "./format";
+import { homeContext } from "./format";
 import {
   Badge,
   DesktopNav,
@@ -192,7 +192,6 @@ function Body({
   }
   if (content.kind !== "ready" || !picks || !current) {
     if (content.kind === "ready") return null;
-    const { heading, detail } = splitMessage(content.title, content.body);
     return (
       <>
         <div className="flex flex-1 items-center py-6 desktop:flex-none desktop:py-8">
@@ -205,9 +204,11 @@ function Body({
             </div>
             <div className="flex flex-col gap-2 p-5">
               <h2 id="a-home-state-title" className="type-heading">
-                {heading}
+                {content.title}
               </h2>
-              <p className="type-body-sm text-muted-foreground">{detail}</p>
+              <p className="type-body-sm text-muted-foreground">
+                {content.body}
+              </p>
             </div>
           </section>
         </div>

@@ -27,7 +27,16 @@
   display: block;
 }
 
-:where(.dark) .ila-root {
+/*
+ * 다크 배합. globals.css의 dark: 변형, design-candidates.css와 같은 판정 규칙이다.
+ *   1. .dark 또는 [data-theme="dark"] 요소 안 (디자인 랩 스위처의 테마 강제 포함)
+ *   2. 시스템 다크이고 루트를 .light/.dark로 고정하지 않은 경우
+ *   단, [data-theme="light"] 요소 안은 시스템 다크여도 라이트 배합을 쓴다.
+ * :where/:not(:where)로 명시도를 .ila-root(0,1,0)와 같게 두고, 뒤에 와서 라이트 배합을 덮는다.
+ */
+.ila-root:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *):not(
+    :where([data-theme="light"], [data-theme="light"] *)
+  ) {
   --il-wash: color-mix(in oklch, var(--il-i) 6%, var(--il-s));
   --il-drop: color-mix(in oklch, var(--il-s) 45%, var(--background));
   --il-vessel: color-mix(in oklch, var(--il-i) 22%, var(--card));
@@ -43,7 +52,9 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not(.light):not(.dark) .ila-root {
+  .ila-root:where(:root:not(.light):not(.dark) *):not(
+      :where([data-theme="light"], [data-theme="light"] *)
+    ) {
     --il-wash: color-mix(in oklch, var(--il-i) 6%, var(--il-s));
     --il-drop: color-mix(in oklch, var(--il-s) 45%, var(--background));
     --il-vessel: color-mix(in oklch, var(--il-i) 22%, var(--card));

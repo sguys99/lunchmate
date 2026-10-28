@@ -16,9 +16,8 @@ import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { clayGridCopy } from "@/copy/design-lab-c";
 import { homeCopy, placeDetailCopy, pollPreviewCopy } from "@/copy/home";
 import {
-  MOCK_DETAIL_PLACE,
   MOCK_HOME_TODAY,
-  MOCK_PLACES,
+  getMockPlace,
   type MockPlace,
   type MockPoll,
 } from "@/features/design-lab/mock";
@@ -351,8 +350,7 @@ function PollSection({
     let votes = c.votes;
     if (poll.myVotePlaceId === c.placeId) votes -= 1;
     if (myVote === c.placeId) votes += 1;
-    const place =
-      MOCK_PLACES.find((p) => p.id === c.placeId) ?? MOCK_DETAIL_PLACE;
+    const place = getMockPlace(c.placeId);
     return { ...c, votes, place };
   });
   const top = Math.max(...rows.map((r) => r.votes));

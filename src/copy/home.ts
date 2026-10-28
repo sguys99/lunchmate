@@ -33,24 +33,28 @@ export const homeCopy = {
   waitingReport: (minutesAgo: number, levelLabel: string) =>
     `${minutesAgo}분 전, ${levelLabel}`,
   thumbsUpEmpty: "후기 모으는 중",
+  /**
+   * 빈 상태, 오류, 오프라인 문구. title은 지금 상태를 말하는 짧은 습니다체 문장(마침표 없음),
+   * body는 다음에 일어날 일이나 할 일만 말한다(title을 되풀이하지 않는다). 제안은 해요체.
+   */
   states: {
     loading: {
       label: "추천을 불러오는 중입니다",
     },
     empty: {
-      title: "조건에 맞는 식당이 없습니다",
-      body: (walkMinutes: number, expandTo: number) =>
-        `도보 ${walkMinutes}분 안에 조건에 맞는 식당이 없습니다. ${expandTo}분까지 넓혀볼까요?`,
+      title: (walkMinutes: number) =>
+        `도보 ${walkMinutes}분 안에 조건에 맞는 식당이 없습니다`,
+      body: (expandTo: number) => `${expandTo}분까지 넓혀볼까요?`,
       action: (expandTo: number) => `${expandTo}분까지 넓히기`,
     },
     error: {
       title: "식당 정보를 불러오지 못했습니다",
-      body: "식당 정보를 불러오지 못했습니다. 잠시 후 자동으로 다시 시도합니다.",
+      body: "잠시 후 자동으로 다시 시도합니다.",
       action: "다시 시도",
     },
     offline: {
       title: "인터넷에 연결되어 있지 않습니다",
-      body: "인터넷에 연결되어 있지 않습니다. 연결되면 추천을 자동으로 다시 불러옵니다.",
+      body: "연결되면 추천을 자동으로 다시 불러옵니다.",
       action: "다시 시도",
     },
   },

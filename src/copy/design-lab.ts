@@ -18,6 +18,9 @@ export const designLabCopy = {
     illustrationsTitle: "일러스트 확인",
     toolsTitle: "점검 도구",
     mapSmoke: "지도 연결 점검",
+    tokensLink: "토큰 견본표",
+    tokensBody:
+      "세 시안의 색, 대비, 타입 스케일, 라운드, 그림자, 모션을 나란히 봅니다. 값은 DESIGN.md에서 읽습니다.",
     designLabel: (id: string, name: string) => `시안 ${id} ${name}`,
   },
 
@@ -61,6 +64,76 @@ export const designLabCopy = {
     eyebrow: (id: string, screen: string) => `시안 ${id}, ${screen}`,
     body: "자리표시 화면입니다. 시안 담당이 실제 화면으로 채웁니다.",
     stateLabel: (state: string) => `상태: ${state}`,
+  },
+
+  /** /design-lab/system/tokens 견본표 (T1.16 보조 자료) */
+  tokens: {
+    metaTitle: "토큰 견본표",
+    title: "G1 토큰 견본표",
+    description:
+      "세 시안의 DESIGN.md 값을 그대로 그립니다. 테마는 시스템 설정을 따르고, 대비비는 지금 보이는 테마의 값입니다.",
+    designHeading: (id: string, name: string) => `시안 ${id} ${name}`,
+    sections: {
+      color: "색",
+      contrast: "대비 쌍",
+      category: "카테고리 색면",
+      type: "타입 스케일",
+      shape: "라운드와 그림자",
+      motion: "모션",
+    },
+    contrastNote:
+      "숫자는 WCAG 대비비이고 소수 둘째 자리에서 내립니다. 기준 미달이면 굵게 표시합니다.",
+    alpha: "알파",
+    reference: "참고",
+    min: (min: number) => `기준 ${min}`,
+    pairs: {
+      body: "본문",
+      card: "카드 글자",
+      muted: "보조 글자",
+      mutedOnCard: "카드 위 보조 글자",
+      primaryButton: "포인트 버튼",
+      primaryIcon: "포인트 아이콘",
+      accent: "선택 칩",
+      border: "경계선",
+      destructive: "오류 글자",
+      success: "성공 안내",
+      warning: "주의 안내",
+      info: "정보 안내",
+      warningIcon: "주의 아이콘",
+    },
+    sampleText: "가나다 123",
+    typeSamples: {
+      display: "오늘 점심, 여기서 끝",
+      title: "오늘은 이 세 곳입니다",
+      heading: "정담국밥",
+      body: "지난주에 좋아요를 누른 국밥집과 가깝습니다.",
+      "body-sm": "도보 약 4분, 점심 세트 1천 원 할인",
+      label: "길찾기",
+      caption: "10월 28일 수요일 점심",
+      "numeric-lg": "4분 9,000원",
+      "numeric-md": "87% 23건",
+    },
+    serif: "세리프",
+    sans: "산세리프",
+    numeric: "숫자",
+    radiusLabels: {
+      card: "카드",
+      button: "버튼",
+      chip: "칩",
+      sheet: "시트",
+    },
+    shadowNone: "없음",
+    duration: "길이",
+    spring: "스프링",
+    stagger: "등장 간격",
+    easing: "기본 이징",
+    springValue: (stiffness: number, damping: number) =>
+      `강성 ${stiffness}, 감쇠 ${damping}`,
+    springLabels: {
+      swipe: "스와이프",
+      sheet: "시트",
+      bar: "득표 바",
+    },
   },
 
   /** 데스크톱 2단의 지도 자리 (실제 지도 없음) */
