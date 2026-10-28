@@ -198,6 +198,7 @@
 | `font.sans`, `font.heading` | `--lm-font-sans`, `--lm-font-heading` | 값은 family + fallback 스택 |
 | `font.numeric` | `--lm-font-numeric`, `--lm-numeric-features` | `"tnum" 1` (+ `"zero" 1`) |
 | `type.<step>.<prop>` | `--lm-type-<step>-<size\|line-height\|weight\|tracking>` | `--lm-type-title-size: 1.5rem` |
+| `type.<step>.font` | `--lm-type-<step>-font` | `var(--lm-font-heading)` (T1.9에서 추가) |
 | `space.base` | `--lm-space-base` | `0.25rem` |
 | `space.scale.<step>` | `--lm-space-<step>` | `--lm-space-md: 1rem` |
 | `radius.base` | `--radius` | shadcn 표준 이름 유지 |
@@ -220,10 +221,12 @@
 
 | 파일 | 라이트 | 다크 |
 | --- | --- | --- |
-| 시안(`a`, `b`, `c`) | `[data-design="a"]` | `.dark [data-design="a"]`, `[data-design="a"].dark`, 그리고 `@media (prefers-color-scheme: dark)` 안의 `:root:not(.light):not(.dark) [data-design="a"]` |
+| 시안(`a`, `b`, `c`) | `[data-design="a"]`, 강제 `[data-design="a"][data-theme="light"]` | `:where(.dark) [data-design="a"]`, `[data-design="a"]:where(.dark)`, 강제 `[data-design="a"][data-theme="dark"]`, 그리고 `@media (prefers-color-scheme: dark)` 안의 `:where(:root:not(.light):not(.dark)) [data-design="a"]` |
 | 확정본 | `:root` | `.dark`, `@media (prefers-color-scheme: dark) { :root:not(.light):not(.dark) }` (현재 `tokens.css`와 같은 구조) |
 
 - 테마와 무관한 토큰(type, space, radius, border, motion, illustration, layout)은 라이트 블록에만 한 번 씁니다. 다크 블록에는 `color`와 `shadow`만 들어갑니다.
+- 시안 생성 파일은 `src/styles/design-candidates.css`, 확정본은 `src/styles/tokens.css`입니다. 둘 다 `pnpm tokens` 생성물이라 직접 고치지 않습니다(`--check`로 어긋남 검사, `--only a`로 한 시안만 검증).
+- 시안 명시도: 전역 다크 선택자는 `:where()`로 감싸 `[data-design]`과 같은 (0,1,0)이고 뒤에 있어 라이트를 이깁니다. `data-theme` 강제는 (0,2,0)이라 전역 `.dark`, 시스템 다크와 무관하게 이깁니다. 디자인 랩 스위처(T1.14)는 같은 요소에 `data-design`과 `data-theme`을 함께 붙입니다. 단, 지금 Tailwind `dark:` 변형은 `data-theme`을 모르므로 시안 화면은 `dark:` 대신 토큰 변수로 테마 차이를 냅니다(`dark` 변형에 `[data-theme="dark"]`를 더할지는 T1.19에서 정함).
 
 ### 3.3 Tailwind `@theme inline` 연결 (T1.19에서 `globals.css`에 반영)
 

@@ -21,6 +21,7 @@
     "postbuild": "node scripts/check-client-secrets.mjs",
     "check:secrets": "node scripts/check-client-secrets.mjs",
     "lint:copy": "node scripts/check-copy.ts",
+    "tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-tokens.ts",
     "db:push": "supabase db push",
     "db:types": "node scripts/db-types.mjs",
     "db:migration:new": "supabase migration new",
