@@ -5,6 +5,7 @@
 // - 진동은 "보조" 신호다. 진동만으로 결과를 알리지 않는다(시각 피드백이 항상 함께 있어야 한다).
 // - 끄는 조건: 앱 설정 off(setHapticsEnabled(false)), OS prefers-reduced-motion: reduce,
 //   호출자가 넘긴 reduced: true(앱 모션 설정 "줄이기", useMotionReduced() 값).
+//   설정(SET) 단계에서 "모션 줄이기"와 "진동"을 두 토글로 나누면 축소 모드 연동을 풀고 진동 설정만 따른다(design-decisions D-04).
 // - 사용자 제스처 제약: Chrome은 페이지에 사용자 활성화(sticky user activation)가 한 번도 없으면
 //   vibrate를 무시하고 false를 돌려준다(콘솔 경고 포함). 그래서 탭, 스와이프 손 뗌, 버튼 클릭 같은
 //   제스처 핸들러 안에서만 부른다. Realtime 수신, 타이머, 효과(useEffect) 안에서 부르지 않는다.

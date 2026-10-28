@@ -82,7 +82,7 @@ color:
       foreground: "oklch(0.925 0.012 80)"
       card: "oklch(0.232 0.007 70)"
       card-foreground: "oklch(0.925 0.012 80)"
-      popover: "oklch(0.25 0.008 70)"
+      popover: "oklch(0.27 0.008 70)"
       popover-foreground: "oklch(0.925 0.012 80)"
       primary: "oklch(0.76 0.07 118)"
       primary-foreground: "oklch(0.2 0.01 110)"
@@ -313,7 +313,7 @@ layout:
 | --- | --- | --- | --- |
 | foreground / background | 4.5 | 11.86 | 14.36 |
 | card-foreground / card | 4.5 | 12.33 | 13.47 |
-| popover-foreground / popover | 4.5 | 12.58 | 12.83 |
+| popover-foreground / popover | 4.5 | 12.58 | 12.08 |
 | primary-foreground / primary | 4.5 | 7.44 | 8.55 |
 | secondary-foreground / secondary | 4.5 | 10.93 | 11.70 |
 | muted-foreground / background | 4.5 | 5.91 | 7.51 |
@@ -465,6 +465,7 @@ layout:
   - 득표 바: `bar` 스프링, 숫자는 NumberFlow로 굴리되 속도는 base.
   - 확정 축하: canvas-confetti를 쓰지 않고 display 세리프 한 줄이 slow로 페이드인하고, 1위 바가 올리브로 차오르는 것으로 대신합니다(시안 B의 고요함 유지, 번들 0).
 - 홈 첫 화면에서 동시에 움직이는 것은 카드 페이드 하나뿐입니다.
+- 홈 첫 화면 카드 등장은 CSS 전환(같은 duration, easing 토큰)으로 하고, Motion은 스와이프와 다시 뽑기처럼 상호작용 뒤에만 비동기로 불러옵니다. 홈 첫 로드 JS 예산 200KB를 지키기 위해서입니다 (design-decisions D-04).
 - **reduced motion**: 모든 전환을 즉시 상태 변화로 바꾸고, 스켈레톤 쉬머도 멈춥니다.
 - 동적 컴포넌트: Motion(`LazyMotion` + `domAnimation`), Base UI Drawer, NumberFlow, Sonner. canvas-confetti와 Embla는 쓰지 않습니다.
 

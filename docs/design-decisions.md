@@ -52,7 +52,7 @@
 | 스와이프 카드 스택 (Motion drag) | 채택 | `domMax` 동적 import 17.0KB, 홈 첫 로드 0 | 끌기 56px 또는 420px/s. 대체 조작 ←/→/Home/End 키와 이전/다음 버튼, 위치는 `aria-live`로 안내. 끝에서 멈춤(3장이라 순환 없음). 축소 모드는 하이드레이션 뒤 `dragListener`만 끔 | G3 구현 주의: `drag` 속성 자체를 조건부로 바꾸면 하이드레이션 불일치. [실기기] 가로 끌기와 세로 스크롤 충돌, iOS 가장자리 뒤로 가기 제스처 |
 | 바텀시트 스냅 (Base UI Drawer) | 조건부 채택 (실기기 확인 전) | 시트 쓰는 화면만(지도 탭), Base UI Drawer 묶음 약 27KB | 스냅 3단계 12rem / 0.55 / 1, 빠르게 튕겨도 한 단계씩. 전체 높이가 아니면 본문 스크롤을 잠가 끌기 충돌 방지. 높이 버튼 3개로 대체 조작. 예비안(Motion 직접 구현)은 지금은 불필요 | [실기기] iOS Safari, 카카오톡 인앱의 스크롤 잠금 전환 끊김, 키보드가 입력칸을 가림, Android WebView 키보드, 홈 인디케이터, 터치 끌기와 본문 스크롤 전환. 살짝 높이 12rem은 지도 시안(T5.1)에서 다시 정함 |
 | 다시 뽑기 셔플 | 채택 | 기존 Motion `domAnimation`, 추가 0 | exit(fast) 뒤 reveal(slow) + `revealDelay` 순차 등장. `AnimatePresence mode="wait"`로 한 순간 효과 1개. 뒤집기, 섞기 연출 없음(Quiet Stone 느린 페이드) | 없음 |
-| 결정 축하 (canvas-confetti) | 채택 | 동적 import 4.1KB(커밋 실측), 확정 버튼 hover, focus 때 preload | 입자 28, ticks 110, scalar 0.75, 색은 토큰(`--primary`, `--chart-2/3/5`)을 읽어 씀. 축소 모드면 모듈을 받지 않고 문장 전환만. 확정 문장은 `role="status"` | 다크에서 `--chart-5` 대비가 낮음 → 다크 색 조합 재검토(T7 투표 확정 화면) |
+| 결정 축하 (canvas-confetti) | 보류 (D-04에서 정정) | 동적 import 4.1KB(커밋 실측), 확정 버튼 hover, focus 때 preload | 입자 28, ticks 110, scalar 0.75, 색은 토큰(`--primary`, `--chart-2/3/5`)을 읽어 씀. 축소 모드면 모듈을 받지 않고 문장 전환만. 확정 문장은 `role="status"` | 다크에서 `--chart-5` 대비가 낮음 → 다크 색 조합 재검토(T7 투표 확정 화면) |
 | NumberFlow (RollingNumber, DeadlineCountdown) | 채택, 투표방과 시트에만 | 라우트 한정, 라이브러리 6.3KB + 공용 컴포넌트 1.1KB | 득표 수, 마감 시분초(`role=timer`), 👍 비율. 홈 카드에는 쓰지 않음(정적 숫자 + `tabular-nums`) | 없음 |
 | 랜딩 A 단어 페이드 (Motion Primitives TextEffect, MIT) | 채택 | 소스 복사, 자체 0.44KB | 제목에 사용 | SSR에서 opacity 0으로 시작해 LCP 요소면 늦어짐 → LCP 요소에는 CSS 키프레임 버전 검토(G3 랜딩) |
 | 랜딩 B 블러 페이드 (Magic UI BlurFade, MIT) | 조건부 채택 | 소스 복사, 자체 0.29KB | 흐림 없이 opacity + 8px 이동으로 쓰기를 권장(`blur={false}`). 흐림은 "장식만을 위한 효과"에 가까움 | G3 랜딩 시안에서 확정 |
@@ -62,7 +62,7 @@
 | PostHog (posthog-js) | 현행 유지 | 동적 import 101.5KB, 홈 첫 로드 0 | 첫 렌더 후 지연 로딩(T0.35) | `clientEnv()`가 zod 전체(약 17KB)를 첫 로드에 끌고 옴. 아래 번들 예산 참고 |
 
 - 번들 예산: PoC 2차 빌드에서 `/today`(실제 홈) 첫 로드 251.6KB로 예산 200KB 초과를 발견(원인은 zod, tailwind-merge, Motion domAnimation 등). 회복 작업 진행 중이며 결과는 `docs/design/bundle-log.md` 참조. `bundle:report` 기본 라우트가 `/`라 pre-push에서 `/today` 초과를 못 잡는 점도 함께 다룸
-- 후속 작업: G3 홈 시안(T3)에서 스와이프와 셔플 사용, 지도 시안(T5.1)에서 시트 높이 재결정, T7 투표 확정 화면에서 축하 다크 색 재검토. PoC 페이지(`/design-lab/poc`)는 해당 화면 구현 후 정리
+- 후속 작업: G3 홈 시안(T3)에서 스와이프와 셔플 사용, 지도 시안(T5.1)에서 시트 높이 재결정, T7 투표 확정 화면은 DESIGN.md 7장대로 세리프 페이드 + 1위 바 채움(confetti는 D-04로 보류). PoC 페이지(`/design-lab/poc`)는 해당 화면 구현 후 정리
 
 ### D-03. 2단계 기타 결정 모음
 
@@ -78,3 +78,17 @@
 | 떠 있는 층 그림자 | 토스트와 툴팁에 `shadow-lg` 허용(과한 그림자 금지의 예외) | 오케스트레이터 | T2.5 | 카드 등 바닥 층은 그대로 금지 |
 | 추정 배지 색 | warning과 중립 중 G3에서 재검토 | 보류 | T2.9 | 지금은 기본안 유지 |
 | 페이지뷰 경로 | 초대 코드를 지우고 `/poll/[code]`로 보냄(쿼리도 제거) | 오케스트레이터 | T2.20 후속 | `src/lib/analytics/pageview.test.ts` |
+
+### D-04. 2단계 마무리 결정 (사용자 승인)
+
+- 게이트/화면: 선택 게이트 아님. 2단계 완료 보고의 제안 4건을 사용자가 "제안대로" 승인
+- 날짜: 2026-10-29
+
+| 항목 | 결정 | 반영 위치 | 후속 |
+| --- | --- | --- | --- |
+| 홈 번들과 모션 | 첫 화면 카드 등장은 CSS 전환으로, Motion(`m`, LazyMotion)은 스와이프, 셔플처럼 상호작용 뒤에만 비동기로 씀. 홈 첫 로드 예산 200KB, 현재 168.4KB | DESIGN.md 7장, CLAUDE.md 13장 | G3 시안마다 `pnpm build` 예산 수치를 비교표에 적음 |
+| 배지 색 | 의미 색 4가지(초록, 주황, 파랑, 빨강)가 나란히 보여 단일 포인트 톤보다 화려함. 의미 색을 2~3개로 줄이는 안과 "추정" 배지 색(D-03)을 G3 안건으로 | 이 기록 | T3 홈 카드 시안 비교표 |
+| 다크 떠 있는 층 | 다크 `popover` 면을 oklch 0.25 → 0.27로 한 단계 밝힘(대화상자, 시트, 드로어, 툴팁 공통, 대비 12.08:1). 툴팁은 다크에서 테두리를 `input`(16%)으로 | DESIGN.md 프런트매터, `tooltip.tsx` | 시각 회귀 다크 스냅샷 갱신 |
+| 모션 줄이기와 진동 | 설정(SET) 단계에서 두 토글로 분리. 그때 `haptic()`이 축소 모드를 따라 꺼지는 연동을 풀고 진동 설정만 따름 | `src/lib/haptics` 주석 | SET 설정 화면 작업 |
+| 결정 축하 정정 | DESIGN.md 7장은 확정 축하에 canvas-confetti를 쓰지 않고 세리프 한 줄 페이드 + 1위 바 채움으로 정했으므로 D-02의 "채택"을 "보류"로 정정. `src/lib/motion/celebrate.ts`와 PoC는 보존하되 화면에 쓰지 않음 | D-02 표 | T7 투표 확정 화면은 DESIGN.md 7장대로 |
+
