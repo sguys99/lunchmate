@@ -209,3 +209,55 @@ describe("텍스트 파일과 출력", () => {
     );
   });
 });
+
+describe("T2.3 대상별 검사", () => {
+  it("metadata export의 title, description", () => {
+    const src = [
+      `import type { Metadata } from "next";`,
+      `// 메타 주석 ${EM} 무시`,
+      `export const metadata: Metadata = {`,
+      `  title: "런치메이트${EM}점심",`,
+      `  description: "한식${MID}국밥",`,
+      `};`,
+    ].join("\n");
+    expect(
+      scanSource("src/app/layout.tsx", src).map((v) => [v.line, v.code]),
+    ).toEqual([
+      [4, "U+2014"],
+      [5, "U+00B7"],
+    ]);
+  });
+
+  it("manifest.ts 반환 객체", () => {
+    const src = [
+      `export default function manifest() {`,
+      `  return { name: "런치메이트", short_name: "점심${MID}저녁" };`,
+      `}`,
+    ].join("\n");
+    expect(scanSource("src/app/manifest.ts", src)).toHaveLength(1);
+  });
+
+  it("OG 이미지 템플릿의 JSX 텍스트와 템플릿 문자열", () => {
+    const src = [
+      `export default function Image() {`,
+      `  const t = \`초대 \${n}명${EM}마감\`;`,
+      `  return new ImageResponse(<div style={{ fontSize: 48 }}>점심 투표${MID}초대</div>);`,
+      `}`,
+    ].join("\n");
+    expect(
+      scanSource("src/app/api/og/route.tsx", src).map((v) => v.line),
+    ).toEqual([2, 3]);
+  });
+
+  it("aria-label, title, placeholder, alt 속성", () => {
+    const src = [
+      `export const C = () => (`,
+      `  <div aria-label="a${EM}b" title="c${MID}d">`,
+      `    <input placeholder="e${EM}f" />`,
+      `    <img alt="g${MID}h" />`,
+      `  </div>`,
+      `);`,
+    ].join("\n");
+    expect(scanSource("a.tsx", src).map((v) => v.line)).toEqual([2, 2, 3, 4]);
+  });
+});
