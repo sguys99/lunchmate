@@ -5,16 +5,17 @@
 // - 활성: 아이콘과 라벨 foreground + 탭 위쪽 가장자리 2px x 20px primary 막대. 비활성: muted-foreground.
 //   면 색으로 활성을 표시하지 않는다. 보조 기술에는 aria-current="page"로 알린다.
 // - 아이콘은 Lucide 1.5px 선, 22px. 라벨은 caption. 칸 전체가 링크라 터치 영역은 칸 폭 x 64px(44px 이상).
-// - 모션: 활성 막대만 fade 프리셋으로 나타나고 사라진다(첫 렌더는 그대로 보임). 축소 모드면 즉시 바뀐다.
+// - 모션: 활성 막대만 fade 프리셋과 같은 값(나타날 때 base, standard / 사라질 때 fast, exit)으로 나타나고 사라진다.
+//   Motion 대신 CSS opacity 전환으로 그린다(T2.22): 홈 첫 로드에서 Motion domAnimation(약 37KB gzip)을 빼기 위해서다.
+//   막대는 네 칸에 모두 두고 활성 칸만 불투명하게 한다. 첫 렌더는 그대로 보인다(전환은 값이 바뀔 때만).
+//   축소 모드: OS 설정은 motion-reduce:, 앱 설정(MotionProvider preference="reduce")은 data-reduced로 즉시 바꾼다.
 // - 데스크톱(화면 컨테이너 1024px 이상)에서도 같은 막대를 좌 리스트 칸 아래에 둔다(AppShell).
-import { AnimatePresence } from "motion/react";
-import * as m from "motion/react-m";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { MouseEvent } from "react";
 import { commonCopy } from "@/copy/common";
 import { focusRing } from "@/components/ui/interaction";
-import { useMotionPreset } from "@/lib/motion";
+import { useMotionPreference } from "@/lib/motion/preference";
 import { cn } from "@/lib/utils";
 import { APP_TABS, matchTab, type AppTabId } from "./tabs";
 
@@ -26,6 +27,8 @@ export type TabBarViewProps = {
    * 실제 앱 화면에서는 쓰지 않는다.
    */
   preview?: boolean;
+  /** nav 랜드마크 이름. 기본 commonCopy.tabBarLabel. 한 화면에 미리보기가 여럿일 때만 바꾼다 */
+  label?: string;
   className?: string;
 };
 
@@ -34,11 +37,16 @@ function preventNavigation(event: MouseEvent<HTMLAnchorElement>) {
 }
 
 /** 경로와 무관한 표시 전용 탭 바. 디자인 랩과 테스트가 활성 탭을 직접 준다. */
-export function TabBarView({ activeId, preview, className }: TabBarViewProps) {
-  const fade = useMotionPreset("fade");
+export function TabBarView({
+  activeId,
+  preview,
+  label = commonCopy.tabBarLabel,
+  className,
+}: TabBarViewProps) {
+  const reduced = useMotionPreference() === "reduce";
   return (
     <nav
-      aria-label={commonCopy.tabBarLabel}
+      aria-label={label}
       data-slot="bottom-tab-bar"
       className={cn(
         "sticky bottom-0 z-10 shrink-0 border-t border-border bg-background pb-[env(safe-area-inset-bottom,0px)]",
@@ -50,17 +58,18 @@ export function TabBarView({ activeId, preview, className }: TabBarViewProps) {
           const isActive = id === activeId;
           return (
             <li key={id} className="relative flex min-w-0">
-              <AnimatePresence initial={false}>
-                {isActive ? (
-                  <m.span
-                    key="indicator"
-                    aria-hidden
-                    data-slot="tab-indicator"
-                    className="pointer-events-none absolute top-0 left-1/2 h-0.5 w-5 -translate-x-1/2 bg-primary"
-                    {...fade}
-                  />
-                ) : null}
-              </AnimatePresence>
+              <span
+                aria-hidden
+                data-slot="tab-indicator"
+                data-active={isActive ? "" : undefined}
+                className={cn(
+                  "pointer-events-none absolute top-0 left-1/2 h-0.5 w-5 -translate-x-1/2 bg-primary transition-opacity motion-reduce:transition-none",
+                  isActive
+                    ? "opacity-100 duration-(--lm-duration-base) ease-standard"
+                    : "opacity-0 duration-(--lm-duration-fast) ease-exit",
+                  reduced && "transition-none",
+                )}
+              />
               <Link
                 href={href}
                 prefetch={preview ? false : undefined}

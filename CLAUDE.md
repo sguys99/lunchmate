@@ -208,4 +208,6 @@ NEXT_PUBLIC_DESIGN_LAB          # true일 때만 /design-lab 노출 (프로덕�
 - `nmap://` 미설치 감지는 타임아웃 기반 → 데스크톱은 바로 네이버 지도 웹.
 - Vercel Hobby는 상업적 이용 불가·Cron 빈도 제한 → 마감은 pg_cron, 수익화 전 Pro 전환.
 - Supabase 무료 플랜은 장기간 비활성 시 일시 정지 → 작업이 뜸하면 대시보드에서 상태 확인.
+- `(app)` 레이아웃에는 LazyMotion이 없다(홈 번들 예산, T2.22). Motion `m` 컴포넌트를 쓰는 화면은 자기 영역을 `MotionProvider`(`@/lib/motion`)로 감싼다. 빠뜨리면 오류 없이 움직이지 않는다. 첫 화면 등장 효과는 CSS로, Motion은 스와이프와 셔플 같은 상호작용 뒤에 쓴다. 토스트는 `@/components/ui/lazy-toaster`의 `toast()`.
+- 홈(`/today`)과 랜딩(`/`) 첫 로드 JS 예산은 `pnpm build`의 postbuild(`bundle-report`)가 검사한다. pre-push는 build를 하지 않으므로 큰 의존성을 넣었으면 로컬에서 `pnpm build`로 확인한다.
 - 네이버 지도 위 카카오 장소 표시는 허용된다(카카오 운영진 답변, T0.15). 카카오는 카카오맵을 권장하므로 지도 레이어는 계속 `MapProvider` 인터페이스로 감싼다.

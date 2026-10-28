@@ -6,6 +6,7 @@ import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  MotionPreferenceProvider,
   MotionProvider,
   motionPresets,
   reducedMotionPresets,
@@ -65,6 +66,30 @@ describe("useMotionPreset", () => {
     mockSystemReduce(null);
     const { result } = renderHook(() => useMotionReduced(), {
       wrapper: wrapper(),
+    });
+    expect(result.current).toBe(false);
+  });
+});
+
+describe("MotionPreferenceProvider (T2.22)", () => {
+  it("(app) 레이아웃의 앱 설정을 안쪽 MotionProvider가 preference 없이도 잇는다", () => {
+    const { result } = renderHook(() => useMotionReduced(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <MotionPreferenceProvider preference="reduce">
+          <MotionProvider>{children}</MotionProvider>
+        </MotionPreferenceProvider>
+      ),
+    });
+    expect(result.current).toBe(true);
+  });
+
+  it("안쪽 MotionProvider가 preference를 주면 그 값이 우선한다", () => {
+    const { result } = renderHook(() => useMotionReduced(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <MotionPreferenceProvider preference="reduce">
+          <MotionProvider preference="system">{children}</MotionProvider>
+        </MotionPreferenceProvider>
+      ),
     });
     expect(result.current).toBe(false);
   });

@@ -23,13 +23,11 @@ describe("스켈레톤", () => {
     const { container } = render(<CardSkeleton count={3} />);
     const region = container.querySelector("[data-slot=loading-region]");
     expect(region).toHaveAttribute("aria-busy", "true");
-    expect(screen.getByRole("status")).toHaveTextContent(
-      states.loading.label,
-    );
+    expect(screen.getByRole("status")).toHaveTextContent(states.loading.label);
     expect(screen.getAllByRole("status")).toHaveLength(1);
-    expect(container.querySelectorAll("[data-slot=card-skeleton]")).toHaveLength(
-      3,
-    );
+    expect(
+      container.querySelectorAll("[data-slot=card-skeleton]"),
+    ).toHaveLength(3);
     for (const bar of container.querySelectorAll("[data-slot=skeleton]")) {
       expect(bar.closest("[aria-hidden=true]")).not.toBeNull();
     }
@@ -73,7 +71,9 @@ describe("EmptyState", () => {
       screen.getByRole("heading", { level: 2, name: states.empty.title }),
     ).toBeInTheDocument();
     expect(screen.getByText(states.empty.body)).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: states.empty.title })).toBeTruthy();
+    expect(
+      screen.getByRole("region", { name: states.empty.title }),
+    ).toBeTruthy();
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.queryByRole("status")).toBeNull();
     expect(screen.queryByRole("button")).toBeNull();

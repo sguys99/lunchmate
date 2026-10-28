@@ -6,7 +6,8 @@
 // - 위치: 아래 가운데. 모바일은 하단 탭(64px) + 하단 safe-area + 12px 위에 뜬다. 탭이 없는 화면은 offset을 덮어쓴다.
 // - 테마: 색이 모두 CSS 변수라 .dark 전환을 그대로 따른다(next-themes 불필요).
 // - 모션: 등장과 스와이프는 Sonner 내장 전환(약 400ms)을 쓴다. Sonner가 prefers-reduced-motion에서 전환을 끈다.
-// - 전역 <Toaster />는 앱 셸(T2.6)이 한 번만 마운트한다. 화면 코드는 여기서 다시 내보내는 toast()를 쓴다.
+// - 앱 셸은 이 Toaster를 lazy-toaster.tsx의 <LazyToaster />로 첫 토스트 때 마운트한다(T2.22). 앱 화면 코드는
+//   lazy-toaster의 toast()를 쓰고, 여기서 다시 내보내는 toast()는 디자인 랩처럼 첫 로드가 상관없는 곳만 쓴다.
 //   문구는 src/copy(예: commonCopy.toasts.linkCopied)에서 가져온다.
 import {
   CircleAlertIcon,

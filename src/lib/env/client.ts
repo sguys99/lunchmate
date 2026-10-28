@@ -1,6 +1,6 @@
 // 클라이언트에 공개되는 환경변수(NEXT_PUBLIC_*)만 검증한다. 서버 키는 절대 여기에 넣지 않는다.
-// zod/mini를 쓰는 이유: 이 파일은 브라우저 번들에 들어가므로 번들 크기를 줄이기 위함 (T0.27).
-import * as z from "zod/mini";
+// 이 파일은 (app) 레이아웃의 분석 Provider를 거쳐 홈 첫 번들에 들어간다. zod/mini도 core 묶음이 약 16KB gzip이라
+// 검사 몇 개(URL, true/false)는 직접 쓴다 (T2.22). 서버 env 검증(server.ts)은 그대로 zod를 쓴다.
 import {
   CLIENT_ENV_KEYS,
   EnvValidationError,
@@ -12,35 +12,35 @@ import {
   type RuntimeInfo,
 } from "./keys";
 
-const optionalUrl = (name: string) =>
-  z.optional(
-    z.url({ error: `${name}: http(s)로 시작하는 올바른 URL이어야 합니다.` }),
-  );
-const optionalString = z.optional(z.string());
-// "true"/"false" 문자열을 boolean으로 변환. 미설정이면 false.
-const flag = z.pipe(
-  z.optional(
-    z.enum(["true", "false"], { error: '"true" 또는 "false"만 허용됩니다.' }),
-  ),
-  z.transform((v) => v === "true"),
-);
+/** URL 형식이어야 하는 키. 값이 있으면 http(s) URL이어야 한다. */
+const URL_KEYS = [
+  "NEXT_PUBLIC_SITE_URL",
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_POSTHOG_HOST",
+  "NEXT_PUBLIC_SENTRY_DSN",
+] as const satisfies readonly ClientEnvKey[];
 
-const clientSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: optionalUrl("NEXT_PUBLIC_SITE_URL"),
-  NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: optionalString,
-  NEXT_PUBLIC_SUPABASE_URL: optionalUrl("NEXT_PUBLIC_SUPABASE_URL"),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString,
-  NEXT_PUBLIC_KAKAO_JS_KEY: optionalString,
-  NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: optionalString,
-  NEXT_PUBLIC_POSTHOG_KEY: optionalString,
-  NEXT_PUBLIC_POSTHOG_HOST: optionalUrl("NEXT_PUBLIC_POSTHOG_HOST"),
-  NEXT_PUBLIC_SENTRY_DSN: optionalUrl("NEXT_PUBLIC_SENTRY_DSN"),
-  NEXT_PUBLIC_DESIGN_LAB: flag,
-});
+/** "true"/"false" 문자열을 boolean으로 바꾸는 키. 미설정이면 false. */
+const FLAG_KEYS = [
+  "NEXT_PUBLIC_DESIGN_LAB",
+] as const satisfies readonly ClientEnvKey[];
 
-export type ClientEnv = z.output<typeof clientSchema>;
+type FlagKey = (typeof FLAG_KEYS)[number];
 
-/** 순수 함수: 주어진 값을 검증한다(테스트용으로 분리). 실패 시 EnvValidationError. */
+export type ClientEnv = {
+  [K in Exclude<ClientEnvKey, FlagKey>]?: string;
+} & { [K in FlagKey]: boolean };
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/** 순수 함수: 주어진 값을 검증한다(테스트용으로 분리). 실패 시 EnvValidationError. 오류 메시지에 값은 넣지 않는다. */
 export function parseClientEnv(
   source: Partial<Record<ClientEnvKey, string | undefined>>,
   info: RuntimeInfo,
@@ -59,18 +59,24 @@ export function parseClientEnv(
       ? []
       : findMissingRequired(cleaned, CLIENT_ENV_KEYS, info);
 
-  const result = z.safeParse(clientSchema, cleaned);
-  if (!result.success) {
-    for (const issue of result.error.issues) {
+  for (const key of URL_KEYS) {
+    const value = cleaned[key];
+    if (value !== undefined && !isHttpUrl(value))
       problems.push({
-        key: String(issue.path[0] ?? "(알 수 없음)"),
-        message: issue.message,
+        key,
+        message: `${key}: http(s)로 시작하는 올바른 URL이어야 합니다.`,
       });
-    }
   }
-  if (problems.length > 0 || !result.success)
-    throw new EnvValidationError("클라이언트", problems);
-  return result.data;
+  const flags = {} as Record<FlagKey, boolean>;
+  for (const key of FLAG_KEYS) {
+    const value = cleaned[key];
+    if (value !== undefined && value !== "true" && value !== "false")
+      problems.push({ key, message: '"true" 또는 "false"만 허용됩니다.' });
+    flags[key] = value === "true";
+  }
+
+  if (problems.length > 0) throw new EnvValidationError("클라이언트", problems);
+  return { ...cleaned, ...flags };
 }
 
 let cached: ClientEnv | undefined;

@@ -12,10 +12,16 @@
 // 빈 상태는 결과이지 사건이 아니라서 live region을 두지 않는다. 각 상태는 제목으로 이름 붙은 section이다.
 import { CloudOff, Utensils, WifiOff, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { useId, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { commonCopy } from "@/copy/common";
 import { cn } from "@/lib/utils";
+import {
+  STATE_GLYPH_CLASS,
+  STATE_MESSAGE_CLASS,
+  StateGlyphView,
+  StateMessageView,
+} from "./state-view";
 
 /* ---------- 그림 ---------- */
 
@@ -24,24 +30,14 @@ import { cn } from "@/lib/utils";
  * 그래서 일러스트와 아이콘을 바꿔 끼워도 제목 위치가 같다.
  */
 export function StateGlyph({
-  icon: Icon,
+  icon,
   className,
 }: {
   icon: LucideIcon;
   className?: string;
 }) {
   return (
-    <span
-      aria-hidden
-      data-slot="state-glyph"
-      className={cn("relative block size-24 shrink-0", className)}
-    >
-      <span className="absolute top-[17px] left-[15px] size-[50px] rounded-full bg-muted" />
-      <Icon
-        className="absolute top-[24px] left-[22px] size-9 text-muted-foreground"
-        strokeWidth={1.4}
-      />
-    </span>
+    <StateGlyphView icon={icon} className={cn(STATE_GLYPH_CLASS, className)} />
   );
 }
 
@@ -96,8 +92,11 @@ type StateMessageBaseProps = {
   body?: ReactNode;
   /** 그림 슬롯. 생략하면 상태별 기본 아이콘, null이면 그림 없음 */
   visual?: ReactNode;
-  /** 문서 구조에 맞춰 h2(화면 본문) 또는 h3(카드, 시트 안) */
-  headingLevel?: "h2" | "h3";
+  /**
+   * 문서 구조에 맞춰 h2(화면 본문) 또는 h3(카드, 시트 안).
+   * h1은 상태가 화면의 유일한 제목일 때만(오류 화면, 404처럼 페이지 내용 전체를 대신할 때, T2.17)
+   */
+  headingLevel?: "h1" | "h2" | "h3";
   className?: string;
 };
 
@@ -116,32 +115,18 @@ function StateMessage({
   action?: StateAction;
   live?: "alert" | "status";
 }) {
-  const titleId = useId();
-  const Heading = headingLevel;
   return (
-    <section
-      aria-labelledby={titleId}
-      data-slot="state-message"
-      data-state={kind}
-      className={cn("flex flex-col items-start", className)}
+    <StateMessageView
+      kind={kind}
+      title={title}
+      body={body}
+      visual={visual}
+      headingLevel={headingLevel}
+      live={live}
+      className={cn(STATE_MESSAGE_CLASS, className)}
     >
-      {/* 그림 상자 안 원이 15px 안쪽에 있어, 8px 당겨 원이 글줄 왼쪽 근처에 오게 한다 */}
-      {visual ? <div className="-ml-2">{visual}</div> : null}
-      <div role={live} className="flex flex-col gap-3 pt-3">
-        <Heading
-          id={titleId}
-          className="type-heading text-balance break-keep text-foreground"
-        >
-          {title}
-        </Heading>
-        {body ? (
-          <p className="type-body-sm break-keep text-muted-foreground">
-            {body}
-          </p>
-        ) : null}
-      </div>
       {action ? <ActionButton action={action} /> : null}
-    </section>
+    </StateMessageView>
   );
 }
 

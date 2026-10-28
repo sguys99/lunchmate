@@ -38,8 +38,15 @@ describe("BottomTabBar", () => {
         "aria-current",
       );
     }
-    const bars = container.querySelectorAll("[data-slot=tab-indicator]");
+    // 막대는 네 칸에 모두 있고(CSS 페이드, T2.22) 활성 칸만 data-active
+    expect(
+      container.querySelectorAll("[data-slot=tab-indicator]"),
+    ).toHaveLength(4);
+    const bars = container.querySelectorAll(
+      "[data-slot=tab-indicator][data-active]",
+    );
     expect(bars).toHaveLength(1);
+    expect(bars[0]).toHaveClass("opacity-100");
     expect(poll.parentElement).toContainElement(bars[0] as HTMLElement);
   });
 
@@ -67,5 +74,23 @@ describe("TabBarView", () => {
     expect(screen.getByRole("navigation").className).toContain(
       "safe-area-inset-bottom",
     );
+  });
+});
+
+describe("활성 막대 모션 (T2.22, CSS 전환)", () => {
+  it("기본은 opacity 전환, 앱 설정이 줄이기면 전환 없음", async () => {
+    const { MotionPreferenceContext } = await import("@/lib/motion/preference");
+    const { container, rerender } = render(<TabBarView activeId="today" />);
+    const bar = () =>
+      container.querySelector("[data-slot=tab-indicator][data-active]");
+    expect(bar()).toHaveClass("transition-opacity");
+    expect(bar()).toHaveClass("motion-reduce:transition-none");
+    expect(bar()).not.toHaveClass("transition-none");
+    rerender(
+      <MotionPreferenceContext value="reduce">
+        <TabBarView activeId="today" />
+      </MotionPreferenceContext>,
+    );
+    expect(bar()).toHaveClass("transition-none");
   });
 });
