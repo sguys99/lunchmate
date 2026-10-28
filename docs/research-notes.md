@@ -345,9 +345,42 @@ function onGoogleClick() {
 
 ---
 
-### T0.19 Vercel Hobby 플랜 제약, Supabase 무료 플랜 일시 정지와 백업 범위
+### T0.19 Vercel Hobby와 Supabase 무료 플랜 제약
 
-조사 중
+**질문**: Vercel Hobby의 상업적 이용 금지 범위, Cron 빈도, 함수 실행 시간, 대역폭 한도와 Pro 가격. Supabase 무료 플랜의 비활성 일시 정지 조건, 백업 범위, DB, 스토리지, Realtime, pg_cron, Auth MAU 한도. 개발 중 정지 방지용 주기 요청이 약관 위반인지.
+
+**결론**: **Vercel Hobby는 Cron이 하루 1회(±59분)로 제한되어 투표 마감에 쓸 수 없으므로 pg_cron 설계가 맞다. 광고, 제휴 링크, 결제가 없는 MVP는 Hobby의 비상업 정의에 걸리지 않지만, 할인 제휴나 광고를 붙이는 순간 Pro($20/월)가 필요하다. Supabase 무료 플랜은 7일간 사용자 DB 활동이 적으면 일시 정지되고(1년 내 복구 가능), 자동 백업이 없으므로 T8.17 주간 `supabase db dump`는 필요하다. 정지 방지용 주기 요청을 금지하는 조항은 약관에 없지만 공식 권장 방식도 아니다.**
+
+**근거 (Vercel)**
+- Fair Use Guidelines, Commercial usage (https://vercel.com/docs/limits/fair-use-guidelines, 문서 갱신 2026-09-14): "Hobby teams are restricted to non-commercial personal use only." 상업적 이용은 제작에 관여한 누구든 금전적 이익을 얻는 배포로 정의. 예: 방문자 결제 요청, 상품이나 서비스 판매 광고, 사이트 제작 대가 수령, 제휴 링크가 주목적인 사이트, AdSense 등 광고 포함. 기부 요청은 상업적 이용 아님.
+- Hobby Plan (https://vercel.com/docs/plans/hobby, 갱신 2026-09-14): 월 Fast Data Transfer 100GB, Fast Origin Transfer 10GB, CDN 요청 100만, 함수 호출 100만, Active CPU 4시간, Provisioned Memory 360GB-hrs, 이미지 변환 5,000, Web Analytics 5만 이벤트. 함수 최대 실행 시간 300초. 런타임 로그 1시간. 배포 하루 100회. 한도 초과 시 대부분 30일 대기.
+- Cron Jobs Usage & Pricing (https://vercel.com/docs/cron-jobs/usage-and-pricing, 갱신 2026-07-15): Hobby는 프로젝트당 100개, **최소 간격 하루 1회, 정밀도 시간 단위(±59분)**. 더 잦은 식은 배포 실패. Pro는 분 단위.
+- Pricing (https://vercel.com/pricing): Pro $20/월(개발자 좌석당), $20 사용량 크레딧 포함. 함수 실행 시간 기본 300초, 최대 800초.
+
+**근거 (Supabase)**
+- Pricing (https://supabase.com/pricing): Free는 활성 프로젝트 2개, MAU 5만, DB 500MB/프로젝트, Egress 5GB, 파일 스토리지 1GB, Realtime 동시 접속 200, Realtime 메시지 월 200만, Edge Function 호출 50만, 로그 보존 1일, **백업 미포함**, **1주 비활성 시 일시 정지**. Pro는 $25/월부터, MAU 10만, 디스크 8GB, Egress 250GB, 스토리지 100GB, Realtime 동시 500, 일일 백업 7일 보존, 컴퓨트 크레딧 $10.
+- Billing on Supabase (https://supabase.com/docs/guides/platform/billing-on-supabase): 무료 프로젝트 2개 한도는 본인이 Owner/Admin인 모든 조직 합산, 일시 정지된 프로젝트는 제외. 서드파티 Auth MAU 5만.
+- Project Pausing (https://supabase.com/docs/guides/platform/free-project-pausing.md): 7일간 사용자 DB 활동이 낮으면 정지. "하루 몇 건의 사용자 요청"이면 보통 충분. 정지 약 1주 전 경고 메일. 경고 후 대시보드 방문이나 API 호출로 방지 가능. 정지 후 1년 안에 대시보드 "Resume project"로 데이터와 설정 그대로 복구. 유료 프로젝트는 정지되지 않음.
+- Backups (https://supabase.com/docs/guides/platform/backups): 일일 자동 백업은 Pro, Team, Enterprise만. 무료 플랜은 "Supabase CLI `db dump`로 정기 내보내기와 외부 보관"을 권장.
+- Supabase Cron (https://supabase.com/docs/guides/cron): pg_cron 기반, 초 단위부터 설정 가능, 동시 실행 8개 이하와 작업당 10분 이내 권장. 무료 플랜 사용 제한 문구는 없음.
+- Terms of Service (https://supabase.com/terms): 보안 장치 우회 금지, 부여 범위 밖 사용 금지, 사용량 상한과 스로틀 적용 가능 조항은 있으나 무료 플랜 정지 회피용 자동 요청을 직접 다루는 조항은 없음.
+
+**확인일**: 2026-10-28
+
+**영향받는 문서/작업**: CLAUDE.md 13장(Vercel Hobby, Supabase 정지 항목: 수치 보강), PRD 14장(수익화 전 Pro 전환 시점), tasks T7.x 투표 마감(pg_cron 유지), T8.17(백업 스크립트 "필요"로 확정), T0.10, T9.x(베타 전 플랜 재검토).
+
+**권장안**
+1. 투표 마감은 계획대로 pg_cron 1분 + 조회 시 판정. Vercel Cron은 쓰지 않는다(필요하면 하루 1회 정리 작업만).
+2. Vercel Hobby는 광고, 제휴 링크, 결제가 없는 동안만 쓴다. 할인 제휴(DEAL)나 광고, 후원 슬롯을 켜기 전, 또는 회사 업무로 개발하는 것으로 볼 여지가 있으면 Pro로 전환한다.
+3. Supabase 백업: T8.17을 필수로 바꿔 GitHub Actions 주 1회 `supabase db dump`(스키마 + 데이터) → 비공개 저장소나 암호화 스토리지에 보관. 클로즈드 베타 시작 시 Pro($25/월, 일일 백업, 정지 없음) 전환을 검토한다.
+4. 정지 방지: 개발 기간에는 실제 개발 사용과 경고 메일 수신 시 대시보드 방문으로 충분하다. 자동화가 필요하면 GitHub Actions로 주 2회 anon 키로 공개 테이블 1건 조회하는 정도에 그친다. 약관상 금지 조항은 없지만 공식 권장도 아니므로 베타 이후에는 Pro 전환으로 해결한다.
+5. 무료 한도 중 가장 먼저 닿을 항목은 Egress 5GB와 Realtime 동시 접속 200이다. 투표방 Realtime 채널은 투표방 화면에서만 구독하고 이탈 시 해제한다.
+
+**남은 불확실성**
+- pg_cron 작업(DB 내부 실행)이 "사용자 DB 활동"으로 집계되는지 공식 문서에 없다. 집계된다면 정지가 사실상 일어나지 않지만 확인 필요(대시보드 경고 메일 수신 여부로 판단).
+- 무료 플랜에서 pg_cron 확장 사용 가능 여부는 문서에 제한 문구가 없다는 것만 확인했다. T0.10 프로젝트 생성 후 Database → Extensions에서 직접 확인.
+- Vercel의 "commercial" 판단은 사례별이며 불명확하면 Vercel Support 문의가 공식 경로다.
+- Vercel과 Supabase 한도 수치는 자주 바뀐다. 베타 직전에 다시 확인한다.
 
 ### T0.20 카카오 provider의 이메일 필수 여부와 비즈 앱 전환 필요성
 
