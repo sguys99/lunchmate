@@ -311,6 +311,18 @@ const fontStackSchema = z.strictObject({
   /** 첫 번째 family 이름. */
   family: z.string().min(1),
   fallback: z.array(z.string().min(1)).min(1),
+  /**
+   * next/font가 노출하는 CSS 변수(예: `--font-pretendard`). 선택 (T1.19).
+   * next/font는 family를 해시된 이름으로 등록하므로 family 문자열만으로는 저장소 폰트 파일을 찾지 못한다.
+   * 있으면 생성기가 `var(<cssVar>, <family>), <fallback...>`을 출력한다.
+   */
+  cssVar: z
+    .string()
+    .regex(
+      /^--[a-z][a-z0-9-]*$/,
+      "cssVar는 --로 시작하는 소문자 CSS 변수 이름이어야 합니다 (예: --font-pretendard)",
+    )
+    .optional(),
 });
 
 export const fontSchema = z.strictObject({

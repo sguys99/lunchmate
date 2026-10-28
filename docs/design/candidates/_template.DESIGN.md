@@ -183,9 +183,11 @@ font:
   sans:
     family: Pretendard Variable
     fallback: [Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Apple SD Gothic Neo, Noto Sans KR, sans-serif]
+    cssVar: "--font-pretendard"
   heading:
     family: Pretendard Variable
     fallback: [Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Apple SD Gothic Neo, Noto Sans KR, sans-serif]
+    cssVar: "--font-pretendard"
     kind: sans
   numeric:
     use: sans

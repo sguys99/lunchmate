@@ -185,9 +185,11 @@ font:
   sans:
     family: Pretendard Variable
     fallback: [Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Apple SD Gothic Neo, Noto Sans KR, sans-serif]
+    cssVar: "--font-pretendard"
   heading:
     family: MaruBuri
     fallback: [AppleMyungjo, Noto Serif KR, Batang, serif]
+    cssVar: "--font-maruburi"
     kind: serif
   numeric:
     use: sans

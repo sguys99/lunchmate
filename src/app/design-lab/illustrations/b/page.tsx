@@ -5,7 +5,6 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import { quietStoneCopy as copy } from "@/copy/design-lab-quiet-stone";
-import { maruBuri } from "@/features/design-lab/fonts";
 import { IllustrationB } from "@/features/design-lab/illustrations/b";
 import { MOCK_PLACES } from "@/features/design-lab/mock";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/features/place/categories";
@@ -177,7 +176,7 @@ export default function QuietStoneIllustrationsPage() {
   const tokens = loadTokens();
   const css = `.qs-light{${themeVars(tokens.color.light)}}.qs-dark{${themeVars(tokens.color.dark)}}`;
   return (
-    <main className={cn(maruBuri.variable, "qs-light flex-1 bg-background")}>
+    <main className="qs-light flex-1 bg-background">
       <style>{css}</style>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-12 sm:px-6">
         <header className="flex flex-col gap-3 px-2">

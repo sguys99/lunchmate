@@ -117,6 +117,7 @@
 | `sans.family` | 문자열 | `Pretendard Variable` | 본문 서체 |
 | `sans.fallback` | 문자열 배열(1개 이상) | `[Pretendard, -apple-system, ...]` | |
 | `heading.family`, `heading.fallback` | 같음 | | 제목 서체 |
+| `sans.cssVar`, `heading.cssVar` | CSS 변수 이름(선택) | `--font-pretendard` | next/font가 노출하는 변수. 있으면 생성 값이 `var(<cssVar>, <family>), <fallback...>`이 됩니다(T1.19). next/font는 family를 해시된 이름으로 등록하므로 family 문자열만으로는 저장소 폰트 파일을 찾지 못합니다. 변수는 루트 `src/app/layout.tsx`가 `<html>`에 붙입니다(`src/app/fonts/index.ts`) |
 | `heading.kind` | `sans` \| `serif` | `sans` | `serif`는 `meta.id`가 `b`이거나 `basedOn`에 `b`가 있을 때만 통과 |
 | `numeric.use` | `sans` \| `heading` | `sans` | 숫자용 별도 서체는 두지 않습니다 |
 | `numeric.tabular` | `true` (리터럴) | `true` | 숫자는 항상 `tabular-nums` |
@@ -195,7 +196,7 @@
 | `color.*.shadcn.<key>` | `--<key>` | `--muted-foreground` |
 | `color.*.app.<key>` | `--<key>` | `--vote-bar-track` |
 | `color.*.category.<slug>.<surface\|ink>` | `--cat-<slug>-<surface\|ink>` | `--cat-hansik-surface` |
-| `font.sans`, `font.heading` | `--lm-font-sans`, `--lm-font-heading` | 값은 family + fallback 스택 |
+| `font.sans`, `font.heading` | `--lm-font-sans`, `--lm-font-heading` | 값은 family + fallback 스택. `cssVar`가 있으면 `var(--font-pretendard, "Pretendard Variable"), Pretendard, ...` |
 | `font.numeric` | `--lm-font-numeric`, `--lm-numeric-features` | `"tnum" 1` (+ `"zero" 1`) |
 | `type.<step>.<prop>` | `--lm-type-<step>-<size\|line-height\|weight\|tracking>` | `--lm-type-title-size: 1.5rem` |
 | `type.<step>.font` | `--lm-type-<step>-font` | `var(--lm-font-heading)` (T1.9에서 추가) |
@@ -228,7 +229,7 @@
 - 시안 생성 파일은 `src/styles/design-candidates.css`, 확정본은 `src/styles/tokens.css`입니다. 둘 다 `pnpm tokens` 생성물이라 직접 고치지 않습니다(`--check`로 어긋남 검사, `--only a`로 한 시안만 검증).
 - 시안 명시도: 전역 다크 선택자는 `:where()`로 감싸 `[data-design]`과 같은 (0,1,0)이고 뒤에 있어 라이트를 이깁니다. `data-theme` 강제는 (0,2,0)이라 전역 `.dark`, 시스템 다크와 무관하게 이깁니다. 디자인 랩 스위처(T1.14)는 같은 요소에 `data-design`과 `data-theme`을 함께 붙입니다. 단, 지금 Tailwind `dark:` 변형은 `data-theme`을 모르므로 시안 화면은 `dark:` 대신 토큰 변수로 테마 차이를 냅니다(`dark` 변형에 `[data-theme="dark"]`를 더할지는 T1.19에서 정함).
 
-### 3.3 Tailwind `@theme inline` 연결 (T1.19에서 `globals.css`에 반영)
+### 3.3 Tailwind `@theme inline` 연결 (`src/app/globals.css`, T1.19 반영)
 
 | 생성 변수 | `@theme inline` 항목 | 쓰는 법 |
 | --- | --- | --- |
@@ -242,7 +243,10 @@
 | `--lm-ease-<step>` | `--ease-<step>: var(--lm-ease-<step>)` | `ease-standard` |
 | `--lm-duration-*`, `--lm-border-*`, `--lm-layout-*` | 연결하지 않음 | `duration-(--lm-duration-base)`, `border-(length:--lm-border-hairline)`, `max-w-(--lm-layout-max-width)` |
 
-- 시안 전환(`data-design`)이 동작하려면 `@theme inline`은 값 대신 `var(...)`만 가리켜야 합니다. 값을 `@theme`에 직접 쓰지 않습니다.
+- 시안 전환(`data-design`)이 동작하려면 `@theme inline`은 값 대신 `var(...)`만 가리켜야 합니다. 값을 `@theme`에 직접 쓰지 않습니다. var 기본값(`var(--lm-radius-sm, 0.5rem)` 같은)도 두지 않습니다(T1.19, 값은 tokens.css 한 곳).
+- Tailwind 기본 팔레트, 그림자(`--color-*`, `--shadow-*`, `--inset-shadow-*`, `--drop-shadow-*`, `--text-shadow-*`)는 `initial`로 지웁니다. `bg-red-500`, `text-white`, `shadow-xs`는 생성되지 않습니다.
+- 토큰 이름(`text-label`, `rounded-button`, `shadow-sheet`, `ease-standard`)은 `src/lib/utils.ts`의 tailwind-merge 설정에도 등록돼 있어 `cn()`이 글자색과 크기를 서로 지우지 않습니다.
+- 하드코딩 색 금지: `.ts/.tsx`는 ESLint `lunchmate/no-hardcoded-color`, CSS는 `scripts/check-css-colors.mjs`(둘 다 `pnpm lint`). 생성물 `tokens.css`, `design-candidates.css`와 토큰 파이프라인 `src/lib/design`, 테스트 파일은 제외합니다.
 
 ## 4. 본문 섹션 템플릿
 
@@ -274,3 +278,4 @@ pnpm vitest run src/lib/design     # 템플릿이 스키마를 통과하는지, 
 | 날짜 | schema | 내용 |
 | --- | --- | --- |
 | 2026-10-28 | 1 | 최초 확정 (T1.3) |
+| 2026-10-29 | 1 | `font.sans.cssVar`, `font.heading.cssVar` 선택 키 추가(하위 호환), Tailwind 연결 정리 (T1.19) |

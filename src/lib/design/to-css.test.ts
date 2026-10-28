@@ -121,7 +121,9 @@ describe("변수 목록", () => {
     expect(v["--lm-type-title-tracking"]).toBe("-0.015em");
     expect(v["--lm-type-numeric-lg-font"]).toBe("var(--lm-font-numeric)");
     expect(v["--lm-numeric-features"]).toBe('"tnum" 1');
-    expect(v["--lm-font-sans"]).toMatch(/^"Pretendard Variable", Pretendard,/);
+    expect(v["--lm-font-sans"]).toMatch(
+      /^var\(--font-pretendard, "Pretendard Variable"\), Pretendard,/,
+    );
     expect(v["--lm-radius-lg"]).toBe("var(--radius)");
     expect(v["--lm-radius-xl"]).toBe("calc(var(--radius) * 1.4)");
     expect(v["--lm-radius-card"]).toBe("var(--lm-radius-xl)");
@@ -132,6 +134,14 @@ describe("변수 목록", () => {
     expect(v["--lm-illust-stroke"]).toBe("0px");
     expect(v["--lm-layout-desktop-columns"]).toBe("2fr 3fr");
     expect(v["--lm-layout-bottom-action-zone-ratio"]).toBe("0.333");
+  });
+
+  it("cssVar가 없으면 family 이름부터 쓴다", () => {
+    const z = structuredClone(t);
+    delete z.font.sans.cssVar;
+    expect(Object.fromEntries(staticVars(z))["--lm-font-sans"]).toMatch(
+      /^"Pretendard Variable", Pretendard,/,
+    );
   });
 
   it("slashedZero면 zero 기능을 더한다", () => {

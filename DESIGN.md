@@ -186,9 +186,11 @@ font:
   sans:
     family: Pretendard Variable
     fallback: [Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Apple SD Gothic Neo, Noto Sans KR, sans-serif]
+    cssVar: "--font-pretendard"
   heading:
     family: MaruBuri
     fallback: [AppleMyungjo, Noto Serif KR, Batang, serif]
+    cssVar: "--font-maruburi"
     kind: serif
   numeric:
     use: sans
@@ -346,7 +348,7 @@ layout:
 
 - **제목**: 마루 부리(MaruBuri) Light 300, Regular 400. **본문, 숫자**: Pretendard Variable.
 - 세리프는 `display`, `title`, `heading`(식당명)에만 씁니다. 버튼, 칩, 숫자, 본문은 모두 Pretendard입니다. 숫자를 세리프로 쓰지 않는 이유는 마루 부리의 숫자가 고정폭이 아니고, 28px에서도 획이 가늘어 "숫자 3개가 분명히 읽혀야 한다"는 조건과 충돌하기 때문입니다.
-- 로딩: design-lab에서만 `src/features/design-lab/fonts.ts`(next/font/local, `preload: false`, `display: swap`)로 불러옵니다. 루트 layout은 건드리지 않았습니다. 대체 스택은 `AppleMyungjo, Noto Serif KR, Batang, serif`.
+- 로딩(T1.19): 루트 layout이 `src/app/fonts/index.ts`(next/font/local)로 Light 300, Regular 400 두 파일을 등록하고 `--font-maruburi`를 `<html>`에 붙입니다. 프런트매터 `font.heading.cssVar`가 이 변수를 가리킵니다. `display: swap`, `preload: false`, `adjustFontFallback: "Times New Roman"`(라틴 글자 크기 보정). 대체 스택은 `AppleMyungjo, Noto Serif KR, Batang, serif`. 굵기별 파일은 그 굵기 글자가 화면에 있을 때만 받습니다. 근거는 docs/design/bundle-log.md.
 
 ### 한글 세리프 웹폰트 비교와 용량 측정
 

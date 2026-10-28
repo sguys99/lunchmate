@@ -92,11 +92,13 @@
     0 -0.5px 0 oklch(0.27 0.028 48 / 10%),
     0 -6px 20px -6px oklch(0.27 0.028 48 / 14%);
   --lm-font-sans:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    var(--font-pretendard, "Pretendard Variable"), Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR",
+    sans-serif;
   --lm-font-heading:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    var(--font-pretendard, "Pretendard Variable"), Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR",
+    sans-serif;
   --lm-font-numeric: var(--lm-font-sans);
   --lm-numeric-features: "tnum" 1;
   --lm-type-display-size: 2rem;
@@ -544,9 +546,11 @@
   --lm-shadow-lg: 0 12px 32px oklch(0.3 0.008 70 / 6%);
   --lm-shadow-sheet: 0 -1px 0 oklch(0.3 0.008 70 / 8%);
   --lm-font-sans:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  --lm-font-heading: MaruBuri, AppleMyungjo, "Noto Serif KR", Batang, serif;
+    var(--font-pretendard, "Pretendard Variable"), Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR",
+    sans-serif;
+  --lm-font-heading:
+    var(--font-maruburi, MaruBuri), AppleMyungjo, "Noto Serif KR", Batang, serif;
   --lm-font-numeric: var(--lm-font-sans);
   --lm-numeric-features: "tnum" 1;
   --lm-type-display-size: 2.5rem;
@@ -975,11 +979,13 @@
   --lm-shadow-sheet:
     0 -1px 0 oklch(0.225 0.012 50 / 6%), 0 -8px 24px oklch(0.225 0.012 50 / 4%);
   --lm-font-sans:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    var(--font-pretendard, "Pretendard Variable"), Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR",
+    sans-serif;
   --lm-font-heading:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    var(--font-pretendard, "Pretendard Variable"), Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR",
+    sans-serif;
   --lm-font-numeric: var(--lm-font-sans);
   --lm-numeric-features: "tnum" 1;
   --lm-type-display-size: 2.25rem;

@@ -39,8 +39,18 @@ function fontFamily(name: string): string {
   return BARE_FAMILY_RE.test(name) ? name : `"${name.replace(/"/g, '\\"')}"`;
 }
 
-function fontStack(stack: { family: string; fallback: string[] }): string {
-  return [stack.family, ...stack.fallback].map(fontFamily).join(", ");
+/**
+ * family + fallback 스택. cssVar(next/font 변수)가 있으면 첫 항목을 `var(<cssVar>, <family>)`로 감싼다.
+ * next/font 변수에는 해시된 family와 크기 보정 대체 서체가 들어 있고, 변수가 없는 곳에서는 family 이름으로 떨어진다.
+ */
+function fontStack(stack: {
+  family: string;
+  fallback: string[];
+  cssVar?: string | undefined;
+}): string {
+  const first = fontFamily(stack.family);
+  const head = stack.cssVar ? `var(${stack.cssVar}, ${first})` : first;
+  return [head, ...stack.fallback.map(fontFamily)].join(", ");
 }
 
 /** 주석 안에 넣을 문자열에서 주석 종료 기호를 무력화한다. */

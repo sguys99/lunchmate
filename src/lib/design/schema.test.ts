@@ -17,10 +17,6 @@ const TEMPLATE = path.resolve(
   "docs/design/candidates/_template.DESIGN.md",
 );
 const source = readFileSync(TEMPLATE, "utf8");
-const tokensCss = readFileSync(
-  path.resolve(process.cwd(), "src/styles/tokens.css"),
-  "utf8",
-);
 
 /** 템플릿 프런트매터를 깊은 복사해서 한 군데만 바꿔 보는 도우미. */
 function mutate(fn: (fm: Record<string, unknown>) => void): unknown {
@@ -55,25 +51,8 @@ describe("_template.DESIGN.md", () => {
       );
     }
   });
-
-  it("shadcn 색 기본값은 현재 tokens.css와 같다 (임시 토큰과 어긋나지 않음)", () => {
-    const { tokens } = parseDesignDoc(source);
-    const [lightBlock = "", darkBlock = ""] = [
-      /:root\s*\{([\s\S]*?)\}/.exec(tokensCss)?.[1],
-      /\.dark\s*\{([\s\S]*?)\}/.exec(tokensCss)?.[1],
-    ];
-    const read = (block: string, key: string) =>
-      new RegExp(`--${key}:\\s*([^;]+);`).exec(block)?.[1]?.trim();
-    for (const key of SHADCN_COLOR_KEYS) {
-      expect(tokens.color.light.shadcn[key], `light ${key}`).toBe(
-        read(lightBlock, key),
-      );
-      expect(tokens.color.dark.shadcn[key], `dark ${key}`).toBe(
-        read(darkBlock, key),
-      );
-    }
-    expect(`${tokens.radius.base}rem`).toBe(read(lightBlock, "radius"));
-  });
+  // 템플릿 색이 임시 tokens.css와 같은지 보던 검사는 T1.19에서 뺐다. tokens.css는 이제 루트 DESIGN.md 생성물이고
+  // 생성물이 최신인지는 design-docs.test.ts가 본다.
 });
 
 describe("designFrontmatterSchema 거부 규칙", () => {
@@ -204,5 +183,32 @@ describe("카테고리 slug 동기화", () => {
   it("도메인 카테고리 정의(src/features/place/categories.ts)와 같다", async () => {
     const domain = await import("@/features/place/categories");
     expect(CATEGORY_SLUGS).toEqual([...domain.CATEGORY_SLUGS]);
+  });
+});
+
+describe("font.*.cssVar (T1.19)", () => {
+  const ok = (data: unknown) => designFrontmatterSchema.safeParse(data).success;
+
+  it("next/font 변수 이름을 받는다", () => {
+    expect(
+      ok(
+        mutate((fm) => {
+          at(fm, "font", "sans")["cssVar"] = "--font-pretendard";
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("--로 시작하지 않거나 대문자가 있으면 실패", () => {
+    for (const bad of ["font-pretendard", "--Font", "var(--font-x)"]) {
+      expect(
+        ok(
+          mutate((fm) => {
+            at(fm, "font", "heading")["cssVar"] = bad;
+          }),
+        ),
+        bad,
+      ).toBe(false);
+    }
   });
 });
