@@ -6,7 +6,7 @@
 // 규칙:
 //   - 허용 목록 방식: src/lib/env/keys.ts의 서버, 클라이언트 키만 대상. VERCEL_OIDC_TOKEN 같은 로컬 전용 값은 올리지 않는다.
 //   - NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_DESIGN_LAB은 환경별 값이 달라 건너뛴다.
-//   - 서버 전용 키(NEXT_PUBLIC_ 아님)는 --sensitive로 등록한다.
+//   - 서버 전용 키(NEXT_PUBLIC_ 아님)는 --sensitive, 공개 키는 --type config로 등록한다.
 //   - 값은 stdin으로만 전달하고 어디에도 출력하지 않는다(이름과 길이만).
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -164,8 +164,9 @@ if (apply) {
         continue;
       }
     }
-    const addArgs = ["env", "add", r.key, r.env];
-    if (isServer(r.key)) addArgs.push("--sensitive");
+    const addArgs = ["env", "add", r.key, "--environment", r.env];
+    // 서버 키는 sensitive. 공개 키는 Vercel이 이름만 보고 비밀로 의심해 거부하므로 config로 명시한다.
+    addArgs.push(...(isServer(r.key) ? ["--sensitive"] : ["--type", "config"]));
     const add = await runVercel(addArgs, r.value);
     if (add.code === 0) {
       console.log(`  완료  ${r.key} (${r.env})`);
