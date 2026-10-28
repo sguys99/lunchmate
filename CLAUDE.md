@@ -23,7 +23,7 @@
 | 영역 | 선택 |
 | --- | --- |
 | 프레임워크 | Next.js 16.x (App Router, Turbopack 기본, 조사 시점 16.4.3) + React 19 + TypeScript strict (T0.27, 2026-10-28) |
-| UI | Tailwind CSS v4 + shadcn/ui **base 계열 스타일(`base-vega`, Base UI 기반, radix 계열 아님)** + Lucide + Motion(`motion/react`, `m` + `LazyMotion`), 폰트 Pretendard Variable |
+| UI | Tailwind CSS v4 + shadcn/ui **base 계열 스타일(`base-vega`, Base UI 기반, radix 계열 아님)** + Lucide + Motion(`motion/react`, `m` + `LazyMotion`), 폰트 Pretendard Variable(본문, 숫자) + 마루 부리(제목 세리프, G1 2026-10-28) |
 | 동적 컴포넌트 | Sonner, NumberFlow, canvas-confetti(동적 import), 바텀시트는 Base UI Drawer(예비: Motion 직접 구현, Vaul은 미유지로 제외, T0.27), Embla(시안 결과에 따라), Magic UI 등 복사형 효과. 용도·로딩 방식은 `docs/tasks.md` 2.4절 |
 | 상태 | TanStack Query(서버 데이터·세션 메모리 캐시) + Zustand(UI·설정 상태) |
 | 인증·DB | Supabase **클라우드 개발 프로젝트 1개**(로컬 Docker 없음). Auth(구글은 내장 provider, 카카오·네이버는 **커스텀 OIDC provider** `custom:kakao`·`custom:naver`, T0.14·T0.20), Postgres + RLS, Realtime, pg_cron |
@@ -98,8 +98,8 @@ docs/                    basic-plan, prd, tasks, design-decisions, research-note
   화면에 각각 입혀 보여주고, 견본표(색·타입 스케일)는 보조 자료로만 붙인다. G1은 토큰·일러스트 화풍·모션 성격을 고르고, 카드 배치는 G3에서 정한다.
 
 ### 6.2 디자인 방향 (정본은 `DESIGN.md`, 확정 전에는 `docs/design/preferences.md`)
-- 톤: 따뜻하고 편안한 미니멀. 따뜻한 밝은 배경(크림·샌드·오프화이트) + **흙빛 계열 단일 포인트 컬러**(테라코타·올리브·캐러멜·클레이 중 G1에서 선택). 다크는 따뜻한 차콜.
-- 타이포: Pretendard 단일(예외: 시안 B만 제목 세리프 시도), 숫자(도보 분·가격·👍%)는 크게 + `tabular-nums`. 위계는 굵기·크기로.
+- 톤: 따뜻하고 편안한 미니멀. 따뜻한 밝은 배경(크림·샌드·오프화이트) + **흙빛 계열 단일 포인트 컬러**: G1에서 **샌드 배경 + 짙은 올리브**(시안 B "Quiet Stone")로 확정(2026-10-28, design-decisions D-01). 다크는 따뜻한 차콜.
+- 타이포: 제목은 마루 부리 세리프, 본문과 숫자는 Pretendard(G1 확정). 숫자(도보 분·가격·👍%)는 크게 + `tabular-nums`. 위계는 굵기·크기로.
 - 카드에 식당 사진이 없다(카카오 미제공) → **카테고리 일러스트가 카드의 시각적 주인공**(음식·그릇 중심, 마스코트 금지), 정보 위계의 주인공은 식당명과 숫자. 카드 한 장에 숫자 3개 + 이유 1줄, 배지 최대 2개.
 - 한 손 조작: 주요 액션은 화면 하단 1/3, 터치 영역 44px 이상, 하단 탭 4개(오늘·지도·투표·나).
 - 모션은 의미 있을 때만: 카드 스와이프, 셔플, 바텀시트 스프링, 득표 바, 확정 축하. 150~300ms, `prefers-reduced-motion` 존중.
