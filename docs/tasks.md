@@ -196,7 +196,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 #### 0.2 외부 등록 (도메인 확정 후, 검수 기간이 긴 것부터)
 
 - [x] T0.5 Vercel 프로젝트 생성, `lunchmate.vercel.app` 사용 가능 여부 확인 후 개발 도메인 확정 (PRD 14.1). 이후 모든 콘솔에는 이 도메인을 정확한 주소로 등록합니다(와일드카드 `*.vercel.app` 등록은 콘솔마다 허용 여부가 다르므로 쓰지 않음).
-- [ ] T0.6 네이버 개발자센터: 네이버 로그인 애플리케이션 등록, 수집 항목(닉네임, 프로필 사진) 최소화, 서비스 URL에 T0.5 도메인과 `http://localhost:3000` 등록, **Callback URL은 Supabase 콜백 `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback`** (커스텀 OIDC provider 방식, T0.14). 검수 전에는 등록한 테스트 아이디만 로그인되므로 검수 일정을 G4 이전에 잡습니다. Client ID/Secret은 `.env.local`이 아니라 Supabase 대시보드에 입력 (AUTH-01N)
+- [x] T0.6 네이버 개발자센터: 네이버 로그인 애플리케이션 등록, 수집 항목(닉네임, 프로필 사진) 최소화, 서비스 URL에 T0.5 도메인과 `http://localhost:3000` 등록, **Callback URL은 Supabase 콜백 `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback`** (커스텀 OIDC provider 방식, T0.14). 검수 전에는 등록한 테스트 아이디만 로그인되므로 검수 일정을 G4 이전에 잡습니다. Client ID/Secret은 `.env.local`이 아니라 Supabase 대시보드에 입력 (AUTH-01N)
 - [x] T0.7 카카오 디벨로퍼스: 앱 생성, JS 키, 플랫폼 Web 도메인, 카카오 로그인 활성화, **OpenID Connect 활성화**, 카카오 로그인 Client Secret 활성화, Redirect URI에 Supabase 콜백 등록, 동의 항목은 닉네임과 프로필 사진만(이메일 불필요, 비즈 앱 전환 없음), 카카오톡 공유 설정. REST API 키와 Client Secret은 Supabase 대시보드에만 입력 (AUTH-01, T0.20)
 - [x] T0.8 네이버 클라우드 Maps: Web Dynamic Map Client ID, 서비스 URL 등록, 일/월 사용량 한도와 알림 설정, 대표 계정 여부 확인(무료 이용량은 대표 계정만, T0.15)
 - [ ] T0.9 Google Cloud: OAuth 클라이언트, 승인된 JavaScript 원본과 리디렉션 URI
