@@ -1,5 +1,5 @@
-// 분석, 관측 초기화 진입점. 지금은 PostHog 지연 로딩 함수만 노출한다(T0.35).
-// 호출 위치(루트 레이아웃의 클라이언트 Provider)와 이벤트 연결은 T2.20에서 만든다.
+// 분석, 관측 진입점. PostHog 지연 로딩(T0.35)과 이벤트 전송 track()(T2.20)을 노출한다.
+// scheduleAnalytics()를 부르는 위치(루트 레이아웃의 클라이언트 Provider)와 capturePageview() 연결은 앱 셸 쪽에서 한다.
 // Sentry 브라우저 초기화는 src/instrumentation-client.ts가 맡는다.
 import { clientEnv } from "@/lib/env/client";
 import { initPostHog } from "./posthog";
@@ -34,4 +34,10 @@ export function scheduleAnalytics(): void {
 }
 
 export { initPostHog } from "./posthog";
+export { capturePageview, track } from "./track";
+export type {
+  AnalyticsEvent,
+  AnalyticsEventMap,
+  AnalyticsEventName,
+} from "./events";
 export { scrubCoordinates, scrubString } from "./scrub";
