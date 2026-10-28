@@ -322,7 +322,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T2.6 (10/29 완료, `src/components/app-shell`, AppShell/ShellSplit/BottomTabBar/PageHeader, 경로 /today /map /poll /me, 데스크톱 1024px 이상 좌 리스트 + 우 지도이고 탭은 좌 칸 아래(사용자 확정), safe-area는 (app) viewport-fit=cover, MotionProvider와 Toaster는 (app)/layout, 플래그 appShell은 프로덕션 꺼짐) 앱 셸: 하단 탭 4개(오늘, 지도, 투표, 나), safe-area 대응, 데스크톱 좌 리스트 + 우 지도 2단 틀, 페이지 헤더
 - [x] T2.7 (10/29 완료, `src/components/states`: CardSkeleton, ListSkeleton, SheetSkeleton(SkeletonLine으로 줄 높이 고정), EmptyState, ErrorState(alert), OfflineState(status), 기본 문구 commonCopy.states, `useOnlineStatus`는 `src/lib/network`, Drawer 제목 title 세리프, 확인 `/design-lab/states`) 상태 컴포넌트: Skeleton 패턴(카드, 리스트, 시트), EmptyState, ErrorState, OfflineState
 - [x] T2.8 (10/29 완료, `src/features/place/illustrations`, `<CategoryIllustration slug size variant decorative />`, 64px 미만 icon 변형, 음식 한 곳 16% 톤 면(사용자 확정), 확인 `/design-lab/illustrations`) 카테고리 아이콘/일러스트 12종 SVG 자체 제작 (한식, 중식, 일식, 양식, 분식, 국밥/탕, 고기, 아시안, 패스트푸드, 샐러드/건강식, 카페/베이커리, 술집), 라이트/다크 대응
-- [ ] T2.9 공통 배지: `추정`, `제보`, `할인`, 웨이팅 3단계, 투표 기피 경고
+- [x] T2.9 (10/29 완료, `src/components/badges` 배지 5종 + PlaceBadges/pickBadges(카드당 2개), 문구 정본 `src/copy/badges.ts`, 기본 우선순위 기피 > 줄 길어요 > 추정 > 조금 기다려요 > 할인 > 바로 입장 > 제보(T3.2에서 확정), 추정 배지 색(warning/중립)은 G3에서 재검토, 확인 `/design-lab/badges`) 공통 배지: `추정`, `제보`, `할인`, 웨이팅 3단계, 투표 기피 경고
 - [ ] T2.10 `/design-lab/components`: 모든 공통 컴포넌트와 상태를 한 페이지에서 보는 갤러리
 
 #### 2.3 모션 시스템

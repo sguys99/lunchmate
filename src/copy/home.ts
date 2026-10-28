@@ -2,6 +2,7 @@
 // 문체: 상태 안내는 습니다체, 제안과 질문은 해요체 (tasks.md 2.2절).
 // design-lab 비교 화면(T1.11~T1.13)과 3단계 홈 시안이 함께 쓴다.
 // 하단 탭, 다시 시도, 이전/다음 같은 공통 라벨은 common.ts에 있다.
+import { badgeCopy } from "./badges";
 import { commonCopy } from "./common";
 
 export const homeCopy = {
@@ -10,21 +11,10 @@ export const homeCopy = {
     reroll: "다시 뽑기",
     pollWithFriends: "친구랑 정하기",
   },
-  badges: {
-    estimate: "추정",
-    report: "제보",
-    deal: "할인",
-    waiting: "웨이팅",
-    avoidWarning: "못 먹는 분 있음",
-  },
-  waitingLevels: {
-    walkIn: "바로 입장",
-    short: "조금 기다려요",
-    long: "줄 길어요",
-  },
-  /** PLACE-07 웨이팅 표시. 예: "12분 전, 줄 길어요" */
-  waitingReport: (minutesAgo: number, levelLabel: string) =>
-    `${minutesAgo}분 전, ${levelLabel}`,
+  /** 배지 문구 정본은 badges.ts(T2.9). 기존 사용처를 위해 같은 값을 가리킨다 */
+  badges: badgeCopy.labels,
+  waitingLevels: badgeCopy.waitingLevels,
+  waitingReport: badgeCopy.waitingReport,
   thumbsUpEmpty: "후기 모으는 중",
   /**
    * 빈 상태, 오류, 오프라인 문구. title은 지금 상태를 말하는 짧은 습니다체 문장(마침표 없음),
