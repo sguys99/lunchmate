@@ -40,3 +40,4 @@ next-env.d.ts
 
 # .env.example 은 커밋 대상
 !.env.example
+.playwright-mcp/

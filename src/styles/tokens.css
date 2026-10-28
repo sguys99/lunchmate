@@ -1,0 +1,118 @@
+/*
+ * 임시 토큰. 1단계 G1에서 DESIGN.md 확정 후 `pnpm tokens` 생성물로 대체.
+ * 직접 수정 금지 규칙은 그때부터 적용.
+ *
+ * 방향: 따뜻한 크림 배경 + 흙빛(테라코타 계열) 단일 포인트, 다크는 따뜻한 차콜.
+ * 포인트 컬러는 --primary 하나만 사용한다 (chart, ring은 같은 색상환의 명도 변주).
+ * 본문 대비 4.5:1 이상: foreground/background, muted-foreground/background, primary-foreground/primary.
+ */
+
+:root {
+  color-scheme: light;
+  --background: oklch(0.975 0.012 85);
+  --foreground: oklch(0.24 0.012 60);
+  --card: oklch(0.99 0.008 85);
+  --card-foreground: oklch(0.24 0.012 60);
+  --popover: oklch(0.99 0.008 85);
+  --popover-foreground: oklch(0.24 0.012 60);
+  --primary: oklch(0.52 0.125 45);
+  --primary-foreground: oklch(0.985 0.01 85);
+  --secondary: oklch(0.94 0.018 80);
+  --secondary-foreground: oklch(0.3 0.014 60);
+  --muted: oklch(0.945 0.015 80);
+  --muted-foreground: oklch(0.47 0.02 65);
+  --accent: oklch(0.93 0.022 78);
+  --accent-foreground: oklch(0.28 0.014 60);
+  --destructive: oklch(0.5 0.19 27);
+  --border: oklch(0.89 0.018 78);
+  --input: oklch(0.89 0.018 78);
+  --ring: oklch(0.6 0.1 45);
+  --chart-1: oklch(0.52 0.125 45);
+  --chart-2: oklch(0.64 0.1 55);
+  --chart-3: oklch(0.74 0.075 70);
+  --chart-4: oklch(0.45 0.07 50);
+  --chart-5: oklch(0.36 0.04 55);
+  --radius: 0.875rem;
+  --sidebar: oklch(0.96 0.014 82);
+  --sidebar-foreground: oklch(0.24 0.012 60);
+  --sidebar-primary: oklch(0.52 0.125 45);
+  --sidebar-primary-foreground: oklch(0.985 0.01 85);
+  --sidebar-accent: oklch(0.93 0.022 78);
+  --sidebar-accent-foreground: oklch(0.28 0.014 60);
+  --sidebar-border: oklch(0.89 0.018 78);
+  --sidebar-ring: oklch(0.6 0.1 45);
+}
+
+/* 다크: shadcn 표준 .dark 클래스 */
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.2 0.008 60);
+  --foreground: oklch(0.94 0.01 85);
+  --card: oklch(0.245 0.01 60);
+  --card-foreground: oklch(0.94 0.01 85);
+  --popover: oklch(0.245 0.01 60);
+  --popover-foreground: oklch(0.94 0.01 85);
+  --primary: oklch(0.73 0.12 50);
+  --primary-foreground: oklch(0.2 0.01 60);
+  --secondary: oklch(0.3 0.012 60);
+  --secondary-foreground: oklch(0.94 0.01 85);
+  --muted: oklch(0.28 0.01 60);
+  --muted-foreground: oklch(0.74 0.015 75);
+  --accent: oklch(0.31 0.014 60);
+  --accent-foreground: oklch(0.94 0.01 85);
+  --destructive: oklch(0.7 0.17 25);
+  --border: oklch(0.94 0.01 85 / 12%);
+  --input: oklch(0.94 0.01 85 / 16%);
+  --ring: oklch(0.6 0.1 50);
+  --chart-1: oklch(0.73 0.12 50);
+  --chart-2: oklch(0.64 0.1 55);
+  --chart-3: oklch(0.55 0.08 60);
+  --chart-4: oklch(0.82 0.08 65);
+  --chart-5: oklch(0.88 0.05 75);
+  --sidebar: oklch(0.225 0.009 60);
+  --sidebar-foreground: oklch(0.94 0.01 85);
+  --sidebar-primary: oklch(0.73 0.12 50);
+  --sidebar-primary-foreground: oklch(0.2 0.01 60);
+  --sidebar-accent: oklch(0.31 0.014 60);
+  --sidebar-accent-foreground: oklch(0.94 0.01 85);
+  --sidebar-border: oklch(0.94 0.01 85 / 12%);
+  --sidebar-ring: oklch(0.6 0.1 50);
+}
+
+/* 시스템 다크 설정 대응: .light 클래스로 명시 지정하지 않은 경우 .dark와 같은 값을 적용 */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+    color-scheme: dark;
+    --background: oklch(0.2 0.008 60);
+    --foreground: oklch(0.94 0.01 85);
+    --card: oklch(0.245 0.01 60);
+    --card-foreground: oklch(0.94 0.01 85);
+    --popover: oklch(0.245 0.01 60);
+    --popover-foreground: oklch(0.94 0.01 85);
+    --primary: oklch(0.73 0.12 50);
+    --primary-foreground: oklch(0.2 0.01 60);
+    --secondary: oklch(0.3 0.012 60);
+    --secondary-foreground: oklch(0.94 0.01 85);
+    --muted: oklch(0.28 0.01 60);
+    --muted-foreground: oklch(0.74 0.015 75);
+    --accent: oklch(0.31 0.014 60);
+    --accent-foreground: oklch(0.94 0.01 85);
+    --destructive: oklch(0.7 0.17 25);
+    --border: oklch(0.94 0.01 85 / 12%);
+    --input: oklch(0.94 0.01 85 / 16%);
+    --ring: oklch(0.6 0.1 50);
+    --chart-1: oklch(0.73 0.12 50);
+    --chart-2: oklch(0.64 0.1 55);
+    --chart-3: oklch(0.55 0.08 60);
+    --chart-4: oklch(0.82 0.08 65);
+    --chart-5: oklch(0.88 0.05 75);
+    --sidebar: oklch(0.225 0.009 60);
+    --sidebar-foreground: oklch(0.94 0.01 85);
+    --sidebar-primary: oklch(0.73 0.12 50);
+    --sidebar-primary-foreground: oklch(0.2 0.01 60);
+    --sidebar-accent: oklch(0.31 0.014 60);
+    --sidebar-accent-foreground: oklch(0.94 0.01 85);
+    --sidebar-border: oklch(0.94 0.01 85 / 12%);
+    --sidebar-ring: oklch(0.6 0.1 50);
+  }
+}
