@@ -231,7 +231,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T0.28 Supabase CLI 연결, `pnpm db:push`, `pnpm db:types` 스크립트
 - [x] T0.29 `pnpm shots <route>`: Playwright로 390px, 1280px, 라이트, 다크 캡처 → `docs/design/shots/`
 - [ ] T0.30 `pnpm analyze` 스크립트: `next analyze --output --snapshot <이름>`(Turbopack 내장 분석기). 비교 수치는 `next analyze export --snapshot <이름>`으로 뽑아 bundle-log.md에 기록. `@next/bundle-analyzer`는 Webpack 전용이라 설치하지 않음 (T0.27)
-- [ ] T0.31 `scripts/check-copy.ts` 뼈대 (금지 문자 검사만 먼저, 비율 리포트는 T2.3)
+- [x] T0.31 `scripts/check-copy.ts` 뼈대 (금지 문자 검사만 먼저, 비율 리포트는 T2.3)
 - [ ] T0.32 git pre-push 훅: lint, typecheck, test, lint:copy
 - [ ] T0.33 GitHub 리포와 Vercel 연결, `main` 푸시 시 자동 배포 확인
 - [ ] T0.34 `MapProvider` 인터페이스 초안과 네이버 구현체로 빈 지도 표시

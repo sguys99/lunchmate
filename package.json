@@ -19,7 +19,8 @@
     "test:e2e": "playwright test",
     "shots": "node scripts/shots.mjs",
     "postbuild": "node scripts/check-client-secrets.mjs",
-    "check:secrets": "node scripts/check-client-secrets.mjs"
+    "check:secrets": "node scripts/check-client-secrets.mjs",
+    "lint:copy": "node scripts/check-copy.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

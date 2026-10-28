@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     // 기본은 node(순수 함수 위주). 컴포넌트 테스트는 파일 상단에 `// @vitest-environment jsdom`
     environment: "node",
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.ts"],
     exclude: ["node_modules", "e2e", ".next"],
     setupFiles: ["./vitest.setup.ts"],
   },
