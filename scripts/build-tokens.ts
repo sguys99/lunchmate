@@ -11,6 +11,9 @@
  * 모드 2(확정): 루트 DESIGN.md가 있으면 → src/styles/tokens.css (:root, .dark, 시스템 다크)
  *              없으면 tokens.css는 건드리지 않는다.
  *
+ * 생성 전에 대비 검사(T1.15, src/lib/design/contrast.ts)를 돌린다. contrastPairs 중 하나라도 기준 미만이면
+ * 파일, 테마, 쌍, 실측값, 기준값을 출력하고 exit 1(아무 파일도 쓰지 않음). 통과하면 문서별 최저 대비를 한 줄씩 출력.
+ *
  * Node 내장 type stripping으로 실행한다(scripts/check-copy.ts와 같은 방식).
  * 상대 모듈은 타입만 정적 import하고, 값은 `.ts` URL로 동적 import한다.
  */
@@ -20,6 +23,7 @@ import { fileURLToPath } from "node:url";
 import * as prettier from "prettier";
 import type * as SchemaModule from "../src/lib/design/schema";
 import type * as ToCssModule from "../src/lib/design/to-css";
+import type * as ContrastModule from "../src/lib/design/contrast";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, "..");
@@ -29,6 +33,9 @@ const schema: typeof SchemaModule = await import(
 );
 const toCss: typeof ToCssModule = await import(
   new URL("../src/lib/design/to-css.ts", import.meta.url).href
+);
+const contrast: typeof ContrastModule = await import(
+  new URL("../src/lib/design/contrast.ts", import.meta.url).href
 );
 
 const CANDIDATE_DIR = "docs/design/candidates";
@@ -131,6 +138,36 @@ if (errors.length > 0) {
   fail(
     `토큰 생성 실패: 아래 문제를 고친 뒤 다시 실행하세요.\n\n${errors.join("\n\n")}`,
   );
+}
+
+/* 대비 검사 (T1.15) ----------------------------------------------------- */
+
+const checked = [...candidates, ...(final ? [final] : [])].map((d) => ({
+  ...d,
+  results: contrast.checkContrast(d.tokens),
+}));
+
+const contrastErrors = checked
+  .map((d) => ({ file: d.file, bad: d.results.filter((r) => !r.pass) }))
+  .filter((d) => d.bad.length > 0);
+
+if (contrastErrors.length > 0) {
+  const body = contrastErrors
+    .map(
+      (d) =>
+        `${d.file}\n${d.bad.map((r) => `- ${contrast.describeFailure(r)}`).join("\n")}`,
+    )
+    .join("\n\n");
+  fail(
+    `토큰 생성 실패: 대비 기준 미달 (WCAG 2.x, docs/design/candidates/FORMAT.md 2.4절). 색을 고친 뒤 다시 실행하세요.\n\n${body}`,
+  );
+}
+
+for (const d of checked) {
+  for (const r of d.results.filter((x) => x.clamped.length > 0)) {
+    console.warn(`경고: ${d.file} ${contrast.describeClamp(r)}`);
+  }
+  console.log(contrast.summarize(d.tokens.meta.id, d.results));
 }
 
 /* 생성, 쓰기 ------------------------------------------------------------ */
