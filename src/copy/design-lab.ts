@@ -15,6 +15,10 @@ export const designLabCopy = {
     screensTitle: "단독 화면",
     screensBody:
       "캡처용 페이지입니다. 테마는 시스템 설정을 따르고, 주소 끝에 ?state=loading 처럼 상태를 붙입니다.",
+    galleryTitle: "컴포넌트 갤러리",
+    galleryBody:
+      "공통 컴포넌트, 4상태, 배지, 일러스트, 앱 셸 조각을 한 페이지에서 봅니다. 테마와 모션을 페이지 안에서 바꿉니다.",
+    galleryLink: "컴포넌트 갤러리",
     illustrationsTitle: "카테고리 일러스트",
     illustrationsBody:
       "운영용 선화 12종을 카드, 큰 카드, 리스트 아이콘 크기로 봅니다. 라이트와 다크를 나란히 둡니다.",

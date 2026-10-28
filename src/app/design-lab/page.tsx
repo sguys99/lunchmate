@@ -72,6 +72,12 @@ export default function DesignLabPage() {
         </ul>
       </Section>
 
+      <Section title={copy.galleryTitle} body={copy.galleryBody}>
+        <Link href="/design-lab/components" className={linkClass}>
+          {copy.galleryLink}
+        </Link>
+      </Section>
+
       <Section title={copy.illustrationsTitle} body={copy.illustrationsBody}>
         <Link href="/design-lab/illustrations" className={linkClass}>
           {copy.illustrationsLink}
