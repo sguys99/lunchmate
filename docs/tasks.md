@@ -218,7 +218,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 0.4 리포와 개발 환경
 
-- [ ] T0.21 Next.js(App Router, 최신 안정판) + TypeScript strict + pnpm 초기화, CLAUDE.md 4장 폴더 구조 생성
+- [x] T0.21 Next.js(App Router, 최신 안정판) + TypeScript strict + pnpm 초기화, CLAUDE.md 4장 폴더 구조 생성
 - [ ] T0.22 Tailwind CSS v4, shadcn/ui 초기화, Pretendard Variable(`next/font/local`, 서브셋) 적용
 - [ ] T0.23 ESLint, Prettier, `typecheck` 스크립트, Vitest, Playwright 설정
 - [ ] T0.24 `src/lib/env.ts`: zod로 환경변수 검증 (서버 전용 키가 클라이언트 번들에 들어가면 빌드 실패)
