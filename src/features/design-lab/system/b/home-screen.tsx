@@ -9,6 +9,12 @@ import { AnimatePresence, LazyMotion, type PanInfo } from "motion/react";
 import * as m from "motion/react-m";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import {
+  CardSkeleton,
+  LoadingRegion,
+  SkeletonLine,
+} from "@/components/states";
+import { Skeleton } from "@/components/ui/skeleton";
 import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
 import { homeCopy } from "@/copy/home";
 import {
@@ -38,8 +44,7 @@ import {
   PIN_POSITIONS,
   PlaceHeading,
   PressButton,
-  SkeletonBlock,
-  StateMessage,
+  StateBlock,
   TabBarB,
   buttonClass,
   dateLine,
@@ -61,14 +66,14 @@ export function HomeScreenB({ state, tokens }: DesignScreenProps) {
               <HomeHeader />
               {content.kind === "loading" ? <IndexSkeleton /> : null}
               <div className="mt-auto pt-12 desktop:mt-14">
-                <NonReady content={content} motion={tokens.motion} />
+                <NonReady content={content} />
               </div>
             </HomeColumn>
           }
           map={<QuietMap />}
+          tabBar={<TabBarB screen="home" />}
         />
       )}
-      <TabBarB screen="home" />
     </div>
   );
 }
@@ -216,6 +221,7 @@ function ReadyHome({ motion }: { motion: DesignMotionTokens }) {
         </HomeColumn>
       }
       map={<QuietMap picks={picks} active={0} />}
+      tabBar={<TabBarB screen="home" />}
     />
   );
 }
@@ -486,42 +492,37 @@ function PlaceCard({
   );
 }
 
-/* ---------- 로딩, 빈 상태, 오류, 오프라인 ---------- */
+/* ---------- 로딩, 빈 상태, 오류, 오프라인 (공통 컴포넌트, T2.7) ---------- */
 
 function NonReady({
   content,
-  motion,
 }: {
   content: Exclude<HomeContent, { kind: "ready" }>;
-  motion: DesignMotionTokens;
 }) {
   if (content.kind === "loading") {
     return (
-      <div role="status" aria-label={content.label}>
-        <span className="sr-only">{content.label}</span>
-        <div className="flex flex-col gap-10">
-          <SkeletonCard />
-          <div className="hidden flex-col gap-10 desktop:flex">
-            <SkeletonCard />
-            <SkeletonCard />
-          </div>
+      <LoadingRegion label={content.label}>
+        {/* 모바일 1장, 데스크톱 3장 세로 (정상 화면과 같은 배치) */}
+        <CardSkeleton bare />
+        <CardSkeleton bare count={2} className="mt-10 hidden desktop:flex" />
+        <div
+          aria-hidden
+          className="mt-5 flex items-center justify-between desktop:hidden"
+        >
+          <Skeleton className="h-12 w-40 rounded-button" />
+          <Skeleton className="h-12 w-28 rounded-button" />
         </div>
-        <div className="mt-5 flex items-center justify-between desktop:hidden">
-          <SkeletonBlock className="h-12 w-40 rounded-button" />
-          <SkeletonBlock className="h-12 w-28 rounded-button" />
-        </div>
-      </div>
+      </LoadingRegion>
     );
   }
   return (
     <section className="rounded-card border border-border bg-card px-7 pt-6 pb-8 @max-[23.75rem]/screen:px-5">
-      <StateMessage
+      <StateBlock
         kind={content.kind}
         title={content.title}
         body={content.body}
         action={content.action}
         category="gukbap"
-        motion={motion}
       />
     </section>
   );
@@ -533,44 +534,14 @@ function IndexSkeleton() {
       {["w-24", "w-28", "w-20"].map((w) => (
         <div key={w} className="flex h-11 items-center gap-3">
           <span className="h-px w-2.5 bg-border" />
-          <SkeletonBlock className={cn("h-3.5 rounded-badge", w)} />
-          <SkeletonBlock className="ml-auto h-3 w-14 rounded-badge" />
+          <SkeletonLine type="body-sm" className={w} />
+          <SkeletonLine
+            type="caption"
+            lineClassName="ml-auto"
+            className="w-14"
+          />
         </div>
       ))}
-    </div>
-  );
-}
-
-function SkeletonCard() {
-  return (
-    <div
-      aria-hidden
-      className="flex flex-col gap-7 rounded-card border border-border bg-card p-7 @max-[23.75rem]/screen:p-5"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-1 flex-col gap-3 pt-1">
-          <SkeletonBlock className="h-3.5 w-14 rounded-badge" />
-          <SkeletonBlock className="h-6 w-36 rounded-badge" />
-          <SkeletonBlock className="mt-1 h-6 w-28 rounded-badge" />
-        </div>
-        {/* 일러스트 자리: 같은 위치의 원 */}
-        <div className="relative -mt-2 -mr-2 size-24 shrink-0">
-          <SkeletonBlock className="absolute top-[17px] left-[15px] size-[50px] rounded-full" />
-        </div>
-      </div>
-      <div className="grid grid-cols-[0.8fr_1.3fr_0.9fr] divide-x divide-border">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="flex flex-col gap-2.5 px-4 first:pl-0 last:pr-0"
-          >
-            <SkeletonBlock className="h-3 w-8 rounded-badge" />
-            <SkeletonBlock className="h-7 w-14 rounded-badge" />
-          </div>
-        ))}
-      </div>
-      <SkeletonBlock className="-mt-1 h-4 w-4/5 rounded-badge" />
-      <SkeletonBlock className="h-12 w-full rounded-button" />
     </div>
   );
 }

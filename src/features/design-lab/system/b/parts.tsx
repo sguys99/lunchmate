@@ -2,10 +2,8 @@
 // 시안 B "Quiet Stone" 화면 공용 조각 (T1.11~T1.13).
 // 원칙: 깊이는 1px 선과 면 톤 한 단계, 올리브 면은 화면당 주 버튼 1개와 1위 득표 바에만.
 import * as m from "motion/react-m";
-import { CloudOff, WifiOff, type LucideIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
-import { commonCopy } from "@/copy/common";
 import { homeCopy } from "@/copy/home";
 import type { MockPlace, StatusBadge } from "@/features/design-lab/mock";
 import type { CategorySlug } from "@/features/place/categories";
@@ -13,8 +11,10 @@ import { CategoryIllustration } from "@/features/place/illustrations";
 import { formatPriceBand } from "@/lib/format";
 import { getKstParts, getMeal } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { springOf, useMotionReduced } from "@/lib/motion";
-import { ACTIVE_TAB_BY_SCREEN, DESIGN_TABS } from "../tabs";
+import { springOf } from "@/lib/motion";
+import { TabBarView } from "@/components/app-shell";
+import { EmptyState, ErrorState, OfflineState } from "@/components/states";
+import { ACTIVE_TAB_BY_SCREEN } from "../tabs";
 import type { DesignMotionTokens } from "../types";
 
 /* ---------- 버튼 ---------- */
@@ -245,53 +245,18 @@ export function PlaceHeading({
   );
 }
 
-/* ---------- 스켈레톤 (느린 호흡) ---------- */
-
-/**
- * skeleton 면 위에 skeleton-highlight 막을 1.6초 왕복으로 겹친다(쉬머 대신 호흡).
- * 모든 막대가 같은 박자라 한 개의 효과로 읽힌다. reduced motion이면 정지.
- */
-export function SkeletonBlock({ className }: { className?: string }) {
-  const reduced = useMotionReduced();
-  return (
-    <div
-      aria-hidden
-      className={cn("relative overflow-hidden bg-skeleton", className)}
-    >
-      {reduced ? null : (
-        <m.div
-          className="absolute inset-0 bg-skeleton-highlight"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 0] }}
-          transition={{
-            duration: 3.2,
-            ease: "easeInOut",
-            repeat: Number.POSITIVE_INFINITY,
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
 /* ---------- 상태 메시지 (빈, 오류, 오프라인) ---------- */
 
-const STATE_ICON: Record<"error" | "offline", LucideIcon> = {
-  error: CloudOff,
-  offline: WifiOff,
-};
-
 /**
- * 상태 화면. 그림은 일러스트와 같은 서명(옅은 원 + 1.4 선)으로 맞춘다.
- * 빈 상태는 카테고리 선화, 오류와 오프라인은 같은 굵기의 아이콘.
+ * 공통 상태 컴포넌트(T2.7, src/components/states)로 그린다. 스켈레톤도 공통 패턴과 ui Skeleton을 쓴다.
+ * 빈 상태는 카테고리 선화 + 주 버튼(이 화면에 다른 주 버튼이 없다), 오류와 오프라인은 기본 아이콘 + 보조 버튼.
  */
-export function StateMessage({
+export function StateBlock({
   kind,
   title,
   body,
   action,
   category = "hansik",
-  motion,
   headingLevel = "h2",
 }: {
   kind: "empty" | "error" | "offline";
@@ -299,96 +264,35 @@ export function StateMessage({
   body: string;
   action: string;
   category?: CategorySlug;
-  motion: DesignMotionTokens;
   headingLevel?: "h2" | "h3";
 }) {
-  const Heading = headingLevel;
-  return (
-    <div
-      role={kind === "empty" ? undefined : "alert"}
-      className="flex flex-col items-start"
-    >
-      {kind === "empty" ? (
-        <CategoryIllustration slug={category} className="-ml-2" />
-      ) : (
-        <StateGlyph Icon={STATE_ICON[kind]} />
-      )}
-      <Heading className="mt-3 type-heading text-balance break-keep">
-        {title}
-      </Heading>
-      <p className="mt-3 type-body-sm text-muted-foreground">{body}</p>
-      <PressButton
-        motion={motion}
-        className={cn(
-          "mt-7",
-          kind === "empty" ? buttonClass.primary : buttonClass.outline,
-        )}
-      >
-        {action}
-      </PressButton>
-    </div>
-  );
-}
-
-function StateGlyph({ Icon }: { Icon: LucideIcon }) {
-  return (
-    <span aria-hidden className="relative -ml-2 block size-24">
-      {/* 일러스트와 같은 자리: 중심 (40, 42), 반지름 25 */}
-      <span className="absolute top-[17px] left-[15px] size-[50px] rounded-full bg-muted" />
-      <Icon
-        className="absolute top-[24px] left-[22px] size-9 text-muted-foreground"
-        strokeWidth={1.4}
+  if (kind === "empty") {
+    return (
+      <EmptyState
+        title={title}
+        body={body}
+        visual={<CategoryIllustration slug={category} />}
+        action={{ label: action, variant: "primary" }}
+        headingLevel={headingLevel}
       />
-    </span>
+    );
+  }
+  const State = kind === "error" ? ErrorState : OfflineState;
+  return (
+    <State
+      title={title}
+      body={body}
+      action={{ label: action }}
+      headingLevel={headingLevel}
+    />
   );
 }
 
 /* ---------- 하단 탭 ---------- */
 
+/** 앱 셸 하단 탭(T2.6)을 미리보기로. 링크는 이동하지 않는다. */
 export function TabBarB({ screen }: { screen: "home" | "sheet" }) {
-  const active = ACTIVE_TAB_BY_SCREEN[screen];
-  return (
-    <nav
-      aria-label={commonCopy.tabBarLabel}
-      className="sticky bottom-0 z-10 shrink-0 border-t border-border bg-background pb-[env(safe-area-inset-bottom,0px)]"
-    >
-      <ul className="mx-auto grid h-(--lm-layout-tab-bar-height) max-w-(--lm-layout-max-width) grid-cols-4">
-        {DESIGN_TABS.map(({ id, label, Icon }) => {
-          const isActive = id === active;
-          return (
-            <li key={id} className="relative flex">
-              {isActive ? (
-                <span
-                  aria-hidden
-                  className="absolute top-0 left-1/2 h-0.5 w-5 -translate-x-1/2 bg-primary"
-                />
-              ) : null}
-              <a
-                href={`#${id}`}
-                aria-current={isActive ? "page" : undefined}
-                onClick={(e) => e.preventDefault()}
-                className={cn(
-                  "flex flex-1 flex-col items-center justify-center gap-1 type-caption transition-colors duration-(--lm-duration-fast)",
-                  isActive
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                  focusRing,
-                  "focus-visible:-outline-offset-4",
-                )}
-              >
-                <Icon
-                  aria-hidden
-                  className="size-[1.375rem]"
-                  strokeWidth={1.5}
-                />
-                {label}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
+  return <TabBarView activeId={ACTIVE_TAB_BY_SCREEN[screen]} preview />;
 }
 
 /* ---------- 지도 자리 위 핀 ---------- */

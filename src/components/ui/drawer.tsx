@@ -113,6 +113,7 @@ function DrawerHandle({ className, ...props }: ComponentProps<"div">) {
   );
 }
 
+/** 시트 제목. DESIGN.md 5장 "시트 안 제목은 title 세리프" (Sheet와 같은 기본값) */
 function DrawerTitle({
   className,
   ...props
@@ -120,7 +121,7 @@ function DrawerTitle({
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn("type-heading", className)}
+      className={cn("type-title break-keep text-foreground", className)}
       {...props}
     />
   );

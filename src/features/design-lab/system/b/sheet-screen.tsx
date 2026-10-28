@@ -10,6 +10,8 @@ import { Check, X } from "lucide-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
 import { homeCopy, placeDetailCopy, pollPreviewCopy } from "@/copy/home";
+import { SheetSkeleton, SkeletonLine } from "@/components/states";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Drawer,
   DrawerBackdrop,
@@ -45,8 +47,7 @@ import {
   PIN_POSITIONS,
   PlaceHeading,
   PressButton,
-  SkeletonBlock,
-  StateMessage,
+  StateBlock,
   TabBarB,
   buttonClass,
 } from "./parts";
@@ -102,8 +103,8 @@ export function SheetScreenB({ state, tokens }: DesignScreenProps) {
             ) : null}
           </MapPlaceholder>
         }
+        tabBar={<TabBarB screen="sheet" />}
       />
-      <TabBarB screen="sheet" />
 
       <Drawer
         open={open}
@@ -154,13 +155,12 @@ function SheetBody({
   if (content.kind === "loading") {
     return (
       <Scroll className="px-(--lm-layout-gutter) pt-5">
-        <div role="status" aria-label={content.label}>
-          <span className="sr-only">{content.label}</span>
-          {inline ? null : (
-            <DrawerTitle className="sr-only">{content.label}</DrawerTitle>
-          )}
-          <SheetSkeleton />
-        </div>
+        {inline ? null : (
+          <DrawerTitle className="sr-only">{content.label}</DrawerTitle>
+        )}
+        <SheetSkeleton label={content.label}>
+          <PollSkeleton />
+        </SheetSkeleton>
       </Scroll>
     );
   }
@@ -171,12 +171,11 @@ function SheetBody({
         {inline ? null : (
           <DrawerTitle className="sr-only">{content.title}</DrawerTitle>
         )}
-        <StateMessage
+        <StateBlock
           kind={content.kind}
           title={content.title}
           body={content.body}
           action={content.action}
-          motion={motion}
         />
       </Scroll>
     );
@@ -467,52 +466,19 @@ function PollSection({
   );
 }
 
-/* ---------- 시트 스켈레톤 ---------- */
+/* ---------- 득표 자리 스켈레톤 ---------- */
 
-function SheetSkeleton() {
+/** 공통 SheetSkeleton(T2.7)의 요약과 정보 행 사이에 들어가는 이 화면만의 득표 블록 자리 */
+function PollSkeleton() {
   return (
-    <div aria-hidden className="flex flex-col gap-7 pb-10">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-1 flex-col gap-3 pt-1">
-          <SkeletonBlock className="h-3.5 w-14 rounded-badge" />
-          <SkeletonBlock className="h-6 w-40 rounded-badge" />
-          <SkeletonBlock className="mt-1 h-6 w-28 rounded-badge" />
+    <div className="mt-10 flex flex-col gap-6 border-t border-border pt-8">
+      <SkeletonLine type="heading" className="w-32" />
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="flex flex-col gap-3">
+          <SkeletonLine type="body-sm" className="w-24" />
+          <Skeleton className="h-2 w-full rounded-full" />
         </div>
-        <div className="relative -mt-2 mr-8 size-24 shrink-0">
-          <SkeletonBlock className="absolute top-[17px] left-[15px] size-[50px] rounded-full" />
-        </div>
-      </div>
-      <div className="grid grid-cols-[0.8fr_1.3fr_0.9fr] divide-x divide-border">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="flex flex-col gap-2.5 px-4 first:pl-0 last:pr-0"
-          >
-            <SkeletonBlock className="h-3 w-8 rounded-badge" />
-            <SkeletonBlock className="h-7 w-14 rounded-badge" />
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-col border-t border-border">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="grid grid-cols-[4.5rem_1fr] gap-4 border-b border-border py-4"
-          >
-            <SkeletonBlock className="h-3.5 w-10 rounded-badge" />
-            <SkeletonBlock className="h-3.5 w-3/4 rounded-badge" />
-          </div>
-        ))}
-      </div>
-      <div className="mt-7 flex flex-col gap-6 border-t border-border pt-8">
-        <SkeletonBlock className="h-6 w-32 rounded-badge" />
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="flex flex-col gap-3">
-            <SkeletonBlock className="h-4 w-24 rounded-badge" />
-            <SkeletonBlock className="h-2 w-full rounded-full" />
-          </div>
-        ))}
-      </div>
+      ))}
     </div>
   );
 }
