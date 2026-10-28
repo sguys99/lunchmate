@@ -329,14 +329,14 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 - [x] T2.11 (10/29 완료, `src/lib/motion` 폴더, 토큰은 `pnpm tokens`가 DESIGN.md에서 `tokens.generated.ts`로 생성하고 `--check`로 검사, 프리셋 enter, exit, fade, press, spring-sheet, spring-card, spring-bar, reveal, MotionProvider는 LazyMotion strict + domAnimation, domMax는 loadDomMax 비동기) Motion 설치, `LazyMotion` 설정, DESIGN.md 모션 토큰을 `src/lib/motion.ts` 프리셋으로 (enter, exit, press, spring-sheet, spring-card)
 - [x] T2.12 (10/29 완료, `useMotionPreset`, `useMotionReduced`, `useMotionTransition`, 축소 모드면 duration 0, transform 제거, opacity만, MotionConfig reducedMotion="user" 안전망, 앱 설정 확장은 `MotionProvider preference="reduce"` 인터페이스) `useReducedMotion` 래퍼: 모든 프리셋이 자동으로 축소 모드를 따르게 합니다.
-- [ ] T2.13 동적 컴포넌트 PoC (design-lab에서, 각각 번들 증가량 기록)
-  - [ ] 스와이프 카드 스택 (Motion drag, 키보드와 버튼 대체 조작 포함)
-  - [ ] 바텀시트 스냅 포인트 (Base UI Drawer 기본, iOS Safari와 카카오톡 인앱 스크롤 잠금, 키보드 `[실기기]` 확인. 문제가 크면 Motion 직접 구현 예비안, T0.27)
-  - [ ] Motion `domMax` 비동기 로딩, PostHog 지연 로딩의 실제 증가량을 `next analyze export`로 측정 (T0.27)
-  - [ ] NumberFlow 숫자 롤링 (득표 수, 카운트다운)
-  - [ ] 다시 뽑기 셔플 모션
-  - [ ] 결정 축하 (canvas-confetti 동적 import)
-  - [ ] 랜딩용 효과 후보 2~3개 (Magic UI, Motion Primitives, React Bits 중)
+- [x] T2.13 (10/29 완료, `/design-lab/poc` 6종, 재사용 로직 `src/features/rec/use-swipe-stack.ts`, `src/lib/motion/celebrate.ts`, `src/components/numbers`(RollingNumber, DeadlineCountdown), `src/components/effects`(단어 페이드, 블러 페이드, 마퀴), 실측 domMax 17.0KB, PostHog 101.5KB, confetti 4.1KB 모두 비동기, iOS Safari와 카카오톡 인앱 스크롤 잠금, 키보드는 [실기기] 미확인) 동적 컴포넌트 PoC (design-lab에서, 각각 번들 증가량 기록)
+  - [x] 스와이프 카드 스택 (Motion drag, 키보드와 버튼 대체 조작 포함)
+  - [x] 바텀시트 스냅 포인트 (Base UI Drawer 기본, iOS Safari와 카카오톡 인앱 스크롤 잠금, 키보드 `[실기기]` 확인. 문제가 크면 Motion 직접 구현 예비안, T0.27)
+  - [x] Motion `domMax` 비동기 로딩, PostHog 지연 로딩의 실제 증가량을 `next analyze export`로 측정 (T0.27)
+  - [x] NumberFlow 숫자 롤링 (득표 수, 카운트다운)
+  - [x] 다시 뽑기 셔플 모션
+  - [x] 결정 축하 (canvas-confetti 동적 import)
+  - [x] 랜딩용 효과 후보 2~3개 (Magic UI, Motion Primitives, React Bits 중)
 - [x] T2.14 (10/29 완료, `src/lib/haptics` haptic(kind) 4종(tap, select, success, warning), 미지원, 축소 모드, 설정 off면 무동작, 80ms 스로틀, 실제 연결은 해당 화면 구현 때, Android 실기기 확인 필요) 햅틱 유틸: 지원 기기(Android)에서만 짧은 진동, 미지원 시 아무 동작 안 함
 - [ ] T2.15 PoC 결과를 `docs/design-decisions.md`에 기록 (채택, 보류, 제외와 이유)
 

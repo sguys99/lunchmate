@@ -19,6 +19,10 @@ export const designLabCopy = {
     galleryBody:
       "공통 컴포넌트, 4상태, 배지, 일러스트, 앱 셸 조각을 한 페이지에서 봅니다. 테마와 모션을 페이지 안에서 바꿉니다.",
     galleryLink: "컴포넌트 갤러리",
+    pocTitle: "동적 컴포넌트 PoC",
+    pocBody:
+      "스와이프 스택, 바텀시트 스냅, 셔플, 결정 축하, 숫자 롤링, 랜딩 효과를 따로 시험합니다. 각 화면에서 모션 줄이기를 켤 수 있습니다.",
+    pocLink: "PoC 목록",
     illustrationsTitle: "카테고리 일러스트",
     illustrationsBody:
       "운영용 선화 12종을 카드, 큰 카드, 리스트 아이콘 크기로 봅니다. 라이트와 다크를 나란히 둡니다.",

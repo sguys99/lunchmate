@@ -78,6 +78,12 @@ export default function DesignLabPage() {
         </Link>
       </Section>
 
+      <Section title={copy.pocTitle} body={copy.pocBody}>
+        <Link href="/design-lab/poc" className={linkClass}>
+          {copy.pocLink}
+        </Link>
+      </Section>
+
       <Section title={copy.illustrationsTitle} body={copy.illustrationsBody}>
         <Link href="/design-lab/illustrations" className={linkClass}>
           {copy.illustrationsLink}
