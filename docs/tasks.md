@@ -202,7 +202,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T0.9 Google Cloud: OAuth 클라이언트, 승인된 JavaScript 원본과 리디렉션 URI
 - [ ] T0.10 Supabase 개발 프로젝트 생성 (리전: 서울), Site URL과 Redirect URLs(T0.5 도메인, `http://localhost:3000`) 등록. provider: 구글은 내장, **카카오와 네이버는 커스텀 OIDC provider로 등록**(`custom:kakao` issuer `https://kauth.kakao.com` scopes `openid profile_nickname profile_image`, `custom:naver` issuer `https://nid.naver.com` scopes `openid`, 둘 다 `email_optional: true`, 무료 플랜 커스텀 3개 중 2개 사용). provider 비밀값은 사용자가 대시보드에 직접 입력 (T0.14, T0.20)
 - [ ] T0.11 PostHog 프로젝트(리전 선택), Sentry 프로젝트 생성
-- [ ] T0.12 자체 도메인 후보 2~3개 가용성만 확인 (구매는 9단계 전)
+- [x] T0.12 자체 도메인 후보 2~3개 가용성만 확인 (구매는 9단계 전)
 - [ ] T0.13 모든 키를 `.env.local`과 Vercel 환경변수에 등록, 브라우저 키 도메인 제한 확인
 
 #### 0.3 확인 필요 항목 조사 (결과는 `docs/research-notes.md`에 출처와 함께)
