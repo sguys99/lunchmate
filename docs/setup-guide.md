@@ -12,11 +12,12 @@
 | 개발 도메인 (프로덕션) | `https://lunchmate-kr.vercel.app` (`lunchmate.vercel.app`은 타인이 사용 중이라 변경) |
 | 로컬 개발 주소 | `http://localhost:3000` |
 | Supabase 리전 | 서울 `ap-northeast-2` |
-| Supabase Auth 콜백 (카카오, 구글용) | `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → **Supabase 생성 후 채움** |
-| 네이버 로그인 콜백 (잠정) | `https://lunchmate-kr.vercel.app/api/auth/naver/callback`, `http://localhost:3000/api/auth/naver/callback` |
+| Supabase Auth 콜백 (카카오, 네이버, 구글 공통) | `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → **Supabase 생성 후 채움** |
+| 로그인 provider | 구글은 Supabase 내장, 카카오(`custom:kakao`)와 네이버(`custom:naver`)는 Supabase 커스텀 OIDC provider (T0.14, T0.20, 2026-10-28 확정) |
 
 - 모든 콘솔에 위 두 주소(`https://lunchmate-kr.vercel.app`, `http://localhost:3000`)를 **정확한 주소로** 등록합니다. `*.vercel.app` 같은 와일드카드는 쓰지 않습니다(PRD 14.1, tasks T0.5).
-- 네이버 로그인 콜백은 서버 함수 방식을 전제로 한 잠정값입니다. T0.14 조사(Supabase가 네이버를 커스텀 OAuth/OIDC provider로 받는지)에서 Supabase 방식으로 바뀌면 Supabase Auth 콜백으로 교체합니다.
+- 세 로그인 모두 콘솔의 Callback(Redirect) URL에는 우리 도메인이 아니라 **Supabase Auth 콜백**을 넣습니다. 네이버도 같습니다(T0.14). 우리 도메인 콜백(`/api/auth/naver/callback`)은 커스텀 provider 실측이 실패해 대안 설계로 갈 때만 씁니다.
+- **로그인 Client ID와 Secret은 앱 환경변수가 아닙니다.** 앱 코드가 쓰지 않으므로 `.env.local`과 Vercel에 넣지 않고, 사용자가 Supabase 대시보드에 직접 입력합니다(2.1절).
 - 자체 도메인은 베타 전에 연결하고(T9.2), 그때 PRD 14.1절 전환 체크리스트대로 모든 콘솔을 다시 고칩니다.
 
 ### 0.2 역할 분담
@@ -25,10 +26,10 @@
 | --- | --- | --- |
 | Vercel | Claude (CLI) | 터미널에서 로그인만 |
 | Supabase | Claude (CLI) | 터미널에서 로그인만 |
-| 카카오 디벨로퍼스 | 사용자 | 콘솔 등록, 키를 `.env.local`에 입력 |
-| 네이버 개발자센터 (로그인) | 사용자 | 콘솔 등록, 키를 `.env.local`에 입력 |
+| 카카오 디벨로퍼스 | 사용자 | 콘솔 등록, JS 키는 `.env.local`, 로그인 키와 시크릿은 Supabase 대시보드에 직접 입력 |
+| 네이버 개발자센터 (로그인) | 사용자 | 콘솔 등록, Client ID/Secret은 Supabase 대시보드에 직접 입력 |
 | 네이버 클라우드 Maps | 사용자 | 콘솔 등록, 한도와 알림 설정, 키 입력 |
-| Google Cloud OAuth | 사용자 | 콘솔 등록, 키 입력 |
+| Google Cloud OAuth | 사용자 | 콘솔 등록, 클라이언트 ID와 보안 비밀번호는 Supabase 대시보드에 직접 입력 |
 | PostHog, Sentry | 사용자 | 프로젝트 생성, 키 입력 |
 
 ### 0.3 비밀키 다루는 법
@@ -51,7 +52,7 @@
 2. **Supabase 로그인** (1분): 프로젝트 ref가 나와야 카카오, 구글 콜백을 채울 수 있습니다.
 3. **네이버 개발자센터 (로그인)**: 앱은 지금 등록하고(개발 중 상태), 검수는 4단계 구현 후 요청합니다. 검수 기준을 미리 읽어 두는 게 좋습니다.
 4. **Google Cloud OAuth**: 브랜딩 확인(verification)에 영업일 며칠이 걸릴 수 있습니다.
-5. **카카오 디벨로퍼스**: 닉네임, 프로필 사진만 쓰면 별도 심사가 없습니다. 이메일이 필요하면 비즈 앱 전환과 심사(영업일 3~5일)가 붙습니다.
+5. **카카오 디벨로퍼스**: 닉네임, 프로필 사진만 쓰므로 별도 심사와 비즈 앱 전환이 없습니다(커스텀 OIDC로 이메일을 요청하지 않음, T0.20).
 6. **네이버 클라우드 Maps**: 가입과 이용 신청, 한도 설정.
 7. **PostHog, Sentry**: 즉시 발급.
 
@@ -82,8 +83,23 @@
   - 개발 프로젝트 생성 (리전 서울 `ap-northeast-2`), DB 비밀번호는 Claude가 만들어 사용자에게 보관을 요청
   - `SUPABASE_PROJECT_REF`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`를 `.env.local`에 기록
   - Auth 설정: Site URL `https://lunchmate-kr.vercel.app`, Redirect URLs에 `https://lunchmate-kr.vercel.app`과 `http://localhost:3000`의 로그인 복귀 경로(정확한 경로는 4단계 인증 구현에서 확정, 와일드카드 미사용)
-  - 카카오, 구글 provider 연결 (아래 3, 5절에서 받은 값을 사용)
-- Supabase 생성이 끝나면 Claude가 **콜백 URL** `https://<ref>.supabase.co/auth/v1/callback`을 알려드립니다. 그 값을 카카오(3.3)와 구글(5.3)에 넣습니다.
+  - provider 등록 자리 준비와 값 안내(비밀값 입력은 사용자가 2.1절대로 직접)
+- Supabase 생성이 끝나면 Claude가 **콜백 URL** `https://<ref>.supabase.co/auth/v1/callback`을 알려드립니다. 그 값을 카카오(3.3), 네이버(4.1), 구글(5.3)에 넣습니다.
+
+### 2.1 로그인 provider 등록 (사용자가 대시보드에서 직접, T0.14, T0.20)
+
+비밀값이 채팅이나 `.env.local`을 거치지 않도록 Supabase 대시보드 **Authentication > Sign In / Providers**에서 직접 입력합니다. 메뉴 이름은 [콘솔에서 확인]. 커스텀 provider는 2026-04 출시 기능이라 화면이 바뀔 수 있습니다.
+
+| provider | 종류 | 입력값 |
+| --- | --- | --- |
+| 구글 | 내장 Google | Client ID, Client Secret (5.3절) |
+| 카카오 | 커스텀, OIDC | 식별자 `custom:kakao`, 이름 `카카오`, issuer `https://kauth.kakao.com`, Client ID = REST API 키, Client Secret = 카카오 로그인 클라이언트 시크릿(3.3절), scopes `openid profile_nickname profile_image`, 이메일 없이 허용(`email_optional`) 켬, PKCE 기본값 유지 |
+| 네이버 | 커스텀, OIDC | 식별자 `custom:naver`, 이름 `네이버`, issuer `https://nid.naver.com`, Client ID/Secret(4.2절), scopes `openid`, 이메일 없이 허용 켬, PKCE 기본값 유지 |
+
+- 내장 카카오 provider는 쓰지 않습니다. `account_email`을 항상 요청해 비즈 앱이 아니면 KOE205로 막힙니다(T0.20).
+- **처음 정한 식별자를 바꾸지 않습니다.** `custom:kakao`를 나중에 내장 `kakao`로 바꾸면 기존 사용자가 새 계정이 됩니다.
+- 무료 플랜은 커스텀 provider 3개까지라 2개를 씁니다.
+- Supabase CLI의 `config.toml` + `env(SUPABASE_AUTH_EXTERNAL_*)` 방식은 내장 provider용 로컬 설정이고, 이 프로젝트는 로컬 Supabase를 쓰지 않으므로 사용하지 않습니다.
 - 주의: 무료 플랜은 장기간 비활성 시 일시 정지됩니다(CLAUDE.md 13장).
 
 ## 3. 카카오 디벨로퍼스 (T0.7)
@@ -107,24 +123,23 @@
 
 ### 3.3 카카오 로그인 (Supabase provider용)
 
-1. **카카오 로그인 > 사용 설정**에서 상태를 **ON**. (OFF면 `KOE004` 오류)
+1. **카카오 로그인 > 사용 설정**에서 상태를 **ON**. (OFF면 `KOE004` 오류) 같은 화면의 **OpenID Connect**도 **ON**으로 둡니다(커스텀 OIDC provider 전제, T0.20). [콘솔에서 확인: 메뉴 위치]
 2. **앱 > 플랫폼 키 > REST API 키**를 엽니다.
    - **리다이렉트 URI**: `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → **Supabase 생성 후 채움**. (틀리면 `KOE006` 오류)
    - **클라이언트 시크릿**: 코드를 생성하고 활성화 상태를 **사용함**으로 둡니다.
 3. **카카오 로그인 > 동의항목 > 개인정보**에서 아래 두 개만 설정합니다.
    - 닉네임(`profile_nickname`): 필수 동의
    - 프로필 사진(`profile_image`): 선택 동의 (필수/선택 구분은 [콘솔에서 확인], 기본안은 선택)
-   - 카카오계정(이메일)은 설정하지 않습니다. 비즈 앱만 받을 수 있고, 이메일 없이도 Supabase에서 "Allow users without an email"을 켜면 로그인됩니다(T0.20에서 최종 확인).
-4. 받을 값
-   - REST API 키 → `SUPABASE_AUTH_EXTERNAL_KAKAO_CLIENT_ID` (**서버 전용**, Supabase에 넣는 용도)
-   - 클라이언트 시크릿 → `SUPABASE_AUTH_EXTERNAL_KAKAO_SECRET` (**서버 전용**)
-   - 두 이름은 CLAUDE.md 12장에 아직 없는 제안 항목입니다. 앱 코드에서는 쓰지 않고 Claude가 Supabase Auth 설정에 반영합니다.
+   - 카카오계정(이메일)은 설정하지 않습니다. 비즈 앱 전환도 하지 않습니다. 커스텀 OIDC provider는 scopes에 이메일을 넣지 않으므로 KOE205가 나지 않습니다(T0.20).
+4. 받을 값 (`.env.local`에 넣지 않고 Supabase 대시보드 2.1절에 직접 입력)
+   - REST API 키 → 커스텀 provider `custom:kakao`의 Client ID
+   - 클라이언트 시크릿 → `custom:kakao`의 Client Secret
 
 ### 3.4 주의
 
 - **카카오 로그인 > 동의항목 > 개인정보 국외이전** 항목이 있습니다. Supabase 서울 리전을 쓰므로 해당 없을 것으로 보지만, Vercel 서버 함수 리전과 함께 T0.18 즈음 확인합니다. [콘솔에서 확인]
 - 카카오 로컬 API(음식점 검색)는 JavaScript 키로 호출합니다. 일 사용량 한도는 **앱 > 쿼터**(또는 비슷한 이름) 화면에서 확인합니다. [콘솔에서 확인]
-- 서버 OG 이미지에서 장소명이 필요하면 REST API 키를 서버에서 쓸 수 있습니다(T0.16 결과에 따름). 그 경우 **REST API 키 > 호출 허용 IP 주소**는 Vercel IP가 고정되지 않으므로 비워 둘지 검토합니다.
+- 서버 OG 이미지에는 식당 이름을 넣지 않고 결과 공유 이미지는 브라우저에서 만들기로 해서, 서버용 카카오 REST 키(`KAKAO_REST_API_KEY`)는 MVP에서 필요 없습니다(T0.16-4). 필요해지면 그때 서버 전용으로 추가하고 호출 허용 IP를 검토합니다.
 
 출처 (2026-10-28 확인)
 - 앱 설정(플랫폼 키, JavaScript SDK 도메인, 제품 링크 관리 웹 도메인): https://developers.kakao.com/docs/ko/app-setting/app
@@ -145,13 +160,13 @@
 | 제공 정보 선택 | **별명**, **프로필 사진**만. 이름, 이메일, 성별, 생일, 연령대, 휴대전화번호는 선택하지 않음. 필수/추가 구분은 별명 필수, 프로필 사진 추가를 기본안으로 [콘솔에서 확인] |
 | 로그인 오픈 API 서비스 환경 | **PC 웹** (모바일 웹 별도 항목이 있으면 함께 추가) [콘솔에서 확인] |
 | 서비스 URL | `https://lunchmate-kr.vercel.app` (대표 URL. 여러 개를 받으면 `http://localhost:3000`도 추가) [콘솔에서 확인] |
-| 네이버 로그인 Callback URL | `https://lunchmate-kr.vercel.app/api/auth/naver/callback`, `http://localhost:3000/api/auth/naver/callback` (잠정, T0.14 결과로 바뀔 수 있음) |
+| 네이버 로그인 Callback URL | **Supabase 콜백** `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → Supabase 생성 후 채움 (커스텀 OIDC provider 방식, T0.14) |
 | 로고 이미지 | 서비스를 대표하는 아이콘 (검수 항목) |
 
 ### 4.2 받을 값
 
-- Client ID → `NAVER_LOGIN_CLIENT_ID` (**서버 전용**으로 관리)
-- Client Secret → `NAVER_LOGIN_CLIENT_SECRET` (**서버 전용**, 절대 `NEXT_PUBLIC_` 금지)
+- Client ID, Client Secret → `.env.local`에 넣지 않고 Supabase 대시보드 `custom:naver` provider에 직접 입력(2.1절).
+- `NAVER_LOGIN_CLIENT_ID`, `NAVER_LOGIN_CLIENT_SECRET`(서버 전용) 환경변수는 커스텀 provider 실측이 실패해 research-notes T0.14 대안 설계로 갈 때만 만듭니다. 그때는 Callback URL도 `https://lunchmate-kr.vercel.app/api/auth/naver/callback`과 `http://localhost:3000/api/auth/naver/callback`으로 바꿉니다.
 
 ### 4.3 개발 중 상태와 검수
 
@@ -191,9 +206,8 @@
 2. **승인된 JavaScript 원본**: `https://lunchmate-kr.vercel.app`, `http://localhost:3000` (경로 없이)
 3. **승인된 리디렉션 URI**: `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback` → **Supabase 생성 후 채움**
 4. 받을 값
-   - 클라이언트 ID → `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` (Supabase에 넣는 용도)
-   - 클라이언트 보안 비밀번호 → `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` (**서버 전용**)
-   - 두 이름은 CLAUDE.md 12장에 없는 제안 항목입니다. 비밀번호는 생성 직후에만 전체가 보일 수 있으니 바로 `.env.local`에 넣습니다.
+   - 클라이언트 ID, 클라이언트 보안 비밀번호 → `.env.local`에 넣지 않고 Supabase 대시보드 내장 Google provider에 직접 입력(2.1절).
+   - 비밀번호는 생성 직후에만 전체가 보일 수 있으니 바로 Supabase에 입력합니다.
 
 ### 5.4 주의
 
@@ -248,7 +262,7 @@
 - 조직과 프로젝트 이름: `lunchmate`.
 - **프로젝트 설정**(https://app.posthog.com/project/settings 또는 EU는 https://eu.posthog.com/project/settings)에서 값 확인
   - Project token(API key, `phc_`로 시작) → `NEXT_PUBLIC_POSTHOG_KEY` (**브라우저 공개용**)
-  - 수집 호스트 → `NEXT_PUBLIC_POSTHOG_HOST`: US `https://us.i.posthog.com`, EU `https://eu.i.posthog.com` (CLAUDE.md 12장에 없는 제안 항목. PostHog 공식 예시는 `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` 이름을 쓰지만 이 프로젝트는 CLAUDE.md 12장의 `NEXT_PUBLIC_POSTHOG_KEY`를 따릅니다)
+  - 수집 호스트 → `NEXT_PUBLIC_POSTHOG_HOST`: US `https://us.i.posthog.com`, EU `https://eu.i.posthog.com` (CLAUDE.md 12장 등록 완료. PostHog 공식 예시는 `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` 이름을 쓰지만 이 프로젝트는 CLAUDE.md 12장의 `NEXT_PUBLIC_POSTHOG_KEY`를 따릅니다)
 - 주의
   - 위치, 좌표, 개인 식별 정보는 보내지 않습니다(CLAUDE.md 7장). 프로젝트 설정의 IP 수집 끄기(Discard client IP data 같은 옵션)를 켜 두기를 권장합니다. [콘솔에서 확인]
   - 세션 리플레이는 기본으로 꺼 둡니다(입력값, 화면 노출 위험).
@@ -276,17 +290,15 @@
 
 ## 9. 다 끝나면 Claude에게 전달할 것
 
-키 값은 보내지 말고 아래 체크 결과만 채팅에 적어 주십시오. 예: "3, 4, 5, 6, 7, 8 완료. .env.local에 KAKAO_JS, NAVER_LOGIN 2개, NAVER_MAP, GOOGLE 2개, KAKAO REST/시크릿, POSTHOG 2개, SENTRY_DSN 넣음. PostHog US."
+키 값은 보내지 말고 아래 체크 결과만 채팅에 적어 주십시오. 예: "3, 4, 5, 6, 7, 8 완료. .env.local에 KAKAO_JS, NAVER_MAP, POSTHOG 2개, SENTRY_DSN 넣음. Supabase에 구글, custom:kakao, custom:naver 등록. PostHog US."
 
 - [ ] `! vercel login` 완료
 - [ ] `! supabase login` 완료 (Supabase 리전 서울 `ap-northeast-2`로 Claude가 생성)
-- [ ] Supabase 생성 후 받은 콜백 URL을 카카오 REST API 키 리다이렉트 URI와 구글 리디렉션 URI에 넣음
+- [ ] Supabase 생성 후 받은 콜백 URL을 카카오 REST API 키 리다이렉트 URI, 네이버 Callback URL, 구글 리디렉션 URI에 넣음
+- [ ] Supabase 대시보드에 provider 3개 등록 (2.1절): 구글 내장, `custom:kakao`, `custom:naver`
 - [ ] `.env.local`에 넣은 키 (넣은 것만 표시)
   - [ ] `NEXT_PUBLIC_KAKAO_JS_KEY` (공개)
-  - [ ] `SUPABASE_AUTH_EXTERNAL_KAKAO_CLIENT_ID`, `SUPABASE_AUTH_EXTERNAL_KAKAO_SECRET` (서버)
-  - [ ] `NAVER_LOGIN_CLIENT_ID`, `NAVER_LOGIN_CLIENT_SECRET` (서버)
   - [ ] `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID` (공개)
-  - [ ] `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID`, `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` (서버)
   - [ ] `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` (공개)
   - [ ] `SENTRY_DSN`
   - Supabase 4개와 `NEXT_PUBLIC_SITE_URL`은 Claude가 채웁니다.
@@ -298,7 +310,7 @@
 - [ ] PostHog 리전 선택 결과 (US/EU), Sentry 데이터 저장 위치
 - [ ] 진행 중 막힌 곳, 화면이 이 문서와 달랐던 곳 (문서를 고치겠습니다)
 
-이 키 이름 중 `SUPABASE_AUTH_EXTERNAL_*` 4개와 `NEXT_PUBLIC_POSTHOG_HOST`는 CLAUDE.md 12장에 아직 없습니다. 사용자 승인 후 CLAUDE.md 12장에 추가합니다.
+정리(2026-10-28, T0.14, T0.20): 제안했던 `SUPABASE_AUTH_EXTERNAL_*` 4개는 앱 코드가 쓰지 않는 provider 비밀값이라 `.env.example`에서 뺐고, Supabase 대시보드에 직접 입력합니다. `NAVER_LOGIN_*`도 대안 설계 때만 씁니다. `NEXT_PUBLIC_POSTHOG_HOST`는 CLAUDE.md 12장에 추가했습니다.
 
 ---
 

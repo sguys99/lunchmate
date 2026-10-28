@@ -86,6 +86,8 @@
 - 카카오톡 인앱 브라우저에서 네이버 로그인 동작은 실기기 확인 항목(T4.14).
 - 커스텀 provider는 2026-04 출시 기능이라 대시보드 UI나 제한이 바뀔 수 있다. 구현 직전에 문서 재확인.
 
+반영: 2026-10-28, CLAUDE.md(2장, 4장, 12장, 13장), prd.md(AUTH-01N, AUTH-08, 10.1 profiles, 13장), tasks.md(T0.6, T0.10, T4.7), setup-guide.md(0.1, 2.1, 4절, 9절), .env.example(`NAVER_LOGIN_*`, `SUPABASE_AUTH_EXTERNAL_*` 제거), basic-plan.md(2장 로그인 행)
+
 ---
 
 ### T0.15 카카오 장소 데이터를 네이버 지도 위에 표시하는 것의 약관 허용 여부
@@ -113,6 +115,8 @@
   - 근거가 DevTalk 운영진(작성자 "C.L", "Map") 답변이며 약관 조항 자체는 아니다. 출시 전(T10.2) 런치메이트 구성(네이버 지도 + 카카오 FD6 + 장소 ID 저장)을 그대로 적어 DevTalk "지도/로컬" 카테고리(https://devtalk.kakao.com/c/map-api/101)에 [이용정책 문의]로 한 번 더 받아 두기를 권장한다.
   - 네이버 Maps 사용 가이드(Usage 가이드)의 로고, 저작권 표기 세부 규칙은 콘솔 이용 신청 화면에서만 보인다는 안내가 있어 원문을 확인하지 못했다. T0.8 콘솔 등록 때 확인한다. 문의처: 네이버 클라우드 고객지원 온라인 문의(https://www.ncloud.com/support/question), 1544-5876.
   - 네이버 Dynamic Map 무료 이용량 수치(월 6,000,000건)는 검색 요약으로만 확인했다. T0.8에서 요금 페이지와 콘솔 한도를 직접 확인한다.
+
+반영: 2026-10-28, CLAUDE.md(7장 네이버 Maps 결과 저장 금지, 13장 지도 표시 허용), prd.md(13장 네이버 지도 행, 출시 전 확인 문단), tasks.md(T0.8 대표 계정, T10.2 DevTalk 일괄 문의)
 
 ### T0.16 장소명, 좌표가 필요한 화면의 처리 방식
 
@@ -209,6 +213,8 @@
 - PRD: APP-02, 12장 두 행, 13장 카카오 로컬 행과 "출시 전 확인" 문단, POLL-09S 생성 위치, poll_candidates 데이터 모델.
 - tasks: T5.24, T7.6, T7.14, T7.20, T8.3 설명 수정, 5단계에 이름 해석 공통 모듈 작업 추가, 온보딩 사무실 설정에 "핀 직접 놓기" 반영.
 - 출시 전 카카오 DevTalk 일괄 문의 항목(T10.2와 묶기): (1) 런치메이트 전체 구성 확인, (2) 사용자가 직접 쓴 메모 저장, (3) 같은 탭 메모리 보존, (4) 투표방 기준점 좌표 저장, (5) 사용자가 공유한 결과 이미지. 문의처: https://devtalk.kakao.com/c/map-api/101 ([이용정책 문의] 머리말).
+
+반영: 2026-10-28, CLAUDE.md(4장, 7장, 13장), prd.md(ONB-01, AC-ONB-3, POLL-04, POLL-05, POLL-09S, APP-02, 9장 개인정보와 가용성, 10.1 polls, poll_candidates, favorites/visits/blocklist, 12장, 13장), tasks.md(T2.19, T4.4, T4.16, T5.12a 신설, T5.14, T5.24, T6.8, T6.13, T7.6, T7.14, T7.15, T7.20, T8.3, T8.4, T10.2), setup-guide.md(3.4 REST 키), basic-plan.md(8장 poll_candidates)
 
 ### T0.17 카카오톡 인앱 브라우저의 외부 브라우저 열기 (AUTH-04)
 
@@ -343,6 +349,8 @@ function onGoogleClick() {
 - 의뢰서의 "2024년 개정(신고제 변경)"에 해당하는 조문 변경은 찾지 못했다. 시행령이나 고시 수준 변경이 있었는지 KISA 문의 시 함께 확인.
 - 신고는 사업자등록증이 전제다. 개인 개발자가 사업자등록 없이 운영할 때의 처리도 함께 문의.
 
+반영: 2026-10-28, CLAUDE.md(7장 현위치, 사무실 핀 좌표, 좌표 필터), prd.md(ONB-01, AC-ONB-3, APP-05 위치정보 처리 안내, 9장 개인정보, 11.3, 14.2), tasks.md(T0.35, T2.20, T2.21, T4.16, T8.14, T10.1)
+
 ---
 
 ### T0.19 Vercel Hobby와 Supabase 무료 플랜 제약
@@ -425,6 +433,8 @@ function onGoogleClick() {
 - 동의 거부, 닉네임만 동의 등 부분 동의 시 id_token에 nickname, picture가 빠지는 경우의 처리(온보딩에서 닉네임 입력으로 대체).
 - 카카오 id_token `sub`는 앱별(pairwise) 값으로 공시되어 있다. 내장 provider의 회원번호와 같은 값인지는 미확인(provider 전환을 하지 않으면 무관).
 - PR #2579 병합 시점과 Supabase 호스팅 반영 시점은 미정. 병합되어도 위 3번 원칙대로 유지.
+
+반영: 2026-10-28, CLAUDE.md(2장, 12장, 13장 provider 유지), prd.md(AUTH-01, AUTH-08, 10.1 profiles, 13장 Supabase Auth 행), tasks.md(T0.7, T0.10, T4.6), setup-guide.md(0.4, 2.1, 3.3, 5.3, 9절), .env.example
 
 ### T0.27 동적 라이브러리와 기반 스택 사전 조사
 
@@ -574,3 +584,5 @@ const loadMax = () => import("./features-max").then((r) => r.default)
 - Next 기본 런타임(React 19 + Next 클라이언트)만으로 홈 예산의 상당 부분을 쓰므로, 200KB 예산의 현실성은 빈 앱 배포(T0 마지막 작업) 후 `next analyze`로 기준선을 잡아 재판단한다.
 - 네이버 지도 JS API v3의 인증 파라미터(`ncpClientId`/`ncpKeyId` 등) 최신 표기와 MarkerClustering 예제의 호환성은 지도 PoC에서 확인한다.
 - Pretendard npm 패키지는 2023-11 이후 릴리스가 없다(저장소는 2026-07 푸시). 폰트 자체는 안정적이지만, 새 버전이 나오면 경로가 바뀔 수 있다.
+
+반영: 2026-10-28, 영향 목록 1~7, 9번. tasks.md(2.4절 Motion, Base UI Drawer, 복사형, Embla 행과 사용 규칙(SDK 지연 로딩, `zod/mini`, `next analyze`), T0.30, T0.35, T2.13), CLAUDE.md(2장 Next.js 16.x, React 19, shadcn base 계열, Base UI Drawer, 3장 `pnpm analyze`), prd.md(13장 PostHog 행). 8번(shadcn 계열 선택)은 T0.22에서 `base-vega`로 이미 결정됨

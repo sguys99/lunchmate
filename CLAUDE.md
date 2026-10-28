@@ -22,11 +22,11 @@
 
 | 영역 | 선택 |
 | --- | --- |
-| 프레임워크 | Next.js (App Router, 최신 안정판) + TypeScript strict |
-| UI | Tailwind CSS v4 + shadcn/ui + Lucide + Motion(`motion/react`, Framer Motion 후속), 폰트 Pretendard Variable |
-| 동적 컴포넌트 | Sonner, NumberFlow, canvas-confetti(동적 import), Vaul 또는 Motion 바텀시트, Embla(시안 결과에 따라), Magic UI 등 복사형 효과. 용도·로딩 방식은 `docs/tasks.md` 2.4절 |
+| 프레임워크 | Next.js 16.x (App Router, Turbopack 기본, 조사 시점 16.4.3) + React 19 + TypeScript strict (T0.27, 2026-10-28) |
+| UI | Tailwind CSS v4 + shadcn/ui **base 계열 스타일(`base-vega`, Base UI 기반, radix 계열 아님)** + Lucide + Motion(`motion/react`, `m` + `LazyMotion`), 폰트 Pretendard Variable |
+| 동적 컴포넌트 | Sonner, NumberFlow, canvas-confetti(동적 import), 바텀시트는 Base UI Drawer(예비: Motion 직접 구현, Vaul은 미유지로 제외, T0.27), Embla(시안 결과에 따라), Magic UI 등 복사형 효과. 용도·로딩 방식은 `docs/tasks.md` 2.4절 |
 | 상태 | TanStack Query(서버 데이터·세션 메모리 캐시) + Zustand(UI·설정 상태) |
-| 인증·DB | Supabase **클라우드 개발 프로젝트 1개**(로컬 Docker 없음). Auth(카카오·구글) + 네이버 커스텀 OAuth, Postgres + RLS, Realtime, pg_cron |
+| 인증·DB | Supabase **클라우드 개발 프로젝트 1개**(로컬 Docker 없음). Auth(구글은 내장 provider, 카카오·네이버는 **커스텀 OIDC provider** `custom:kakao`·`custom:naver`, T0.14·T0.20), Postgres + RLS, Realtime, pg_cron |
 | 지도·장소 | 네이버 Web Dynamic Map(표시), 카카오 로컬 API JS SDK(음식점 FD6), 길찾기 `nmap://` |
 | 공유 | Kakao JS SDK 공유 + Web Share API, Vercel OG 이미지 |
 | 검증·테스트 | zod, Vitest, Playwright |
@@ -46,7 +46,8 @@ pnpm db:push             # supabase db push → 클라우드 개발 프로젝트
 pnpm db:types            # supabase gen types --project-id → src/lib/supabase/types.ts
 pnpm shots <route>       # 시안 캡처 390px·1280px, 라이트·다크 → docs/design/shots/
 pnpm tokens              # DESIGN.md 프런트매터 → src/styles/tokens.css 생성
-pnpm analyze             # 번들 분석 (증가량은 docs/design/bundle-log.md에 기록)
+pnpm analyze             # next analyze --output --snapshot <이름> (Turbopack 내장, @next/bundle-analyzer 미사용, T0.27)
+                         # 비교 수치는 next analyze export로 뽑아 docs/design/bundle-log.md에 기록
 ```
 
 ## 4. 폴더 구조
@@ -56,7 +57,8 @@ src/app/(public)/        랜딩, 약관, /poll/[code] 미리보기
 src/app/(app)/           오늘 · 지도 · 투표 · 나 (로그인 필요)
 src/app/admin/           관리자 (role=admin)
 src/app/design-lab/      시안 페이지 — 프로덕션에서 404 (NEXT_PUBLIC_DESIGN_LAB 플래그)
-src/app/api/             서버 함수: 네이버 OAuth, OG 이미지, 투표 마감, rate limit
+src/app/auth/callback/   OAuth 콜백 (세션 교환, 네이버 프로필 1회 동기화, T0.14)
+src/app/api/             서버 함수: OG 이미지(식당 이름 미포함, T0.16), 투표 마감, rate limit
 src/components/ui/       shadcn 기반 공통 컴포넌트 (토큰만 사용)
 src/features/<도메인>/    rec, map, place, poll, party, feedback, deal, auth ...
 src/copy/<도메인>.ts      화면 문구 모음 (컴포넌트 안에 문장 직접 쓰지 않음, 1~2단어 라벨 예외)
@@ -112,9 +114,11 @@ docs/                    basic-plan, prd, tasks, design-decisions, research-note
 
 ## 7. 절대 규칙 (데이터·보안·정책)
 
-- **카카오 장소 데이터 저장·캐싱 금지.** DB에는 `place_id`와 사용자 생성 데이터만. 캐시는 세션 메모리(TanStack Query)만, localStorage·DB·서버 캐시·서비스 워커 캐시 금지.
-  장소명·좌표가 필요한 화면(즐겨찾기·기록·피드백 요청·오프라인·투표 후보·OG 이미지)의 처리 방식은 tasks.md T0.16 조사 결과를 따른다. 결과가 나오기 전에는 임의로 저장하지 않는다.
-- **현위치는 서버·PostHog·Sentry로 보내지 않는다.** 브라우저에서 추천 계산에만 사용. 저장은 사용자가 지정한 사무실 좌표만.
+- **카카오 장소 데이터 저장·캐싱 금지.** DB에 저장할 수 있는 카카오 값은 `place_id`와 `place_url`뿐이다. 장소명·주소·좌표·카테고리·전화번호는 기간이 짧아도, 사용자가 확정했어도 저장하지 않는다(투표 후보 포함). 캐시는 세션 메모리(TanStack Query)만, localStorage·DB·서버 캐시·서비스 워커 캐시 금지. 서비스 워커는 앱 셸만 캐시하고 `dapi.kakao.com` 응답은 제외한다. (T0.16, 2026-10-28)
+  이름 표시는 세션 메모리 → 기준점 주변 FD6 매칭 → 카카오맵 링크 순(공통 모듈 T5.12a). 사용자가 직접 쓴 메모 저장은 카카오 답변(T10.2) 전까지 플래그로 숨긴다.
+- **네이버 Maps API 결과(지오코딩·역지오코딩 좌표와 주소)도 저장하지 않는다**(Maps 이용약관 제7조 ⑪, T0.15).
+- **현위치는 서버·PostHog·Sentry로 보내지 않는다.** 브라우저에서 추천 계산과 지도 중심 이동에만 사용. Sentry `beforeSend`와 PostHog 속성에서 좌표를 거른다. (T0.18)
+- **사무실 좌표는 사용자가 지도에 직접 놓은 핀만 저장한다.** 현위치 버튼은 지도 중심만 옮기고, 주소 검색·지오코딩 결과 좌표는 지도 이동에만 쓴다. 현위치·검색 좌표가 저장 API로 가지 않도록 코드 경로를 분리하고 테스트로 막는다. (T0.16·T0.18, 2026-10-28)
 - 모든 테이블은 생성 마이그레이션에서 **RLS 활성화 + 정책 작성**. 정책 없는 테이블은 푸시 금지.
 - 비공개 후기 텍스트는 어떤 API 응답에도 나오면 안 된다. 집계(가격·👍·태그)는 집계 뷰/보안 함수로만 제공.
 - 타인의 `avoid_rules`는 클라이언트에서 읽지 않는다. 투표 기피 경고는 Postgres 보안 함수가 플래그만 반환.
@@ -182,20 +186,24 @@ SUPABASE_SERVICE_ROLE_KEY       # 서버 전용
 SUPABASE_PROJECT_REF            # db:push·db:types용 개발 프로젝트 ID
 NEXT_PUBLIC_KAKAO_JS_KEY        # 도메인 제한
 NEXT_PUBLIC_NAVER_MAP_CLIENT_ID # 도메인 제한
-NAVER_LOGIN_CLIENT_ID / NAVER_LOGIN_CLIENT_SECRET   # 서버 전용
-NEXT_PUBLIC_POSTHOG_KEY / SENTRY_DSN
+NEXT_PUBLIC_POSTHOG_KEY / NEXT_PUBLIC_POSTHOG_HOST / SENTRY_DSN
+# NAVER_LOGIN_CLIENT_ID / NAVER_LOGIN_CLIENT_SECRET: 서버 전용, T0.14 대안 설계(서버 직접 구현)로 갈 때만 추가
 NEXT_PUBLIC_DESIGN_LAB          # true일 때만 /design-lab 노출 (프로덕션 false)
 ```
+카카오·네이버·구글 로그인 Client ID/Secret은 **앱 환경변수가 아니다.** Supabase 대시보드(Authentication > Sign In / Providers)에만 입력한다(T0.14·T0.20).
 도메인 관련 값(`appname`, OAuth Redirect, 카카오 플랫폼 도메인)은 하드코딩하지 말고 `NEXT_PUBLIC_SITE_URL`에서 만든다.
-Supabase·카카오·네이버 Redirect URL에는 프로덕션 도메인과 `http://localhost:3000`을 등록한다.
+카카오·네이버·구글 콘솔의 Redirect(Callback) URL은 Supabase 콜백 `https://<ref>.supabase.co/auth/v1/callback`, Supabase Redirect URLs에는 프로덕션 도메인과 `http://localhost:3000`을 등록한다.
 
 ## 13. 함정 (Gotchas)
 
 - 카카오톡 인앱 브라우저는 **구글 OAuth 차단** → 인앱 감지 시 카카오 로그인 우선, 구글은 외부 브라우저 안내(AUTH-04).
 - 로그인 후 원래 경로(특히 `/poll/[code]`) 복귀: redirect 파라미터는 내부 경로만 허용(오픈 리다이렉트 방지).
-- 카카오 로컬 거리는 직선거리, 페이지당 15건·최대 3페이지. `place_id` 단건 조회 가능 여부는 [확인 필요](T0.16).
+- 로그인 provider는 처음 고른 것을 유지한다. `custom:kakao`를 나중에 내장 `kakao`로(또는 반대로) 바꾸면 기존 사용자가 새 계정이 된다(이메일 미수집이라 자동 연결 없음, T0.20).
+- 커스텀 provider 세션의 `provider_token`은 저장·로깅하지 않는다. 네이버 닉네임·사진은 콜백에서 한 번만 조회한다(T0.14).
+- 카카오 로컬 거리는 직선거리, 페이지당 15건·최대 3페이지. `place_id` 단건 조회 API는 없다. 이름은 세션 메모리, 기준점 주변 FD6 매칭, 카카오맵 링크 순으로 보여준다(T0.16-2). 카카오 장애 시 재시도 1회 후 오류 안내와 "네이버 지도에서 보기".
+- 서버 OG 이미지에는 식당 이름을 넣지 않는다(POLL-04). 결과 공유 이미지(POLL-09S)는 브라우저에서 만든다(T0.16-4).
 - `profiles`는 본인만 읽기 → 다른 사용자의 닉네임·아바타는 공개 프로필 뷰로만. 다른 사용자의 행 생성(투표 확정 시 방문 후보)은 보안 함수로.
 - `nmap://` 미설치 감지는 타임아웃 기반 → 데스크톱은 바로 네이버 지도 웹.
 - Vercel Hobby는 상업적 이용 불가·Cron 빈도 제한 → 마감은 pg_cron, 수익화 전 Pro 전환.
 - Supabase 무료 플랜은 장기간 비활성 시 일시 정지 → 작업이 뜸하면 대시보드에서 상태 확인.
-- 네이버 지도 위에 카카오 장소 표시 허용 여부 [확인 필요] → 지도 레이어는 `MapProvider` 인터페이스로 감싸 카카오맵 전환 가능하게.
+- 네이버 지도 위 카카오 장소 표시는 허용된다(카카오 운영진 답변, T0.15). 카카오는 카카오맵을 권장하므로 지도 레이어는 계속 `MapProvider` 인터페이스로 감싼다.
