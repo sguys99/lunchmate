@@ -51,7 +51,7 @@ tasks.md에서 다음 미완료 작업부터 진행해줘. 시작 전에 관련 
 
 | 단계 | 이름 | 예상 기간 | 게이트 | 상태 | 완료/전체 |
 | --- | --- | --- | --- | --- | --- |
-| 0 | 준비 (문서 정리, 계정, 리포) | 3일 | G0 | 진행 중 | 3/36 |
+| 0 | 준비 (문서 정리, 계정, 리포) | 3일 | G0 | 완료 (10/28) | 36/36 |
 | 1 | 디자인 시스템: DESIGN.md 시안 | 4일 | ⛔ G1 | 진행 중 | 3/21 |
 | 2 | 공통 기반: 문구, 컴포넌트, 모션 | 4일 | G2 | 대기 | 0/22 |
 | 3 | 핵심 화면 시안: 홈 카드, 랜딩 | 3일 | ⛔ G3 | 대기 | 0/8 |
@@ -203,7 +203,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T0.10 Supabase 개발 프로젝트 생성 (리전: 서울), Site URL과 Redirect URLs(T0.5 도메인, `http://localhost:3000`) 등록. provider: 구글은 내장, **카카오와 네이버는 커스텀 OIDC provider로 등록**(`custom:kakao` issuer `https://kauth.kakao.com` scopes `openid profile_nickname profile_image`, `custom:naver` issuer `https://nid.naver.com` scopes `openid`, 둘 다 `email_optional: true`, 무료 플랜 커스텀 3개 중 2개 사용). provider 비밀값은 사용자가 대시보드에 직접 입력 (T0.14, T0.20)
 - [x] T0.11 PostHog 프로젝트(리전 선택), Sentry 프로젝트 생성
 - [x] T0.12 자체 도메인 후보 2~3개 가용성만 확인 (구매는 9단계 전)
-- [ ] T0.13 모든 키를 `.env.local`과 Vercel 환경변수에 등록, 브라우저 키 도메인 제한 확인
+- [x] T0.13 모든 키를 `.env.local`과 Vercel 환경변수에 등록, 브라우저 키 도메인 제한 확인
 
 #### 0.3 확인 필요 항목 조사 (결과는 `docs/research-notes.md`에 출처와 함께)
 
@@ -236,7 +236,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T0.33 GitHub 리포와 Vercel 연결, `main` 푸시 시 자동 배포 확인
 - [x] T0.34 `MapProvider` 인터페이스 초안과 네이버 구현체로 빈 지도 표시
 - [x] T0.35 Sentry, PostHog SDK 설치만 (이벤트 연결은 T2.20). PostHog는 첫 렌더 후 동적 import, Sentry `beforeSend`에 좌표 필터 자리 마련 (T0.18, T0.27)
-- [ ] T0.36 **G0 확인**: `*.vercel.app`에서 네이버 지도가 보이고, pre-push 검사가 동작합니다.
+- [x] T0.36 **G0 확인**: `*.vercel.app`에서 네이버 지도가 보이고, pre-push 검사가 동작합니다.
 
 ---
 
