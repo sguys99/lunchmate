@@ -384,7 +384,47 @@ function onGoogleClick() {
 
 ### T0.20 카카오 provider의 이메일 필수 여부와 비즈 앱 전환 필요성
 
-조사 중
+**질문**: Supabase 카카오 provider가 이메일을 필수로 요구하는가? 카카오 이메일 동의 항목에 비즈 앱 전환이 필요한가? "Allow users without an email" 같은 옵션으로 닉네임과 프로필 사진만 받는 구성이 가능한가?
+
+**결론: 내장 카카오 provider는 현재 `account_email` 스코프를 항상 요청하므로, 비즈 앱이 아니면 "Allow users without an email"을 켜도 KOE205로 로그인이 막힌다. 닉네임과 사진만 받으려면 카카오도 커스텀 OIDC provider(`custom:kakao`, scopes `openid profile_nickname profile_image`, `email_optional: true`)로 붙이는 것을 권장하고, 내장 provider를 쓰려면 개인 개발자 비즈 앱 전환(본인인증 + 약관 동의, 사업자번호 불필요) 후 이메일을 선택 동의로 두어야 한다.**
+
+#### 근거
+
+- Supabase 카카오 가이드 https://supabase.com/docs/guides/auth/social-sign-in/auth-kakao : 동의 항목 profile_nickname, profile_image, account_email(선택). "the "account_email" consent item is only available for apps that are registered as "Biz App"". 이메일이 필요 없으면 "omit `account_email` and enable **Allow users without an email**". 콜백 `https://<project-ref>.supabase.co/auth/v1/callback`, 카카오 로그인 Client Secret 활성화 필요.
+- Supabase Auth 소스 https://github.com/supabase/auth/blob/master/internal/api/provider/kakao.go : 기본 스코프가 `account_email`, `profile_image`, `profile_nickname`으로 하드코딩되고 클라이언트 `scopes`는 뒤에 덧붙이기만 한다(제거 불가).
+- 이슈 https://github.com/supabase/auth/issues/2574 (2026-06-12, open): "Kakao provider hardcodes account_email scope, blocking non-Biz Korean developers", "Allow users without an email" 설정과 무관하게 KOE205 발생.
+- PR https://github.com/supabase/auth/pull/2579 (2026-06-16, 2026-10-28 기준 미병합): `email_optional`일 때 `account_email`을 기본 스코프에서 빼는 수정. 같은 PR에 카카오 디벨로퍼스 담당자 댓글(2026-10-23): "The `account_email` scope is only available to Biz apps", "Individual developers can switch to a Biz app by verifying their identity and agreeing to the terms", 설정하지 않은 스코프를 요청하면 동의 화면 전에 KOE205로 거부. 앞선 PR #2397(기본 스코프에서 이메일 제거)은 하위 호환 문제로 닫힘.
+- 카카오 동의 항목 https://developers.kakao.com/docs/ko/kakaologin/utilize : 닉네임, 프로필 사진은 조건 없이 제공. 카카오계정 이메일 사용 조건은 "비즈 앱, 테스트 앱".
+- 카카오 앱 설정 https://developers.kakao.com/docs/ko/app-setting/app : 개인 개발자 비즈 앱은 앱 소유자 본인인증 + 카카오비즈니스 통합 서비스 약관 동의로 전환, 사업자등록번호 불필요, 비즈니스 채널 연결 불가.
+- 카카오 OIDC discovery 실측 `https://kauth.kakao.com/.well-known/openid-configuration` (2026-10-28): issuer `https://kauth.kakao.com`, `claims_supported`에 nickname, picture, email 포함, `token_endpoint_auth_methods_supported: ["client_secret_post"]`, PKCE S256 지원.
+- Supabase Auth 소스 https://github.com/supabase/auth/blob/master/internal/api/provider/oidc.go : issuer가 카카오인 id_token은 전용 파서가 nickname을 name으로, picture를 사진으로 매핑. 커스텀 OIDC provider도 같은 `ParseIDToken` 경로를 탄다.
+- 개발자 포럼 https://devtalk.kakao.com/t/koe205-account-email/147207 : 일반 앱에서 account_email 요청 시 KOE205 사례.
+
+**확인일**: 2026-10-28
+
+#### 영향받는 문서와 작업
+
+- PRD AUTH-01, 12장 외부 연동 표 Supabase Auth 행: "카카오 provider의 이메일 필수 여부 [확인 필요]" 해소. 카카오도 커스텀 OIDC로 붙인다는 결정(또는 비즈 앱 전환 결정)을 반영. PRD 비기능 "카카오, 네이버 로그인은 닉네임, 프로필 사진만 수집"과 일치하는 쪽은 커스텀 OIDC안.
+- tasks T0.7: 카카오 디벨로퍼스에서 OpenID Connect 활성화, 카카오 로그인 Client Secret 활성화, Redirect URI에 Supabase 콜백 등록, 동의 항목은 닉네임, 프로필 사진만.
+- tasks T0.10: "카카오와 구글 provider 연결" 중 카카오를 커스텀 provider 등록으로 변경. 무료 플랜 커스텀 한도 3개 중 2개 사용(네이버, 카카오).
+- tasks T4.6: `signInWithOAuth({ provider: 'custom:kakao' })`. 구글만 내장 provider.
+- 환경변수 추가 없음(카카오 REST 키와 Client Secret은 Supabase 대시보드에만 입력). `NEXT_PUBLIC_KAKAO_JS_KEY`는 공유와 지도 검색용으로 그대로.
+- docs/setup-guide.md(작성 시): 카카오 콘솔 OIDC 활성화, Client Secret, Supabase 콜백 URL, 커스텀 provider 값 기록.
+- 개인정보 처리방침(T10.3): 이메일 미수집 문구 유지 가능.
+
+#### 권장 설계
+
+1. 기본안(커스텀 OIDC): `provider_type: 'oidc'`, `identifier: 'custom:kakao'`, `name: '카카오'`, `issuer: 'https://kauth.kakao.com'`, `client_id: REST API 키`, `client_secret: 카카오 로그인 Client Secret`, `scopes: ['openid', 'profile_nickname', 'profile_image']`, `email_optional: true`. 닉네임과 사진은 id_token에서 바로 `user_metadata`로 들어오므로 네이버와 달리 프로필 API 호출이 필요 없다.
+2. 대안(내장 provider): 개인 개발자 비즈 앱으로 전환 후 `account_email`을 **선택 동의**로 설정하고 Supabase에서 "Allow users without an email"을 켠다. 동의 화면에 이메일 선택 항목이 보이고, 동의한 사용자는 이메일이 `auth.users`에 저장되므로 처리방침에 수집 항목으로 적어야 한다.
+3. 어느 쪽이든 **처음 고른 provider를 유지**한다. 나중에 `custom:kakao`에서 내장 `kakao`로(또는 반대로) 바꾸면 provider 이름이 달라 기존 사용자가 새 계정으로 생성된다(이메일이 없어 자동 연결도 안 됨). PR #2579가 병합되어도 MVP 중에는 전환하지 않는다.
+4. 계정 연결(AUTH-08): 이메일 미수집이므로 MVP에서 불가, PRD 비고와 일치.
+
+#### 남은 불확실성
+
+- 커스텀 OIDC로 카카오 토큰 교환 시 인증 방식 자동 감지(Basic 먼저 시도)가 `client_secret_post` 전용인 카카오에서 문제없는지 개발 프로젝트에서 실측(T4.6).
+- 동의 거부, 닉네임만 동의 등 부분 동의 시 id_token에 nickname, picture가 빠지는 경우의 처리(온보딩에서 닉네임 입력으로 대체).
+- 카카오 id_token `sub`는 앱별(pairwise) 값으로 공시되어 있다. 내장 provider의 회원번호와 같은 값인지는 미확인(provider 전환을 하지 않으면 무관).
+- PR #2579 병합 시점과 Supabase 호스팅 반영 시점은 미정. 병합되어도 위 3번 원칙대로 유지.
 
 ### T0.27 동적 라이브러리 사전 조사 (버전, 유지보수 상태, 라이선스, 호환성)
 
