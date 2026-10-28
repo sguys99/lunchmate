@@ -1,0 +1,67 @@
+#!/bin/sh
+# 런치메이트 pre-push 훅 (T0.32)
+#
+# main 푸시 = Vercel 프로덕션 배포이므로(CLAUDE.md 11장) 푸시 전에 아래 4개 검사를 순서대로 돌린다.
+#   lint -> typecheck -> test -> lint:copy
+# 하나라도 실패하면 exit 1로 푸시를 막는다.
+#
+# 포함하지 않는 것과 이유:
+#   - build: 푸시마다 수십 초~분 단위로 느려진다. 빌드 오류는 Vercel 배포 단계에서 잡히고,
+#     타입 오류 대부분은 typecheck가 먼저 잡는다.
+#   - test:e2e: 브라우저 설치와 dev 서버, 클라우드 DB가 필요해 느리고 환경 의존적이다.
+#     작업 완료 시 수동으로 돌린다.
+#
+# 우회: CI 환경이나 긴급 시에만 `git push --no-verify`. 별도 환경변수 우회는 두지 않는다.
+#
+# 설치: package.json의 prepare 스크립트가 `git config core.hooksPath .githooks`를 설정한다.
+
+set -u
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || {
+  echo "pre-push: git 저장소를 찾을 수 없습니다." >&2
+  exit 1
+}
+cd "$root" || exit 1
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pre-push: pnpm을 찾을 수 없습니다. pnpm 설치 후 다시 푸시하세요." >&2
+  echo "푸시가 중단되었습니다: 환경 확인" >&2
+  exit 1
+fi
+
+# 커밋되지 않은 변경은 검사 결과를 오염시킬 수 있다(푸시되는 커밋과 다른 내용을 검사).
+# 자동 stash 같은 조작은 하지 않고 경고만 한다. 검사는 현재 작업 트리 기준이다.
+if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+  echo "pre-push 경고: 커밋되지 않은 변경이 있습니다. 검사는 현재 작업 트리 기준이라" >&2
+  echo "  푸시되는 커밋과 결과가 다를 수 있습니다. (git status로 확인)" >&2
+  echo "" >&2
+fi
+
+total_start=$(date +%s)
+
+run_step() {
+  name=$1
+  echo "==> [$name] 시작"
+  step_start=$(date +%s)
+  # 훅의 stdin(푸시 ref 목록)을 검사 도구가 읽지 않도록 /dev/null을 연결한다.
+  pnpm run --silent "$name" </dev/null
+  status=$?
+  elapsed=$(( $(date +%s) - step_start ))
+  if [ "$status" -ne 0 ]; then
+    echo "==> [$name] 실패 (${elapsed}초, exit $status)" >&2
+    echo "" >&2
+    echo "푸시가 중단되었습니다: $name" >&2
+    echo "  문제를 고친 뒤 다시 푸시하세요. CI 환경이나 긴급 시에만 git push --no-verify로 우회합니다." >&2
+    exit 1
+  fi
+  echo "==> [$name] 통과 (${elapsed}초)"
+  echo ""
+}
+
+run_step lint
+run_step typecheck
+run_step test
+run_step lint:copy
+
+echo "pre-push: 모든 검사 통과 (총 $(( $(date +%s) - total_start ))초)"
+exit 0
