@@ -20,6 +20,34 @@ describe("scrubString", () => {
     expect(scrubString("-33.8688/151.2093")).toBe(FILTERED);
   });
 
+  it("JSON 문자열, 앞에 ?가 없는 쿼리, 인코딩된 중첩 URL의 좌표를 가린다", () => {
+    expect(scrubString('{"lat":37.5665,"lng":"126.978","q":1}')).toBe(
+      `{"lat":"${FILTERED}","lng":"${FILTERED}","q":1}`,
+    );
+    expect(scrubString("x=126.978&y=37.5665&page=2")).toBe(
+      `x=${FILTERED}&y=${FILTERED}&page=2`,
+    );
+    expect(scrubString("/login?next=%2Fmap%3Flat%3D37.5665%26tab%3D1")).toBe(
+      `/login?next=%2Fmap%3Flat%3D${FILTERED}%26tab%3D1`,
+    );
+  });
+
+  it("소수점 3자리 좌표 쌍과 한국 범위 단독 좌표 숫자 문자열을 가린다", () => {
+    expect(scrubString("37.566,126.978")).toBe(FILTERED);
+    expect(scrubString("moved 37.566535")).toBe(`moved ${FILTERED}`);
+    expect(scrubString("126.9779692")).toBe(FILTERED);
+    expect(scrubString("-37.566535")).toBe(FILTERED);
+  });
+
+  it("타임스탬프, 금액, 짧은 소수는 건드리지 않는다", () => {
+    expect(scrubString("1730000000.123 1730000001.456")).toBe(
+      "1730000000.123 1730000001.456",
+    );
+    expect(scrubString("37.5 126.9")).toBe("37.5 126.9");
+    expect(scrubString("37.5665")).toBe("37.5665");
+    expect(scrubString("12000원")).toBe("12000원");
+  });
+
   it("좌표가 아닌 숫자는 건드리지 않는다", () => {
     expect(scrubString("v1.2.3")).toBe("v1.2.3");
     expect(scrubString("가격 12.5 와 3.14")).toBe("가격 12.5 와 3.14");
@@ -52,6 +80,48 @@ describe("scrubCoordinates", () => {
       coords: FILTERED,
       keep: "ok",
     });
+  });
+
+  it("접미형 좌표 키를 가리고 비슷한 단어는 남긴다", () => {
+    expect(
+      scrubCoordinates({
+        office_lat: 37.5,
+        centerLng: 127,
+        user_longitude: 1,
+        flat: "yes",
+        salon: "ok",
+        origin: "office",
+      }),
+    ).toEqual({
+      office_lat: FILTERED,
+      centerLng: FILTERED,
+      user_longitude: FILTERED,
+      flat: "yes",
+      salon: "ok",
+      origin: "office",
+    });
+  });
+
+  it("position은 정수(카드 순서)만 남기고 좌표 값은 가린다", () => {
+    expect(scrubCoordinates({ position: 2 })).toEqual({ position: 2 });
+    expect(scrubCoordinates({ position: 37.5665 })).toEqual({
+      position: FILTERED,
+    });
+    expect(scrubCoordinates({ position: [37.5, 127.0] })).toEqual({
+      position: FILTERED,
+    });
+  });
+
+  it("[키, 값] 쌍 배열의 좌표 값을 가린다", () => {
+    expect(
+      scrubCoordinates([
+        ["lat", "37.5"],
+        ["q", "a"],
+      ]),
+    ).toEqual([
+      ["lat", FILTERED],
+      ["q", "a"],
+    ]);
   });
 
   it("중첩 객체, 배열, 문자열 값 안의 좌표를 가린다", () => {

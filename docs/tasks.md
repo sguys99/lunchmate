@@ -347,7 +347,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T2.18 공통 오류 경계와 사용자 친화적 오류 화면 (APP-06)
 - [ ] T2.19 TanStack Query 기본 설정: 세션 메모리 캐시만, persist 플러그인 금지 (카카오 데이터 저장 금지). `gcTime`은 T10.2 카카오 답변 전까지 짧게 잡습니다 (T0.16-3)
 - [x] T2.20 (10/29 완료, `src/lib/analytics/events.ts` PRD 10.2 이벤트 24개 판별 유니언, 좌표와 개인 정보 키 never, 런타임 가드, `track.ts` 큐 포함 지연 전송, autocapture off 유지와 before_send로 요소 텍스트, 좌표 제거, 페이지뷰 Provider 마운트는 앱 셸 연결 때) 분석 이벤트 타입 `src/lib/analytics/events.ts`: PRD 10.2절 이벤트를 타입으로 정의, 좌표와 개인 식별 속성은 타입에서 막음. PostHog autocapture 속성에 좌표가 섞이지 않게 필터 (T0.18)
-- [ ] T2.21 Sentry 설정: `beforeSend`와 breadcrumb 필터로 좌표, 쿼리스트링 위치값 스크러빙 + 테스트 (T0.18)
+- [x] T2.21 (10/29 완료, `sentry-options.ts` beforeSend, beforeBreadcrumb, beforeSendSpan(SDK 11 span 스트리밍 기본이라 beforeSendTransaction 제거) 3런타임 공통, `scrub.ts` JSON, 인코딩 URL, query_string 쌍, 접미형 키, 단독 좌표 숫자 패턴 + 테스트) Sentry 설정: `beforeSend`와 breadcrumb 필터로 좌표, 쿼리스트링 위치값 스크러빙 + 테스트 (T0.18)
 - [ ] T2.22 **G2 확인**: 갤러리에서 모든 컴포넌트가 라이트/다크, 축소 모션에서 정상이고 `lint:copy`가 통과합니다.
 
 ---
