@@ -221,13 +221,14 @@
 ## 6. 네이버 클라우드 플랫폼 Maps (T0.8)
 
 - 접속: https://www.ncloud.com → 회원가입, 로그인 → 콘솔 https://console.ncloud.com
-- 기존 "Application Services > Maps"는 업그레이드된 **새 Maps**(AI·NAVER API 소속)로 대체되었습니다. 신규 등록은 새 Maps로 합니다. 옛 블로그 글의 메뉴와 다릅니다.
-- 결제수단 등록이 필요할 수 있습니다(무료 이용량 안에서도). [콘솔에서 확인]
+- 신규 등록은 **새 Maps**(Application Services > Maps, console.ncloud.com/maps/subscription)에서 합니다. 옛 블로그 글의 메뉴와 다릅니다.
+- 결제수단이 없으면 콘솔 전체가 "서비스 이용이 불가능한 계정입니다"로 막힙니다. 마이페이지 > 결제수단에서 먼저 등록합니다(2026-10-28 확인).
 
 ### 6.1 Application 등록
 
 1. 콘솔 우측 상단 **리전 & 플랫폼**을 확인합니다(기본값 유지, [콘솔에서 확인]).
-2. **Menu > All Services > AI·NAVER API > AI·NAVER API > Application** 으로 이동.
+2. **https://console.ncloud.com/maps/subscription** 으로 이동(Menu > All Services > Application Services > Maps)하고 **이용 신청하기**를 누릅니다.
+   - 갱신 2026-10-28: 새로 가입한 계정에서는 AI·NAVER API > Application의 Service 선택에 CLOVA만 보이고 Maps가 나오지 않았습니다. 새 Maps 메뉴에서 등록합니다.
 3. 처음이면 **Application 등록**에서 AI·NAVER API 이용약관에 동의합니다.
 4. Application 이름: `lunchmate` (최대 20자)
 5. Service 선택: **Maps > Web Dynamic Map**만 체크. (주소 검색이 필요해지면 Geocoding을 나중에 추가. 체크하지 않은 API를 부르면 429 오류)
