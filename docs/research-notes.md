@@ -426,6 +426,151 @@ function onGoogleClick() {
 - 카카오 id_token `sub`는 앱별(pairwise) 값으로 공시되어 있다. 내장 provider의 회원번호와 같은 값인지는 미확인(provider 전환을 하지 않으면 무관).
 - PR #2579 병합 시점과 Supabase 호스팅 반영 시점은 미정. 병합되어도 위 3번 원칙대로 유지.
 
-### T0.27 동적 라이브러리 사전 조사 (버전, 유지보수 상태, 라이선스, 호환성)
+### T0.27 동적 라이브러리와 기반 스택 사전 조사
 
-조사 중
+- **확인일**: 2026-10-28
+- **조사 방법**: npm registry(`npm view <pkg> version time license repository peerDependencies`), GitHub API(`gh api repos/...`: archived, pushed_at, 최근 커밋, 이슈), Context7(Next.js, Motion), 공식 문서(WebFetch), bundlephobia API(gzip 근사), jsDelivr/unpkg 파일 목록(Pretendard), shadcn 레지스트리 JSON
+
+#### 질문
+
+1. Next.js 최신 안정판은 무엇이고 어떤 React 버전을 요구하는가?
+2. 2.4절 후보(Motion, Vaul, Sonner, NumberFlow, canvas-confetti, Embla, 복사형 효과)와 기반 스택(Tailwind v4, shadcn CLI, TanStack Query, Zustand, zod, Supabase, PostHog, Sentry, Playwright, Vitest)의 최신 버전, 유지보수 상태, 라이선스, 호환성, 크기는?
+3. Vaul은 계속 써도 되는가? 대안은?
+4. `@next/bundle-analyzer`는 Turbopack 기본 빌드에서 쓸 수 있는가?
+5. Pretendard Variable은 어떻게 배포하고, 네이버 지도 MarkerClustering은 어떻게 붙이는가?
+
+#### 결론
+
+- **Next.js 16.4.3(2026-10-23, `latest` 태그) + React 19.3.1(2026-10-14)로 시작한다.** Next 16 peer는 `react ^18.2.0 || ^19.0.0`, Node 20.9 이상. App Router는 내장 React canary를 쓰지만 package.json에는 `react`/`react-dom` 19.3.1을 명시한다. `next dev`/`next build` 기본 번들러는 Turbopack이다.
+- **Vaul은 채택하지 않는다.** npm 마지막 릴리스 1.1.2(2024-12-14), 저장소 README에 "This repo is unmaintained"(2025-10-03 커밋 "Explain maintenance")가 명시되어 있다. 아카이브는 아니지만 열린 이슈 163개, React 19 관련 이슈("Type error in React19 pnpm workspaces", "A React Element from an older version of React was rendered")와 2026-08 스크롤 잠금 미해제 버그가 방치 중이다.
+- **바텀시트는 Base UI Drawer(`@base-ui/react/drawer`, shadcn base 스타일 `drawer`)를 1순위로 한다.** 1.2.0(2026-02)에 추가, 1.9.0(2026-10-09)까지 매 릴리스 Drawer 수정이 이어지고, `snapPoints`, 스와이프 닫기, 중첩, 가상 키보드 처리, 포커스 트랩을 공식 지원한다. shadcn 레지스트리의 base 스타일(`base-nova`) drawer가 이미 Base UI로 바뀌었고, radix 스타일(`new-york-v4`, `radix-nova`)만 아직 vaul을 쓴다. 2순위는 Motion `drag` + `domMax` 직접 구현(이미 Motion을 쓰므로 추가 의존성 0, 대신 포커스 트랩, 스크롤 잠금, 키보드 처리를 직접 만들어야 함). `react-modal-sheet`(5.6.0, 2026-03, Motion 기반, 8.7KB gzip)는 3순위 예비안.
+- **번들 분석은 `next analyze`(Turbopack 내장 분석기, v16.1+)로 한다.** `@next/bundle-analyzer`(16.4.3)는 공식 문서상 "plugin for Webpack"이며 Turbopack 빌드에서는 동작하지 않는다(쓰려면 `next build --webpack`으로 별도 빌드). `pnpm analyze`는 `next analyze --output --snapshot <이름>`으로 정의하고, 비교 수치는 `next analyze export --snapshot <이름>`(v16.4+, JSON Lines)로 뽑아 bundle-log.md에 적는다.
+- **Motion은 `motion` 14.7.1, `m` + `LazyMotion` 필수.** 공식 수치: `motion` 컴포넌트는 기능이 모두 포함되어 tree shake가 안 됨(React 문서 기준 약 34~43KB, 문서 내 표기 차이 있음), `m` 초기 약 5KB, `domAnimation` +24KB, `domMax`(drag, layout) +38KB. 홈은 `domAnimation` 동기 로딩, 스와이프/시트가 필요한 곳은 `domMax`를 비동기(`features={() => import(...)}`)로 로딩한다.
+- **홈 200KB 예산 경고**: PostHog(posthog-js 약 104KB gzip)와 supabase-js(약 56KB), zod 전체(약 89KB)를 홈 초기 번들에 그대로 넣으면 예산을 넘긴다. PostHog는 첫 렌더 후 동적 import, 클라이언트 검증은 `zod/mini` 사용을 검토한다.
+- **React Bits는 "MIT + Commons Clause"**이므로 앱 안에서 쓰는 것은 허용되지만 컴포넌트 자체 재배포는 금지다. Magic UI, Motion Primitives는 MIT.
+
+#### 표 1. 기반 스택
+
+| 패키지 | 최신 버전 | 마지막 릴리스 | 유지보수 | 라이선스 | Next 16 / React 19 호환 | gzip(근사) | 권장 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| next | 16.4.3 | 2026-10-23 | 활발(canary 16.5.0-canary.29) | MIT | 본체. peer react ^18.2 \|\| ^19 | 해당 없음 | 채택 |
+| react / react-dom | 19.3.1 | 2026-10-14 | 활발 | MIT | 기준 | 해당 없음 | 채택 |
+| tailwindcss | 4.3.3 | 2026-07-16 | 활발 | MIT | create-next-app 기본 포함 | 런타임 0 | 채택 |
+| shadcn (CLI) | 4.23.0 | 2026-10-27 | 활발 | MIT | Tailwind v4, React 19 지원. radix/base 두 계열 스타일 제공 | 복사형 | 채택. base 계열 스타일 검토(아래) |
+| @tanstack/react-query | 5.105.0 | 2026-10-26 | 활발 | MIT | peer react ^18 \|\| ^19 | 13.2KB | 채택 |
+| zustand | 5.0.16 | 2026-10-22 | 활발 | MIT | peer react >=18 | 0.5KB | 채택 |
+| zod | 4.6.7 | 2026-10-12 | 활발, **v4 확정** | MIT | 무관 | 88.9KB(전체) | 채택. 서버는 `zod`, 클라이언트는 `zod/mini` 검토 |
+| @supabase/supabase-js | 2.118.0 | 2026-10-15 | 활발 | MIT | 무관 | 56.3KB | 채택 |
+| @supabase/ssr | 0.12.7 | 2026-09-08 | 활발(0.x) | MIT | peer supabase-js ^2.114.0 | 6.1KB | 채택. 0.x라 마이너 업데이트 시 변경 로그 확인 |
+| posthog-js | 1.440.0 | 2026-10-27 | 매우 활발 | Apache-2.0 AND MIT | peer react >=16.8 | 103.5KB | 채택. 홈 초기 번들에서 분리(동적 import) |
+| @sentry/nextjs | 11.9.0 | 2026-10-23 | 활발 | MIT | peer next ^14 \|\| ^15 \|\| ^16 | 측정 안 함(클라이언트 SDK 큼) | 채택. 클라이언트 통합 최소화, PoC에서 측정 |
+| @playwright/test | 1.64.1 | 2026-10-14 | 활발 | Apache-2.0 | next peer `^1.51.1` 충족 | 개발 의존성 | 채택 |
+| vitest | 5.0.5 | 2026-10-15 | 활발 | MIT | peer vite ^6.4 \|\| ^7 \|\| ^8 | 개발 의존성 | 채택. vite를 명시 설치해야 할 수 있음 |
+| @next/bundle-analyzer | 16.4.3 | 2026-10-23 | next와 동반 릴리스 | MIT | **Webpack 전용** | 개발 의존성 | 미채택. `next analyze` 사용 |
+
+#### 표 2. 동적 컴포넌트 (tasks 2.4절 후보)
+
+| 패키지 | 최신 버전 | 마지막 릴리스 | 유지보수 | 라이선스 | React 19 호환 | gzip(근사) | 권장 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| motion (`motion/react`) | 14.7.1 | 2026-10-27 | 매우 활발 | MIT | peer react ^18 \|\| ^19 | 전체 58.5KB(bundlephobia), 공식: `m` 약 5KB + domAnimation 24KB / domMax 38KB | 채택. `m` + `LazyMotion` 강제 |
+| vaul | 1.1.2 | 2024-12-14 | **미유지(README 명시)**, 아카이브 아님 | MIT | peer는 ^19 포함, React 19 관련 이슈 방치 | 18.5KB(radix dialog 포함) | **미채택** |
+| @base-ui/react (Drawer) | 1.9.0 | 2026-10-09 | 매월 릴리스, Drawer 수정 지속 | MIT | peer react ^17 \|\| ^18 \|\| ^19 | 서브패스 import라 PoC에서 측정 | **바텀시트 1순위** |
+| react-modal-sheet | 5.6.0 | 2026-03-27 | 보통(7개월 무릴리스) | MIT | peer motion >=11, react >=16 | 8.7KB(+motion) | 예비안 |
+| sonner | 2.0.8 | 2026-08-09 | 유지 중 | MIT | peer react ^18 \|\| ^19 | 9.4KB | 채택. shadcn `sonner`는 next-themes 의존 |
+| @number-flow/react | 0.6.2 | 2026-07-18 | 유지 중(0.x) | MIT | peer react ^18 \|\| ^19 | 6.3KB | 채택. 해당 컴포넌트에서만 |
+| canvas-confetti | 1.9.4 | 2025-10-25 | 안정(변경 적음) | ISC | 프레임워크 무관 | 4.3KB | 채택. 동적 import |
+| @types/canvas-confetti | 1.9.0 | 2024-12-17 | DefinitelyTyped | MIT | 해당 없음 | 타입만 | 함께 설치 |
+| embla-carousel-react | 8.6.0 | 2025-04-04 | 저장소 활발(2026-10 푸시), 9.0.0-rc04 진행 중 | MIT | peer react ^19 포함 | 7.3KB | 시안 결과에 따라. shadcn carousel은 8.x 기준이므로 8.6.0 고정 |
+| Magic UI | 복사형 | 저장소 2026-10-17 푸시 | 활발 | MIT | 소스 복사 | 컴포넌트별 | 필요 시 복사 |
+| Motion Primitives | 복사형 | 저장소 2026-09-28 푸시 | 활발 | MIT | motion 의존 | 컴포넌트별 | 필요 시 복사 |
+| React Bits | 복사형 | 저장소 2026-10-19 푸시 | 활발 | **MIT + Commons Clause** | 소스 복사 | 컴포넌트별 | 앱 내 사용 가능. 컴포넌트 재배포 금지 |
+| 네이버 MarkerClustering | 예제 소스(npm 없음) | 저장소 2020-02-14 푸시 | 사실상 정지(예제 코드) | Apache-2.0(파일 헤더) | 프레임워크 무관, 전역 `naver` 필요 | 원본 약 20KB(비압축) | 소스 복사 후 래핑 |
+
+gzip 수치 출처: bundlephobia API(`https://bundlephobia.com/api/size?package=<pkg>@<ver>`, 2026-10-28 조회). 패키지 전체 기준이라 tree shaking 후 실제 증가량은 더 작을 수 있다. 실제 값은 T2.13 PoC에서 `next analyze`로 측정해 bundle-log.md에 기록한다.
+
+#### 세부 메모
+
+**Motion 사용법**
+
+```tsx
+import { LazyMotion, domAnimation } from "motion/react"
+import * as m from "motion/react-m"
+
+// 홈: 동기 로딩
+<LazyMotion features={domAnimation} strict>{children}</LazyMotion>
+
+// 스와이프/시트: domMax 비동기 로딩
+// features-max.ts: export { domMax as default } from "motion/react"
+const loadMax = () => import("./features-max").then((r) => r.default)
+<LazyMotion features={loadMax} strict>...</LazyMotion>
+```
+
+`strict`를 켜면 `LazyMotion` 안에서 실수로 `motion.div`를 쓸 때 오류가 나서 전체 번들 유입을 막는다.
+
+**바텀시트 결론 근거**
+
+- Vaul README: "This repo is unmaintained. I might come back to it at some point, but not in the near future."
+- shadcn 레지스트리: `new-york-v4/drawer.json`, `radix-nova/drawer.json`의 dependencies는 `vaul`, `base-nova/drawer.json`은 `@base-ui/react`(Drawer에 `snapPoints`, `swipeDirection` 사용).
+- Base UI Drawer 열린 이슈(2026-10): Safari 스크롤 잠금 시 전환 끊김, Android WebView `resizes-content` 키보드 미지원 등. 활발히 보고되고 처리되는 단계라 PoC에서 iOS Safari와 카카오톡 인앱 브라우저 실기기 확인이 필요하다.
+
+**번들 분석**
+
+- `next analyze`: 빌드 산출물을 만들지 않고 Turbopack 모듈 그래프로 분석. `--output`은 `.next/diagnostics/analyze`에 저장, `--snapshot <name>`으로 이름 붙임, `next analyze export --snapshot <name>`은 JSON Lines 출력(v16.4.0).
+- `@next/bundle-analyzer`: 문서 제목부터 "`@next/bundle-analyzer` plugin for Webpack". Turbopack이 기본이므로 쓰려면 `ANALYZE=true next build --webpack`처럼 프로덕션과 다른 번들러로 빌드해야 해서 수치가 실제 배포와 어긋난다.
+
+**Pretendard Variable**
+
+- npm `pretendard` 1.3.9(2023-11-05, GitHub 최신 릴리스도 v1.3.9), 라이선스 OFL-1.1.
+- 파일 경로(npm 패키지 내부):
+  - 단일 파일: `pretendard/dist/web/variable/woff2/PretendardVariable.woff2` (약 2.06MB)
+  - 다이내믹 서브셋 CSS: `pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css` (unicode-range 92개 조각, `woff2-dynamic-subset/PretendardVariable.subset.{0..91}.woff2`, 조각당 약 31~44KB)
+- 권장: 다이내믹 서브셋 CSS를 루트 레이아웃(또는 globals.css)에서 import해 자체 호스팅한다(외부 CDN 의존 없음, 필요한 글자 조각만 받음). `next/font/local`은 unicode-range 조각 92개를 다루기 번거롭고, 단일 2MB 파일은 LCP 예산에 불리하다. `font-family: "Pretendard Variable"`.
+
+**네이버 지도 MarkerClustering**
+
+- 공식 저장소 `navermaps/marker-tools.js`의 `marker-clustering/src/MarkerClustering.js`(Apache-2.0, 2016 NAVER Corp.)를 복사해 쓰는 방식이다. npm 패키지가 없다.
+- 파일 최상단에서 `naver.maps.Util.ClassExtend(MarkerClustering, naver.maps.OverlayView, ...)`를 실행하므로 **지도 SDK 로드가 끝난 뒤에** 평가되어야 한다. 정적 import가 아니라, SDK `onload` 이후 `src/lib/naver/marker-clustering.ts`에서 동적 import 또는 팩토리 함수로 감싸 평가한다.
+- 옵션: `map`, `markers`, `minClusterSize`(기본 2), `maxZoom`(기본 13), `gridSize`(기본 100), `icons`, `indexGenerator`([10,100,200,500,1000]), `disableClickZoom`, `averageCenter`, `stylingFunction`. 예제 아이콘은 인라인 style과 이미지 URL이므로, 토큰 클래스 기반 HTML로 바꿔 하드코딩 색 금지 규칙을 지킨다.
+- 최대 45곳 후보라 클러스터링 필요성 자체가 낮다. 지도 시안에서 필요할 때만 넣는다.
+
+#### 근거 출처 URL
+
+- Next.js 설치(Node 20.9, Turbopack 기본, App Router React canary): https://nextjs.org/docs/app/getting-started/installation (lastUpdated 2026-10-02)
+- Next.js 번들 분석(next analyze v16.1+, export v16.4, @next/bundle-analyzer는 Webpack용): https://nextjs.org/docs/app/guides/package-bundling (lastUpdated 2026-10-15)
+- next CLI `next analyze` 옵션: https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/06-cli/next.mdx
+- Motion 번들 크기와 LazyMotion: https://motion.dev/docs/react-reduce-bundle-size
+- Vaul 저장소(미유지 공지): https://github.com/emilkowalski/vaul
+- Vaul React 19 이슈: https://github.com/emilkowalski/vaul/issues?q=React+19
+- Base UI Drawer: https://base-ui.com/react/components/drawer , 릴리스 노트 https://github.com/mui/base-ui/releases/tag/v1.2.0 , https://github.com/mui/base-ui/releases/tag/v1.9.0
+- shadcn 레지스트리: https://ui.shadcn.com/r/styles/new-york-v4/drawer.json , https://ui.shadcn.com/r/styles/base-nova/drawer.json , https://ui.shadcn.com/r/styles/new-york-v4/carousel.json , https://ui.shadcn.com/r/styles/new-york-v4/sonner.json
+- react-modal-sheet: https://github.com/Temzasse/react-modal-sheet
+- React Bits 라이선스: https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md
+- Magic UI: https://github.com/magicuidesign/magicui , Motion Primitives: https://github.com/ibelick/motion-primitives
+- Pretendard: https://github.com/orioncactus/pretendard , 파일 목록 https://data.jsdelivr.com/v1/packages/npm/pretendard@1.3.9?structure=flat
+- 네이버 MarkerClustering: https://github.com/navermaps/marker-tools.js/tree/master/marker-clustering
+- npm 메타데이터: `https://registry.npmjs.org/<pkg>` (각 패키지 version, time, license, peerDependencies)
+- gzip 크기: https://bundlephobia.com/api/size?package=<pkg>@<ver>
+
+#### 영향받는 문서와 작업
+
+1. **tasks.md 2.4절 표, Vaul 행 교체 제안**
+   - 현재: `| Vaul 또는 Motion 직접 구현 | 스냅 포인트 바텀시트 | 지도 상세, 피드백 | 지도 탭 진입 시 지연 로딩 | Vaul 유지보수 상태를 T0.27에서 확인 후 결정 |`
+   - 제안: `| Base UI Drawer (\`@base-ui/react/drawer\`, shadcn base 스타일 drawer) | 스냅 포인트 바텀시트 | 지도 상세, 피드백 | 지도 탭 진입 시 지연 로딩 | Vaul은 미유지(T0.27)로 제외. 예비안: Motion drag 직접 구현 |`
+2. **tasks.md 2.4절 Motion 행 비고 보강 제안**: "`m` 컴포넌트(`motion/react-m`) + `LazyMotion strict`. 홈은 domAnimation 동기, domMax는 비동기 로딩"
+3. **tasks.md 2.4절 복사형 행 비고 보강 제안**: "React Bits는 MIT + Commons Clause(컴포넌트 재배포 금지). 복사한 파일 상단에 출처와 라이선스 주석"
+4. **tasks.md 2.4절 Embla 행 비고**: "8.6.0 고정(9.x는 RC, shadcn carousel은 8.x 기준)"
+5. **tasks.md 2.4절 사용 규칙에 추가 제안**: "분석/관측 SDK(PostHog, Sentry 클라이언트)는 홈 초기 번들에 넣지 않고 첫 렌더 이후 로딩한다."
+6. **CLAUDE.md 2장 표**: 동적 컴포넌트 칸의 "Vaul 또는 Motion 바텀시트"를 "Base UI Drawer(예비: Motion 직접 구현)"로 수정 제안. 프레임워크 칸에 "Next.js 16.x(조사 시점 16.4.3), React 19" 명시 제안.
+7. **CLAUDE.md 3장 명령어**: `pnpm analyze` 정의를 `next analyze --output --snapshot <이름>`으로 명시하고, `@next/bundle-analyzer`는 쓰지 않는다고 적는다.
+8. **shadcn 초기화(T1.x 또는 T2.x 스캐폴딩)**: radix 계열과 base 계열 중 선택이 필요하다. 바텀시트를 Base UI로 가면 base 계열 스타일(`base-nova` 등)로 init하는 편이 일관된다. 이것은 사용자 결정 사항이다.
+9. **T2.13(동적 라이브러리 PoC)**: Base UI Drawer 스냅 포인트 시트, Motion domMax 비동기 로딩, PostHog 지연 로딩의 실제 증가량을 `next analyze export`로 측정해 bundle-log.md에 기록.
+
+#### 남은 불확실성
+
+- Base UI Drawer가 공식 문서에서 "preview/안정" 중 어느 단계로 표기되는지 확인하지 못했다(문서 페이지에 단계 표기 없음). 열린 이슈에 iOS Safari 스크롤 잠금, Android WebView 키보드 문제가 있어 **iOS Safari와 카카오톡 인앱 브라우저 실기기 확인이 필요하다**(Claude가 대신 확인할 수 없음).
+- Base UI Drawer 단독 gzip 크기와, radix 계열 shadcn 컴포넌트와 섞어 쓸 때의 중복 크기는 PoC에서 측정해야 한다.
+- bundlephobia 수치는 패키지 전체 기준 근사치다. Motion 공식 수치(24KB/38KB)와 bundlephobia(58.5KB 전체)는 측정 기준이 다르다.
+- `@sentry/nextjs` 11.x 클라이언트 번들 크기는 측정하지 않았다. 홈 200KB 예산에 미치는 영향은 PoC에서 확인한다.
+- Next 기본 런타임(React 19 + Next 클라이언트)만으로 홈 예산의 상당 부분을 쓰므로, 200KB 예산의 현실성은 빈 앱 배포(T0 마지막 작업) 후 `next analyze`로 기준선을 잡아 재판단한다.
+- 네이버 지도 JS API v3의 인증 파라미터(`ncpClientId`/`ncpKeyId` 등) 최신 표기와 MarkerClustering 예제의 호환성은 지도 PoC에서 확인한다.
+- Pretendard npm 패키지는 2023-11 이후 릴리스가 없다(저장소는 2026-07 푸시). 폰트 자체는 안정적이지만, 새 버전이 나오면 경로가 바뀔 수 있다.

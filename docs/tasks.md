@@ -224,7 +224,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T0.24 `src/lib/env.ts`: zod로 환경변수 검증 (서버 전용 키가 클라이언트 번들에 들어가면 빌드 실패)
 - [ ] T0.25 `src/lib/flags.ts`: 기능 플래그 (`NEXT_PUBLIC_DESIGN_LAB` 포함, 프로덕션에서 `/design-lab` 404)
 - [ ] T0.26 `src/lib/time`: KST 끼니 판정, 마감 판정 유틸과 단위 테스트
-- [ ] T0.27 동적 라이브러리 사전 조사: 2.4절 후보의 최신 버전, 유지보수 상태(특히 Vaul), 라이선스, Next.js 최신판과 React 버전 호환성을 Context7과 공식 문서로 확인
+- [x] T0.27 동적 라이브러리 사전 조사: 2.4절 후보의 최신 버전, 유지보수 상태(특히 Vaul), 라이선스, Next.js 최신판과 React 버전 호환성을 Context7과 공식 문서로 확인
 - [ ] T0.28 Supabase CLI 연결, `pnpm db:push`, `pnpm db:types` 스크립트
 - [ ] T0.29 `pnpm shots <route>`: Playwright로 390px, 1280px, 라이트, 다크 캡처 → `docs/design/shots/`
 - [ ] T0.30 `@next/bundle-analyzer`와 `pnpm analyze` 스크립트
