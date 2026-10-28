@@ -79,7 +79,7 @@ function Segmented<T extends string>({
               className={cn(
                 "h-10 min-w-12 rounded-chip px-3.5 type-caption whitespace-nowrap",
                 "transition-colors duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
-                "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
                 active
                   ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground",
@@ -191,7 +191,7 @@ export function ComponentsGallery({ initial }: { initial: GalleryOptions }) {
                     <li key={id}>
                       <a
                         href={`#${id}`}
-                        className="flex min-h-11 items-center gap-3 type-caption text-muted-foreground outline-none hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring lg:min-h-9"
+                        className="flex min-h-11 items-center gap-3 type-caption text-muted-foreground outline-none hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-solid lg:min-h-9"
                       >
                         <span aria-hidden className="tabular-nums">
                           {String(i + 1).padStart(2, "0")}

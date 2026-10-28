@@ -104,8 +104,10 @@ export const commonCopy = {
 
   /** 짧은 알림(토스트) */
   toasts: {
-    linkCopied: "링크를 복사했습니다.",
+    linkCopied: "링크를 복사했습니다",
     copyFailed: "복사하지 못했습니다. 주소창의 링크를 직접 복사해 주세요.",
+    /** 토스트 설명. 다시 시도 버튼이 아래가 아니라 오른쪽에 붙으므로 states.error.body("아래 버튼")를 쓰지 않는다 */
+    retryLater: "잠시 뒤 다시 시도할 수 있습니다.",
   },
 
   /** 숫자 단위 라벨. 숫자 포매팅 자체는 src/lib/format이 맡는다 */

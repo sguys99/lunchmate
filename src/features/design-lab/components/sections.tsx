@@ -526,7 +526,7 @@ function Overlays() {
             size="sm"
             onClick={() =>
               toast.error(commonCopy.states.error.title, {
-                description: commonCopy.states.error.body,
+                description: commonCopy.toasts.retryLater,
                 action: { label: commonCopy.actions.retry, onClick: () => {} },
               })
             }

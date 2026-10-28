@@ -20,7 +20,7 @@ import type { DesignMotionTokens } from "../types";
 /* ---------- 버튼 ---------- */
 
 const focusRing =
-  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 export const buttonClass = {
   primary: cn(

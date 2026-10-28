@@ -73,9 +73,9 @@ function Toaster({ toastOptions, ...props }: ToasterProps) {
           title: "type-body-sm text-foreground break-keep",
           description: "type-caption text-muted-foreground break-keep",
           actionButton:
-            "relative -my-1 ml-auto shrink-0 self-center rounded-sm px-1 py-1 type-label text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 outline-none hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring before:absolute before:top-1/2 before:left-1/2 before:h-11 before:w-[max(100%,2.75rem)] before:-translate-x-1/2 before:-translate-y-1/2",
+            "relative -my-1 ml-auto shrink-0 self-center rounded-sm px-1 py-1 type-label text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 outline-none hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring before:absolute before:top-1/2 before:left-1/2 before:h-11 before:w-[max(100%,2.75rem)] before:-translate-x-1/2 before:-translate-y-1/2",
           cancelButton:
-            "shrink-0 self-center rounded-sm px-1 py-1 type-label text-muted-foreground outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+            "shrink-0 self-center rounded-sm px-1 py-1 type-label text-muted-foreground outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring",
           ...toastOptions?.classNames,
         },
       }}

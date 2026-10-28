@@ -13,6 +13,7 @@ describe("Input", () => {
     expect(input.className).toContain("type-body");
     expect(input.className).toContain("rounded-input");
     expect(input.className).toContain("focus-visible:outline-ring");
+    expect(input.className).toContain("focus-visible:outline-solid");
   });
 
   it("aria-invalid면 destructive 테두리 클래스가 걸린다", () => {

@@ -14,6 +14,32 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       await expectNoA11yViolations(page);
     });
 
+    // axe는 포커스 링이 보이는지 판정하지 않는다. Tab으로 갤러리를 돌며 링(outline 또는 box-shadow)을 직접 확인한다.
+    // T2.22 G2 확인에서 Tailwind v4 outline-none 때문에 모든 링이 사라진 것을 찾아 추가했다.
+    test("키보드 포커스 링이 보인다", async ({ page }) => {
+      test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+      await openGallery(page, theme);
+      const missing: string[] = [];
+      for (let i = 0; i < 70; i++) {
+        await page.keyboard.press("Tab");
+        const r = await page.evaluate(() => {
+          const el = document.activeElement as HTMLElement | null;
+          if (!el || el === document.body || !el.closest("main")) return null;
+          if (!el.matches(":focus-visible")) return null;
+          const cs = getComputedStyle(el);
+          const outline =
+            cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) > 0;
+          const shadow = cs.boxShadow !== "none";
+          const label = (el.getAttribute("aria-label") ?? el.textContent ?? "")
+            .trim()
+            .slice(0, 24);
+          return outline || shadow ? null : `${el.tagName} ${label}`;
+        });
+        if (r) missing.push(r);
+      }
+      expect(missing).toEqual([]);
+    });
+
     // 앱 탭 화면 (appShell 플래그는 개발 환경에서 켜져 있다)
     for (const path of ["/today", "/map", "/poll", "/me"]) {
       test(`앱 탭 ${path}`, async ({ page }) => {

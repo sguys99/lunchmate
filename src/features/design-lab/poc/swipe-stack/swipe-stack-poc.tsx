@@ -95,7 +95,7 @@ export function SwipeStackPoc() {
           tabIndex={0}
           onKeyDown={stack.onKeyDown}
           aria-describedby="swipe-hint"
-          className="relative grid rounded-card outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="relative grid rounded-card outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring focus-visible:outline-solid"
         >
           {/* 뒤에 남은 카드 가장자리. 앞 카드보다 좁고 아래로 조금씩 비친다 */}
           {[2, 1].map((depth) => (

@@ -14,7 +14,7 @@ function Input({ className, type, ...props }: ComponentProps<"input">) {
       className={cn(
         "h-12 w-full min-w-0 rounded-input border border-input bg-card px-4 type-body text-foreground outline-none placeholder:text-muted-foreground",
         "transition-[border-color,outline-color] duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
-        "focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
         "aria-invalid:border-destructive aria-invalid:focus-visible:outline-destructive",
         "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
         "file:inline-flex file:h-8 file:border-0 file:bg-transparent file:type-label file:text-foreground",

@@ -32,7 +32,8 @@ export const homeCopy = {
     },
     error: {
       title: "식당 정보를 불러오지 못했습니다",
-      body: "잠시 후 자동으로 다시 시도합니다.",
+      // 재시도 1회가 끝난 뒤 보이는 화면이라 자동 재시도를 약속하지 않는다 (PRD 12장, copy-guide 4.3절)
+      body: "잠시 후 다시 시도해 주세요.",
       action: commonCopy.actions.retry,
     },
     offline: {

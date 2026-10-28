@@ -27,6 +27,7 @@ describe("Button", () => {
     const button = screen.getByRole("button", { name: "닫기" });
     expect(button.className).toContain("before:h-[max(100%,2.75rem)]");
     expect(button.className).toContain("focus-visible:outline-ring");
+    expect(button.className).toContain("focus-visible:outline-solid");
     expect(button.className).toContain("motion-reduce:transition-none");
   });
 

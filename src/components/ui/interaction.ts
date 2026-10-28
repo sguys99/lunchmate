@@ -2,9 +2,13 @@
 // DESIGN.md 5장: 포커스는 2px ring + 바깥 2px 간격, 눌림은 scale 0.98(fast, standard), reduced motion이면 즉시 변화.
 // cn(tailwind-merge)을 쓰지 않는다: 오류 화면처럼 첫 로드가 가벼워야 하는 곳도 이 상수를 쓴다 (T2.22).
 
-/** 키보드 포커스 링. box-shadow가 아니라 outline이라 그림자 규칙(1px 선과 면 톤)과 겹치지 않는다. */
+/**
+ * 키보드 포커스 링. box-shadow가 아니라 outline이라 그림자 규칙(1px 선과 면 톤)과 겹치지 않는다.
+ * outline-solid를 빼면 안 된다: Tailwind v4의 outline-none이 --tw-outline-style을 none으로 두고,
+ * focus-visible:outline-2는 그 변수를 outline-style로 읽어서 링이 보이지 않는다 (T2.22 G2 확인에서 발견).
+ */
 export const focusRing =
-  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 /**
  * 보이는 크기보다 넓은 터치 영역. 가운데 정렬된 투명 의사 요소가 최소 44px(기본) 정사각을 덮는다.

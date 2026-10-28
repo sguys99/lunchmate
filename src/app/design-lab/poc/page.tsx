@@ -17,7 +17,7 @@ export default function PocIndexPage() {
           <li key={p.slug}>
             <Link
               href={`/design-lab/poc/${p.slug}`}
-              className="flex flex-col gap-1.5 py-5 outline-none hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className="flex flex-col gap-1.5 py-5 outline-none hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid"
             >
               <span className="flex items-baseline justify-between gap-3">
                 <span className="type-heading">{p.title}</span>
