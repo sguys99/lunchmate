@@ -40,6 +40,15 @@ describe("evaluateFlag", () => {
       ),
     ).toBe(true);
   });
+  it("appShell은 개발과 Preview에서 켜지고 Production에서는 꺼진다 (T2.6)", () => {
+    expect(evaluateFlag(FLAGS.appShell, ctx())).toBe(true);
+    expect(evaluateFlag(FLAGS.appShell, ctx({ vercelEnv: "preview" }))).toBe(
+      true,
+    );
+    expect(evaluateFlag(FLAGS.appShell, ctx({ vercelEnv: "production" }))).toBe(
+      false,
+    );
+  });
   it("앞으로의 플래그는 모두 기본 false", () => {
     for (const key of ["pollEntry", "betaFeedback", "userPlaceMemo"] as const) {
       expect(evaluateFlag(FLAGS[key], ctx())).toBe(false);

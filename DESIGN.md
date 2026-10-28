@@ -417,6 +417,7 @@ layout:
 ### 하단 탭
 - 높이 64 + safe-area, 면 `background`, 위쪽 1px `border`. 4개(오늘, 지도, 투표, 나), Lucide 1.5px 아이콘 22px + caption 라벨.
 - 활성: 아이콘과 라벨 `foreground`, 탭 위쪽 가장자리에 2px x 20px `primary` 막대. 비활성: `muted-foreground`. 면 색으로 활성을 표시하지 않습니다.
+- 데스크톱(1024px 이상) 2단에서는 좌 리스트 칸 아래에 같은 모양으로 둡니다. 지도를 가리지 않고 모바일과 같은 위치 감각을 유지합니다 (사용자 확정 2026-10-29, T2.6).
 
 ### 득표 바
 - 트랙 `vote-bar-track` 높이 8px 알약, 채움 1위만 `vote-bar`(올리브), 나머지 후보는 `muted-foreground` 30% 대신 `chart-3`을 씁니다. 득표 수는 바 밖 오른쪽에 numeric-md, 1위는 `foreground`, 나머지는 `muted-foreground`. 길이 변화는 `bar` 스프링(감쇠비 1.1).

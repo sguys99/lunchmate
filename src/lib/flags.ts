@@ -37,6 +37,14 @@ export const FLAGS = {
     owner: "T0.25",
     productionOff: true,
   },
+  appShell: {
+    description:
+      "로그인 후 앱 화면(오늘, 지도, 투표, 나) 묶음. 탭 화면이 자리 표시만 있는 동안 프로덕션에서 숨김.",
+    default: false,
+    source: { type: "const", value: true },
+    owner: "T2.6 (해제: 오늘 탭 실제 화면 T5)",
+    productionOff: true,
+  },
   pollEntry: {
     description: "홈과 상세의 투표 관련 진입점 (친구랑 정하기, 회식 모드 등).",
     default: false,
