@@ -203,6 +203,24 @@
   --ease-emphasized: var(--lm-ease-emphasized);
 }
 
+/*
+ * 스켈레톤 호흡 (T2.5, DESIGN.md 5장 추천 카드 상태): skeleton-highlight 막이 1.6초씩 왕복(3.2초 주기).
+ * 위 @theme inline은 토큰 var() 연결만 두므로(edit-flow.test) 애니메이션은 별도 @theme에 둔다.
+ * reduced motion 정지는 컴포넌트(skeleton.tsx)의 motion-reduce:after:animate-none이 맡는다.
+ */
+@theme {
+  --animate-skeleton-breathe: lm-skeleton-breathe 3.2s ease-in-out infinite;
+  @keyframes lm-skeleton-breathe {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

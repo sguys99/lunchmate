@@ -129,7 +129,7 @@ function MapError({
       <h2 className="text-lg font-semibold">{text.title}</h2>
       <p className="text-sm text-muted-foreground">{text.body}</p>
       {kind === "load" && (
-        <Button variant="outline" className="mt-2 min-h-11" onClick={onRetry}>
+        <Button variant="secondary" className="mt-2" onClick={onRetry}>
           {mapCopy.retry}
         </Button>
       )}

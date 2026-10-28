@@ -42,6 +42,13 @@ export const commonCopy = {
 
   actions,
 
+  /** 공통 컴포넌트(src/components/ui)의 보조 기술용 라벨 (T2.5) */
+  a11y: {
+    /** 토스트 영역(Sonner)의 이름 */
+    notifications: "알림",
+    closeNotification: "알림 닫기",
+  },
+
   /**
    * 4상태 기본 문구. 도메인 화면에 더 구체적인 문구가 없을 때만 쓴다.
    * title은 지금 상태를 말하는 짧은 습니다체 문장(마침표 없음),

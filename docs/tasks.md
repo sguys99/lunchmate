@@ -318,7 +318,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 2.2 컴포넌트
 
-- [ ] T2.5 shadcn 컴포넌트 설치와 토큰 재스타일: Button, Toggle/Chip, Badge, Dialog, Sheet, Tabs, Slider, Input, Skeleton, Avatar, Tooltip, Sonner. shadcn 기본 회색과 기본 라운드를 그대로 쓰지 않습니다.
+- [x] T2.5 (10/29 완료, `src/components/ui` 12종 + Chip/ChipGroup, Button 기본 variant secondary(올리브는 primary 명시), 포커스와 44px 터치 영역 공통 `interaction.ts`, 렌더 테스트 11개, sonner 약 9.6KB gzip, 갤러리 초안 `/design-lab/components`) shadcn 컴포넌트 설치와 토큰 재스타일: Button, Toggle/Chip, Badge, Dialog, Sheet, Tabs, Slider, Input, Skeleton, Avatar, Tooltip, Sonner. shadcn 기본 회색과 기본 라운드를 그대로 쓰지 않습니다.
 - [ ] T2.6 앱 셸: 하단 탭 4개(오늘, 지도, 투표, 나), safe-area 대응, 데스크톱 좌 리스트 + 우 지도 2단 틀, 페이지 헤더
 - [ ] T2.7 상태 컴포넌트: Skeleton 패턴(카드, 리스트, 시트), EmptyState, ErrorState, OfflineState
 - [ ] T2.8 카테고리 아이콘/일러스트 12종 SVG 자체 제작 (한식, 중식, 일식, 양식, 분식, 국밥/탕, 고기, 아시안, 패스트푸드, 샐러드/건강식, 카페/베이커리, 술집), 라이트/다크 대응
