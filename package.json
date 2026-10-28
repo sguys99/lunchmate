@@ -24,6 +24,7 @@
     "db:push": "supabase db push",
     "db:types": "node scripts/db-types.mjs",
     "db:migration:new": "supabase migration new",
+    "env:sync": "node scripts/env-sync-vercel.mjs",
     "prepare": "git config core.hooksPath .githooks",
     "analyze": "next analyze --output --snapshot latest",
     "bundle:report": "node scripts/bundle-report.mjs"
