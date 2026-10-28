@@ -89,3 +89,20 @@
 | 번들 증가량 (gzip) | 홈 +약 37KB (+14KB 비동기) | 홈 +약 37KB (+14KB 비동기) + 폰트 약 272KB | 홈 +약 43KB |
 | 접근성 위험 | 스와이프에 이전/다음 버튼 있음. 일러스트 위 배지 대비는 검사 통과. 시트 스냅이 높아 지도 조작 영역이 좁음 | 세리프 300 가는 획(대비 수치는 통과, 작은 크기 가독성 확인 필요). 시트 상세가 첫 화면 밖이라 스크린리더 순서상 득표가 먼저 | 1280x800에서 세 번째 카드가 하단 액션에 일부 가림(포커스 시 가려질 위험). 다크 일러스트 밝기 |
 | Claude 추천과 이유 | **추천 (기본안)**. PRD 8.3 "카드의 시각적 주인공은 카테고리 일러스트"와 preferences의 "스타벅스의 따뜻한 색과 일러스트"를 가장 직접 구현합니다. 모션 성격(스프링 스와이프, 셔플)이 "보통" 강도에 맞고, 폰트 추가 전송이 없습니다. 보완: 국밥/일식 색면을 흙빛 쪽으로 데우고, 시트 스냅을 낮춤 | 비추천. 가장 세련되지만 세리프 272KB가 홈 LCP 서체에 걸리고, 정보가 적어 보이는 위험이 10초 원칙과 부딪칩니다. 세리프 없이 B의 여백과 1px 선 규칙만 A에 빌려 오는 조합은 검토할 만합니다 | 차순위. 비교 속도는 가장 빠르나 일러스트가 작아 "일러스트가 주인공" 결정과 어긋나고 표 같은 인상이 남습니다. 숫자 열 정렬과 빠른 duration은 G3 카드 배치에서 다시 쓸 만합니다 |
+
+## 7. G1 확인 (T1.21)
+
+2026-10-29. 루트 `DESIGN.md`의 값 4곳을 임시로 바꾸고 `pnpm tokens`를 실행한 뒤, 실행 중인 dev 서버(3000)를 Playwright로 390px에서 열어 `getComputedStyle`로 확인했습니다. 대비 검사는 바꾼 값에서도 통과(final 80건)했습니다.
+
+| 바꾼 키 | 전 | 후 | `tokens.css` | 확인한 요소 (전 → 후) |
+| --- | --- | --- | --- | --- |
+| `color.light.shadcn.primary` | `oklch(0.43 0.055 118)` 올리브 | `oklch(0.43 0.12 25)` 적갈 | `:root --primary` | `/` 가격 글자색, `/design-lab/system/b/home` 길찾기 버튼 배경 `lab(34.4 -7.8 19.8)` → `lab(32.7 37.8 22.3)` |
+| `color.dark.shadcn.primary` | `oklch(0.76 0.07 118)` | `oklch(0.76 0.1 25)` | `.dark`, 시스템 다크 블록 둘 다 | 시스템 다크 에뮬레이션(b/home)과 스위처 `?theme=dark`(`<html class="dark">`, 시스템 라이트)에서 버튼 배경 `lab(71.2 31.0 17.2)` |
+| `radius.components.card` | `xl` | `sm` | `--lm-radius-card: var(--lm-radius-sm)` | 추천 카드 `border-radius` 24px → 8px |
+| `type.title.size` | `1.875` | `2.5` | `--lm-type-title-size: 2.5rem` | "오늘의 추천" 제목 `font-size` 30px → 40px |
+
+- 전/후 캡처(라이트, 시스템 다크, `.dark` 강제)를 나란히 놓고 눈으로도 확인했습니다. 캡처는 저장소에 넣지 않았습니다.
+- 생성물 diff는 바꾼 키에 해당하는 5줄(`--primary`는 `:root`, `.dark`, 시스템 다크 3곳)뿐이었습니다. `@theme inline`과 `type-*` 유틸리티가 값을 쓰지 않고 `var()`만 가리키므로 새로고침만으로 반영됩니다.
+- JS로 읽는 토큰(모션, 레이아웃, 일러스트, `tokens.server.ts`)은 프로세스 안에 캐시되어 dev 서버를 다시 띄워야 반영됩니다. CSS 토큰은 해당 없습니다.
+- 되돌림: `git checkout -- DESIGN.md src/styles/tokens.css` 후 `pnpm tokens --check` "최신", `git status`에 두 파일 변경 없음, 화면 값도 원래대로(`--primary` 올리브, 카드 24px, 제목 30px) 돌아온 것을 확인했습니다.
+- 회귀 방지: `src/lib/design/edit-flow.test.ts`. 루트 `DESIGN.md` 사본을 임시 폴더에서 같은 4곳만 바꿔 실제 CLI(`build-tokens.ts --root`)로 생성하고, `:root`, `.dark`, 시스템 다크 블록의 값과 diff 범위를 검사합니다. `globals.css`의 `@theme inline` 선언이 모두 `var()` 하나인지도 검사합니다.
