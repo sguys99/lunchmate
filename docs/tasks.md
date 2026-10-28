@@ -224,7 +224,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T0.21 Next.js(App Router, 최신 안정판) + TypeScript strict + pnpm 초기화, CLAUDE.md 4장 폴더 구조 생성
 - [x] T0.22 Tailwind CSS v4, shadcn/ui 초기화, Pretendard Variable(`next/font/local`, 서브셋) 적용
 - [x] T0.23 ESLint, Prettier, `typecheck` 스크립트, Vitest, Playwright 설정
-- [ ] T0.24 `src/lib/env.ts`: zod로 환경변수 검증 (서버 전용 키가 클라이언트 번들에 들어가면 빌드 실패)
+- [x] T0.24 `src/lib/env.ts`: zod로 환경변수 검증 (서버 전용 키가 클라이언트 번들에 들어가면 빌드 실패)
 - [ ] T0.25 `src/lib/flags.ts`: 기능 플래그 (`NEXT_PUBLIC_DESIGN_LAB` 포함, 프로덕션에서 `/design-lab` 404)
 - [x] T0.26 `src/lib/time`: KST 끼니 판정, 마감 판정 유틸과 단위 테스트
 - [x] T0.27 동적 라이브러리 사전 조사: 2.4절 후보의 최신 버전, 유지보수 상태(특히 Vaul), 라이선스, Next.js 최신판과 React 버전 호환성을 Context7과 공식 문서로 확인
