@@ -62,7 +62,7 @@ export const pollPreviewCopy = {
   myVote: "내 선택",
   vote: "투표하기",
   /** 득표가 하나도 없을 때 (design-lab 시트 화면의 empty 상태) */
-  noVotes: "아직 투표한 사람이 없습니다. 먼저 골라 볼까요?",
+  noVotes: "아직 투표한 사람이 없습니다. 먼저 골라볼까요?",
 } as const;
 
 export const placeDetailCopy = {
