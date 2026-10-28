@@ -41,10 +41,14 @@ export function ShellSplit({
         <div className="flex min-w-0 flex-1 flex-col">{list}</div>
         {tabBar}
       </div>
-      {/* self-start라야 칸이 리스트 높이로 늘어나지 않고 sticky가 동작한다 */}
-      <div className="hidden min-h-0 desktop:sticky desktop:top-0 desktop:flex desktop:h-dvh desktop:flex-col desktop:self-start">
+      {/* self-start라야 칸이 리스트 높이로 늘어나지 않고 sticky가 동작한다.
+          aside 랜드마크: 모든 내용이 랜드마크 안에 있어야 스크린 리더 사용자가 칸 단위로 오갈 수 있다(axe region, T2.17) */}
+      <aside
+        aria-label={shellCopy.mapRegion}
+        className="hidden min-h-0 desktop:sticky desktop:top-0 desktop:flex desktop:h-dvh desktop:flex-col desktop:self-start"
+      >
         {map ?? <MapPane />}
-      </div>
+      </aside>
     </div>
   );
 }

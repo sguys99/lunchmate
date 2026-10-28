@@ -343,7 +343,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 #### 2.4 품질 장치
 
 - [x] T2.16 (10/29 완료, `e2e/visual/gallery.spec.ts` 갤러리 섹션 12개 x 라이트/다크 x 390/1280 = 48장(darwin, 약 2.1MB), `pnpm test:e2e:visual`, 갱신 `--update-snapshots`, colorScheme 일치와 하이드레이션, 폰트 대기, dev 인디케이터는 stylePath로 스냅샷에서만 숨김, 허용 오차 0.2%, `docs/e2e.md`) Playwright 시각 회귀 스냅샷: 컴포넌트 갤러리 기준
-- [ ] T2.17 axe 접근성 검사를 E2E에 연결
+- [x] T2.17 (10/29 완료, `@axe-core/playwright` dev, `e2e/helpers/axe.ts` WCAG 2.1 A/AA + best-practice 위반 0, `e2e/a11y.spec.ts` 갤러리, 앱 탭 4개, 404 셸 안팎, PoC x 라이트/다크 x 390/1280 = 32건, 수정: 오류와 404 제목 h1, 지도 칸 aside 랜드마크, 미리보기 탭 바 label, disableRules 없음) axe 접근성 검사를 E2E에 연결
 - [x] T2.18 (10/29 완료, src/app/error.tsx, global-error.tsx, not-found.tsx, (app)/error.tsx와 not-found.tsx로 셸 안 하단 탭 유지, 공통 ErrorScreen과 NotFoundScreen, Next 16 retry(), 메시지와 스택 비노출하고 digest만 참고 번호로, `src/lib/errors` reportError가 지연 Sentry 청크로 captureException) 공통 오류 경계와 사용자 친화적 오류 화면 (APP-06)
 - [x] T2.19 (10/29 완료, `src/lib/query` getQueryClient(서버는 요청마다, 브라우저는 싱글턴)와 QueryProvider를 (app) 레이아웃에 마운트, gcTime 5분(T10.2 답변 전), staleTime 1분, retry 1, 재연결 시 다시 불러오기, 포커스 복귀 시 다시 불러오지 않음, persist 의존성과 사용을 테스트로 금지, 단독 gzip 약 10.2KB) TanStack Query 기본 설정: 세션 메모리 캐시만, persist 플러그인 금지 (카카오 데이터 저장 금지). `gcTime`은 T10.2 카카오 답변 전까지 짧게 잡습니다 (T0.16-3)
 - [x] T2.20 (10/29 완료, `src/lib/analytics/events.ts` PRD 10.2 이벤트 24개 판별 유니언, 좌표와 개인 정보 키 never, 런타임 가드, `track.ts` 큐 포함 지연 전송, autocapture off 유지와 before_send로 요소 텍스트, 좌표 제거, 페이지뷰 Provider 마운트는 앱 셸 연결 때) 분석 이벤트 타입 `src/lib/analytics/events.ts`: PRD 10.2절 이벤트를 타입으로 정의, 좌표와 개인 식별 속성은 타입에서 막음. PostHog autocapture 속성에 좌표가 섞이지 않게 필터 (T0.18)

@@ -184,6 +184,9 @@ export const designLabComponentsCopy = {
     headerTitle: "오늘은 여기 어때요",
     headerDetailTitle: "방문 기록",
     headerAction: "편집",
+    /** 미리보기 탭 바 두 개가 같은 이름의 nav 랜드마크가 되지 않게 따로 이름 붙인다(axe landmark-unique) */
+    tabBarPreviewActive: "주요 메뉴 미리보기, 오늘 활성",
+    tabBarPreviewNone: "주요 메뉴 미리보기, 활성 없음",
   },
 
   /** 4상태 섹션 (구 /design-lab/states) */

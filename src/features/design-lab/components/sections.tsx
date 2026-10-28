@@ -772,12 +772,22 @@ function AppShellSection() {
       </Specimen>
       <Specimen name={names.tabBar}>
         <Stage className="overflow-hidden bg-background">
-          <TabBarView activeId="today" preview className="static border-t-0" />
+          <TabBarView
+            activeId="today"
+            preview
+            label={s.tabBarPreviewActive}
+            className="static border-t-0"
+          />
         </Stage>
       </Specimen>
       <Specimen name={names.tabBarNone}>
         <Stage className="overflow-hidden bg-background">
-          <TabBarView activeId={null} preview className="static border-t-0" />
+          <TabBarView
+            activeId={null}
+            preview
+            label={s.tabBarPreviewNone}
+            className="static border-t-0"
+          />
         </Stage>
       </Specimen>
     </Grid>
