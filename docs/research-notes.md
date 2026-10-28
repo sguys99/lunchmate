@@ -210,9 +210,96 @@
 - tasks: T5.24, T7.6, T7.14, T7.20, T8.3 설명 수정, 5단계에 이름 해석 공통 모듈 작업 추가, 온보딩 사무실 설정에 "핀 직접 놓기" 반영.
 - 출시 전 카카오 DevTalk 일괄 문의 항목(T10.2와 묶기): (1) 런치메이트 전체 구성 확인, (2) 사용자가 직접 쓴 메모 저장, (3) 같은 탭 메모리 보존, (4) 투표방 기준점 좌표 저장, (5) 사용자가 공유한 결과 이미지. 문의처: https://devtalk.kakao.com/c/map-api/101 ([이용정책 문의] 머리말).
 
-### T0.17 카카오톡 인앱 브라우저의 외부 브라우저 열기 스킴 동작 (AUTH-04)
+### T0.17 카카오톡 인앱 브라우저의 외부 브라우저 열기 (AUTH-04)
 
-조사 중
+**질문**: 카카오톡 인앱 브라우저에서 구글 로그인이 왜 막히는가, `kakaotalk://web/openExternal?url=` 스킴은 Android와 iOS에서 동작하는가, 인앱 감지와 iOS 대응은 어떻게 하는가. 라인, 인스타그램, 네이버 앱 인앱은 어떤가.
+
+**결론**: **구글 OAuth는 임베디드 웹뷰를 정책으로 차단하므로(`disallowed_useragent`, 2021-09-30 시행) 카카오톡 인앱에서 구글 로그인은 불가능하다고 보고 설계한다. `kakaotalk://web/openExternal?url=`은 카카오 공식 문서에 없는 비공식 스킴이며, 커뮤니티에서 널리 쓰이지만 동작 보장이 없다. 구현은 "카카오 로그인 기본 노출 + 구글 탭 시 스킴 시도 + 실패하면 수동 안내" 3단으로 하고, Android와 iOS 모두 실기기에서 확인한다. 라인은 공식 파라미터 `openExternalBrowser=1`이 있다.**
+
+**근거**
+- Google Developers Blog, "Upcoming security changes to Google's OAuth 2.0 authorization endpoint in embedded webviews" (https://developers.googleblog.com/2021/06/upcoming-security-changes-to-googles-oauth-2.0-authorization-endpoint.html): 임베디드 웹뷰의 OAuth 요청을 2021-09-30부터 `disallowed_useragent` 오류로 거부한다. Android WebView, iOS WKWebView/UIWebView는 비준수, Android Custom Tabs와 iOS SFSafariViewController, 기본 브라우저는 허용. 테스트용 `disallow_webview=true` 파라미터 안내.
+- Google OAuth 2.0 Policies, "Use secure browsers" (https://developers.google.com/identity/protocols/oauth2/policies): "A developer must not direct a Google OAuth 2.0 authorization request to an embedded user-agent under the developer's control."
+- 카카오 데브톡 "인앱 브라우저 구글 OAuth 403 에러" (https://devtalk.kakao.com/t/oauth-403/117012): 카카오 운영진 답변(2021-07-20) "구글이 카카오 인앱 브라우저 요청을 차단하는 문제로 카카오 측 대응 불가", (2022-08-24) "카카오톡은 안드로이드 인앱 브라우저(WebView)를 사용해 제한을 받는다. 네이버는 자체 브라우저라 정상 동작하는 것으로 보인다".
+- 카카오 데브톡 "disallowed-useragent" 관련 글 (https://devtalk.kakao.com/t/disallowed-useragent/30703): 카카오톡 인앱 브라우저 UA에 `KAKAOTALK` 문자열이 붙는다는 설명.
+- 카카오 데브톡 "카카오톡 인앱 브라우저에서 Branch 딥링크로 앱 열기" (https://devtalk.kakao.com/t/branch/151358, 2026-08-26): `kakaotalk://web/openExternal`의 공식 지원 여부와 iOS/Android 차이를 질문했으나 운영진은 "인앱 브라우저 관련은 데브톡 범위 밖, 고객센터 문의"로만 답했다. 즉 공식 확인 불가. 같은 글에 "비동기 처리 후 사용자 제스처 없이 호출하면 전환이 안 되는가"라는 문의도 있음(답 없음).
+- 카카오 JavaScript 하이브리드 앱 문서 (https://developers.kakao.com/docs/ko/javascript/hybrid): 웹뷰 관련 설명만 있고 `openExternal` 스킴이나 UA 언급 없음.
+- 공개 코드 예 (https://gist.github.com/hongggyelim/934a94c8c61f3e893347f8be12f259cd): UA에 `kakaotalk` 포함 시 `window.location.replace('kakaotalk://web/openExternal?url=' + encodeURIComponent(url))`. OS 분기 없음.
+- LINE Developers, "Using LINE features with the LINE URL scheme" (https://developers.line.biz/en/docs/line-login/using-line-url-scheme/): URL에 `?openExternalBrowser=1`을 붙이면 외부 브라우저로 연다. LIFF 앱을 제외한 LINE 앱 내 모든 URL에 적용.
+- Chrome for Developers, "Android Intents with Chrome" (https://developer.chrome.com/docs/android/intents): `intent://<host><path>#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=...;end` 구문. 앱이 없으면 fallback URL로 이동.
+- iOS: 웹 페이지가 WKWebView 밖의 Safari를 강제로 여는 공개 API는 없다. `x-safari-https://` 스킴이 Safari Info.plist에 등록되어 있다는 개인 블로그 보고(https://christiantietze.de/posts/2023/05/safari-for-mac-url-scheme/)가 있으나 Apple 비문서화 스킴이라 사용하지 않는다.
+
+**인앱 UA 감지 문자열 (대소문자 무시)**
+
+| 앱 | UA 토큰 | 구글 OAuth | 외부 열기 수단 |
+| --- | --- | --- | --- |
+| 카카오톡 | `KAKAOTALK` | 차단 | `kakaotalk://web/openExternal?url=` (비공식), 수동: 우측 하단/상단 메뉴 → 다른 브라우저로 열기 |
+| 라인 | `Line/` | 차단 | `?openExternalBrowser=1` (공식) |
+| 인스타그램 | `Instagram` | 차단 | 공식 스킴 없음. Android는 `intent://` 시도, iOS는 수동 안내(··· → 외부 브라우저에서 열기) |
+| 페이스북 | `FBAN` 또는 `FBAV` | 차단 | 인스타그램과 같음 |
+| 네이버 앱 | `NAVER(inapp` | 데브톡 운영진은 "자체 브라우저라 정상 동작하는 것으로 보인다"고 했으나 미검증 | 우선 그대로 시도, 실패 시 안내 |
+| 기타 웹뷰 | Android `; wv)`, iOS에서 `Safari/` 토큰 없음 | 차단 가능성 | 수동 안내 |
+
+UA 문자열은 앱 업데이트로 바뀔 수 있으므로 감지 목록은 `src/lib/inapp.ts` 한 곳에 상수로 둔다.
+
+**구현 의사코드**
+
+```ts
+// src/lib/inapp.ts (클라이언트 전용)
+type InApp = 'kakaotalk' | 'line' | 'instagram' | 'facebook' | 'naver' | 'webview' | null
+
+export function detectInApp(ua = navigator.userAgent): InApp {
+  const s = ua.toLowerCase()
+  if (s.includes('kakaotalk')) return 'kakaotalk'
+  if (/\bline\//.test(s)) return 'line'
+  if (s.includes('instagram')) return 'instagram'
+  if (s.includes('fban') || s.includes('fbav')) return 'facebook'
+  if (s.includes('naver(inapp')) return 'naver'
+  if (/android.*; wv\)/.test(s)) return 'webview'
+  return null
+}
+
+// 구글 버튼 onClick (반드시 사용자 탭 이벤트 안에서 동기 호출)
+function onGoogleClick() {
+  const app = detectInApp()
+  if (!app || app === 'naver') return startGoogleOAuth()   // 네이버는 실기기 확인 후 결정
+  const url = location.href                                // 현재 /poll/{code} 등 내부 경로 유지
+  if (app === 'kakaotalk') {
+    location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url)
+  } else if (app === 'line') {
+    location.href = withParam(url, 'openExternalBrowser', '1')
+  } else if (isAndroid()) {
+    const u = new URL(url)
+    location.href = `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=https;` +
+      `package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`
+  }
+  // 전환이 안 되면 페이지가 그대로 보인다: 1.5초 뒤 visibilityState가 여전히 visible이면 안내 시트
+  setTimeout(() => {
+    if (document.visibilityState === 'visible') openExternalGuideSheet(app, isIOS())
+  }, 1500)
+}
+```
+
+- 안내 시트: OS와 앱별 이미지(카카오톡 iOS/Android, 인스타그램)와 "링크 복사" 버튼. 문구는 `src/copy/auth.ts`.
+- 자동 리다이렉트(페이지 진입 즉시 스킴 호출)는 하지 않는다. 투표방 미리보기와 카카오 로그인은 인앱에서 정상 동작하므로 사용자가 구글을 고를 때만 시도한다.
+- 서버에서도 같은 판정을 한 번 더 한다: `/auth/google` 시작 라우트에서 UA가 인앱이면 OAuth로 보내지 않고 안내 페이지로 보낸다(AC-AUTH-2의 이중 안전장치).
+- 외부 브라우저로 넘어가면 인앱의 쿠키와 세션이 없으므로 로그인은 처음부터 진행된다. `redirect` 파라미터는 URL에 그대로 실어 보낸다(내부 경로만 허용 규칙 유지).
+
+**확인일**: 2026-10-28
+
+**영향받는 문서/작업**: PRD AUTH-04 (iOS는 "안내 이미지만"이 아니라 "스킴 시도 후 안내"로 수정 제안), AC-AUTH-2, tasks T4.10, CLAUDE.md 13장 첫 항목(변경 불필요).
+
+**권장안**
+1. 인앱에서는 카카오 로그인을 기본 버튼으로 크게, 네이버는 함께, 구글은 보조로 둔다(PRD 그대로).
+2. 구글 탭 시 앱별 스킴을 사용자 제스처 안에서 시도하고, 1.5초 뒤에도 화면이 보이면 수동 안내 시트를 띄운다. Android와 iOS 모두 같은 흐름이다.
+3. 감지 문자열과 스킴은 한 파일 상수로 관리하고, 분기 결과를 PostHog 이벤트 속성(`inapp: kakaotalk` 등, 좌표나 UA 원문은 넣지 않음)으로 기록해 실패율을 본다.
+4. 4단계 착수 시 실기기 체크리스트: 카카오톡 iOS/Android에서 스킴 전환 여부, 전환 후 `/poll/{code}` 복귀, 네이버 앱 인앱 구글 로그인 가능 여부, 인스타그램 Android `intent://` 동작.
+
+**남은 불확실성**
+- `kakaotalk://web/openExternal`은 비공식이며 카카오가 공식 답변을 거부했다. iOS 동작, 버전별 차이, 향후 차단 여부를 문서로 확인할 수 없다. 실기기 확인 필요(Claude가 대신 확인할 수 없음).
+- 네이버 앱 인앱의 구글 로그인 허용 여부는 2022년 운영진 추정 발언뿐이다.
+- UA 토큰은 앱 업데이트로 바뀔 수 있다.
+
+---
 
 ### T0.18 위치기반서비스사업 신고 대상 여부
 
