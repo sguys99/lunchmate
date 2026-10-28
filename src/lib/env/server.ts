@@ -20,9 +20,6 @@ const serverSchema = z.object({
   SUPABASE_PROJECT_REF: optionalString,
   NAVER_LOGIN_CLIENT_ID: optionalString,
   NAVER_LOGIN_CLIENT_SECRET: optionalString,
-  SENTRY_DSN: z
-    .url({ error: "http(s)로 시작하는 올바른 URL이어야 합니다." })
-    .optional(),
 });
 
 export type ServerEnv = z.output<typeof serverSchema>;
@@ -68,7 +65,6 @@ export function serverEnv(): ServerEnv {
       SUPABASE_PROJECT_REF: process.env.SUPABASE_PROJECT_REF,
       NAVER_LOGIN_CLIENT_ID: process.env.NAVER_LOGIN_CLIENT_ID,
       NAVER_LOGIN_CLIENT_SECRET: process.env.NAVER_LOGIN_CLIENT_SECRET,
-      SENTRY_DSN: process.env.SENTRY_DSN,
     },
     {
       NODE_ENV: process.env.NODE_ENV,

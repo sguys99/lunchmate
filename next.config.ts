@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -14,4 +15,15 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// 소스맵 업로드는 SENTRY_AUTH_TOKEN이 있을 때만 한다(T0.33 이후 Vercel에 등록).
+// 토큰이 없는 로컬 빌드와 CI도 그대로 통과해야 한다.
+const uploadSourcemaps = Boolean(process.env.SENTRY_AUTH_TOKEN);
+
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  telemetry: false,
+  // tunnelRoute는 쓰지 않는다. 광고 차단기 우회 이득보다 서버 부하, proxy 설정, rate limit 관리 부담이 커서 MVP에서는 보류.
+  sourcemaps: { disable: !uploadSourcemaps },
+  // onRouterTransitionStart는 instrumentation-client.ts에서 직접 내보낸다.
+  suppressOnRouterTransitionStartWarning: true,
+});

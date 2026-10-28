@@ -14,3 +14,5 @@
 | 날짜 | 패키지@버전 | 용도 | 로딩 방식 | 홈 번들 영향 (gzip) | 누적 (gzip, 예산 200KB) | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-10-28 | 기준선: Next 16.4.3 + React 19.3 + shadcn base 빈 홈 | 기준선 | 기본 포함 | 해당 없음 | 132.1 KB | `node scripts/bundle-report.mjs` 결과(5개 청크, raw 446.9KB). 예산 200KB의 66% |
+| 2026-10-28 | @sentry/nextjs@11.9.0 | 오류 모니터링 (T0.35) | 동적 import (첫 렌더 후 requestIdleCallback, DSN 없으면 요청 없음) | +0.4 KB | 132.5 KB | 초기 번들에는 `instrumentation-client.ts` 스케줄러만 포함. SDK 지연 청크는 약 56.8KB gzip(홈 첫 로드 목록에 없음). `withSentryConfig`, Session Replay와 tunnelRoute는 미사용. 측정은 `pnpm build` 후 `pnpm bundle:report` |
+| 2026-10-28 | posthog-js@1.438.24 | 제품 분석 (T0.35) | 동적 import (초기화 시점에만, 키 없으면 로드 안 함) | 0 | 132.5 KB | `src/lib/analytics/posthog.ts`만 설치하고 아직 어디에서도 마운트하지 않아 청크 자체가 빌드에 없음. 실제 청크 크기(조사값 약 104KB gzip)는 T2.13, T2.20에서 `next analyze export`로 측정 |

@@ -14,10 +14,23 @@ describe("parseClientEnv", () => {
       {
         NEXT_PUBLIC_SITE_URL: "https://lunchmate.kr",
         NEXT_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com",
+        NEXT_PUBLIC_SENTRY_DSN: "https://k@o1.ingest.sentry.io/1",
       },
       prod,
     );
     expect(env.NEXT_PUBLIC_SITE_URL).toBe("https://lunchmate.kr");
+    expect(env.NEXT_PUBLIC_SENTRY_DSN).toBe("https://k@o1.ingest.sentry.io/1");
+  });
+
+  it("SENTRY_DSN이 URL이 아니면 실패하고 값은 노출하지 않는다", () => {
+    try {
+      parseClientEnv({ NEXT_PUBLIC_SENTRY_DSN: "dsn-secret-xyz" }, dev);
+      expect.unreachable();
+    } catch (e) {
+      expect(e).toBeInstanceOf(EnvValidationError);
+      expect((e as Error).message).toContain("NEXT_PUBLIC_SENTRY_DSN");
+      expect((e as Error).message).not.toContain("dsn-secret-xyz");
+    }
   });
 
   it("개발 환경에서는 전부 비어 있어도 통과하고 빈 문자열은 미설정으로 본다", () => {

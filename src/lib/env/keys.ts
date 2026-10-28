@@ -8,8 +8,6 @@ export const SERVER_ENV_KEYS = [
   "SUPABASE_PROJECT_REF",
   "NAVER_LOGIN_CLIENT_ID",
   "NAVER_LOGIN_CLIENT_SECRET",
-  // 이름에 NEXT_PUBLIC_ 이 없으므로 서버 전용으로 취급 (T0.35에서 처리 방식 확정)
-  "SENTRY_DSN",
 ] as const;
 
 /** 브라우저에 공개되는 키. NEXT_PUBLIC_ 접두사만 허용한다. */
@@ -23,6 +21,8 @@ export const CLIENT_ENV_KEYS = [
   "NEXT_PUBLIC_NAVER_MAP_CLIENT_ID",
   "NEXT_PUBLIC_POSTHOG_KEY",
   "NEXT_PUBLIC_POSTHOG_HOST",
+  // Sentry DSN은 브라우저에도 노출되는 공개 값이므로 서버와 클라이언트가 이 키 하나를 함께 쓴다 (T0.35)
+  "NEXT_PUBLIC_SENTRY_DSN",
   "NEXT_PUBLIC_DESIGN_LAB",
 ] as const;
 

@@ -34,6 +34,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: optionalString,
   NEXT_PUBLIC_POSTHOG_KEY: optionalString,
   NEXT_PUBLIC_POSTHOG_HOST: optionalUrl("NEXT_PUBLIC_POSTHOG_HOST"),
+  NEXT_PUBLIC_SENTRY_DSN: optionalUrl("NEXT_PUBLIC_SENTRY_DSN"),
   NEXT_PUBLIC_DESIGN_LAB: flag,
 });
 
@@ -90,6 +91,7 @@ export function clientEnv(): ClientEnv {
       process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_DESIGN_LAB: process.env.NEXT_PUBLIC_DESIGN_LAB,
   };
   // 브라우저에서는 VERCEL_ENV, NEXT_PHASE를 알 수 없으므로 필수 검사는 서버 시작 시(instrumentation)에 맡긴다.

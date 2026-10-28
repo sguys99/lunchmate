@@ -186,7 +186,8 @@ SUPABASE_SERVICE_ROLE_KEY       # 서버 전용
 SUPABASE_PROJECT_REF            # db:push·db:types용 개발 프로젝트 ID
 NEXT_PUBLIC_KAKAO_JS_KEY        # 도메인 제한
 NEXT_PUBLIC_NAVER_MAP_CLIENT_ID # 도메인 제한
-NEXT_PUBLIC_POSTHOG_KEY / NEXT_PUBLIC_POSTHOG_HOST / SENTRY_DSN
+NEXT_PUBLIC_POSTHOG_KEY / NEXT_PUBLIC_POSTHOG_HOST / NEXT_PUBLIC_SENTRY_DSN   # 공개 값, 서버와 브라우저 공용, 첫 렌더 후 지연 로딩 (T0.35)
+SENTRY_AUTH_TOKEN               # 서버 전용, 소스맵 업로드용 (Vercel에만, 선택)
 # NAVER_LOGIN_CLIENT_ID / NAVER_LOGIN_CLIENT_SECRET: 서버 전용, T0.14 대안 설계(서버 직접 구현)로 갈 때만 추가
 NEXT_PUBLIC_DESIGN_LAB          # true일 때만 /design-lab 노출 (프로덕션 false)
 ```

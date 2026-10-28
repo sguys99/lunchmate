@@ -235,7 +235,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T0.32 git pre-push 훅: lint, typecheck, test, lint:copy
 - [ ] T0.33 GitHub 리포와 Vercel 연결, `main` 푸시 시 자동 배포 확인
 - [ ] T0.34 `MapProvider` 인터페이스 초안과 네이버 구현체로 빈 지도 표시
-- [ ] T0.35 Sentry, PostHog SDK 설치만 (이벤트 연결은 T2.20). PostHog는 첫 렌더 후 동적 import, Sentry `beforeSend`에 좌표 필터 자리 마련 (T0.18, T0.27)
+- [x] T0.35 Sentry, PostHog SDK 설치만 (이벤트 연결은 T2.20). PostHog는 첫 렌더 후 동적 import, Sentry `beforeSend`에 좌표 필터 자리 마련 (T0.18, T0.27)
 - [ ] T0.36 **G0 확인**: `*.vercel.app`에서 네이버 지도가 보이고, pre-push 검사가 동작합니다.
 
 ---

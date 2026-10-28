@@ -276,8 +276,8 @@
 - 접속: https://sentry.io → 가입 시 **데이터 저장 위치**(US 또는 EU)를 고르는 단계가 있습니다. [콘솔에서 확인]
 - **Projects > Create Project** → 플랫폼 **Next.js** → 이름 `lunchmate`.
 - DSN 확인: **Settings > Projects > lunchmate > Client Keys (DSN)** [콘솔에서 확인]
-  - DSN → `SENTRY_DSN`. DSN은 브라우저에도 들어가는 값이라 비밀은 아니지만, 이름은 CLAUDE.md 12장을 따릅니다. 클라이언트에서 쓰는 방식은 T0.35에서 Claude가 정합니다.
-- 소스맵 업로드용 인증 토큰(`SENTRY_AUTH_TOKEN`, **서버 전용**, 빌드 시 사용)은 T0.35에서 Sentry 설치 마법사(`npx @sentry/wizard@latest -i nextjs`)를 돌릴 때 함께 만듭니다. 마법사는 토큰을 `.env.sentry-build-plugin`에 저장하고 `.gitignore`에 추가합니다. 지금은 만들지 않아도 됩니다.
+  - DSN → `NEXT_PUBLIC_SENTRY_DSN` (**브라우저 공개용**, 서버와 브라우저가 함께 사용, T0.35에서 확정)
+- 소스맵 업로드용 인증 토큰(`SENTRY_AUTH_TOKEN`, **서버 전용**, 선택): T0.35는 마법사 없이 수동으로 설정했고, 토큰이 없으면 업로드만 건너뜁니다. 필요해지면 Sentry Settings > Auth Tokens에서 만들어 **Vercel 환경변수에만** 등록합니다.
 - 주의
   - 오류 이벤트에 현위치, 좌표가 들어가지 않게 `beforeSend`로 거릅니다(CLAUDE.md 7장, 구현 시 Claude 담당).
   - **Settings > Projects > lunchmate > Security & Privacy**(또는 Client Keys)에서 허용 도메인을 `lunchmate-kr.vercel.app`과 `localhost`로 제한할 수 있습니다. [콘솔에서 확인]
@@ -290,7 +290,7 @@
 
 ## 9. 다 끝나면 Claude에게 전달할 것
 
-키 값은 보내지 말고 아래 체크 결과만 채팅에 적어 주십시오. 예: "3, 4, 5, 6, 7, 8 완료. .env.local에 KAKAO_JS, NAVER_MAP, POSTHOG 2개, SENTRY_DSN 넣음. Supabase에 구글, custom:kakao, custom:naver 등록. PostHog US."
+키 값은 보내지 말고 아래 체크 결과만 채팅에 적어 주십시오. 예: "3, 4, 5, 6, 7, 8 완료. .env.local에 KAKAO_JS, NAVER_MAP, POSTHOG 2개, NEXT_PUBLIC_SENTRY_DSN 넣음. Supabase에 구글, custom:kakao, custom:naver 등록. PostHog US."
 
 - [ ] `! vercel login` 완료
 - [ ] `! supabase login` 완료 (Supabase 리전 서울 `ap-northeast-2`로 Claude가 생성)
@@ -300,7 +300,8 @@
   - [ ] `NEXT_PUBLIC_KAKAO_JS_KEY` (공개)
   - [ ] `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID` (공개)
   - [ ] `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` (공개)
-  - [ ] `SENTRY_DSN`
+  - [ ] `NEXT_PUBLIC_SENTRY_DSN` (공개)
+  - [ ] PostHog 프로젝트 설정에서 "Discard client IP data" 켜기 (SDK 옵션으로는 IP 폐기 불가, T0.35)
   - Supabase 4개와 `NEXT_PUBLIC_SITE_URL`은 Claude가 채웁니다.
 - [ ] 도메인 제한 확인: 카카오 JavaScript SDK 도메인, 카카오 웹 도메인, 네이버 Maps Web 서비스 URL, 구글 JavaScript 원본에 `https://lunchmate-kr.vercel.app`과 로컬 주소 등록
 - [ ] 동의 항목: 카카오, 네이버 모두 닉네임(별명), 프로필 사진만
