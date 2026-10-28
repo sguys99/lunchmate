@@ -30,6 +30,10 @@ export default defineConfig({
   ],
   webServer: {
     command: "pnpm dev",
+    // 디자인 랩 플래그는 e2e 에서 명시적으로 제어한다(.env.local 값보다 우선). 기본 off.
+    env: {
+      NEXT_PUBLIC_DESIGN_LAB: process.env.NEXT_PUBLIC_DESIGN_LAB ?? "false",
+    },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
