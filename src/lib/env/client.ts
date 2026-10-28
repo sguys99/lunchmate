@@ -5,6 +5,7 @@ import {
   CLIENT_ENV_KEYS,
   EnvValidationError,
   cleanEnv,
+  resolveSiteUrl,
   findMissingRequired,
   type ClientEnvKey,
   type EnvProblem,
@@ -26,6 +27,7 @@ const flag = z.pipe(
 
 const clientSchema = z.object({
   NEXT_PUBLIC_SITE_URL: optionalUrl("NEXT_PUBLIC_SITE_URL"),
+  NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: optionalString,
   NEXT_PUBLIC_SUPABASE_URL: optionalUrl("NEXT_PUBLIC_SUPABASE_URL"),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString,
   NEXT_PUBLIC_KAKAO_JS_KEY: optionalString,
@@ -49,6 +51,8 @@ export function parseClientEnv(
       string | undefined
     >,
   );
+  // SITE_URL이 없으면 Vercel 프로덕션 URL로 대체한 뒤 필수 검사와 URL 검증을 한다.
+  cleaned.NEXT_PUBLIC_SITE_URL = resolveSiteUrl(cleaned);
   const problems: EnvProblem[] =
     options.checkRequired === false
       ? []
@@ -77,6 +81,8 @@ export function clientEnv(): ClientEnv {
   // process.env 전체나 동적 키 접근은 브라우저에서 비어 있다.
   const raw = {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL:
+      process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_KAKAO_JS_KEY: process.env.NEXT_PUBLIC_KAKAO_JS_KEY,

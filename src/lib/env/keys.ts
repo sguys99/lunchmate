@@ -15,6 +15,8 @@ export const SERVER_ENV_KEYS = [
 /** 브라우저에 공개되는 키. NEXT_PUBLIC_ 접두사만 허용한다. */
 export const CLIENT_ENV_KEYS = [
   "NEXT_PUBLIC_SITE_URL",
+  // Vercel 시스템 변수(Production 도메인, 프로토콜 없음). SITE_URL이 없을 때의 폴백
+  "NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL",
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "NEXT_PUBLIC_KAKAO_JS_KEY",
@@ -34,6 +36,7 @@ export type ClientEnvKey = (typeof CLIENT_ENV_KEYS)[number];
 export const PRODUCTION_REQUIRED_KEYS: readonly (
   ServerEnvKey | ClientEnvKey
 )[] = [
+  // NEXT_PUBLIC_SITE_URL은 Vercel 프로덕션 URL로 대체 가능(resolveSiteUrl). 판정은 폴백 적용 후 값으로 한다.
   "NEXT_PUBLIC_SITE_URL",
   // T0.13 이후 필수 전환:
   // "NEXT_PUBLIC_SUPABASE_URL",
@@ -44,6 +47,21 @@ export const PRODUCTION_REQUIRED_KEYS: readonly (
   // "NEXT_PUBLIC_POSTHOG_KEY",
   // "NEXT_PUBLIC_POSTHOG_HOST",
 ];
+
+/**
+ * 사이트 URL 폴백: NEXT_PUBLIC_SITE_URL → https://NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL.
+ * 둘 다 없으면 undefined(개발은 siteUrl()이 localhost로, 프로덕션은 필수 검사가 오류로 처리).
+ * Vercel 값은 프로토콜이 없는 호스트이므로 https://를 붙인다.
+ */
+export function resolveSiteUrl(
+  cleaned: Record<string, string | undefined>,
+): string | undefined {
+  const explicit = cleaned.NEXT_PUBLIC_SITE_URL;
+  if (explicit) return explicit;
+  const host = cleaned.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL;
+  if (!host) return undefined;
+  return /^https?:\/\//i.test(host) ? host : `https://${host}`;
+}
 
 export type RuntimeInfo = {
   NODE_ENV?: string;

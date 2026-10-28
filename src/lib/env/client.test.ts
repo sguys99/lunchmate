@@ -65,6 +65,31 @@ describe("parseClientEnv", () => {
     expect(() => parseClientEnv({}, vercelProd)).toThrow(EnvValidationError);
   });
 
+  it("SITE_URL이 없으면 Vercel 프로덕션 URL(https:// 붙임)로 대체하고 필수 검사를 통과한다", () => {
+    const env = parseClientEnv(
+      { NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: "lunchmate.vercel.app" },
+      vercelProd,
+    );
+    expect(env.NEXT_PUBLIC_SITE_URL).toBe("https://lunchmate.vercel.app");
+  });
+
+  it("SITE_URL이 있으면 Vercel 프로덕션 URL보다 우선한다", () => {
+    const env = parseClientEnv(
+      {
+        NEXT_PUBLIC_SITE_URL: "https://lunchmate.kr",
+        NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: "lunchmate.vercel.app",
+      },
+      prod,
+    );
+    expect(env.NEXT_PUBLIC_SITE_URL).toBe("https://lunchmate.kr");
+  });
+
+  it("둘 다 없는 프로덕션은 여전히 오류", () => {
+    expect(() =>
+      parseClientEnv({ NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: " " }, prod),
+    ).toThrow(/NEXT_PUBLIC_SITE_URL.*필수/);
+  });
+
   it("로컬 next build 단계는 필수 검사를 건너뛰지만 VERCEL_ENV=production 이면 검사한다", () => {
     expect(() => parseClientEnv({}, build)).not.toThrow();
     expect(() =>
@@ -83,6 +108,15 @@ describe("siteUrl, absoluteUrl", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
     expect(siteUrl()).toBe("http://localhost:3000");
     expect(absoluteUrl("/poll/abc")).toBe("http://localhost:3000/poll/abc");
+  });
+
+  it("SITE_URL이 없고 Vercel 프로덕션 URL이 있으면 그것을 쓴다", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
+    vi.stubEnv(
+      "NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL",
+      "lunchmate.vercel.app",
+    );
+    expect(siteUrl()).toBe("https://lunchmate.vercel.app");
   });
 
   it("끝 슬래시를 정리하고 경로를 붙인다", () => {

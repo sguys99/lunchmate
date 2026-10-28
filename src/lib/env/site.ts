@@ -1,9 +1,9 @@
-// NEXT_PUBLIC_SITE_URL에서 파생되는 값. 도메인을 코드에 하드코딩하지 말고 여기서 만든다.
+// NEXT_PUBLIC_SITE_URL(없으면 Vercel 프로덕션 URL)에서 파생되는 값. 도메인을 코드에 하드코딩하지 말고 여기서 만든다.
 import { clientEnv } from "./client";
 
 const DEV_FALLBACK = "http://localhost:3000";
 
-/** 사이트 기준 URL(끝 슬래시 없음). 미설정이면 개발용 localhost. 프로덕션 미설정은 clientEnv()가 오류를 낸다. */
+/** 사이트 기준 URL(끝 슬래시 없음). SITE_URL → Vercel 프로덕션 URL → 개발용 localhost 순. 프로덕션 미설정은 clientEnv()가 오류를 낸다. */
 export function siteUrl(): string {
   const url = clientEnv().NEXT_PUBLIC_SITE_URL ?? DEV_FALLBACK;
   return url.replace(/\/+$/, "");
