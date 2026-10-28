@@ -1,6 +1,7 @@
 // 시안 B 일러스트와 제목 세리프 확인용 임시 페이지 (T1.5).
 // [data-design="b"] 변수 생성기(T1.9)가 붙기 전이라, b.DESIGN.md를 서버에서 읽어 이 페이지 전용 변수를 만든다.
-// 값은 모두 b.DESIGN.md의 oklch 토큰이며 이 파일에 색 값을 직접 쓰지 않는다. T1.11 이후 삭제한다.
+// 값은 모두 b.DESIGN.md의 oklch 토큰이며 이 파일에 색 값을 직접 쓰지 않는다.
+// G1 확정 후(T1.20) 운영 일러스트(T2.8) 출발점으로 쓰려고 남겨 둔다. T2.8에서 운영 일러스트로 옮긴 뒤 삭제한다.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";

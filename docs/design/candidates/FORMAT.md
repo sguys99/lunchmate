@@ -7,6 +7,7 @@
 - **기계 검증 정본**: `src/lib/design/schema.ts` (zod v4). 이 문서와 스키마가 다르면 스키마가 맞고, 이 문서를 고칩니다.
 - **빈 템플릿**: `docs/design/candidates/_template.DESIGN.md`. 현재 `src/styles/tokens.css` 값이 기본값으로 들어 있어 그대로 파싱됩니다.
 - **소비자**: `scripts/build-tokens.ts`(T1.9, CSS 변수 생성), 대비 검사(T1.15), 모션 프리셋 `src/lib/motion`(T2.11), 디자인 랩 스위처(T1.14).
+- **G1 확정(2026-10-28, D-01) 후 이 폴더의 시안 문서(`a`, `b`, `c`)는 보존용입니다.** 생성물 대상이 아니며 스키마와 대비 검증만 받습니다. 정본은 루트 `DESIGN.md`입니다(7절).
 
 ## 1. 파일 구조
 
@@ -226,7 +227,7 @@
 | 확정본 | `:root` | `.dark`, `@media (prefers-color-scheme: dark) { :root:not(.light):not(.dark) }` (현재 `tokens.css`와 같은 구조) |
 
 - 테마와 무관한 토큰(type, space, radius, border, motion, illustration, layout)은 라이트 블록에만 한 번 씁니다. 다크 블록에는 `color`와 `shadow`만 들어갑니다.
-- 시안 생성 파일은 `src/styles/design-candidates.css`, 확정본은 `src/styles/tokens.css`입니다. 둘 다 `pnpm tokens` 생성물이라 직접 고치지 않습니다(`--check`로 어긋남 검사, `--only a`로 한 시안만 검증).
+- 시안 생성 파일은 `src/styles/design-candidates.css`(루트 `DESIGN.md`가 없을 때만, 7절), 확정본은 `src/styles/tokens.css`입니다. 둘 다 `pnpm tokens` 생성물이라 직접 고치지 않습니다(`--check`로 어긋남 검사, `--only a`로 한 시안만 검증).
 - 시안 명시도: 전역 다크 선택자는 `:where()`로 감싸 `[data-design]`과 같은 (0,1,0)이고 뒤에 있어 라이트를 이깁니다. `data-theme` 강제는 (0,2,0)이라 전역 `.dark`, 시스템 다크와 무관하게 이깁니다. 디자인 랩 스위처(T1.14)는 같은 요소에 `data-design`과 `data-theme`을 함께 붙입니다. 단, 지금 Tailwind `dark:` 변형은 `data-theme`을 모르므로 시안 화면은 `dark:` 대신 토큰 변수로 테마 차이를 냅니다(`dark` 변형에 `[data-theme="dark"]`를 더할지는 T1.19에서 정함).
 
 ### 3.3 Tailwind `@theme inline` 연결 (`src/app/globals.css`, T1.19 반영)
@@ -279,3 +280,14 @@ pnpm vitest run src/lib/design     # 템플릿이 스키마를 통과하는지, 
 | --- | --- | --- |
 | 2026-10-28 | 1 | 최초 확정 (T1.3) |
 | 2026-10-29 | 1 | `font.sans.cssVar`, `font.heading.cssVar` 선택 키 추가(하위 호환), Tailwind 연결 정리 (T1.19) |
+| 2026-10-29 | 1 | 확정 후 시안 문서 보존 규칙(7절). 스키마 변경 없음, 생성 규칙만 바뀜 (T1.20) |
+
+## 7. 확정 후 시안 문서 (보존용, T1.20)
+
+G1에서 시안 B "Quiet Stone"이 선택되어(`docs/design-decisions.md` D-01) 루트 `DESIGN.md`가 정본이 되었습니다. 이 폴더의 `a.DESIGN.md`, `b.DESIGN.md`, `c.DESIGN.md`는 선택 과정의 기록으로 남기며 **생성물 대상이 아닙니다.**
+
+- `pnpm tokens`는 루트 `DESIGN.md`가 있으면 `src/styles/tokens.css`만 만듭니다. 시안 문서는 스키마와 대비 검사만 하고 `design-candidates.css`는 만들지 않으며, 남아 있으면 지웁니다. `--check`와 `design-docs.test.ts`는 그 파일이 남아 있으면 실패합니다.
+- 시안 문서의 `meta.status`는 `candidate` 그대로 둡니다(선택 당시 값을 보존). 값을 고치지 않습니다. 디자인을 바꾸려면 루트 `DESIGN.md`를 고칩니다.
+- 디자인 랩 화면(`/design-lab/system/**`)은 `data-design` 범위 대신 루트 `tokens.css`(`:root`)를 그대로 씁니다. 그래서 루트 `DESIGN.md`를 고치고 `pnpm tokens`를 실행하면 화면이 따라 바뀝니다(T1.21). 테마 강제는 `<html>`의 `.light`/`.dark` 클래스로 합니다.
+- 미선택 시안 A, C의 화면 코드는 지웠습니다. 시안별 화면은 `docs/design/shots/`의 캡처와 `docs/design/g1-comparison.md`로 봅니다.
+- 루트 `DESIGN.md`가 없는 상태(다른 게이트에서 시안을 다시 비교하는 경우)로 돌아가면 1모드가 다시 동작해 `design-candidates.css`를 만듭니다. 이때는 그 파일을 쓰는 레이아웃에서 직접 import합니다.

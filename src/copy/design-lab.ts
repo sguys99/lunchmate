@@ -8,19 +8,24 @@ export const designLabCopy = {
 
   /** /design-lab 첫 페이지 목록 */
   index: {
-    systemTitle: "디자인 시스템 (G1)",
-    switcherLink: "시안 스위처",
+    systemTitle: "디자인 시스템 (G1 확정)",
+    switcherLink: "화면 스위처",
     switcherBody:
-      "같은 화면에서 시안, 상태, 테마를 바로 바꿔 봅니다. 선택값은 주소에 남습니다.",
-    screensTitle: "시안별 단독 화면",
+      "같은 화면에서 상태, 테마, 보기를 바로 바꿔 봅니다. 선택값은 주소에 남습니다. 토큰은 루트 DESIGN.md를 따릅니다.",
+    screensTitle: "단독 화면",
     screensBody:
       "캡처용 페이지입니다. 테마는 시스템 설정을 따르고, 주소 끝에 ?state=loading 처럼 상태를 붙입니다.",
     illustrationsTitle: "일러스트 확인",
+    illustrationsBody:
+      "시안 B 선화 12종입니다. 운영 일러스트(T2.8)를 만들 때까지 둡니다.",
+    archiveTitle: "보존 자료",
+    archiveBody:
+      "미선택 시안 A, C의 화면 코드는 지웠습니다. 시안 문서는 docs/design/candidates, 캡처는 docs/design/shots, 비교 자료는 docs/design/g1-comparison.md에 있습니다.",
     toolsTitle: "점검 도구",
     mapSmoke: "지도 연결 점검",
     tokensLink: "토큰 견본표",
     tokensBody:
-      "세 시안의 색, 대비, 타입 스케일, 라운드, 그림자, 모션을 나란히 봅니다. 값은 DESIGN.md에서 읽습니다.",
+      "확정본의 색, 대비, 타입 스케일, 라운드, 그림자, 모션을 봅니다. 값은 루트 DESIGN.md에서 읽습니다.",
     designLabel: (id: string, name: string) => `시안 ${id} ${name}`,
   },
 
@@ -56,7 +61,10 @@ export const designLabCopy = {
       full: "전체 폭",
     },
     openStandalone: "단독 화면",
-    shortcuts: "단축키: 1~3 시안, H/S 화면, [ ] 상태, O/L/D 테마, F 보기",
+    shortcuts: "단축키: H/S 화면, [ ] 상태, O/L/D 테마, F 보기",
+    shortcutsMulti:
+      "단축키: 숫자 시안, H/S 화면, [ ] 상태, O/L/D 테마, F 보기",
+    finalLabel: (name: string) => `확정 ${name}`,
   },
 
   /** 시안 화면이 채워지기 전 자리표시 */
@@ -71,8 +79,9 @@ export const designLabCopy = {
     metaTitle: "토큰 견본표",
     title: "G1 토큰 견본표",
     description:
-      "세 시안의 DESIGN.md 값을 그대로 그립니다. 테마는 시스템 설정을 따르고, 대비비는 지금 보이는 테마의 값입니다.",
-    designHeading: (id: string, name: string) => `시안 ${id} ${name}`,
+      "루트 DESIGN.md(확정본) 값을 그대로 그립니다. 테마는 시스템 설정을 따르고, 대비비는 지금 보이는 테마의 값입니다.",
+    designHeading: (name: string, version: string) =>
+      `확정본 ${name} v${version}`,
     sections: {
       color: "색",
       contrast: "대비 쌍",

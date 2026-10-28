@@ -1,5 +1,5 @@
 // 스위처 선택값 <-> URL 쿼리 (T1.14). 새로고침과 공유에도 선택이 남게 쿼리에 둔다.
-// 쿼리: ?design=a&screen=home&state=ready&theme=system&view=frame (기본값은 생략)
+// 쿼리: ?design=b&screen=home&state=ready&theme=system&view=frame (기본값은 생략)
 import {
   DESIGN_STATES,
   parseDesignState,
@@ -26,7 +26,7 @@ export type SwitcherSelection = {
 };
 
 export const DEFAULT_SELECTION: SwitcherSelection = {
-  design: "a",
+  design: DESIGN_IDS[0],
   screen: "home",
   state: "ready",
   theme: "system",

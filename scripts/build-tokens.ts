@@ -6,10 +6,11 @@
  *   node scripts/build-tokens.ts --only a    시안 a만 검증하고 변환해 본다 (파일은 쓰지 않음)
  *   node scripts/build-tokens.ts --root <폴더>  다른 폴더를 저장소 루트처럼 사용 (테스트용)
  *
- * 모드 1(시안): docs/design/candidates/*.DESIGN.md (언더스코어로 시작하는 템플릿 제외)
- *              → src/styles/design-candidates.css, 시안마다 [data-design="<id>"] 세트
+ * 모드 1(시안, G1 확정 전): 루트 DESIGN.md가 없으면 docs/design/candidates/*.DESIGN.md
+ *              (언더스코어로 시작하는 템플릿 제외) → src/styles/design-candidates.css, 시안마다 [data-design="<id>"] 세트
  * 모드 2(확정): 루트 DESIGN.md가 있으면 → src/styles/tokens.css (:root, .dark, 시스템 다크)
- *              없으면 tokens.css는 건드리지 않는다.
+ *              시안 문서는 보존용이라 검증(스키마, 대비)만 하고 CSS는 만들지 않는다(T1.20).
+ *              남아 있는 design-candidates.css는 지우고, --check에서는 "남은 생성물"로 실패한다.
  *
  * 생성 전에 대비 검사(T1.15, src/lib/design/contrast.ts)를 돌린다. contrastPairs 중 하나라도 기준 미만이면
  * 파일, 테마, 쌍, 실측값, 기준값을 출력하고 exit 1(아무 파일도 쓰지 않음). 통과하면 문서별 최저 대비를 한 줄씩 출력.
@@ -17,7 +18,13 @@
  * Node 내장 type stripping으로 실행한다(scripts/check-copy.ts와 같은 방식).
  * 상대 모듈은 타입만 정적 import하고, 값은 `.ts` URL로 동적 import한다.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as prettier from "prettier";
@@ -185,7 +192,11 @@ try {
     process.exit(0);
   }
 
-  if (candidates.length === 0) {
+  if (final) {
+    console.log(
+      `시안 보존: 루트 ${FINAL_SRC}가 있어 ${CANDIDATE_OUT}를 만들지 않습니다 (시안 문서는 검증만, FORMAT.md 7절).`,
+    );
+  } else if (candidates.length === 0) {
     console.log(
       `시안 없음: ${CANDIDATE_DIR}/<id>.DESIGN.md가 없어 ${CANDIDATE_OUT}를 만들지 않았습니다.`,
     );
@@ -208,6 +219,20 @@ try {
 }
 
 let stale = 0;
+
+// 확정 후에는 시안 생성물이 없어야 한다(T1.20).
+if (final && existsSync(path.join(root, CANDIDATE_OUT))) {
+  if (check) {
+    stale++;
+    console.error(
+      `남은 생성물: ${CANDIDATE_OUT} (확정 후에는 만들지 않습니다. pnpm tokens로 지우세요)`,
+    );
+  } else {
+    rmSync(path.join(root, CANDIDATE_OUT));
+    console.log(`삭제: ${CANDIDATE_OUT} (확정 후 시안 생성물)`);
+  }
+}
+
 for (const { file, css: raw } of outputs) {
   const abs = path.join(root, file);
   // 저장소 Prettier 설정으로 한 번 정리한다(긴 font 스택 줄바꿈 등). 같은 입력이면 같은 출력.

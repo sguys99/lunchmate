@@ -8,7 +8,8 @@
  *   1. .dark 클래스(shadcn 표준) 또는 [data-theme="dark"] 요소와 그 자손
  *   2. 시스템 다크 설정이고 루트를 .light/.dark로 고정하지 않은 경우
  * 단, [data-theme="light"] 요소와 그 자손은 위 조건과 무관하게 라이트로 본다.
- * design-candidates.css(FORMAT.md 3.2)와 같은 규칙: 디자인 랩 스위처가 컨테이너 단위로 테마를 강제한다.
+ * 디자인 랩 스위처는 G1 확정 후(T1.20) <html>의 .light/.dark 클래스로 테마를 강제한다(tokens.css가 그 선택자만 안다).
+ * [data-theme] 규칙은 확정 전 시안 CSS(design-candidates.css, FORMAT.md 3.2)용으로 남겨 둔다.
  * 한계: [data-theme="light"] 안에 다시 [data-theme="dark"]를 중첩하면 라이트로 본다(중첩하지 않는다).
  */
 @custom-variant dark {

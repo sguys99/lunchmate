@@ -1,14 +1,16 @@
 "use client";
 // /design-lab/system 시안 스위처 (T1.14).
-// 같은 페이지에서 data-design, data-theme만 바꿔 즉시 전환한다(리로드 없음). 선택값은 URL 쿼리에 남긴다.
-// 컨트롤 바는 시안 범위(DesignScope) 바깥이라 전역 임시 토큰(tokens.css)의 중립 스타일을 쓴다.
+// 같은 페이지에서 화면, 상태, 테마, 보기를 바로 바꾼다(리로드 없음). 선택값은 URL 쿼리에 남긴다.
+// G1 확정 후(T1.20) 토큰은 루트 tokens.css 하나라 컨트롤 바와 화면이 같은 토큰을 쓴다.
+// 시안 선택 그룹은 DESIGN_IDS가 2개 이상일 때만 보인다(G3 홈 시안에서 재사용).
+// 테마 강제는 <html> 클래스로 건다(useRootTheme). 컨트롤 바도 함께 바뀐다.
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { designLabCopy } from "@/copy/design-lab";
 import { DESIGN_STATES } from "@/features/design-lab/mock";
 import { cn } from "@/lib/utils";
-import { DesignScope } from "./design-scope";
+import { DesignScope, useRootTheme } from "./design-scope";
 import { DESIGN_SCREENS } from "./registry";
 import { ScreenViewport } from "./screen-viewport";
 import {
@@ -23,7 +25,7 @@ import {
   DESIGN_SCREEN_IDS,
   DESIGN_THEMES,
   SCREEN_VIEWS,
-  type DesignTokensById,
+  type DesignScreenTokens,
 } from "./types";
 
 const copy = designLabCopy.switcher;
@@ -77,9 +79,12 @@ function isTypingTarget(target: EventTarget | null): boolean {
   );
 }
 
-export function DesignSwitcher({ tokens }: { tokens: DesignTokensById }) {
+const MULTI_DESIGN = DESIGN_IDS.length > 1;
+
+export function DesignSwitcher({ tokens }: { tokens: DesignScreenTokens }) {
   const searchParams = useSearchParams();
   const sel = parseSelection(searchParams);
+  useRootTheme(sel.theme);
 
   // 현재 주소를 기준으로 고친다(키보드 핸들러가 오래된 sel을 잡지 않게).
   // history.replaceState는 Next가 useSearchParams와 동기화한다. 서버 왕복 없이 즉시 바뀐다.
@@ -102,8 +107,9 @@ export function DesignSwitcher({ tokens }: { tokens: DesignTokensById }) {
         new URLSearchParams(window.location.search),
       );
       const key = e.key.toLowerCase();
-      const designIndex = ["1", "2", "3"].indexOf(key);
-      const design = DESIGN_IDS[designIndex];
+      const design = MULTI_DESIGN
+        ? DESIGN_IDS[Number.parseInt(key, 10) - 1]
+        : undefined;
       if (design) update({ design });
       else if (key === "h") update({ screen: "home" });
       else if (key === "s") update({ screen: "sheet" });
@@ -130,18 +136,19 @@ export function DesignSwitcher({ tokens }: { tokens: DesignTokensById }) {
         aria-label={copy.toolbarLabel}
         className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-background px-4 py-2"
       >
-        <Segmented
-          label={copy.groups.design}
-          value={sel.design}
-          onChange={(design) => update({ design })}
-          options={DESIGN_IDS.map((id) => ({
-            value: id,
-            label: id.toUpperCase(),
-            title: tokens[id].meta.name,
-          }))}
-        />
+        {MULTI_DESIGN ? (
+          <Segmented
+            label={copy.groups.design}
+            value={sel.design}
+            onChange={(design) => update({ design })}
+            options={DESIGN_IDS.map((id) => ({
+              value: id,
+              label: id.toUpperCase(),
+            }))}
+          />
+        ) : null}
         <span className="text-xs font-medium">
-          {tokens[sel.design].meta.name}
+          {copy.finalLabel(tokens.meta.name)}
         </span>
         <Segmented
           label={copy.groups.screen}
@@ -187,7 +194,7 @@ export function DesignSwitcher({ tokens }: { tokens: DesignTokensById }) {
           {copy.openStandalone}
         </Link>
         <p className="ml-auto hidden text-[0.6875rem] text-muted-foreground lg:block">
-          {copy.shortcuts}
+          {MULTI_DESIGN ? copy.shortcutsMulti : copy.shortcuts}
         </p>
       </header>
 
@@ -198,12 +205,8 @@ export function DesignSwitcher({ tokens }: { tokens: DesignTokensById }) {
         )}
       >
         <ScreenViewport view={sel.view}>
-          <DesignScope
-            design={sel.design}
-            theme={sel.theme}
-            className="h-full overflow-y-auto"
-          >
-            <Screen state={sel.state} tokens={tokens[sel.design]} />
+          <DesignScope className="h-full overflow-y-auto">
+            <Screen state={sel.state} tokens={tokens} />
           </DesignScope>
         </ScreenViewport>
       </div>

@@ -5,10 +5,13 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  // design-lab 시스템 화면은 시안 DESIGN.md 프런트매터를 서버에서 읽는다(getDesignTokens, T1.14).
-  // 함수 번들에 문서가 들어가도록 명시한다.
+  // design-lab 화면은 루트 DESIGN.md 프런트매터를 서버에서 읽는다(getScreenTokens, T1.14, T1.20).
+  // 시안 B 일러스트 확인 페이지(T2.8까지 유지)는 보존된 b.DESIGN.md를 읽는다. 함수 번들에 문서가 들어가도록 명시한다.
   outputFileTracingIncludes: {
-    "/design-lab/**": ["./docs/design/candidates/*.DESIGN.md"],
+    "/design-lab/**": [
+      "./DESIGN.md",
+      "./docs/design/candidates/b.DESIGN.md",
+    ],
   },
   turbopack: {
     rules: {

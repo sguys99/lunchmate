@@ -1,55 +1,36 @@
-// 서버 전용: 시안 DESIGN.md 프런트매터에서 JS용 토큰을 읽는다 (T1.14).
+// 서버 전용: 확정 DESIGN.md(루트) 프런트매터에서 JS용 토큰을 읽는다 (T1.14, T1.20).
 // 클라이언트 컴포넌트에서 import하지 않는다(node:fs). 결과를 props로 내려준다.
 //
-// 파일 읽기 방식을 고른 이유: 프런트매터(정본)를 그대로 파싱하므로 `pnpm tokens`와 값이 어긋날 일이 없다.
-// 런타임에 읽어도 Vercel 함수 번들에 문서가 포함되도록 next.config.ts의 outputFileTracingIncludes에
-// docs/design/candidates/*.DESIGN.md를 넣었다. (design-lab은 프로덕션에서 꺼져 있어 실제로 읽힐 일은 거의 없다.)
+// G1 확정(D-01) 후 디자인 랩 화면은 시안 문서(docs/design/candidates/) 대신 루트 DESIGN.md를 읽는다.
+// CSS 변수도 src/styles/tokens.css(:root, 루트 DESIGN.md 생성물)를 그대로 쓰므로, DESIGN.md를 고치고
+// `pnpm tokens`를 실행하면 디자인 랩 화면이 따라 바뀐다(T1.21).
+// 런타임에 읽어도 Vercel 함수 번들에 문서가 포함되도록 next.config.ts의 outputFileTracingIncludes에 DESIGN.md를 넣었다.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { parseDesignDoc, type DesignFrontmatter } from "@/lib/design/schema";
-import {
-  DESIGN_IDS,
-  type DesignId,
-  type DesignScreenTokens,
-  type DesignTokensById,
-} from "./types";
+import type { DesignScreenTokens } from "./types";
 
-const cacheById = new Map<DesignId, DesignScreenTokens>();
-const docById = new Map<DesignId, DesignFrontmatter>();
+let docCache: DesignFrontmatter | undefined;
+let tokenCache: DesignScreenTokens | undefined;
 
-/** 시안 DESIGN.md 프런트매터 전체 (견본표 페이지용). 같은 프로세스에서는 한 번만 읽는다. */
-export function getDesignFrontmatter(id: DesignId): DesignFrontmatter {
-  const hit = docById.get(id);
-  if (hit) return hit;
-  const file = path.join(
-    process.cwd(),
-    "docs/design/candidates",
-    `${id}.DESIGN.md`,
-  );
-  const { tokens } = parseDesignDoc(readFileSync(file, "utf8"));
-  docById.set(id, tokens);
-  return tokens;
+/** 확정 DESIGN.md 프런트매터 전체 (견본표 페이지용). 같은 프로세스에서는 한 번만 읽는다. */
+export function getFinalFrontmatter(): DesignFrontmatter {
+  if (docCache) return docCache;
+  const file = path.join(process.cwd(), "DESIGN.md");
+  docCache = parseDesignDoc(readFileSync(file, "utf8")).tokens;
+  return docCache;
 }
 
-/** 시안 하나의 JS용 토큰. 같은 프로세스에서는 한 번만 읽는다. */
-export function getDesignTokens(id: DesignId): DesignScreenTokens {
-  const hit = cacheById.get(id);
-  if (hit) return hit;
-  const tokens = getDesignFrontmatter(id);
-  const { id: metaId, name, concept, mood } = tokens.meta;
-  const value: DesignScreenTokens = {
-    meta: { id: metaId, name, concept, mood },
+/** 화면 컴포넌트용 JS 토큰 (motion, layout, illustration). */
+export function getScreenTokens(): DesignScreenTokens {
+  if (tokenCache) return tokenCache;
+  const tokens = getFinalFrontmatter();
+  const { id, name, concept, mood } = tokens.meta;
+  tokenCache = {
+    meta: { id, name, concept, mood },
     motion: tokens.motion,
     layout: tokens.layout,
     illustration: tokens.illustration,
   };
-  cacheById.set(id, value);
-  return value;
-}
-
-/** 시안 3안 전부 (스위처용) */
-export function getAllDesignTokens(): DesignTokensById {
-  return Object.fromEntries(
-    DESIGN_IDS.map((id) => [id, getDesignTokens(id)]),
-  ) as Record<DesignId, DesignScreenTokens>;
+  return tokenCache;
 }

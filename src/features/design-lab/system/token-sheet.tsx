@@ -1,6 +1,7 @@
 // G1 토큰 견본표 (T1.16 보조 자료). 서버 컴포넌트, /design-lab/system/tokens에서만 쓴다.
-// 값은 시안 DESIGN.md 프런트매터를 파싱한 결과(getDesignFrontmatter)에서 가져오고, 대비비는 src/lib/design/contrast.ts로 계산한다.
-// 색은 시안 범위([data-design]) 안의 CSS 변수로 칠한다. 테마는 시스템 설정을 따르고, 숫자와 oklch 값은
+// G1 확정 후(T1.20) 루트 DESIGN.md(확정본) 한 벌만 그린다. 값은 프런트매터를 파싱한 결과(getFinalFrontmatter),
+// 대비비는 src/lib/design/contrast.ts로 계산한다. 시안 3안 비교는 docs/design/shots와 g1-comparison.md에 남아 있다.
+// 색은 루트 tokens.css(:root) 변수로 칠한다. 테마는 시스템 설정을 따르고, 숫자와 oklch 값은
 // 라이트와 다크 둘 다 그려 dark: 변형으로 지금 테마의 값만 보인다(캡처 라이트/다크가 각각 맞는 숫자를 보여 준다).
 import type { CSSProperties, ReactNode } from "react";
 import { designLabCopy } from "@/copy/design-lab";
@@ -18,8 +19,7 @@ import {
   type DesignFrontmatter,
 } from "@/lib/design/schema";
 import { cn } from "@/lib/utils";
-import { getDesignFrontmatter } from "./tokens.server";
-import { DESIGN_IDS, type DesignId } from "./types";
+import { getFinalFrontmatter } from "./tokens.server";
 
 const copy = designLabCopy.tokens;
 
@@ -428,17 +428,17 @@ function MotionSection({ doc }: { doc: DesignFrontmatter }) {
   );
 }
 
-function DesignColumn({ id }: { id: DesignId }) {
-  const doc = getDesignFrontmatter(id);
+function FinalColumn() {
+  const doc = getFinalFrontmatter();
+  const id = doc.meta.id;
   return (
     <article
-      data-design={id}
       aria-labelledby={`tokens-${id}`}
       className="flex min-w-0 flex-col gap-6 rounded-xl border border-border bg-background p-4 type-body font-sans text-foreground"
     >
       <header className="flex flex-col gap-1">
         <h2 id={`tokens-${id}`} className="type-heading">
-          {copy.designHeading(id.toUpperCase(), doc.meta.name)}
+          {copy.designHeading(doc.meta.name, doc.meta.version)}
         </h2>
         <p className="type-body-sm text-muted-foreground">{doc.meta.concept}</p>
       </header>
@@ -454,16 +454,12 @@ function DesignColumn({ id }: { id: DesignId }) {
 
 export function TokenSheet() {
   return (
-    <main className="mx-auto flex w-full max-w-[90rem] flex-1 flex-col gap-5 bg-background px-4 py-6 text-foreground">
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 bg-background px-4 py-6 text-foreground">
       <header className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-bold tracking-tight">{copy.title}</h1>
         <p className="text-sm text-muted-foreground">{copy.description}</p>
       </header>
-      <div className="grid gap-4 lg:grid-cols-3">
-        {DESIGN_IDS.map((id) => (
-          <DesignColumn key={id} id={id} />
-        ))}
-      </div>
+      <FinalColumn />
     </main>
   );
 }

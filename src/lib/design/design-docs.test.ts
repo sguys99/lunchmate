@@ -2,7 +2,8 @@
  * 저장소의 실제 DESIGN 문서 검사 (T1.15). pre-push의 `pnpm test`에 포함되어 아래가 깨지면 푸시를 막는다.
  * - docs/design/candidates/*.DESIGN.md(템플릿 포함)와 루트 DESIGN.md(있으면)가 스키마를 통과하는지
  * - 모든 contrastPairs가 라이트, 다크에서 기준 대비 이상인지
- * - 생성물(src/styles/design-candidates.css, 확정 후 tokens.css)이 문서와 같은지 (`pnpm tokens --check`와 같은 판정)
+ * - 생성물이 문서와 같은지 (`pnpm tokens --check`와 같은 판정)
+ *   확정 전: src/styles/design-candidates.css, 확정 후(루트 DESIGN.md 있음): tokens.css만 있고 design-candidates.css는 없음(T1.20)
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -21,10 +22,10 @@ const candidateFiles = readdirSync(path.join(REPO, CANDIDATE_DIR))
   .sort()
   .map((f) => `${CANDIDATE_DIR}/${f}`);
 
-const docFiles = [
-  ...candidateFiles,
-  ...(existsSync(path.join(REPO, FINAL_SRC)) ? [FINAL_SRC] : []),
-];
+const hasFinal = existsSync(path.join(REPO, FINAL_SRC));
+const CANDIDATE_OUT = "src/styles/design-candidates.css";
+
+const docFiles = [...candidateFiles, ...(hasFinal ? [FINAL_SRC] : [])];
 
 function load(rel: string): DesignFrontmatter {
   return parseDesignDoc(readFileSync(path.join(REPO, rel), "utf8")).tokens;
@@ -60,19 +61,21 @@ describe("토큰 생성물이 최신이다 (pnpm tokens로 다시 생성)", () =
     (f) => !path.basename(f).startsWith("_"),
   );
 
-  it.runIf(candidates.length > 0)(
-    "src/styles/design-candidates.css",
-    async () => {
-      const out = "src/styles/design-candidates.css";
-      const expected = await formatCss(
-        out,
-        candidatesFile(candidates.map(load)),
-      );
-      expect(readFileSync(path.join(REPO, out), "utf8")).toBe(expected);
-    },
-  );
+  it.runIf(!hasFinal && candidates.length > 0)(CANDIDATE_OUT, async () => {
+    const expected = await formatCss(
+      CANDIDATE_OUT,
+      candidatesFile(candidates.map(load)),
+    );
+    expect(readFileSync(path.join(REPO, CANDIDATE_OUT), "utf8")).toBe(
+      expected,
+    );
+  });
 
-  it.runIf(existsSync(path.join(REPO, FINAL_SRC)))(
+  it.runIf(hasFinal)(`확정 후 ${CANDIDATE_OUT}는 없다 (시안 문서는 보존용)`, () => {
+    expect(existsSync(path.join(REPO, CANDIDATE_OUT))).toBe(false);
+  });
+
+  it.runIf(hasFinal)(
     "src/styles/tokens.css",
     async () => {
       const out = "src/styles/tokens.css";

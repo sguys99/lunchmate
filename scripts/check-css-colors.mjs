@@ -4,7 +4,7 @@
  *   node scripts/check-css-colors.mjs           src/**\/*.css 검사, 위반 있으면 exit 1
  *   node scripts/check-css-colors.mjs <파일...>  지정한 파일만 검사
  *
- * 제외: DESIGN.md 생성물(src/styles/tokens.css, src/styles/design-candidates.css). 색 값은 그 두 파일에만 있다.
+ * 제외: DESIGN.md 생성물(src/styles/tokens.css, 확정 전에만 생기는 src/styles/design-candidates.css). 색 값은 생성물에만 있다.
  * 패턴은 ESLint 규칙과 같다(scripts/color-lint/match.mjs). CSS 주석 안은 보지 않는다.
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";

@@ -52,7 +52,7 @@ tasks.md에서 다음 미완료 작업부터 진행해줘. 시작 전에 관련 
 | 단계 | 이름 | 예상 기간 | 게이트 | 상태 | 완료/전체 |
 | --- | --- | --- | --- | --- | --- |
 | 0 | 준비 (문서 정리, 계정, 리포) | 3일 | G0 | 완료 (10/28) | 36/36 |
-| 1 | 디자인 시스템: DESIGN.md 시안 | 4일 | ⛔ G1 | 진행 중 | 19/21 |
+| 1 | 디자인 시스템: DESIGN.md 시안 | 4일 | ⛔ G1 | 진행 중 | 20/21 |
 | 2 | 공통 기반: 문구, 컴포넌트, 모션 | 4일 | G2 | 대기 | 0/22 |
 | 3 | 핵심 화면 시안: 홈 카드, 랜딩 | 3일 | ⛔ G3 | 대기 | 0/8 |
 | 4 | 인증, 온보딩, 설정 | 1.5주 | ⛔ 시안 + G4 | 대기 | 0/30 |
@@ -295,7 +295,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 - [x] T1.18 (10/28 완료, 루트 `DESIGN.md`, design-decisions D-01) 선택안을 루트 `DESIGN.md`로 확정하고 `docs/design-decisions.md`에 선택 내용, 조합 지시, 날짜를 기록
 - [x] T1.19 (10/29 완료, 서체는 `font.*.cssVar`로 next/font 연결, 마루 부리 300/400 swap 비preload, `lunchmate/no-hardcoded-color` + CSS 색 검사) `src/styles/tokens.css` 생성(빌드 스크립트 산출물), Tailwind v4 테마 연결, 하드코딩 색 금지 린트 규칙 추가
-- [ ] T1.20 미선택 시안의 design-lab 코드 삭제. 시안 DESIGN 파일은 `docs/design/candidates/`에, 캡처는 `docs/design/shots/`에 보존
+- [x] T1.20 (10/29 완료, A/C 코드 삭제, design-lab은 루트 토큰 사용, 시안 문서와 캡처 보존) 미선택 시안의 design-lab 코드 삭제. 시안 DESIGN 파일은 `docs/design/candidates/`에, 캡처는 `docs/design/shots/`에 보존
 - [ ] T1.21 **G1 확인**: DESIGN.md를 고치고 `pnpm tokens`를 실행하면 화면이 따라 바뀝니다.
 
 ---

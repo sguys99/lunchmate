@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { designLabCopy } from "@/copy/design-lab";
-import { getAllDesignTokens } from "@/features/design-lab/system/tokens.server";
+import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
   DESIGN_SCREEN_IDS,
@@ -17,7 +17,7 @@ function Section({
 }: {
   title: string;
   body?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <section className="flex flex-col gap-3 rounded-lg border border-border p-5">
@@ -29,7 +29,7 @@ function Section({
 }
 
 export default function DesignLabPage() {
-  const tokens = getAllDesignTokens();
+  const { name } = getScreenTokens().meta;
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 bg-background p-6 text-foreground">
       <header className="flex flex-col gap-2">
@@ -56,7 +56,7 @@ export default function DesignLabPage() {
           {DESIGN_IDS.map((id) => (
             <li key={id} className="flex flex-wrap items-baseline gap-x-4">
               <span className="min-w-48 text-sm">
-                {copy.designLabel(id.toUpperCase(), tokens[id].meta.name)}
+                {copy.designLabel(id.toUpperCase(), name)}
               </span>
               {DESIGN_SCREEN_IDS.map((screen) => (
                 <Link
@@ -72,20 +72,13 @@ export default function DesignLabPage() {
         </ul>
       </Section>
 
-      <Section title={copy.illustrationsTitle}>
-        <ul className="flex flex-wrap gap-4">
-          {DESIGN_IDS.map((id) => (
-            <li key={id}>
-              <Link
-                href={`/design-lab/illustrations/${id}`}
-                className={linkClass}
-              >
-                {copy.designLabel(id.toUpperCase(), tokens[id].meta.name)}
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <Section title={copy.illustrationsTitle} body={copy.illustrationsBody}>
+        <Link href="/design-lab/illustrations/b" className={linkClass}>
+          {copy.designLabel("B", name)}
+        </Link>
       </Section>
+
+      <Section title={copy.archiveTitle} body={copy.archiveBody} />
 
       <Section title={copy.toolsTitle}>
         <Link href="/design-lab/map-smoke" className={linkClass}>
