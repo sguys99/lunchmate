@@ -1,0 +1,156 @@
+/*
+ * 시안 A "Terracotta Table" 일러스트 색 역할 (T1.4).
+ * 전역 CSS다(next.config의 *.css 규칙이 CSS Modules를 끄므로). 클래스는 ila- 접두사로 충돌을 막는다.
+ * 색 값은 쓰지 않고 토큰 변수만 섞는다. --il-s, --il-i는 IllustrationA가 카테고리별로 넣는다.
+ *   --il-s: var(--cat-<slug>-surface), --il-i: var(--cat-<slug>-ink)
+ * 다크에서는 색면이 어둡고 ink가 밝아 단순 혼합이 명암을 뒤집으므로, 역할별 혼합 비율을 다시 정해
+ * "밝은 쪽이 빛 받는 면"이라는 관계를 두 테마에서 같게 유지한다.
+ */
+
+.ila-root {
+  --il-wash: color-mix(in oklch, var(--il-i) 9%, var(--il-s));
+  --il-drop: color-mix(in oklch, var(--il-i) 17%, var(--il-s));
+  --il-vessel: var(--card);
+  --il-vessel-shade: color-mix(in oklch, var(--il-i) 13%, var(--card));
+  --il-rim: color-mix(in oklch, var(--il-i) 34%, var(--card));
+  --il-hi: color-mix(in oklch, var(--card) 82%, var(--il-s));
+  --il-light: color-mix(in oklch, var(--il-i) 26%, var(--il-s));
+  --il-mid: color-mix(in oklch, var(--il-i) 52%, var(--il-s));
+  --il-deep: color-mix(in oklch, var(--il-i) 80%, var(--il-s));
+  --il-line: var(--il-i);
+  --il-accent: var(--primary);
+  --il-accent-deep: color-mix(in oklch, var(--primary) 68%, var(--il-i));
+  --il-steam: color-mix(in oklch, var(--il-i) 22%, var(--il-s));
+  /* 구운 빵 색: 테마별 mid를 포인트 쪽으로 데운다(다크에서도 같은 식이 따라온다) */
+  --il-toast: color-mix(in oklch, var(--il-mid) 58%, var(--primary));
+  --il-toast-hi: color-mix(in oklch, var(--il-toast) 55%, var(--il-hi));
+  display: block;
+}
+
+:where(.dark) .ila-root {
+  --il-wash: color-mix(in oklch, var(--il-i) 6%, var(--il-s));
+  --il-drop: color-mix(in oklch, var(--il-s) 45%, var(--background));
+  --il-vessel: color-mix(in oklch, var(--il-i) 22%, var(--card));
+  --il-vessel-shade: color-mix(in oklch, var(--il-i) 10%, var(--card));
+  --il-rim: color-mix(in oklch, var(--il-i) 46%, var(--card));
+  --il-hi: color-mix(in oklch, var(--foreground) 72%, var(--il-i));
+  --il-light: color-mix(in oklch, var(--il-i) 76%, var(--il-s));
+  --il-mid: color-mix(in oklch, var(--il-i) 50%, var(--il-s));
+  --il-deep: color-mix(in oklch, var(--il-i) 26%, var(--il-s));
+  --il-line: color-mix(in oklch, var(--il-s) 55%, var(--background));
+  --il-accent-deep: color-mix(in oklch, var(--primary) 62%, var(--il-s));
+  --il-steam: color-mix(in oklch, var(--il-i) 30%, var(--il-s));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) .ila-root {
+    --il-wash: color-mix(in oklch, var(--il-i) 6%, var(--il-s));
+    --il-drop: color-mix(in oklch, var(--il-s) 45%, var(--background));
+    --il-vessel: color-mix(in oklch, var(--il-i) 22%, var(--card));
+    --il-vessel-shade: color-mix(in oklch, var(--il-i) 10%, var(--card));
+    --il-rim: color-mix(in oklch, var(--il-i) 46%, var(--card));
+    --il-hi: color-mix(in oklch, var(--foreground) 72%, var(--il-i));
+    --il-light: color-mix(in oklch, var(--il-i) 76%, var(--il-s));
+    --il-mid: color-mix(in oklch, var(--il-i) 50%, var(--il-s));
+    --il-deep: color-mix(in oklch, var(--il-i) 26%, var(--il-s));
+    --il-line: color-mix(in oklch, var(--il-s) 55%, var(--background));
+    --il-accent-deep: color-mix(in oklch, var(--primary) 62%, var(--il-s));
+    --il-steam: color-mix(in oklch, var(--il-i) 30%, var(--il-s));
+  }
+}
+
+/* 면 */
+.ila-bg {
+  fill: var(--il-s);
+}
+.ila-wash {
+  fill: var(--il-wash);
+}
+.ila-drop {
+  fill: var(--il-drop);
+}
+.ila-vessel {
+  fill: var(--il-vessel);
+}
+.ila-vessel-shade {
+  fill: var(--il-vessel-shade);
+}
+.ila-rim {
+  fill: var(--il-rim);
+}
+.ila-hi {
+  fill: var(--il-hi);
+}
+.ila-light {
+  fill: var(--il-light);
+}
+.ila-mid {
+  fill: var(--il-mid);
+}
+.ila-deep {
+  fill: var(--il-deep);
+}
+.ila-line {
+  fill: var(--il-line);
+}
+.ila-accent {
+  fill: var(--il-accent);
+}
+.ila-accent-deep {
+  fill: var(--il-accent-deep);
+}
+.ila-toast {
+  fill: var(--il-toast);
+}
+.ila-toast-hi {
+  fill: var(--il-toast-hi);
+}
+
+/* 선 (붓 자국처럼 둥근 끝) */
+.ila-s-hi,
+.ila-s-light,
+.ila-s-mid,
+.ila-s-deep,
+.ila-s-line,
+.ila-s-accent,
+.ila-s-rim,
+.ila-steam {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ila-s-hi {
+  stroke: var(--il-hi);
+}
+.ila-s-light {
+  stroke: var(--il-light);
+}
+.ila-s-mid {
+  stroke: var(--il-mid);
+}
+.ila-s-deep {
+  stroke: var(--il-deep);
+}
+.ila-s-line {
+  stroke: var(--il-line);
+}
+.ila-s-accent {
+  stroke: var(--il-accent);
+}
+.ila-s-rim {
+  stroke: var(--il-rim);
+}
+.ila-steam {
+  stroke: var(--il-steam);
+  stroke-width: 2.2;
+}
+.ila-s-vessel {
+  fill: none;
+  stroke: var(--il-vessel);
+  stroke-linecap: round;
+}
+.ila-s-toast {
+  fill: none;
+  stroke: var(--il-toast);
+  stroke-linecap: round;
+}
