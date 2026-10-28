@@ -1,0 +1,20 @@
+/*
+ * 디자인 랩 전용 보조 CSS (T1.14). design-lab/layout.tsx에서만 불러온다.
+ *
+ * 서체 연결: next/font는 폰트를 해시된 family 이름으로 등록하므로, DESIGN.md의 family 이름
+ * ("Pretendard Variable", MaruBuri)만으로는 저장소의 폰트 파일을 찾지 못하고 시스템 폰트로 떨어진다.
+ * 그래서 시안 범위 안에서 --lm-font-* 를 next/font 변수로 다시 가리킨다.
+ *   --font-pretendard: 루트 layout.tsx (Pretendard Variable 서브셋)
+ *   --font-maruburi:   src/features/design-lab/fonts.ts (시안 B 제목 세리프)
+ * 생성물(design-candidates.css)과 명시도가 같고(:root [data-design] = 0,2,0 > 0,1,0) 뒤에 오므로 이긴다.
+ * 테마 블록에는 서체가 없으므로 다크, data-theme 강제와 충돌하지 않는다.
+ * 확정본(T1.19)에서도 같은 문제가 생기므로, 그때 tokens.css 쪽 연결 방식을 정한다.
+ */
+:root [data-design] {
+  --lm-font-sans: var(--font-pretendard);
+  --lm-font-heading: var(--font-pretendard);
+}
+
+:root [data-design="b"] {
+  --lm-font-heading: var(--font-maruburi, serif);
+}

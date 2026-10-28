@@ -1,6 +1,35 @@
+import Link from "next/link";
 import { designLabCopy } from "@/copy/design-lab";
+import { getAllDesignTokens } from "@/features/design-lab/system/tokens.server";
+import {
+  DESIGN_IDS,
+  DESIGN_SCREEN_IDS,
+} from "@/features/design-lab/system/types";
+
+const copy = designLabCopy.index;
+const linkClass =
+  "text-sm font-medium underline underline-offset-4 hover:text-primary";
+
+function Section({
+  title,
+  body,
+  children,
+}: {
+  title: string;
+  body?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-3 rounded-lg border border-border p-5">
+      <h2 className="text-base font-semibold">{title}</h2>
+      {body ? <p className="text-sm text-muted-foreground">{body}</p> : null}
+      {children}
+    </section>
+  );
+}
 
 export default function DesignLabPage() {
+  const tokens = getAllDesignTokens();
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 bg-background p-6 text-foreground">
       <header className="flex flex-col gap-2">
@@ -9,10 +38,54 @@ export default function DesignLabPage() {
         </h1>
         <p className="text-muted-foreground">{designLabCopy.description}</p>
       </header>
-      <section className="flex flex-col gap-1 rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold">{designLabCopy.emptyTitle}</h2>
-        <p className="text-muted-foreground">{designLabCopy.emptyBody}</p>
-      </section>
+
+      <Section title={copy.systemTitle} body={copy.switcherBody}>
+        <Link href="/design-lab/system" className={linkClass}>
+          {copy.switcherLink}
+        </Link>
+      </Section>
+
+      <Section title={copy.screensTitle} body={copy.screensBody}>
+        <ul className="flex flex-col gap-2">
+          {DESIGN_IDS.map((id) => (
+            <li key={id} className="flex flex-wrap items-baseline gap-x-4">
+              <span className="min-w-48 text-sm">
+                {copy.designLabel(id.toUpperCase(), tokens[id].meta.name)}
+              </span>
+              {DESIGN_SCREEN_IDS.map((screen) => (
+                <Link
+                  key={screen}
+                  href={`/design-lab/system/${id}/${screen}`}
+                  className={linkClass}
+                >
+                  {designLabCopy.switcher.screens[screen]}
+                </Link>
+              ))}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title={copy.illustrationsTitle}>
+        <ul className="flex flex-wrap gap-4">
+          {DESIGN_IDS.map((id) => (
+            <li key={id}>
+              <Link
+                href={`/design-lab/illustrations/${id}`}
+                className={linkClass}
+              >
+                {copy.designLabel(id.toUpperCase(), tokens[id].meta.name)}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title={copy.toolsTitle}>
+        <Link href="/design-lab/map-smoke" className={linkClass}>
+          {copy.mapSmoke}
+        </Link>
+      </Section>
     </main>
   );
 }

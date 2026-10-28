@@ -8,6 +8,8 @@ export const homeCopy = {
     poll: "투표",
     me: "나",
   },
+  /** 하단 탭 nav의 aria-label */
+  tabBarLabel: "주요 메뉴",
   actions: {
     directions: "길찾기",
     reroll: "다시 뽑기",
@@ -62,6 +64,8 @@ export const pollPreviewCopy = {
   minutesLeft: (minutes: number) => `${minutes}분 남음`,
   myVote: "내 선택",
   vote: "투표하기",
+  /** 득표가 하나도 없을 때 (design-lab 시트 화면의 empty 상태) */
+  noVotes: "아직 투표한 사람이 없습니다. 먼저 골라 볼까요?",
 } as const;
 
 export const placeDetailCopy = {

@@ -3,21 +3,41 @@
 @import "shadcn/tailwind.css";
 @import "../styles/tokens.css";
 
-/* dark: 변형은 .dark 클래스(shadcn 표준) 또는 시스템 다크 설정(.light로 고정하지 않은 경우) */
+/*
+ * dark: 변형 (T1.14). 다크로 보는 경우
+ *   1. .dark 클래스(shadcn 표준) 또는 [data-theme="dark"] 요소와 그 자손
+ *   2. 시스템 다크 설정이고 루트를 .light/.dark로 고정하지 않은 경우
+ * 단, [data-theme="light"] 요소와 그 자손은 위 조건과 무관하게 라이트로 본다.
+ * design-candidates.css(FORMAT.md 3.2)와 같은 규칙: 디자인 랩 스위처가 컨테이너 단위로 테마를 강제한다.
+ * 한계: [data-theme="light"] 안에 다시 [data-theme="dark"]를 중첩하면 라이트로 본다(중첩하지 않는다).
+ */
 @custom-variant dark {
-  &:where(.dark, .dark *) {
+  &:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *):not(
+      :where([data-theme="light"], [data-theme="light"] *)
+    ) {
     @slot;
   }
   @media (prefers-color-scheme: dark) {
-    &:where(:root:not(.light):not(.dark), :root:not(.light):not(.dark) *) {
+    &:where(:root:not(.light):not(.dark), :root:not(.light):not(.dark) *):not(
+        :where([data-theme="light"], [data-theme="light"] *)
+      ) {
       @slot;
     }
   }
 }
 
+/*
+ * desktop: 변형 (T1.14). 뷰포트가 아니라 가장 가까운 화면 컨테이너(@container/screen) 폭 기준.
+ * 디자인 랩 390px 프레임 안에서도 모바일 배치를 유지하기 위해서다. 기준 1024px = 시안 3안의 layout.desktop.breakpoint.
+ * 화면 루트에 `@container/screen` 클래스가 있어야 동작한다(DesignScope가 붙인다).
+ */
+@custom-variant desktop (@container screen (width >= 64rem));
+
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: var(--font-pretendard);
+  /* 서체: --lm-font-* 가 없으면(design-lab 밖) Pretendard. 디자인 랩의 next/font 연결은 design-lab/design-lab.css */
+  --font-sans: var(--lm-font-sans, var(--font-pretendard));
+  --font-heading: var(--lm-font-heading, var(--font-pretendard));
+  --font-numeric: var(--lm-font-numeric, var(--font-pretendard));
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,13 +69,139 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /*
+   * --lm-* 토큰 연결 (FORMAT.md 3.3). 값은 쓰지 않고 var()만 가리켜 data-design 전환이 동작하게 한다.
+   * 변수 이름은 시안(design-candidates.css)과 확정본(tokens.css, T1.19)이 같으므로 이 연결은 그대로 쓴다.
+   * 지금 tokens.css(임시)에는 --lm-* 가 없어서, 기존 유틸리티(rounded-*, shadow-*, p-*)는 var 기본값으로
+   * 현재 모습을 유지한다. 새 이름(text-title, bg-success, rounded-card 등)은 시안 안에서만 값이 있다.
+   */
+
+  /* 앱 의미 색 */
+  --color-success: var(--success);
+  --color-success-surface: var(--success-surface);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-surface: var(--warning-surface);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-surface: var(--info-surface);
+  --color-info-foreground: var(--info-foreground);
+  --color-vote-bar: var(--vote-bar);
+  --color-vote-bar-track: var(--vote-bar-track);
+  --color-vote-bar-foreground: var(--vote-bar-foreground);
+  --color-skeleton: var(--skeleton);
+  --color-skeleton-highlight: var(--skeleton-highlight);
+  --color-overlay: var(--overlay);
+
+  /* 카테고리 색면/선 */
+  --color-cat-hansik-surface: var(--cat-hansik-surface);
+  --color-cat-hansik-ink: var(--cat-hansik-ink);
+  --color-cat-jungsik-surface: var(--cat-jungsik-surface);
+  --color-cat-jungsik-ink: var(--cat-jungsik-ink);
+  --color-cat-ilsik-surface: var(--cat-ilsik-surface);
+  --color-cat-ilsik-ink: var(--cat-ilsik-ink);
+  --color-cat-yangsik-surface: var(--cat-yangsik-surface);
+  --color-cat-yangsik-ink: var(--cat-yangsik-ink);
+  --color-cat-bunsik-surface: var(--cat-bunsik-surface);
+  --color-cat-bunsik-ink: var(--cat-bunsik-ink);
+  --color-cat-gukbap-surface: var(--cat-gukbap-surface);
+  --color-cat-gukbap-ink: var(--cat-gukbap-ink);
+  --color-cat-gogi-surface: var(--cat-gogi-surface);
+  --color-cat-gogi-ink: var(--cat-gogi-ink);
+  --color-cat-asian-surface: var(--cat-asian-surface);
+  --color-cat-asian-ink: var(--cat-asian-ink);
+  --color-cat-fastfood-surface: var(--cat-fastfood-surface);
+  --color-cat-fastfood-ink: var(--cat-fastfood-ink);
+  --color-cat-salad-surface: var(--cat-salad-surface);
+  --color-cat-salad-ink: var(--cat-salad-ink);
+  --color-cat-cafe-surface: var(--cat-cafe-surface);
+  --color-cat-cafe-ink: var(--cat-cafe-ink);
+  --color-cat-pub-surface: var(--cat-pub-surface);
+  --color-cat-pub-ink: var(--cat-pub-ink);
+
+  /* 타입 스케일: text-<step> (크기, 행간, 굵기, 자간). 서체까지 한 번에 쓰려면 아래 type-<step> 유틸리티 */
+  --text-display: var(--lm-type-display-size);
+  --text-display--line-height: var(--lm-type-display-line-height);
+  --text-display--font-weight: var(--lm-type-display-weight);
+  --text-display--letter-spacing: var(--lm-type-display-tracking);
+  --text-title: var(--lm-type-title-size);
+  --text-title--line-height: var(--lm-type-title-line-height);
+  --text-title--font-weight: var(--lm-type-title-weight);
+  --text-title--letter-spacing: var(--lm-type-title-tracking);
+  --text-heading: var(--lm-type-heading-size);
+  --text-heading--line-height: var(--lm-type-heading-line-height);
+  --text-heading--font-weight: var(--lm-type-heading-weight);
+  --text-heading--letter-spacing: var(--lm-type-heading-tracking);
+  --text-body: var(--lm-type-body-size);
+  --text-body--line-height: var(--lm-type-body-line-height);
+  --text-body--font-weight: var(--lm-type-body-weight);
+  --text-body--letter-spacing: var(--lm-type-body-tracking);
+  --text-body-sm: var(--lm-type-body-sm-size);
+  --text-body-sm--line-height: var(--lm-type-body-sm-line-height);
+  --text-body-sm--font-weight: var(--lm-type-body-sm-weight);
+  --text-body-sm--letter-spacing: var(--lm-type-body-sm-tracking);
+  --text-label: var(--lm-type-label-size);
+  --text-label--line-height: var(--lm-type-label-line-height);
+  --text-label--font-weight: var(--lm-type-label-weight);
+  --text-label--letter-spacing: var(--lm-type-label-tracking);
+  --text-caption: var(--lm-type-caption-size);
+  --text-caption--line-height: var(--lm-type-caption-line-height);
+  --text-caption--font-weight: var(--lm-type-caption-weight);
+  --text-caption--letter-spacing: var(--lm-type-caption-tracking);
+  --text-numeric-lg: var(--lm-type-numeric-lg-size);
+  --text-numeric-lg--line-height: var(--lm-type-numeric-lg-line-height);
+  --text-numeric-lg--font-weight: var(--lm-type-numeric-lg-weight);
+  --text-numeric-lg--letter-spacing: var(--lm-type-numeric-lg-tracking);
+  --text-numeric-md: var(--lm-type-numeric-md-size);
+  --text-numeric-md--line-height: var(--lm-type-numeric-md-line-height);
+  --text-numeric-md--font-weight: var(--lm-type-numeric-md-weight);
+  --text-numeric-md--letter-spacing: var(--lm-type-numeric-md-tracking);
+
+  /* 간격 */
+  --spacing: var(--lm-space-base, 0.25rem);
+
+  /* 라운드: 단계 (기본값은 이전 globals.css 배수) */
+  --radius-sm: var(--lm-radius-sm, calc(var(--radius) * 0.6));
+  --radius-md: var(--lm-radius-md, calc(var(--radius) * 0.8));
+  --radius-lg: var(--lm-radius-lg, var(--radius));
+  --radius-xl: var(--lm-radius-xl, calc(var(--radius) * 1.4));
+  --radius-2xl: var(--lm-radius-2xl, calc(var(--radius) * 1.8));
+  --radius-3xl: var(--lm-radius-3xl, calc(var(--radius) * 2.2));
+  --radius-4xl: var(--lm-radius-4xl, calc(var(--radius) * 2.6));
+
+  /* 라운드: 컴포넌트 (rounded-card, rounded-chip ...) */
+  --radius-card: var(--lm-radius-card, var(--radius));
+  --radius-button: var(--lm-radius-button, var(--radius));
+  --radius-chip: var(--lm-radius-chip, var(--radius));
+  --radius-badge: var(--lm-radius-badge, var(--radius));
+  --radius-input: var(--lm-radius-input, var(--radius));
+  --radius-sheet: var(--lm-radius-sheet, var(--radius));
+  --radius-tab-bar: var(--lm-radius-tab-bar, var(--radius));
+
+  /* 그림자 (기본값은 Tailwind 기본 그림자를 oklch로 옮긴 것) */
+  --shadow-sm: var(
+    --lm-shadow-sm,
+    0 1px 3px 0 oklch(0 0 0 / 10%),
+    0 1px 2px -1px oklch(0 0 0 / 10%)
+  );
+  --shadow-md: var(
+    --lm-shadow-md,
+    0 4px 6px -1px oklch(0 0 0 / 10%),
+    0 2px 4px -2px oklch(0 0 0 / 10%)
+  );
+  --shadow-lg: var(
+    --lm-shadow-lg,
+    0 10px 15px -3px oklch(0 0 0 / 10%),
+    0 4px 6px -4px oklch(0 0 0 / 10%)
+  );
+  --shadow-sheet: var(--lm-shadow-sheet, none);
+
+  /* 이징 (ease-standard ...). duration, border, layout은 연결하지 않고 duration-(--lm-duration-base)처럼 쓴다 */
+  --ease-standard: var(--lm-ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  --ease-enter: var(--lm-ease-enter, cubic-bezier(0, 0, 0.2, 1));
+  --ease-exit: var(--lm-ease-exit, cubic-bezier(0.4, 0, 1, 1));
+  --ease-emphasized: var(--lm-ease-emphasized, cubic-bezier(0.2, 0, 0, 1));
 }
 
 @layer base {
@@ -68,4 +214,76 @@
   html {
     @apply font-sans;
   }
+}
+
+/*
+ * type-<step>: 타입 스케일 한 단계를 서체까지 한 번에 적용 (FORMAT.md 2.6). 예: type-title, type-numeric-lg
+ * numeric-* 단계는 tabular-nums(와 시안의 slashed zero)를 함께 켠다.
+ */
+@utility type-display {
+  font-family: var(--lm-type-display-font, var(--font-pretendard));
+  font-size: var(--lm-type-display-size);
+  line-height: var(--lm-type-display-line-height);
+  font-weight: var(--lm-type-display-weight);
+  letter-spacing: var(--lm-type-display-tracking);
+}
+@utility type-title {
+  font-family: var(--lm-type-title-font, var(--font-pretendard));
+  font-size: var(--lm-type-title-size);
+  line-height: var(--lm-type-title-line-height);
+  font-weight: var(--lm-type-title-weight);
+  letter-spacing: var(--lm-type-title-tracking);
+}
+@utility type-heading {
+  font-family: var(--lm-type-heading-font, var(--font-pretendard));
+  font-size: var(--lm-type-heading-size);
+  line-height: var(--lm-type-heading-line-height);
+  font-weight: var(--lm-type-heading-weight);
+  letter-spacing: var(--lm-type-heading-tracking);
+}
+@utility type-body {
+  font-family: var(--lm-type-body-font, var(--font-pretendard));
+  font-size: var(--lm-type-body-size);
+  line-height: var(--lm-type-body-line-height);
+  font-weight: var(--lm-type-body-weight);
+  letter-spacing: var(--lm-type-body-tracking);
+}
+@utility type-body-sm {
+  font-family: var(--lm-type-body-sm-font, var(--font-pretendard));
+  font-size: var(--lm-type-body-sm-size);
+  line-height: var(--lm-type-body-sm-line-height);
+  font-weight: var(--lm-type-body-sm-weight);
+  letter-spacing: var(--lm-type-body-sm-tracking);
+}
+@utility type-label {
+  font-family: var(--lm-type-label-font, var(--font-pretendard));
+  font-size: var(--lm-type-label-size);
+  line-height: var(--lm-type-label-line-height);
+  font-weight: var(--lm-type-label-weight);
+  letter-spacing: var(--lm-type-label-tracking);
+}
+@utility type-caption {
+  font-family: var(--lm-type-caption-font, var(--font-pretendard));
+  font-size: var(--lm-type-caption-size);
+  line-height: var(--lm-type-caption-line-height);
+  font-weight: var(--lm-type-caption-weight);
+  letter-spacing: var(--lm-type-caption-tracking);
+}
+@utility type-numeric-lg {
+  font-family: var(--lm-type-numeric-lg-font, var(--font-pretendard));
+  font-size: var(--lm-type-numeric-lg-size);
+  line-height: var(--lm-type-numeric-lg-line-height);
+  font-weight: var(--lm-type-numeric-lg-weight);
+  letter-spacing: var(--lm-type-numeric-lg-tracking);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: var(--lm-numeric-features, "tnum" 1);
+}
+@utility type-numeric-md {
+  font-family: var(--lm-type-numeric-md-font, var(--font-pretendard));
+  font-size: var(--lm-type-numeric-md-size);
+  line-height: var(--lm-type-numeric-md-line-height);
+  font-weight: var(--lm-type-numeric-md-weight);
+  letter-spacing: var(--lm-type-numeric-md-tracking);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: var(--lm-numeric-features, "tnum" 1);
 }

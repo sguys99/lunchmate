@@ -13,8 +13,24 @@ export function GogiC() {
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <rect x="14" y="25" width="19" height="11" rx="4" fill={M} transform="rotate(-16 23.5 30.5)" />
-      <rect x="31" y="34" width="18" height="10" rx="4" fill={M} transform="rotate(12 40 39)" />
+      <rect
+        x="14"
+        y="25"
+        width="19"
+        height="11"
+        rx="4"
+        fill={M}
+        transform="rotate(-16 23.5 30.5)"
+      />
+      <rect
+        x="31"
+        y="34"
+        width="18"
+        height="10"
+        rx="4"
+        fill={M}
+        transform="rotate(12 40 39)"
+      />
     </>
   );
 }

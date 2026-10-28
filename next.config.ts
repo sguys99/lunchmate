@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // design-lab 시스템 화면은 시안 DESIGN.md 프런트매터를 서버에서 읽는다(getDesignTokens, T1.14).
+  // 함수 번들에 문서가 들어가도록 명시한다.
+  outputFileTracingIncludes: {
+    "/design-lab/**": ["./docs/design/candidates/*.DESIGN.md"],
+  },
   turbopack: {
     rules: {
       "*.css": {

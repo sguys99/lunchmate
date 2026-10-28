@@ -13,8 +13,18 @@ export function YangsikC() {
         fill="none"
       />
       <rect x="44.5" y="20" width="3" height="18" rx="1.5" fill={K} />
-      <path d="M41 9v8a5 5 0 0 0 10 0V9" stroke={K} strokeWidth="2" fill="none" />
-      <path d="M44.3 9v9M47.7 9v9" stroke={K} strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M41 9v8a5 5 0 0 0 10 0V9"
+        stroke={K}
+        strokeWidth="2"
+        fill="none"
+      />
+      <path
+        d="M44.3 9v9M47.7 9v9"
+        stroke={K}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
       <ellipse cx="32" cy="46" rx="26" ry="4" fill={K} />
     </>
   );
