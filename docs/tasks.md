@@ -338,7 +338,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
   - [x] 결정 축하 (canvas-confetti 동적 import)
   - [x] 랜딩용 효과 후보 2~3개 (Magic UI, Motion Primitives, React Bits 중)
 - [x] T2.14 (10/29 완료, `src/lib/haptics` haptic(kind) 4종(tap, select, success, warning), 미지원, 축소 모드, 설정 off면 무동작, 80ms 스로틀, 실제 연결은 해당 화면 구현 때, Android 실기기 확인 필요) 햅틱 유틸: 지원 기기(Android)에서만 짧은 진동, 미지원 시 아무 동작 안 함
-- [ ] T2.15 PoC 결과를 `docs/design-decisions.md`에 기록 (채택, 보류, 제외와 이유)
+- [x] T2.15 (10/29 완료, `docs/design-decisions.md` D-02 PoC 판정표(채택 5, 조건부 2, 보류 1, 제외 1, 햅틱 연결 제안, PostHog 지연 유지), D-03 2단계 기타 결정 7건) PoC 결과를 `docs/design-decisions.md`에 기록 (채택, 보류, 제외와 이유)
 
 #### 2.4 품질 장치
 
