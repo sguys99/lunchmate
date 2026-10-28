@@ -17,9 +17,11 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=mobile --project=desktop",
+    "test:e2e:visual": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=visual-mobile --project=visual-desktop",
+    "test:e2e:a11y": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=mobile --project=desktop e2e/a11y.spec.ts",
     "shots": "node scripts/shots.mjs",
-    "postbuild": "node scripts/check-client-secrets.mjs",
+    "postbuild": "node scripts/check-client-secrets.mjs && node scripts/bundle-report.mjs",
     "check:secrets": "node scripts/check-client-secrets.mjs",
     "lint:copy": "node scripts/check-copy.ts",
     "tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-tokens.ts",
@@ -52,6 +54,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@testing-library/dom": "^10.4.2",

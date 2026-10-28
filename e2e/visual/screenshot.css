@@ -1,0 +1,5 @@
+/* 시각 회귀 스냅샷에서만 쓰는 스타일 (T2.16, playwright.config의 stylePath).
+   Next dev 인디케이터와 개발 오버레이는 shadow DOM 호스트 nextjs-portal 안에 있다. 앱 코드와 설정은 건드리지 않는다. */
+nextjs-portal {
+  display: none !important;
+}
