@@ -15,9 +15,10 @@ export const designLabCopy = {
     screensTitle: "단독 화면",
     screensBody:
       "캡처용 페이지입니다. 테마는 시스템 설정을 따르고, 주소 끝에 ?state=loading 처럼 상태를 붙입니다.",
-    illustrationsTitle: "일러스트 확인",
+    illustrationsTitle: "카테고리 일러스트",
     illustrationsBody:
-      "시안 B 선화 12종입니다. 운영 일러스트(T2.8)를 만들 때까지 둡니다.",
+      "운영용 선화 12종을 카드, 큰 카드, 리스트 아이콘 크기로 봅니다. 라이트와 다크를 나란히 둡니다.",
+    illustrationsLink: "일러스트 12종",
     archiveTitle: "보존 자료",
     archiveBody:
       "미선택 시안 A, C의 화면 코드는 지웠습니다. 시안 문서는 docs/design/candidates, 캡처는 docs/design/shots, 비교 자료는 docs/design/g1-comparison.md에 있습니다.",
@@ -147,4 +148,20 @@ export const designLabCopy = {
 
   /** 데스크톱 2단의 지도 자리 (실제 지도 없음) */
   mapPlaceholder: "지도 자리",
+
+  /** /design-lab/illustrations 카테고리 일러스트 확인 (T2.8) */
+  illustrations: {
+    metaTitle: "카테고리 일러스트",
+    eyebrow: "T2.8",
+    title: "카테고리 일러스트",
+    description:
+      "음식과 그릇만 그린 선화 12종입니다. 바닥선, 시점, 선 굵기를 맞췄고 64px 미만에서는 잔선을 뺀 아이콘 변형을 씁니다.",
+    light: "라이트",
+    dark: "다크",
+    cardSize: "카드 96px",
+    largeSize: "큰 카드 144px",
+    iconSize: "리스트 아이콘 40px, 32px",
+    listSample: "리스트 예시",
+    listMeta: (minutes: number) => `도보 약 ${minutes}분`,
+  },
 } as const;

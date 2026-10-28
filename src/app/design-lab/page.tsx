@@ -73,8 +73,8 @@ export default function DesignLabPage() {
       </Section>
 
       <Section title={copy.illustrationsTitle} body={copy.illustrationsBody}>
-        <Link href="/design-lab/illustrations/b" className={linkClass}>
-          {copy.designLabel("B", name)}
+        <Link href="/design-lab/illustrations" className={linkClass}>
+          {copy.illustrationsLink}
         </Link>
       </Section>
 

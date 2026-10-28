@@ -45,23 +45,3 @@ export const quietStoneScreenCopy = {
     voteUnit: "표",
   },
 } as const;
-
-/**
- * /design-lab/illustrations/b 확인 페이지 (T1.5). 숫자 라벨과 단위는 quietStoneScreenCopy.numbers,
- * 길찾기는 homeCopy.actions를 쓴다. T2.8에서 운영 일러스트로 옮길 때 페이지와 함께 지운다.
- */
-export const quietStoneIllustrationsCopy = {
-  metaTitle: "시안 B 일러스트",
-  eyebrow: "시안 B",
-  title: "Quiet Stone",
-  description:
-    "가는 선화 12종과 제목 세리프 견본입니다. 왼쪽은 라이트, 오른쪽은 다크 토큰입니다.",
-  lightLabel: "라이트",
-  darkLabel: "다크",
-  specimenLabel: "제목 세리프",
-  specimenDisplay: "오늘 점심은 여기로 정했어요",
-  specimenTitle: "오늘의 추천",
-  illustrationsLabel: "카테고리 일러스트",
-  cardLabel: "추천 카드 예시",
-  secondaryAction: "다른 곳",
-} as const;
