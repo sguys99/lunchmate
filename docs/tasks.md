@@ -328,7 +328,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 #### 2.3 모션 시스템
 
 - [x] T2.11 (10/29 완료, `src/lib/motion` 폴더, 토큰은 `pnpm tokens`가 DESIGN.md에서 `tokens.generated.ts`로 생성하고 `--check`로 검사, 프리셋 enter, exit, fade, press, spring-sheet, spring-card, spring-bar, reveal, MotionProvider는 LazyMotion strict + domAnimation, domMax는 loadDomMax 비동기) Motion 설치, `LazyMotion` 설정, DESIGN.md 모션 토큰을 `src/lib/motion.ts` 프리셋으로 (enter, exit, press, spring-sheet, spring-card)
-- [ ] T2.12 `useReducedMotion` 래퍼: 모든 프리셋이 자동으로 축소 모드를 따르게 합니다.
+- [x] T2.12 (10/29 완료, `useMotionPreset`, `useMotionReduced`, `useMotionTransition`, 축소 모드면 duration 0, transform 제거, opacity만, MotionConfig reducedMotion="user" 안전망, 앱 설정 확장은 `MotionProvider preference="reduce"` 인터페이스) `useReducedMotion` 래퍼: 모든 프리셋이 자동으로 축소 모드를 따르게 합니다.
 - [ ] T2.13 동적 컴포넌트 PoC (design-lab에서, 각각 번들 증가량 기록)
   - [ ] 스와이프 카드 스택 (Motion drag, 키보드와 버튼 대체 조작 포함)
   - [ ] 바텀시트 스냅 포인트 (Base UI Drawer 기본, iOS Safari와 카카오톡 인앱 스크롤 잠금, 키보드 `[실기기]` 확인. 문제가 크면 Motion 직접 구현 예비안, T0.27)
