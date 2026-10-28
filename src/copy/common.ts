@@ -79,6 +79,20 @@ export const commonCopy = {
     },
   },
 
+  /**
+   * 화면 전체 오류 (T2.18, APP-06). error.tsx, global-error.tsx가 쓴다.
+   * 화면을 그리다 멈춘 경우라 "불러오지 못했습니다"(states.error) 대신 화면을 주어로 말한다.
+   * 제목은 상태 안내(습니다체), 설명은 다음 행동 제안(해요체)이다.
+   * 오류 메시지와 스택은 보여 주지 않고, 문의할 때 쓸 참고 번호(digest)만 작게 보여 준다.
+   */
+  errorPage: {
+    title: "화면을 표시하지 못했습니다",
+    body: "다시 시도해도 같다면 오늘 추천에서 새로 시작해 볼까요?",
+    retry: actions.retry,
+    home: "오늘 추천으로",
+    reference: (digest: string) => `참고 번호 ${digest}`,
+  },
+
   /** 확인 대화상자. 질문은 해요체, 결과 안내는 습니다체 */
   dialogs: {
     discard: {

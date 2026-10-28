@@ -19,3 +19,10 @@ export {
   type StateAction,
   type StateActionWithDefaultLabel,
 } from "./messages";
+// 화면 전체 오류, 404, 셸 밖 틀 (T2.18). error.tsx, global-error.tsx, not-found.tsx가 쓴다.
+export {
+  ErrorScreen,
+  NotFoundScreen,
+  StandaloneFrame,
+  type ErrorScreenProps,
+} from "./error-screen";
