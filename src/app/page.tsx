@@ -5,7 +5,7 @@ export default function Home() {
       <p className="text-muted-foreground">
         오늘 뭐 먹지를 10초 안에 정해 드립니다.
       </p>
-      <p className="text-2xl font-semibold tabular-nums text-primary">
+      <p className="text-2xl font-semibold text-primary tabular-nums">
         12,000원
       </p>
     </main>

@@ -10,12 +10,7 @@ const pretendard = localFont({
   variable: "--font-pretendard",
   display: "swap",
   weight: "45 930",
-  fallback: [
-    "Apple SD Gothic Neo",
-    "Malgun Gothic",
-    "system-ui",
-    "sans-serif",
-  ],
+  fallback: ["Apple SD Gothic Neo", "Malgun Gothic", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +21,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko" className={cn("h-full antialiased", pretendard.variable)}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

@@ -1,0 +1,30 @@
+# 생성물, 잠금 파일, 정적 자산
+pnpm-lock.yaml
+.next
+out
+build
+coverage
+test-results
+playwright-report
+blob-report
+node_modules
+next-env.d.ts
+*.tsbuildinfo
+src/app/fonts
+docs/design/shots
+public
+
+# 문서 서식 보존
+docs
+CLAUDE.md
+AGENTS.md
+README.md
+*.md
+
+# 에이전트 도구, 생성 토큰
+.claude
+.agents
+src/styles/tokens.css
+skills-lock.json
+.mcp.json
+pnpm-workspace.yaml
