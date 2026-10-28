@@ -21,7 +21,8 @@ const SKIP = new Map([
   ["NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL", "Vercel 시스템 변수"],
 ]);
 
-const args = new Set(process.argv.slice(2));
+// pnpm 11은 `pnpm env:sync -- --apply`의 `--`를 그대로 넘기므로 무시한다
+const args = new Set(process.argv.slice(2).filter((a) => a !== "--"));
 for (const a of args) {
   if (!["--apply", "--overwrite"].includes(a)) {
     console.error(

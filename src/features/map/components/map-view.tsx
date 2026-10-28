@@ -89,7 +89,8 @@ export function MapView({
         className,
       )}
     >
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* 네이버 SDK가 지도 요소에 position: relative를 인라인으로 덮어쓰므로 absolute 대신 크기로 채운다 */}
+      <div ref={containerRef} className="size-full" />
       {status.type === "loading" && <MapSkeleton />}
       {status.type === "error" && (
         <MapError kind={status.kind} onRetry={retry} />
