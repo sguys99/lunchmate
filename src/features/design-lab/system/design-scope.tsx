@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
-import { DesignMotionProvider } from "./motion";
+import { MotionProvider } from "@/lib/motion";
 import type { DesignTheme } from "./types";
 
 const PortalContainerContext = createContext<HTMLElement | null>(null);
@@ -56,7 +56,7 @@ export function DesignScope({
       )}
     >
       <PortalContainerContext value={container}>
-        <DesignMotionProvider>{children}</DesignMotionProvider>
+        <MotionProvider>{children}</MotionProvider>
       </PortalContainerContext>
     </div>
   );

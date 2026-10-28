@@ -31,10 +31,8 @@ export type DesignScreenTokens = {
   illustration: DesignFrontmatter["illustration"];
 };
 
+/** 모션 토큰 (단계 이름 타입은 @/lib/motion의 SpringName, EasingName, DurationStep). */
 export type DesignMotionTokens = DesignScreenTokens["motion"];
-export type SpringPreset = keyof DesignMotionTokens["spring"];
-export type EasingPreset = keyof DesignMotionTokens["easing"];
-export type DurationStep = keyof DesignMotionTokens["duration"];
 
 /** 시안 화면 컴포넌트 props. HomeScreenA, SheetScreenB 등 모두 같은 props를 받는다. */
 export type DesignScreenProps = {

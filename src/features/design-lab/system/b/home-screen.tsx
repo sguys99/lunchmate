@@ -19,14 +19,15 @@ import {
 } from "@/features/design-lab/mock";
 import { categoryLabel } from "@/features/place/categories";
 import { formatWalkMinutes } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import { DesktopSplit, MapPlaceholder } from "../desktop-split";
 import {
   loadDomMax,
+  reduceTransition,
   staggerOf,
   tweenOf,
-  usePrefersReducedMotion,
-} from "../motion";
+  useMotionReduced,
+} from "@/lib/motion";
+import { cn } from "@/lib/utils";
+import { DesktopSplit, MapPlaceholder } from "../desktop-split";
 import { getHomeContent, type HomeContent } from "../states";
 import type { DesignMotionTokens, DesignScreenProps } from "../types";
 import {
@@ -240,9 +241,9 @@ function Carousel({
   onPrev: () => void;
   onNext: () => void;
 }) {
-  const reduced = usePrefersReducedMotion();
-  const enter = reduced ? { duration: 0 } : tweenOf(motion, "base", "enter");
-  const exit = reduced ? { duration: 0 } : tweenOf(motion, "fast", "exit");
+  const reduced = useMotionReduced();
+  const enter = reduceTransition(tweenOf("base", "enter", motion), reduced);
+  const exit = reduceTransition(tweenOf("fast", "exit", motion), reduced);
   const swipe = motion.spring.swipe;
 
   function onDragEnd(_: unknown, info: PanInfo) {
@@ -434,14 +435,14 @@ function PlaceCard({
   reveal: boolean;
   revealOffset?: number;
 }) {
-  const reduced = usePrefersReducedMotion();
+  const reduced = useMotionReduced();
   const block = (i: number) =>
     reveal && !reduced
       ? {
           initial: { opacity: 0 },
           animate: { opacity: 1 },
           transition: {
-            ...tweenOf(motion, "slow", "enter"),
+            ...tweenOf("slow", "enter", motion),
             delay: (i + revealOffset) * staggerOf(motion),
           },
         }

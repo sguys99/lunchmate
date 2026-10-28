@@ -7,13 +7,13 @@ import type { ComponentProps, ReactNode } from "react";
 import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
 import { commonCopy } from "@/copy/common";
 import { homeCopy } from "@/copy/home";
-import { IllustrationB } from "@/features/design-lab/illustrations/b";
 import type { MockPlace, StatusBadge } from "@/features/design-lab/mock";
 import type { CategorySlug } from "@/features/place/categories";
+import { CategoryIllustration } from "@/features/place/illustrations";
 import { formatPriceBand } from "@/lib/format";
 import { getKstParts, getMeal } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { springOf, usePrefersReducedMotion } from "../motion";
+import { springOf, useMotionReduced } from "@/lib/motion";
 import { ACTIVE_TAB_BY_SCREEN, DESIGN_TABS } from "../tabs";
 import type { DesignMotionTokens } from "../types";
 
@@ -48,7 +48,7 @@ export function PressButton({
     <m.button
       type="button"
       whileTap={{ scale: 0.98 }}
-      transition={springOf(motion, "press")}
+      transition={springOf("press", motion)}
       className={className}
       {...props}
     />
@@ -237,9 +237,9 @@ export function PlaceHeading({
         )}
         {children ? <div className="pt-1">{children}</div> : null}
       </div>
-      <IllustrationB
-        category={place.category}
-        className={cn("-mt-2 -mr-2 size-24 shrink-0", illustrationClassName)}
+      <CategoryIllustration
+        slug={place.category}
+        className={cn("-mt-2 -mr-2 shrink-0", illustrationClassName)}
       />
     </div>
   );
@@ -252,7 +252,7 @@ export function PlaceHeading({
  * 모든 막대가 같은 박자라 한 개의 효과로 읽힌다. reduced motion이면 정지.
  */
 export function SkeletonBlock({ className }: { className?: string }) {
-  const reduced = usePrefersReducedMotion();
+  const reduced = useMotionReduced();
   return (
     <div
       aria-hidden
@@ -309,7 +309,7 @@ export function StateMessage({
       className="flex flex-col items-start"
     >
       {kind === "empty" ? (
-        <IllustrationB category={category} className="-ml-2 size-24" />
+        <CategoryIllustration slug={category} className="-ml-2" />
       ) : (
         <StateGlyph Icon={STATE_ICON[kind]} />
       )}

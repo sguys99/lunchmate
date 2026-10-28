@@ -9,6 +9,7 @@
  * 모드 1(시안, G1 확정 전): 루트 DESIGN.md가 없으면 docs/design/candidates/*.DESIGN.md
  *              (언더스코어로 시작하는 템플릿 제외) → src/styles/design-candidates.css, 시안마다 [data-design="<id>"] 세트
  * 모드 2(확정): 루트 DESIGN.md가 있으면 → src/styles/tokens.css (:root, .dark, 시스템 다크)
+ *              + src/lib/motion/tokens.generated.ts (Motion용 JS 상수: duration, easing, spring, T2.11)
  *              시안 문서는 보존용이라 검증(스키마, 대비)만 하고 CSS는 만들지 않는다(T1.20).
  *              남아 있는 design-candidates.css는 지우고, --check에서는 "남은 생성물"로 실패한다.
  *
@@ -20,6 +21,7 @@
  */
 import {
   existsSync,
+  mkdirSync,
   readFileSync,
   readdirSync,
   rmSync,
@@ -31,6 +33,7 @@ import * as prettier from "prettier";
 import type * as SchemaModule from "../src/lib/design/schema";
 import type * as ToCssModule from "../src/lib/design/to-css";
 import type * as ContrastModule from "../src/lib/design/contrast";
+import type * as ToTsModule from "../src/lib/design/to-ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, "..");
@@ -43,6 +46,9 @@ const toCss: typeof ToCssModule = await import(
 );
 const contrast: typeof ContrastModule = await import(
   new URL("../src/lib/design/contrast.ts", import.meta.url).href
+);
+const toTs: typeof ToTsModule = await import(
+  new URL("../src/lib/design/to-ts.ts", import.meta.url).href
 );
 
 const CANDIDATE_DIR = "docs/design/candidates";
@@ -179,7 +185,7 @@ for (const d of checked) {
 
 /* 생성, 쓰기 ------------------------------------------------------------ */
 
-const outputs: { file: string; css: string }[] = [];
+const outputs: { file: string; content: string }[] = [];
 
 try {
   if (only !== undefined) {
@@ -203,12 +209,19 @@ try {
   } else {
     outputs.push({
       file: CANDIDATE_OUT,
-      css: toCss.candidatesFile(candidates.map((c) => c.tokens)),
+      content: toCss.candidatesFile(candidates.map((c) => c.tokens)),
     });
   }
 
   if (final) {
-    outputs.push({ file: FINAL_OUT, css: toCss.finalTokensFile(final.tokens) });
+    outputs.push({
+      file: FINAL_OUT,
+      content: toCss.finalTokensFile(final.tokens),
+    });
+    outputs.push({
+      file: toTs.MOTION_TOKENS_OUT,
+      content: toTs.motionTokensFile(final.tokens),
+    });
   } else {
     console.log(
       `확정본 없음: 루트 ${FINAL_SRC}가 없어 ${FINAL_OUT}는 그대로 둡니다 (G1 확정 후 생성).`,
@@ -233,13 +246,13 @@ if (final && existsSync(path.join(root, CANDIDATE_OUT))) {
   }
 }
 
-for (const { file, css: raw } of outputs) {
+for (const { file, content: raw } of outputs) {
   const abs = path.join(root, file);
   // 저장소 Prettier 설정으로 한 번 정리한다(긴 font 스택 줄바꿈 등). 같은 입력이면 같은 출력.
   const config = (await prettier.resolveConfig(path.join(repo, file))) ?? {};
-  const css = await prettier.format(raw, { ...config, filepath: abs });
+  const content = await prettier.format(raw, { ...config, filepath: abs });
   const current = existsSync(abs) ? readFileSync(abs, "utf8") : null;
-  if (current === css) {
+  if (current === content) {
     console.log(`최신: ${file}`);
     continue;
   }
@@ -248,7 +261,8 @@ for (const { file, css: raw } of outputs) {
     console.error(`다름: ${file} (pnpm tokens로 다시 생성하세요)`);
     continue;
   }
-  writeFileSync(abs, css);
+  mkdirSync(path.dirname(abs), { recursive: true });
+  writeFileSync(abs, content);
   console.log(`생성: ${file}`);
 }
 

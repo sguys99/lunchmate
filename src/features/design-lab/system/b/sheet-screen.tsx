@@ -34,7 +34,7 @@ import { getKstParts, msUntil } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { useDesignPortalContainer } from "../design-scope";
 import { DesktopSplit, MapPlaceholder } from "../desktop-split";
-import { springOf, usePrefersReducedMotion } from "../motion";
+import { springOf, useMotionReduced } from "@/lib/motion";
 import { getSheetContent, type SheetContent } from "../states";
 import type { DesignMotionTokens, DesignScreenProps } from "../types";
 import {
@@ -331,7 +331,7 @@ function PollSection({
   emptyMessage: string | null;
 }) {
   const headingId = useId();
-  const reduced = usePrefersReducedMotion();
+  const reduced = useMotionReduced();
   const [myVote, setMyVote] = useState<MockPlaceId | null>(poll.myVotePlaceId);
   // 첫 렌더는 0에서 시작해 실제 값으로 굴러가게 한다(NumberFlow는 값이 바뀔 때만 움직인다).
   const [mounted, setMounted] = useState(false);
@@ -455,7 +455,7 @@ function PollSection({
                     )}
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: mounted ? ratio : 0 }}
-                    transition={springOf(motion, "bar")}
+                    transition={springOf("bar", motion)}
                   />
                 </span>
               </button>

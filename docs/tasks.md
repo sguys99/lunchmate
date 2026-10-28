@@ -327,7 +327,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 2.3 모션 시스템
 
-- [ ] T2.11 Motion 설치, `LazyMotion` 설정, DESIGN.md 모션 토큰을 `src/lib/motion.ts` 프리셋으로 (enter, exit, press, spring-sheet, spring-card)
+- [x] T2.11 (10/29 완료, `src/lib/motion` 폴더, 토큰은 `pnpm tokens`가 DESIGN.md에서 `tokens.generated.ts`로 생성하고 `--check`로 검사, 프리셋 enter, exit, fade, press, spring-sheet, spring-card, spring-bar, reveal, MotionProvider는 LazyMotion strict + domAnimation, domMax는 loadDomMax 비동기) Motion 설치, `LazyMotion` 설정, DESIGN.md 모션 토큰을 `src/lib/motion.ts` 프리셋으로 (enter, exit, press, spring-sheet, spring-card)
 - [ ] T2.12 `useReducedMotion` 래퍼: 모든 프리셋이 자동으로 축소 모드를 따르게 합니다.
 - [ ] T2.13 동적 컴포넌트 PoC (design-lab에서, 각각 번들 증가량 기록)
   - [ ] 스와이프 카드 스택 (Motion drag, 키보드와 버튼 대체 조작 포함)
