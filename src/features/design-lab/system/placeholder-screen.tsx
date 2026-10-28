@@ -2,7 +2,7 @@
 // 자리표시 화면 (T1.14). 시안 담당이 home-screen.tsx, sheet-screen.tsx를 채우면 더 이상 쓰지 않는다.
 // 토큰 색, 타입, 라운드, 그림자가 실제로 바뀌는지 확인하는 최소 화면이다.
 import { designLabCopy } from "@/copy/design-lab";
-import { homeCopy } from "@/copy/home";
+import { commonCopy } from "@/copy/common";
 import { cn } from "@/lib/utils";
 import { DesktopSplit } from "./desktop-split";
 import { getHomeContent, getSheetContent } from "./states";
@@ -115,7 +115,7 @@ export function PlaceholderScreen({
         }
       />
       <nav
-        aria-label={homeCopy.tabBarLabel}
+        aria-label={commonCopy.tabBarLabel}
         className="sticky bottom-0 grid h-(--lm-layout-tab-bar-height) shrink-0 grid-cols-4 border-t border-border bg-background"
       >
         {DESIGN_TABS.map(({ id, label, Icon }) => (

@@ -9,7 +9,7 @@ import { AnimatePresence, LazyMotion, type PanInfo } from "motion/react";
 import * as m from "motion/react-m";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { quietStoneScreenCopy as copy } from "@/copy/design-lab-b";
+import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
 import { homeCopy } from "@/copy/home";
 import {
   MOCK_HOME_ALL_SETS,

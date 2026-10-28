@@ -8,7 +8,7 @@ import NumberFlow from "@number-flow/react";
 import * as m from "motion/react-m";
 import { Check, X } from "lucide-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { quietStoneScreenCopy as copy } from "@/copy/design-lab-b";
+import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
 import { homeCopy, placeDetailCopy, pollPreviewCopy } from "@/copy/home";
 import {
   Drawer,

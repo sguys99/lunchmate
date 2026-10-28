@@ -5,7 +5,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
-import { quietStoneCopy as copy } from "@/copy/design-lab-quiet-stone";
+import {
+  quietStoneIllustrationsCopy as copy,
+  quietStoneScreenCopy,
+} from "@/copy/design-lab-quiet-stone";
+import { homeCopy } from "@/copy/home";
 import { IllustrationB } from "@/features/design-lab/illustrations/b";
 import { MOCK_PLACES } from "@/features/design-lab/mock";
 import { CATEGORIES, CATEGORY_SLUGS } from "@/features/place/categories";
@@ -104,15 +108,19 @@ function Panel({ mode }: { mode: "light" | "dark" }) {
           <dl className="grid grid-cols-[0.8fr_1.3fr_0.9fr] divide-x divide-border">
             {[
               {
-                label: copy.walkLabel,
+                label: quietStoneScreenCopy.numbers.walk,
                 num: String(place.walkMinutes),
-                unit: copy.walkUnit,
+                unit: quietStoneScreenCopy.numbers.walkUnit,
               },
-              { label: copy.priceLabel, num: priceNum, unit: priceUnit },
               {
-                label: copy.thumbsLabel,
+                label: quietStoneScreenCopy.numbers.price,
+                num: priceNum,
+                unit: priceUnit,
+              },
+              {
+                label: quietStoneScreenCopy.numbers.thumbs,
                 num: String(place.thumbsUpRate ?? ""),
-                unit: copy.thumbsUnit,
+                unit: quietStoneScreenCopy.numbers.thumbsUnit,
               },
             ].map((n) => (
               <div
@@ -141,7 +149,7 @@ function Panel({ mode }: { mode: "light" | "dark" }) {
               type="button"
               className="h-12 flex-1 rounded-full bg-primary text-[0.9375rem] font-medium text-primary-foreground"
             >
-              {copy.primaryAction}
+              {homeCopy.actions.directions}
             </button>
             <button
               type="button"

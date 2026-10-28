@@ -1,8 +1,10 @@
 // 지도 화면 문구. 컴포넌트 안에 문장을 직접 쓰지 않는다 (CLAUDE.md 4장).
+import { commonCopy } from "./common";
+
 export const mapCopy = {
   mapLabel: "식당 지도",
   loadingLabel: "지도를 불러오는 중입니다",
-  retry: "다시 시도",
+  retry: commonCopy.actions.retry,
   error: {
     keyMissing: {
       title: "지도 키가 설정되지 않았습니다",

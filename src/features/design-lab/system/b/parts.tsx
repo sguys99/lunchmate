@@ -4,7 +4,8 @@
 import * as m from "motion/react-m";
 import { CloudOff, WifiOff, type LucideIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
-import { quietStoneScreenCopy as copy } from "@/copy/design-lab-b";
+import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
+import { commonCopy } from "@/copy/common";
 import { homeCopy } from "@/copy/home";
 import { IllustrationB } from "@/features/design-lab/illustrations/b";
 import type { MockPlace, StatusBadge } from "@/features/design-lab/mock";
@@ -348,7 +349,7 @@ export function TabBarB({ screen }: { screen: "home" | "sheet" }) {
   const active = ACTIVE_TAB_BY_SCREEN[screen];
   return (
     <nav
-      aria-label={homeCopy.tabBarLabel}
+      aria-label={commonCopy.tabBarLabel}
       className="sticky bottom-0 z-10 shrink-0 border-t border-border bg-background pb-[env(safe-area-inset-bottom,0px)]"
     >
       <ul className="mx-auto grid h-(--lm-layout-tab-bar-height) max-w-(--lm-layout-max-width) grid-cols-4">

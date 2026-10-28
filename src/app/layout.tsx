@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { maruBuri, pretendard } from "./fonts";
+import { siteCopy } from "@/copy/common";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "런치메이트",
-  description: "오늘 뭐 먹지를 10초 안에 정해 드립니다.",
+  title: siteCopy.name,
+  description: siteCopy.description,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

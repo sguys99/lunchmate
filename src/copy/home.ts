@@ -1,21 +1,14 @@
 // 오늘(홈) 화면 문구. 컴포넌트 안에 문장을 직접 쓰지 않는다 (CLAUDE.md 4장).
 // 문체: 상태 안내는 습니다체, 제안과 질문은 해요체 (tasks.md 2.2절).
 // design-lab 비교 화면(T1.11~T1.13)과 3단계 홈 시안이 함께 쓴다.
+// 하단 탭, 다시 시도, 이전/다음 같은 공통 라벨은 common.ts에 있다.
+import { commonCopy } from "./common";
+
 export const homeCopy = {
-  tabs: {
-    today: "오늘",
-    map: "지도",
-    poll: "투표",
-    me: "나",
-  },
-  /** 하단 탭 nav의 aria-label */
-  tabBarLabel: "주요 메뉴",
   actions: {
     directions: "길찾기",
     reroll: "다시 뽑기",
     pollWithFriends: "친구랑 정하기",
-    previous: "이전",
-    next: "다음",
   },
   badges: {
     estimate: "추정",
@@ -50,12 +43,12 @@ export const homeCopy = {
     error: {
       title: "식당 정보를 불러오지 못했습니다",
       body: "잠시 후 자동으로 다시 시도합니다.",
-      action: "다시 시도",
+      action: commonCopy.actions.retry,
     },
     offline: {
       title: "인터넷에 연결되어 있지 않습니다",
       body: "연결되면 추천을 자동으로 다시 불러옵니다.",
-      action: "다시 시도",
+      action: commonCopy.actions.retry,
     },
   },
 } as const;
