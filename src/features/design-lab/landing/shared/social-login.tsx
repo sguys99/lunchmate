@@ -1,0 +1,135 @@
+"use client";
+// 소셜 로그인 버튼 3종 (T3.4, DESIGN.md 5장 "소셜 로그인 버튼").
+// - 색과 심볼은 각 사 가이드 그대로(토큰 brand-*), 높이 48, 라운드 12px(카카오 가이드), 심볼 왼쪽, 레이블 가운데.
+//   레이블 서체는 카카오 가이드("OS별 기본 시스템 서체")를 따라 system-ui.
+// - 브랜드 버튼은 포인트 컬러(primary) 개수에 세지 않는다. 화면의 primary는 "추천 체험" 하나뿐이다.
+// - 시안 동작: 누르면 "연결하는 중" 상태가 0.7초 이어진 뒤 토스트. ?state=error면 오류 토스트(다음 행동 안내).
+// - 오프라인이면 모두 aria-disabled. 카카오톡 인앱이면(AUTH-04) 구글만 막고 외부 브라우저 안내를 붙인다.
+import { useState, type ReactNode } from "react";
+import { focusRing, pressMotion } from "@/components/ui/interaction";
+import { toast } from "@/components/ui/lazy-toaster";
+import { landingLabCopy } from "@/copy/design-lab-landing";
+import { cn } from "@/lib/utils";
+import { GoogleSymbol, KakaoSymbol, NaverSymbol } from "./brand-symbols";
+import type { LandingEnv } from "./use-landing-env";
+
+const copy = landingLabCopy.common;
+
+type Provider = "kakao" | "naver" | "google";
+
+const PROVIDERS: readonly {
+  id: Provider;
+  label: string;
+  aria: string;
+  symbol: ReactNode;
+  className: string;
+}[] = [
+  {
+    id: "kakao",
+    label: copy.kakao,
+    aria: copy.kakaoAria,
+    symbol: <KakaoSymbol />,
+    className: "bg-brand-kakao text-brand-kakao-foreground",
+  },
+  {
+    id: "naver",
+    label: copy.naver,
+    aria: copy.naverAria,
+    symbol: <NaverSymbol />,
+    className: "bg-brand-naver text-brand-naver-foreground",
+  },
+  {
+    id: "google",
+    label: copy.google,
+    aria: copy.googleAria,
+    symbol: <GoogleSymbol />,
+    className:
+      "border border-brand-google-border bg-brand-google text-brand-google-foreground",
+  },
+];
+
+export function SocialLogin({
+  env,
+  className,
+}: {
+  env: LandingEnv;
+  className?: string;
+}) {
+  const [pending, setPending] = useState<Provider | null>(null);
+
+  function start(id: Provider) {
+    if (pending) return;
+    setPending(id);
+    window.setTimeout(() => {
+      setPending(null);
+      if (env.state === "error") {
+        void toast.error(copy.loginError, { description: copy.loginErrorBody });
+      } else {
+        void toast(copy.labToast);
+      }
+    }, 700);
+  }
+
+  return (
+    <div className={cn("flex flex-col gap-2.5", className)}>
+      <ul aria-label={copy.loginGroupLabel} className="flex flex-col gap-2.5">
+        {PROVIDERS.map((p) => {
+          const blocked =
+            env.offline || (env.inApp && p.id === "google") || pending !== null;
+          const busy = pending === p.id;
+          return (
+            <li key={p.id}>
+              <button
+                type="button"
+                aria-label={p.aria}
+                aria-disabled={blocked || undefined}
+                aria-busy={busy || undefined}
+                aria-describedby={
+                  env.inApp && p.id === "google"
+                    ? "landing-inapp-note"
+                    : undefined
+                }
+                onClick={() => {
+                  if (!blocked) start(p.id);
+                }}
+                className={cn(
+                  "relative flex h-12 w-full items-center justify-center rounded-md px-12 font-[system-ui] text-[0.9375rem] leading-none font-medium",
+                  focusRing,
+                  pressMotion,
+                  p.className,
+                  blocked && !busy && "cursor-not-allowed opacity-45",
+                  busy && "opacity-80",
+                )}
+              >
+                <span className="absolute top-1/2 left-4 flex size-6 -translate-y-1/2 items-center justify-center">
+                  {p.symbol}
+                </span>
+                <span aria-hidden>{p.label}</span>
+                {busy ? <span className="sr-only">{copy.pending}</span> : null}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {env.inApp ? (
+        <div
+          id="landing-inapp-note"
+          className="flex flex-col items-start gap-1 pt-1"
+        >
+          <p className="type-caption break-keep text-muted-foreground">
+            {copy.inappGoogle}
+          </p>
+          <button
+            type="button"
+            className={cn(
+              "-ml-0.5 h-11 type-caption text-foreground underline decoration-muted-foreground underline-offset-3",
+              focusRing,
+            )}
+          >
+            {copy.inappOpen}
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}

@@ -128,7 +128,8 @@ export function resolveRef(theme: ColorTheme, ref: string): string | undefined {
   }
   const shadcn: Record<string, string> = theme.shadcn;
   const app: Record<string, string> = theme.app;
-  return shadcn[ref] ?? app[ref];
+  const brand: Record<string, string> = theme.brand ?? {};
+  return shadcn[ref] ?? app[ref] ?? brand[ref];
 }
 
 export type ContrastPair = DesignFrontmatter["contrastPairs"][number];

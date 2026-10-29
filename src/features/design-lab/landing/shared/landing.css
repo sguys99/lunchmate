@@ -1,0 +1,184 @@
+/*
+ * 랜딩 시안 CSS 모션 (T3.4). Motion 없이 CSS만 쓰는 첫 화면 효과. 시간과 곡선은 모두 토큰 변수.
+ * - 첫 화면 효과는 opacity 0에서 시작하지 않는다(LCP 요소가 첫 프레임부터 그려지게). 제목은 색과 위치만 바뀐다.
+ * - prefers-reduced-motion이면 모두 끈다(끝 상태로 바로 보임).
+ * 색은 토큰 변수만 쓴다(check-css-colors).
+ */
+
+/* ---------- 제목 잉크 번짐: 단어마다 옅은 글자색에서 본문 색으로, 0.12em 아래에서 제자리로 ---------- */
+@keyframes lm-ink-settle {
+  from {
+    color: var(--muted-foreground);
+    transform: translateY(0.12em);
+  }
+  to {
+    color: var(--foreground);
+    transform: none;
+  }
+}
+
+.lm-ink-word {
+  display: inline-block;
+  animation: lm-ink-settle var(--lm-duration-slow) var(--lm-ease-enter) both;
+  animation-delay: calc(var(--lm-ink-i, 0) * var(--lm-stagger) + 120ms);
+}
+
+/* ---------- 선화 그리기: 선마다 300ms, 70ms 간격으로 이어 그리고, 음식 톤 면은 마지막에 스며든다 ---------- */
+@keyframes lm-draw-stroke {
+  from {
+    stroke-dashoffset: 160;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes lm-draw-tone {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lm-draw g > :not([stroke="none"]) {
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: lm-draw-stroke var(--lm-duration-slow) var(--lm-ease-standard)
+    forwards;
+  animation-delay: calc(
+    var(--lm-draw-start, 400ms) + var(--lm-draw-i, 0) * var(--lm-stagger)
+  );
+}
+.lm-draw g > :nth-child(1) {
+  --lm-draw-i: 0;
+}
+.lm-draw g > :nth-child(2) {
+  --lm-draw-i: 1;
+}
+.lm-draw g > :nth-child(3) {
+  --lm-draw-i: 2;
+}
+.lm-draw g > :nth-child(4) {
+  --lm-draw-i: 3;
+}
+.lm-draw g > :nth-child(5) {
+  --lm-draw-i: 4;
+}
+.lm-draw g > :nth-child(6) {
+  --lm-draw-i: 5;
+}
+.lm-draw g > :nth-child(7) {
+  --lm-draw-i: 6;
+}
+.lm-draw g > :nth-child(n + 8) {
+  --lm-draw-i: 7;
+}
+
+.lm-draw g > [stroke="none"] {
+  opacity: 0;
+  animation: lm-draw-tone var(--lm-duration-slow) var(--lm-ease-enter) forwards;
+  animation-delay: calc(var(--lm-draw-start, 400ms) + 8 * var(--lm-stagger));
+}
+
+/* ---------- 화면에 들어올 때 등장 (C 스크롤 장면). data-shown은 IntersectionObserver가 붙인다 ---------- */
+/* 스크롤 아래 블록이라 LCP 대상이 아니다. JS가 없거나 감지 전에도 보이게 [data-reveal="armed"]일 때만 숨긴다. */
+.lm-reveal[data-reveal="armed"] {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.lm-reveal[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--lm-duration-slow) var(--lm-ease-enter),
+    transform var(--lm-duration-slow) var(--lm-ease-enter);
+  transition-delay: calc(var(--lm-reveal-i, 0) * var(--lm-stagger));
+}
+
+/* 득표 바: 장면이 보이면 0에서 제 길이로(bar 스프링 대신 감속 곡선, 오버슈트 없음) */
+.lm-bar {
+  transform-origin: left center;
+  transform: scaleX(var(--lm-bar, 0));
+}
+[data-reveal="armed"] .lm-bar {
+  transform: scaleX(0);
+}
+[data-reveal="shown"] .lm-bar {
+  transition: transform var(--lm-duration-slow) var(--lm-ease-emphasized);
+  transition-delay: calc(240ms + var(--lm-bar-i, 0) * var(--lm-stagger));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lm-ink-word,
+  .lm-draw g > *,
+  .lm-reveal,
+  .lm-bar {
+    animation: none !important;
+    transition: none !important;
+  }
+  .lm-draw g > :not([stroke="none"]),
+  .lm-draw g > [stroke="none"] {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  .lm-reveal[data-reveal="armed"] {
+    opacity: 1;
+    transform: none;
+  }
+  [data-reveal="armed"] .lm-bar {
+    transform: scaleX(var(--lm-bar, 0));
+  }
+}
+
+/* ---------- B 다시 뽑기 손짓: 첫 화면 2.4초 뒤 아이콘이 한 바퀴 돈다(한 번만). 누를 수 있다는 단서 ---------- */
+@keyframes lm-nudge-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+.lm-nudge {
+  animation: lm-nudge-turn calc(var(--lm-duration-slow) * 2)
+    var(--lm-ease-standard) 2.4s 1 both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-nudge {
+    animation: none;
+  }
+}
+
+/* ---------- C 첫 장면: 떠오른 고민이 한 줄씩 지워진다(가는 선이 왼쪽에서 오른쪽으로, 한 번만) ---------- */
+@keyframes lm-strike {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.lm-strike {
+  position: relative;
+}
+.lm-strike::after {
+  content: "";
+  position: absolute;
+  left: -0.125rem;
+  right: -0.125rem;
+  top: 55%;
+  height: 1px;
+  background: var(--muted-foreground);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: lm-strike var(--lm-duration-slow) var(--lm-ease-standard) forwards;
+  animation-delay: calc(700ms + var(--lm-strike-i, 0) * 4 * var(--lm-stagger));
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-strike::after {
+    animation: none;
+    transform: scaleX(1);
+  }
+}

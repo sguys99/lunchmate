@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { designLabCopy } from "@/copy/design-lab";
+import { landingLabCopy } from "@/copy/design-lab-landing";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
@@ -81,6 +82,15 @@ export default function DesignLabPage() {
       <Section title={copy.galleryTitle} body={copy.galleryBody}>
         <Link href="/design-lab/components" className={linkClass}>
           {copy.galleryLink}
+        </Link>
+      </Section>
+
+      <Section
+        title={landingLabCopy.index.title}
+        body={landingLabCopy.index.labBody}
+      >
+        <Link href="/design-lab/landing" className={linkClass}>
+          {landingLabCopy.index.labLink}
         </Link>
       </Section>
 

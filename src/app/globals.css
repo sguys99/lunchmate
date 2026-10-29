@@ -105,6 +105,21 @@
   --color-skeleton-highlight: var(--skeleton-highlight);
   --color-overlay: var(--overlay);
 
+  /* 소셜 로그인 브랜드 색 (T3.4, DESIGN.md 5장 "소셜 로그인 버튼"). 로그인 버튼에만 쓴다 */
+  --color-brand-kakao: var(--brand-kakao);
+  --color-brand-kakao-foreground: var(--brand-kakao-foreground);
+  --color-brand-kakao-symbol: var(--brand-kakao-symbol);
+  --color-brand-naver: var(--brand-naver);
+  --color-brand-naver-foreground: var(--brand-naver-foreground);
+  --color-brand-google: var(--brand-google);
+  --color-brand-google-foreground: var(--brand-google-foreground);
+  --color-brand-google-border: var(--brand-google-border);
+  --color-brand-google-blue: var(--brand-google-blue);
+  --color-brand-google-red: var(--brand-google-red);
+  --color-brand-google-yellow: var(--brand-google-yellow);
+  --color-brand-google-green: var(--brand-google-green);
+  --color-brand-google-logo-surface: var(--brand-google-logo-surface);
+
   /* 카테고리 색면/선 */
   --color-cat-hansik-surface: var(--cat-hansik-surface);
   --color-cat-hansik-ink: var(--cat-hansik-ink);

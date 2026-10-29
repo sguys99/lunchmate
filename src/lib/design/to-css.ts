@@ -62,11 +62,14 @@ function commentSafe(s: string): string {
 /* 변수 목록                                                            */
 /* ------------------------------------------------------------------ */
 
-/** 한 테마의 색 변수 (shadcn → app → category 순). */
+/** 한 테마의 색 변수 (shadcn → app → brand(있으면) → category 순). */
 export function colorVars(theme: ColorTheme): CssDecl[] {
   const out: CssDecl[] = [];
   for (const [k, v] of Object.entries(theme.shadcn)) out.push([`--${k}`, v]);
   for (const [k, v] of Object.entries(theme.app)) out.push([`--${k}`, v]);
+  for (const [k, v] of Object.entries(theme.brand ?? {})) {
+    out.push([`--${k}`, v]);
+  }
   for (const [slug, c] of Object.entries(theme.category)) {
     out.push([`--cat-${slug}-surface`, c.surface]);
     out.push([`--cat-${slug}-ink`, c.ink]);

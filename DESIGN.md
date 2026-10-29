@@ -63,6 +63,21 @@ color:
       skeleton: "oklch(0.925 0.012 78)"
       skeleton-highlight: "oklch(0.948 0.01 80)"
       overlay: "oklch(0.24 0.01 70 / 32%)"
+    # 소셜 로그인 버튼 브랜드 색 (T3.4). 각 사 가이드 값 그대로, 로그인 버튼에만 쓴다. DESIGN.md 5장 "소셜 로그인 버튼"
+    brand:
+      brand-kakao: "oklch(0.9139 0.1909 101.37)"
+      brand-kakao-foreground: "oklch(0 0 0 / 85%)"
+      brand-kakao-symbol: "oklch(0 0 0)"
+      brand-naver: "oklch(0.725 0.2014 149.53)"
+      brand-naver-foreground: "oklch(1 0 0)"
+      brand-google: "oklch(1 0 0)"
+      brand-google-foreground: "oklch(0.2393 0 0)"
+      brand-google-border: "oklch(0.566 0.0047 157.09)"
+      brand-google-blue: "oklch(0.6304 0.18 259.96)"
+      brand-google-red: "oklch(0.6257 0.2058 29.08)"
+      brand-google-yellow: "oklch(0.8304 0.1698 83.99)"
+      brand-google-green: "oklch(0.6475 0.1603 148.5)"
+      brand-google-logo-surface: "oklch(1 0 0)"
     category:
       hansik: { surface: "oklch(0.93 0.021 50)", ink: "oklch(0.43 0.068 50)" }
       jungsik: { surface: "oklch(0.93 0.021 20)", ink: "oklch(0.43 0.068 20)" }
@@ -125,6 +140,21 @@ color:
       skeleton: "oklch(0.265 0.008 70)"
       skeleton-highlight: "oklch(0.3 0.009 70)"
       overlay: "oklch(0.1 0.005 70 / 60%)"
+    # 소셜 로그인 버튼 브랜드 색 (T3.4). 각 사 가이드 값 그대로, 로그인 버튼에만 쓴다. DESIGN.md 5장 "소셜 로그인 버튼"
+    brand:
+      brand-kakao: "oklch(0.9139 0.1909 101.37)"
+      brand-kakao-foreground: "oklch(0 0 0 / 85%)"
+      brand-kakao-symbol: "oklch(0 0 0)"
+      brand-naver: "oklch(0.725 0.2014 149.53)"
+      brand-naver-foreground: "oklch(1 0 0)"
+      brand-google: "oklch(0.1872 0.002 286.2)"
+      brand-google-foreground: "oklch(0.9158 0 0)"
+      brand-google-border: "oklch(0.6535 0.0046 157.12)"
+      brand-google-blue: "oklch(0.6304 0.18 259.96)"
+      brand-google-red: "oklch(0.6257 0.2058 29.08)"
+      brand-google-yellow: "oklch(0.8304 0.1698 83.99)"
+      brand-google-green: "oklch(0.6475 0.1603 148.5)"
+      brand-google-logo-surface: "oklch(1 0 0)"
     category:
       hansik: { surface: "oklch(0.285 0.026 50)", ink: "oklch(0.85 0.055 50)" }
       jungsik: { surface: "oklch(0.285 0.026 20)", ink: "oklch(0.85 0.055 20)" }
@@ -181,6 +211,8 @@ contrastPairs:
   - { fg: primary, bg: card, min: 4.5, note: 선택 칩 글자와 텍스트 링크 }
   - { fg: foreground, bg: muted, min: 4.5, note: 스켈레톤 없이 muted 면 위 본문 }
   - { fg: primary-foreground, bg: vote-bar, min: 4.5, note: 1위 득표 바 위 숫자 }
+  - { fg: brand-google-foreground, bg: brand-google, min: 4.5, note: 구글 로그인 버튼 글자 }
+  - { fg: brand-google-border, bg: background, min: 3, note: 구글 로그인 버튼 테두리 }
 
 font:
   sans:
@@ -421,6 +453,12 @@ layout:
 
 ### 득표 바
 - 트랙 `vote-bar-track` 높이 8px 알약, 채움 1위만 `vote-bar`(올리브), 나머지 후보는 `muted-foreground` 30% 대신 `chart-3`을 씁니다. 득표 수는 바 밖 오른쪽에 numeric-md, 1위는 `foreground`, 나머지는 `muted-foreground`. 길이 변화는 `bar` 스프링(감쇠비 1.1).
+
+### 소셜 로그인 버튼 (T3.4)
+- 카카오, 네이버, 구글 버튼은 각 사 가이드의 색과 심볼을 그대로 씁니다(프런트매터 `color.*.brand`, Tailwind `bg-brand-kakao` 등). 앱 포인트 컬러 규칙(한 화면 primary 1개)과 별개로 세지 않습니다.
+- 모양: 높이 48, 라운드 12px(카카오 가이드 값, `rounded-md`), 심볼 왼쪽, 레이블 가운데. 레이블은 "카카오 로그인", "네이버 로그인", "Google 계정으로 계속하기"처럼 각 사 허용 문구를 씁니다.
+- 구글은 라이트에서 Light 테마(흰 면, 회색 테두리), 다크에서 Dark 테마(#131314 면)를 따르고 G 로고 4색은 바꾸지 않습니다.
+- 접근성 위험: 네이버 그린 위 흰 글자는 대비 약 2.3:1로 4.5:1에 못 미칩니다. 브랜드 가이드 값이라 대비 쌍 검사에서 뺐고, 버튼에 `aria-label`로 이름을 주며 레이블 크기를 15px 500으로 둡니다. 출시 전 네이버 공식 가이드 원문으로 다시 확인합니다([확인 필요]).
 
 ### 배지
 - 라운드 8px(`badge: sm`), 높이 24, 좌우 8px, 1px 테두리 + caption 글자, 면 없음. 테두리와 글자 색은 의미 색 실색(`warning`, `info`)과 `*-foreground`를 씁니다. 카드당 최대 2개, 식당명 아래 한 줄.
