@@ -1,8 +1,7 @@
 "use client";
-// 홈 시안 공용 조작 (T3.1): 끼니 토글(REC-01), 기준 위치 칩(REC-02), 다시 뽑기(REC-05), 그냥 골라줘(REC-12 진입점).
-// 올리브 면 버튼은 쓰지 않는다. 화면의 주 버튼은 카드의 "길찾기" 하나다(CLAUDE.md 6.3).
+// 홈 D1 조작 (T3.1, G3 D-05): 끼니 토글(REC-01), 기준 위치 칩(REC-02), 다시 뽑기(REC-05), 그냥 골라줘(REC-12 진입점).
+// 올리브 면 버튼은 쓰지 않는다. 화면의 주 버튼은 하단 행동 줄의 "길찾기" 하나다(CLAUDE.md 6.3).
 import { ChevronDown, Dices, MapPin, RotateCcw } from "lucide-react";
-import type React from "react";
 import { Button } from "@/components/ui/button";
 import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { designLabHomeCopy } from "@/copy/design-lab-home";
@@ -104,46 +103,35 @@ export function LocationChip({
   );
 }
 
+/** 다시 뽑기 아이콘 버튼(48px 원, 보이는 글자 없음 → aria-label) */
 export function RerollButton({
   onClick,
-  iconOnly = false,
   className,
 }: {
   onClick: () => void;
-  iconOnly?: boolean;
   className?: string;
 }) {
-  if (iconOnly) {
-    return (
-      <Button
-        size="icon"
-        aria-label={copy.actions.reroll}
-        onClick={onClick}
-        className={className}
-      >
-        <RotateCcw aria-hidden strokeWidth={1.5} />
-      </Button>
-    );
-  }
   return (
-    <Button onClick={onClick} className={cn("pr-5 pl-4", className)}>
-      <RotateCcw aria-hidden className="size-4" strokeWidth={1.5} />
-      {copy.actions.reroll}
+    <Button
+      size="icon"
+      aria-label={copy.actions.reroll}
+      onClick={onClick}
+      className={className}
+    >
+      <RotateCcw aria-hidden strokeWidth={1.5} />
     </Button>
   );
 }
 
 /**
- * "그냥 골라줘" (REC-12, T3.3). 누르면 useJustPick().begin, 손이나 포커스가 닿으면 결과 패널을 미리 받는다.
- * 화면 카드 위에서 r1이 도는 동안(C, D)에는 같은 자리에서 "바로 보기"가 된다(건너뛰기를 눈에 보이게).
+ * "그냥 골라줘" (REC-12). 누르면 useJustPick().begin, 손이나 포커스가 닿으면 결과 패널을 미리 받는다.
+ * 화면 카드 위에서 R1이 도는 동안에는 같은 자리에서 "바로 보기"가 된다(건너뛰기를 눈에 보이게).
  */
 export function JustPickButton({
-  variant = "secondary",
   pick,
   from = 0,
   className,
 }: {
-  variant?: "secondary" | "ghost";
   pick: JustPick;
   /** 연출을 시작할 카드(지금 보고 있는 곳) */
   from?: number;
@@ -152,7 +140,6 @@ export function JustPickButton({
   const skipping = pick.pageHighlight;
   return (
     <Button
-      variant={variant}
       data-entry="just-pick"
       aria-haspopup="dialog"
       onPointerEnter={pick.prefetch}
@@ -172,39 +159,31 @@ export function JustPickButton({
 }
 
 /**
- * 홈 머리: 첫 줄 기준 위치 칩(왼쪽) + 끼니 토글(오른쪽), 둘째 줄 날짜 caption, 셋째 줄 세리프 제목 + 시안별 trailing.
- * 네 시안이 같은 머리를 써서 비교가 카드 배치에 모이게 한다.
+ * 홈 머리: 첫 줄 기준 위치 칩(왼쪽) + 끼니 토글(오른쪽), 둘째 줄 날짜와 끼니 caption, 셋째 줄 세리프 제목.
+ * 줄 사이 24px(데스크톱 16px).
  */
 export function HomeHeader({
   meal,
   location,
   onMeal,
   onLocation,
-  trailing,
-  className,
 }: {
   meal: Meal;
   location: BaseLocation;
   onMeal: (meal: Meal) => void;
   onLocation: () => void;
-  /** 제목 오른쪽 (예: 다시 뽑기 아이콘 버튼) */
-  trailing?: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <header className={cn("flex flex-col gap-6", className)}>
+    <header className="flex flex-col gap-6 desktop:gap-4">
       <div className="flex items-center justify-between gap-3">
         <LocationChip location={location} onCycle={onLocation} />
         <MealToggle meal={meal} onChange={onMeal} className="-mr-2" />
       </div>
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <p className="type-caption text-muted-foreground">
-            {mockDateLine()} {copy.meal[meal]}
-          </p>
-          <h1 className="type-title">{copy.title}</h1>
-        </div>
-        {trailing}
+      <div className="flex flex-col gap-1.5">
+        <p className="type-caption text-muted-foreground">
+          {mockDateLine()} {copy.meal[meal]}
+        </p>
+        <h1 className="type-title">{copy.title}</h1>
       </div>
     </header>
   );

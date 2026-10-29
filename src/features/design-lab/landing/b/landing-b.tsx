@@ -1,5 +1,5 @@
 "use client";
-// 랜딩 시안 B "바로 해 보는 데모" (T3.4).
+// 랜딩 G3 선택안 B "바로 해 보는 데모" (T3.4, design-decisions D-06). 규칙 정본은 DESIGN.md 5장 "랜딩". 실제 랜딩 구현은 T4.28.
 // - 히어로가 데모다. 예시 동네의 카드 3장을 처음부터 그려 두고(정적, LCP), "다시 뽑기"로 실제처럼 바꿔 본다.
 // - Motion을 쓰지 않는다(G3 선택 후). 셔플은 CSS 전환(landing.css lm-shuffle): 세 장이 함께 흐려지고(exit, fast)
 //   새 세 장이 70ms 간격으로 떠오른다(reveal, slow). 축소 모드면 애니메이션 없이 바로 바꾼다.
@@ -59,7 +59,7 @@ function DemoList({
     >
       {picks.map((p) => (
         <li key={p.id}>
-          <DemoCard place={p} dedupeWalk />
+          <DemoCard place={p} />
         </li>
       ))}
     </ol>

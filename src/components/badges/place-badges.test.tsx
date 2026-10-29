@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { badgeCopy } from "@/copy/badges";
+import { EstimateMark } from "./estimate-mark";
 import {
   AvoidWarningBadge,
   DealBadge,
@@ -26,9 +27,9 @@ function badgeOf(srLabel: string) {
 
 describe("도메인 배지 라벨과 접근성 이름", () => {
   it.each([
-    [<EstimateBadge key="e" />, "추정", "추정 가격", "border-warning"],
-    [<ReportBadge key="r" />, "제보", "사용자 제보", "border-info"],
-    [<DealBadge key="d" />, "할인", "할인 정보 있음", "border-info"],
+    [<EstimateBadge key="e" />, "추정", "추정 가격", "border-input"],
+    [<ReportBadge key="r" />, "제보", "사용자 제보", "border-input"],
+    [<DealBadge key="d" />, "할인", "할인 정보 있음", "border-input"],
     [
       <AvoidWarningBadge key="a" />,
       "못 먹는 분 있음",
@@ -36,7 +37,7 @@ describe("도메인 배지 라벨과 접근성 이름", () => {
       "border-warning",
     ],
   ])(
-    "%#: 보이는 글자, sr-only 이름, 의미 색 테두리",
+    "%#: 보이는 글자, sr-only 이름, calm 테두리(기피만 의미 색)",
     (node, label, sr, border) => {
       const { container } = render(node);
       const visible = container.querySelector("[aria-hidden='true']:not(svg)");
@@ -48,6 +49,34 @@ describe("도메인 배지 라벨과 접근성 이름", () => {
       expect(sr).toContain(label);
     },
   );
+
+  it("의미 색(warning)은 기피 경고 하나뿐이다", () => {
+    const { container } = render(
+      <>
+        <EstimateBadge />
+        <ReportBadge />
+        <DealBadge />
+        <WaitingBadge level="walkIn" />
+        <WaitingBadge level="short" />
+        <WaitingBadge level="long" />
+        <AvoidWarningBadge />
+      </>,
+    );
+    const tinted = Array.from(
+      container.querySelectorAll<HTMLElement>("[data-badge]"),
+    ).filter((el) =>
+      /border-(warning|info|success|destructive)/.test(el.className),
+    );
+    expect(tinted.map((el) => el.dataset.badge)).toEqual(["avoidWarning"]);
+  });
+
+  it("할인은 색 대신 아이콘이 붙는다", () => {
+    const { container } = render(<DealBadge />);
+    expect(container.querySelector("svg")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+  });
 
   it("기피 경고는 이모지 대신 아이콘을 쓰고, 라벨에 기호가 없다", () => {
     const { container } = render(<AvoidWarningBadge />);
@@ -61,10 +90,10 @@ describe("도메인 배지 라벨과 접근성 이름", () => {
 
 describe("WaitingBadge", () => {
   it.each([
-    ["walkIn", "바로 입장", "border-success"],
-    ["short", "조금 기다려요", "border-warning"],
-    ["long", "줄 길어요", "border-warning"],
-  ] as const)("%s: PRD 3단계 이름과 아이콘", (level, label, border) => {
+    ["walkIn", "바로 입장", "border-input"],
+    ["short", "조금 기다려요", "border-input"],
+    ["long", "줄 길어요", "border-input"],
+  ] as const)("%s: PRD 3단계 이름과 아이콘, 중립 색", (level, label, border) => {
     const { container } = render(<WaitingBadge level={level} />);
     const badge = badgeOf(`웨이팅 ${label}`);
     expect(badge.className).toContain(border);
@@ -142,5 +171,16 @@ describe("PlaceBadges", () => {
   it("후보가 없으면 아무것도 그리지 않는다", () => {
     const { container } = render(<PlaceBadges badges={[]} />);
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("EstimateMark", () => {
+  it("테두리 없는 보조 글자 하나, 스크린 리더는 '추정 가격'", () => {
+    const { container } = render(<EstimateMark />);
+    const mark = container.querySelector<HTMLElement>("[data-estimate-mark]");
+    expect(mark?.className).toContain("text-muted-foreground");
+    expect(mark?.className).not.toContain("border");
+    expect(screen.getByText("추정")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByText("추정 가격")).toHaveClass("sr-only");
   });
 });

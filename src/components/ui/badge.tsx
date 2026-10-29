@@ -3,6 +3,7 @@
 //
 // 라운드 8px(badge: sm), 높이 24, 좌우 8px, 1px 테두리 + caption 글자, 면 없음.
 // 의미 색 variant는 테두리에 실색(warning, info ...), 글자에 *-foreground를 쓴다(대비 4.5:1은 foreground 쪽이 맡는다).
+// neutral은 도메인 배지 calm 체계(G3)의 중립: input 선 + foreground 글자, 아이콘은 muted-foreground.
 // 카드당 최대 2개는 쓰는 쪽에서 지킨다.
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
@@ -16,6 +17,8 @@ const badgeVariants = cva(
       variant: {
         default: "border-border text-foreground",
         muted: "border-border text-muted-foreground",
+        neutral:
+          "border-input text-foreground [&>svg]:text-muted-foreground",
         success: "border-success text-success-foreground",
         warning: "border-warning text-warning-foreground",
         info: "border-info text-info-foreground",

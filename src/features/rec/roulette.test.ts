@@ -3,11 +3,8 @@ import {
   HIGHLIGHT,
   RESULT_REVEAL_MS,
   ROULETTE_BUDGET_MS,
-  ROULETTE_MODES,
   highlightSchedule,
-  isRouletteMode,
-  rollingStrip,
-  settleMs,
+  highlightSettleMs,
 } from "./roulette";
 
 describe("highlightSchedule", () => {
@@ -44,51 +41,25 @@ describe("highlightSchedule", () => {
   });
 });
 
-describe("rollingStrip", () => {
-  it.each([
-    [0, 0],
-    [1, 0],
-    [2, 1],
-    [0, 2],
-  ])(
-    "목표 %i, 시작 %i: 띠의 마지막이 목표이고 첫 칸은 시작",
-    (target, start) => {
-      const { order, stopAt } = rollingStrip(3, target, start);
-      expect(order[stopAt]).toBe(target);
-      expect(stopAt).toBe(order.length - 1);
-      expect(order[0]).toBe(start);
-      expect(order.length).toBeGreaterThan(2 * 3);
-    },
-  );
-});
-
 describe("시간 예산", () => {
-  it("모든 안이 목표와 상관없이 결과까지 2초 안에 끝난다", () => {
-    for (const mode of ROULETTE_MODES) {
-      for (let target = 0; target < 3; target++) {
-        for (let start = 0; start < 3; start++) {
-          const total =
-            settleMs(mode, highlightSchedule(3, target, start)) +
-            RESULT_REVEAL_MS;
-          expect(total, `${mode} ${target} ${start}`).toBeLessThanOrEqual(
-            ROULETTE_BUDGET_MS,
-          );
-        }
+  it("목표와 시작 카드와 상관없이 결과까지 2초 안에 끝난다", () => {
+    for (let target = 0; target < 3; target++) {
+      for (let start = 0; start < 3; start++) {
+        const total =
+          highlightSettleMs(highlightSchedule(3, target, start)) +
+          RESULT_REVEAL_MS;
+        expect(total, `${target} ${start}`).toBeLessThanOrEqual(
+          ROULETTE_BUDGET_MS,
+        );
       }
     }
   });
 
-  it("r1, r2는 1.2초 이상 보여 준다(룰렛이라는 걸 알 만큼)", () => {
-    expect(settleMs("r2") + RESULT_REVEAL_MS).toBeGreaterThanOrEqual(1200);
+  it("1.2초 이상 보여 준다(룰렛이라는 걸 알 만큼)", () => {
     for (let target = 0; target < 3; target++) {
       expect(
-        settleMs("r1", highlightSchedule(3, target)) + RESULT_REVEAL_MS,
+        highlightSettleMs(highlightSchedule(3, target)) + RESULT_REVEAL_MS,
       ).toBeGreaterThanOrEqual(1200);
     }
-  });
-
-  it("isRouletteMode", () => {
-    expect(isRouletteMode("r2")).toBe(true);
-    expect(isRouletteMode("r4")).toBe(false);
   });
 });

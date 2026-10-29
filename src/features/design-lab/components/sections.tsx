@@ -15,6 +15,7 @@ import {
   ReportBadge,
   WaitingBadge,
 } from "@/components/badges/place-badges";
+import { EstimateMark } from "@/components/badges/estimate-mark";
 import {
   BADGE_PRIORITY,
   type PlaceBadge,
@@ -658,6 +659,7 @@ function PlaceBadgesSection() {
           <DealBadge />
           <WaitingBadge level="long" />
           <AvoidWarningBadge />
+          <EstimateMark />
         </Row>
       </Specimen>
       <Specimen name={names.waiting}>

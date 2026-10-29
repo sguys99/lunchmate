@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MOCK_HOME_ALL_SETS } from "@/features/design-lab/mock";
 import { MOCK_PLACES } from "@/features/design-lab/mock/places";
 import { reasonWithoutWalk } from "./reason";
 
@@ -22,6 +23,14 @@ describe("reasonWithoutWalk", () => {
   it("목업 12곳 모두 도보 분이 빠진다", () => {
     for (const p of MOCK_PLACES) {
       expect(reasonWithoutWalk(p.reason)).not.toMatch(/도보/);
+    }
+  });
+
+  it("홈과 랜딩 데모에 나오는 목업 세트에도 도보 분이 남지 않는다", () => {
+    for (const set of MOCK_HOME_ALL_SETS) {
+      for (const p of set) {
+        expect(reasonWithoutWalk(p.reason)).not.toMatch(/도보 약/);
+      }
     }
   });
 });

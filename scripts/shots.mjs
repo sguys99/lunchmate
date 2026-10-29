@@ -3,7 +3,7 @@
  * 시안 캡처 스크립트 (T0.29, CLAUDE.md 6.1절, tasks.md 2.3절)
  *
  * 사용법
- *   pnpm shots /design-lab/home/a [/design-lab/home/b ...] [옵션]
+ *   pnpm shots /design-lab/home/d1 [/design-lab/landing/b ...] [옵션]
  *
  * 옵션
  *   --base-url <url>   기본 http://localhost:3000. 응답이 없으면 `pnpm dev`를 띄우고 끝나면 종료한다.

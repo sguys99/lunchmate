@@ -1,4 +1,4 @@
-// 랜딩 데모 카드 (T3.4, B 데모와 C 둘째 장면). 세 장을 한 화면에 두는 압축형: 왼쪽 선화, 오른쪽 식당명, 숫자 3개, 이유 한 줄.
+// 랜딩 B 데모 카드 (T3.4, G3 D-06). 세 장을 한 화면에 두는 압축형: 왼쪽 선화 56, 오른쪽 식당명, 숫자 3개, 이유 두 줄까지.
 // 시안 B 조각(system/b/parts)은 Motion을 함께 가져와서 쓰지 않는다. 이 파일은 Motion 의존이 없다.
 import { SkeletonLine } from "@/components/states";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -6,27 +6,14 @@ import { landingLabCopy } from "@/copy/design-lab-landing";
 import type { MockPlace } from "@/features/design-lab/mock";
 import { categoryLabel } from "@/features/place/categories";
 import { CategoryIllustration } from "@/features/place/illustrations";
+import { reasonWithoutWalk } from "@/features/rec/reason";
 import { priceBandParts } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const copy = landingLabCopy.b;
 
-/**
- * 이유 문장 앞의 "도보 약 N분, "을 뗀다. 도보 분은 숫자 칸에 이미 있어 중복이다(홈 카드와 같은 규칙, G3 선택 후).
- * 목업(places.ts)은 홈 시안과 같이 쓰므로 데이터는 두고 표시에서만 뗀다.
- */
-export function reasonWithoutWalk(reason: string): string {
-  return reason.replace(/^도보 약 \d+분,\s*/, "");
-}
-
-export function DemoCard({
-  place,
-  dedupeWalk = false,
-}: {
-  place: MockPlace;
-  /** 이유에서 도보 분을 뗀다(랜딩 B). C 둘째 장면은 시안 그대로 둔다 */
-  dedupeWalk?: boolean;
-}) {
+/** 이유 문장에서는 도보 분을 뗀다(숫자 칸과 중복, 홈 카드와 같은 규칙) */
+export function DemoCard({ place }: { place: MockPlace }) {
   const price = priceBandParts(place.priceKRW);
   const cells = [
     {
@@ -92,7 +79,7 @@ export function DemoCard({
         </dl>
         {/* 이유는 잘리지 않게 두 줄까지(360px에서 긴 이유가 말줄임되던 문제, T3.5) */}
         <p className="line-clamp-2 type-body-sm break-keep text-muted-foreground">
-          {dedupeWalk ? reasonWithoutWalk(place.reason) : place.reason}
+          {reasonWithoutWalk(place.reason)}
         </p>
       </div>
     </article>

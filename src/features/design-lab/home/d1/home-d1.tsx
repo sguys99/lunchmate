@@ -1,5 +1,6 @@
 "use client";
-// 홈 수정 시안 D1 "머리 아래 한 줄 띠" (G3 D 선택 뒤, 2026-10-30).
+// 홈 G3 선택안 D1 "머리 아래 한 줄 띠" (D 선택 뒤 수정안, 2026-10-30 선택, design-decisions D-05).
+// 규칙 정본은 DESIGN.md 5장 "오늘(홈) 화면". 실제 홈(/today) 구현은 T5.17에서 이 화면을 옮긴다.
 //
 // 의도: 결정 화면(D)은 그대로 두고, 어제 피드백을 제목 바로 아래 헤어라인 띠 한 줄로 올린다.
 //       카드 면을 쓰지 않아 큰 카드보다 조용하고, 첫 화면에서 반드시 눈에 들어온다.
@@ -9,6 +10,7 @@
 // 상태: 로딩, 빈 상태, 오류에서도 띠를 보인다(추천과 따로 오는 정보). 오프라인에서는 보낼 수 없어 숨긴다.
 // 모션: 첫 화면은 카드 묶음 CSS 페이드 하나. 띠 접힘은 누른 뒤에만.
 import { CategoryIllustration } from "@/features/place/illustrations";
+import type { DesignState } from "@/features/design-lab/mock";
 import { getHomeContent } from "@/features/design-lab/system/states";
 import { cn } from "@/lib/utils";
 import {
@@ -19,7 +21,6 @@ import {
 } from "../shared/frame";
 import {
   ActionBarSkeleton,
-  CalmBadgeDefault,
   TodayActionBar,
   TodayJustPickLayer,
   TodayPicks,
@@ -35,19 +36,14 @@ import {
   useYesterday,
   type Yesterday,
 } from "../shared/yesterday";
-import type { HomeVariantProps } from "../types";
 
-export function HomeD1(props: HomeVariantProps) {
-  return (
-    <CalmBadgeDefault>
-      <ScreenD1 {...props} />
-    </CalmBadgeDefault>
-  );
-}
+export type HomeD1Props = {
+  state: DesignState;
+};
 
-function ScreenD1({ state }: HomeVariantProps) {
+export function HomeD1({ state }: HomeD1Props) {
   const content = getHomeContent(state);
-  const t = useTodayPick("d1");
+  const t = useTodayPick();
   const y = useYesterday();
   const strip =
     y.place && content.kind !== "offline" ? (

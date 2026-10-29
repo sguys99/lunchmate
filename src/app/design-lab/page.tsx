@@ -41,7 +41,7 @@ export default function DesignLabPage() {
       </header>
 
       <Section title={copy.homeTitle} body={copy.homeBody}>
-        <Link href="/design-lab/home" className={linkClass}>
+        <Link href="/design-lab/home/d1" className={linkClass}>
           {copy.homeLink}
         </Link>
       </Section>
@@ -89,7 +89,7 @@ export default function DesignLabPage() {
         title={landingLabCopy.index.title}
         body={landingLabCopy.index.labBody}
       >
-        <Link href="/design-lab/landing" className={linkClass}>
+        <Link href="/design-lab/landing/b" className={linkClass}>
           {landingLabCopy.index.labLink}
         </Link>
       </Section>

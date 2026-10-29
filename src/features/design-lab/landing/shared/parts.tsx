@@ -1,5 +1,5 @@
 "use client";
-// 세 안이 함께 쓰는 랜딩 조각 (T3.4): 화면 틀, 추천 체험 버튼, 오프라인 안내, 약관 문장.
+// 랜딩 B 조각 (T3.4, G3 D-06): 화면 틀, 워드마크, 추천 체험 버튼, 오프라인 안내, 로그인 구분 줄, 약관 문장.
 // Button(Base UI) 대신 buttonClass를 써서 실제 랜딩으로 옮겼을 때 첫 로드에 Base UI가 들어오지 않게 한다.
 import Link from "next/link";
 import { ArrowRight, WifiOff } from "lucide-react";
@@ -46,13 +46,9 @@ export function Wordmark({ className }: { className?: string }) {
 /** 추천 체험(포인트 컬러 버튼, 화면에 하나). 오프라인이면 막고 안내 문장과 잇는다. */
 export function TryButton({
   env,
-  label = copy.tryCta,
-  variant = "primary",
   className,
 }: {
   env: LandingEnv;
-  label?: string;
-  variant?: "primary" | "secondary";
   className?: string;
 }) {
   return (
@@ -64,30 +60,23 @@ export function TryButton({
         if (!env.offline) void toast(copy.tryToast);
       }}
       className={cn(
-        buttonClass(variant),
+        buttonClass("primary"),
         "w-full",
         env.offline && "cursor-not-allowed",
         className,
       )}
     >
-      {label}
+      {copy.tryCta}
       <ArrowRight aria-hidden className="size-4" strokeWidth={1.5} />
     </button>
   );
 }
 
 /** 오프라인 안내. 빨간 면 없이 아이콘과 글자만(DESIGN.md 2장 의미 색). */
-export function OfflineNote({
-  className,
-  primary = true,
-}: {
-  className?: string;
-  /** 체험 버튼이 aria-describedby로 가리키는 안내면 true. 한 화면에 id는 하나 */
-  primary?: boolean;
-}) {
+export function OfflineNote({ className }: { className?: string }) {
   return (
     <div
-      id={primary ? "landing-offline-note" : undefined}
+      id="landing-offline-note"
       role="status"
       className={cn("flex items-start gap-3", className)}
     >

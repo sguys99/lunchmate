@@ -54,7 +54,7 @@ tasks.md에서 다음 미완료 작업부터 진행해줘. 시작 전에 관련 
 | 0 | 준비 (문서 정리, 계정, 리포) | 3일 | G0 | 완료 (10/28) | 36/36 |
 | 1 | 디자인 시스템: DESIGN.md 시안 | 4일 | ⛔ G1 | 완료 (10/29, 시안 B) | 21/21 |
 | 2 | 공통 기반: 문구, 컴포넌트, 모션 | 4일 | G2 | 완료 (10/29, 실기기 확인 남음) | 22/22 |
-| 3 | 핵심 화면 시안: 홈 카드, 랜딩 | 3일 | ⛔ G3 | 대기 | 0/8 |
+| 3 | 핵심 화면 시안: 홈 카드, 랜딩 | 3일 | ⛔ G3 | 완료 (10/30, 홈 D1, 랜딩 B) | 8/8 |
 | 4 | 인증, 온보딩, 설정 | 1.5주 | ⛔ 시안 + G4 | 대기 | 0/30 |
 | 5 | 추천, 지도, 상세, 길찾기 | 1.5주 | ⛔ 시안 + G5 | 대기 | 0/43 |
 | 6 | 피드백, 후기, 기록, 제보 | 1.5주 | ⛔ 시안 + G6 | 대기 | 0/33 |
@@ -322,7 +322,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T2.6 (10/29 완료, `src/components/app-shell`, AppShell/ShellSplit/BottomTabBar/PageHeader, 경로 /today /map /poll /me, 데스크톱 1024px 이상 좌 리스트 + 우 지도이고 탭은 좌 칸 아래(사용자 확정), safe-area는 (app) viewport-fit=cover, MotionProvider와 Toaster는 (app)/layout, 플래그 appShell은 프로덕션 꺼짐) 앱 셸: 하단 탭 4개(오늘, 지도, 투표, 나), safe-area 대응, 데스크톱 좌 리스트 + 우 지도 2단 틀, 페이지 헤더
 - [x] T2.7 (10/29 완료, `src/components/states`: CardSkeleton, ListSkeleton, SheetSkeleton(SkeletonLine으로 줄 높이 고정), EmptyState, ErrorState(alert), OfflineState(status), 기본 문구 commonCopy.states, `useOnlineStatus`는 `src/lib/network`, Drawer 제목 title 세리프, 확인 `/design-lab/states`) 상태 컴포넌트: Skeleton 패턴(카드, 리스트, 시트), EmptyState, ErrorState, OfflineState
 - [x] T2.8 (10/29 완료, `src/features/place/illustrations`, `<CategoryIllustration slug size variant decorative />`, 64px 미만 icon 변형, 음식 한 곳 16% 톤 면(사용자 확정), 확인 `/design-lab/illustrations`) 카테고리 아이콘/일러스트 12종 SVG 자체 제작 (한식, 중식, 일식, 양식, 분식, 국밥/탕, 고기, 아시안, 패스트푸드, 샐러드/건강식, 카페/베이커리, 술집), 라이트/다크 대응
-- [x] T2.9 (10/29 완료, `src/components/badges` 배지 5종 + PlaceBadges/pickBadges(카드당 2개), 문구 정본 `src/copy/badges.ts`, 기본 우선순위는 T3.2에서 기피 > 웨이팅(줄 길어요 > 조금 기다려요 > 바로 입장) > 할인 > 제보로 확정, 추정은 가격 옆 표시로 이동, 추정 배지 색(warning/중립)은 G3에서 재검토, 확인 `/design-lab/badges`) 공통 배지: `추정`, `제보`, `할인`, 웨이팅 3단계, 투표 기피 경고
+- [x] T2.9 (10/29 완료, `src/components/badges` 배지 5종 + PlaceBadges/pickBadges(카드당 2개), 문구 정본 `src/copy/badges.ts`, 기본 우선순위는 T3.2에서 기피 > 웨이팅(줄 길어요 > 조금 기다려요 > 바로 입장) > 할인 > 제보로 확정, 추정은 가격 옆 표시로 이동, 배지 색은 G3에서 calm(기피 경고만 의미 색)으로 확정해 T3.8에서 기본값으로 바꿈(D-05), 확인 `/design-lab/badges`) 공통 배지: `추정`, `제보`, `할인`, 웨이팅 3단계, 투표 기피 경고
 - [x] T2.10 (10/29 완료, `/design-lab/components` 12섹션 + `data-gallery-section`, 쿼리 `?theme=light|dark&motion=reduce&static=1`로 결정적 렌더, 페이지 안 테마/모션/정지 전환, states와 badges 확인 페이지는 갤러리로 흡수, illustrations 페이지는 정밀 확인용 유지) `/design-lab/components`: 모든 공통 컴포넌트와 상태를 한 페이지에서 보는 갤러리
 
 #### 2.3 모션 시스템
@@ -366,8 +366,8 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T3.4 랜딩 시안 3안 이상: 가치 제안 한 줄, 추천 체험 버튼, 카카오/네이버/구글 시작 버튼. 동적 효과는 이 화면에서 가장 적극적으로 시도합니다.
 - [x] T3.5 4상태, 다크, 360px 최소 폭 확인 (10/29 완료, `docs/design/g3-qa.md`, axe 192건 통과)
 - [x] T3.6 캡처와 비교표 작성 (번들 증가량 포함) (10/29 완료, `docs/design/g3-comparison.md`, 캡처 70장 `docs/design/shots/2026-10-29/`)
-- [ ] ⛔ T3.7 **선택 게이트 G3**: 홈과 랜딩 각각 선택을 요청하고 멈춥니다.
-- [ ] T3.8 선택 기록, DESIGN.md에 카드 규칙 보강, 미선택 코드 삭제
+- [x] ⛔ T3.7 (10/30 완료: 1차 홈 D, 랜딩 B 선택 → D에 어제 피드백을 첫 화면에 둔 2차 D1, D2, D3 중 D1 선택, 안건 8건은 추천안 확정) **선택 게이트 G3**: 홈과 랜딩 각각 선택을 요청하고 멈춥니다.
+- [x] T3.8 (10/30 완료, design-decisions D-05 홈 D1, D-06 랜딩 B. DESIGN.md 5장 "오늘(홈) 화면", "그냥 골라줘", "랜딩", "배지" calm 보강. 공용 배지 calm 기본값과 `EstimateMark` 승격. PRD REC-04, REC-12, FB-01 정리. 미선택 시안 코드 삭제, 남긴 확인 화면 `/design-lab/home/d1`, `/design-lab/landing/b`) 선택 기록, DESIGN.md에 카드 규칙 보강, 미선택 코드 삭제
 
 ---
 
@@ -387,7 +387,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 #### 4.2 인증
 
 - [ ] T4.6 카카오, 구글 로그인 (Supabase Auth): 카카오는 `signInWithOAuth({ provider: 'custom:kakao' })`, 구글은 내장 provider. 카카오 토큰 교환 인증 방식(`client_secret_post`)과 부분 동의 시 닉네임 누락 처리를 개발 프로젝트에서 실측 (AUTH-01, T0.20)
-- [ ] T4.7 네이버 로그인: `signInWithOAuth({ provider: 'custom:naver' })`. state, PKCE, nonce는 Supabase가 처리하고, `/auth/callback` Route Handler에서 provider가 `custom:naver`이고 닉네임이 없을 때 `provider_token`으로 네이버 프로필 API를 한 번 호출해 닉네임과 사진만 `profiles`에 저장(토큰 저장, 로깅 금지). 실측에서 토큰 교환, 프로필 API, `provider_token` 중 하나라도 실패하면 research-notes T0.14 대안 설계(서버 직접 구현, `NAVER_LOGIN_*` 서버 전용 키 추가)로 전환 (AUTH-01N, T0.14)
+- [ ] T4.7 네이버 로그인: `signInWithOAuth({ provider: 'custom:naver' })`. state, PKCE, nonce는 Supabase가 처리하고, `/auth/callback` Route Handler에서 provider가 `custom:naver`이고 닉네임이 없을 때 `provider_token`으로 네이버 프로필 API를 한 번 호출해 닉네임과 사진만 `profiles`에 저장(토큰 저장, 로깅 금지). 실측에서 토큰 교환, 프로필 API, `provider_token` 중 하나라도 실패하면 research-notes T0.14 대안 설계(서버 직접 구현, `NAVER_LOGIN_*` 서버 전용 키 추가)로 전환 (AUTH-01N, T0.14). 구현 전 네이버 로그인 BI 가이드 원문(https://developers.naver.com/docs/login/bi/bi.md)을 확인해, 초록 면 흰 글자(대비 약 2.3:1, G3 브랜드 예외)보다 대비가 높은 공식 버튼 유형이 있으면 그 유형으로 교체 [확인 필요] (G3 안건 7, D-05, D-06)
 - [ ] T4.8 세션 처리 미들웨어, `(app)` 경로 보호
 - [ ] T4.9 로그인 후 원래 경로 복귀, redirect는 내부 경로만 허용 (AUTH-03)
 - [ ] T4.10 인앱 브라우저 감지(카카오톡, 인스타그램, 네이버 등), 카카오 로그인 우선 노출, 구글 탭 시 외부 브라우저 안내 (AUTH-04)
@@ -414,7 +414,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T4.25 다크 모드 시스템/라이트/다크 (SET-04)
 - [ ] T4.26 "요즘 이게 땡겨요" 7일 가중치 (SET-05)
 - [ ] T4.27 '나' 탭 골격 (설정, 계정, 약관 링크)
-- [ ] T4.28 랜딩 구현 (G3 선택안), SEO, OG 메타 (APP-04)
+- [ ] T4.28 랜딩 구현 (G3 선택안 B, D-06, DESIGN.md 5장 "랜딩"), SEO, OG 메타 (APP-04). 출시 전 카카오, 네이버, 구글 로그인 심볼을 각 사 공식 에셋으로 교체(시안 SVG는 다시 그린 것, G3 안건 7)
 - [ ] T4.29 이벤트: `login_started`, `login_completed`, `onboarding_step_completed`
 - [ ] T4.30 **G4 확인**: AUTH, ONB, SET P0 AC 통과, 3종 로그인 동작, E2E 온보딩 통과
 
@@ -450,12 +450,12 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 - [ ] T5.15 끼니 자동 전환과 수동 토글 (REC-01)
 - [ ] T5.16 기준 위치 칩, 위치 권한 거부 시 기본 사무실 (REC-02, PRD 12장)
-- [ ] T5.17 카드 3장 (G3 선택안), 데스크톱 가로 배치 (REC-04, REC-06)
+- [ ] T5.17 카드 3장 (G3 선택안 D1: 오늘의 한 곳 큰 카드 + 대안 2장 + 하단 고정 행동 줄 + 어제 피드백 띠 자리), 데스크톱 좌 세로 + 우 지도 2단 (REC-04, REC-06, D-05). **먼저** 공용 배지(`place-badges.tsx`)의 Tooltip 정적 import를 지연 로딩으로 분리합니다. 시안 코드를 그대로 옮기면 `/today` 약 307KB, D-04 방식(Motion 상호작용 뒤)이면 약 202KB로 예산 경계입니다(`docs/design/g3-comparison.md` 2절)
 - [ ] T5.18 다시 뽑기와 셔플 모션 (REC-05)
 - [ ] T5.19 "왜 추천했나요?" 펼치기 (REC-07)
 - [ ] T5.20 카드 액션: 길찾기, 상세, 즐겨찾기, 다시 안 갈래요, 투표에 추가(7단계 전까지 플래그) (REC-08)
 - [ ] T5.21 후보 부족과 0곳 빈 상태, 완화 제안 버튼 (REC-09)
-- [ ] T5.22 그냥 골라줘 룰렛과 결과 카드 (REC-12)
+- [ ] T5.22 그냥 골라줘 룰렛과 결과 카드 (REC-12): R1 하이라이트 순회(화면 카드 위, `src/features/rec/roulette.ts`), 다시 고르기는 직전 결과 제외, 데스크톱 결과 패널은 좌 리스트 칸 안 + 지도 핀 강조 (D-05, DESIGN.md 5장)
 - [ ] T5.23 하단 진입점: 친구랑 정하기, 회식 모드 (REC-10, 플래그)
 - [ ] T5.24 카카오 API 오류, 한도 초과: 재시도 1회 후 오류 안내 + "네이버 지도에서 주변 식당 보기"(네이버 지도 웹/앱 검색 링크) + 다시 시도. 즐겨찾기 기반 대체 추천은 저장 금지로 만들지 않음 (PRD 12장, T0.16-3)
 - [ ] T5.25 접근성: 스와이프 대체 버튼, 카드 순서 낭독, 포커스 이동
@@ -505,7 +505,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 6.2 피드백과 학습
 
-- [ ] T6.8 "어제 ○○ 어땠어요?" 카드: 👍/👎/안 갔어요, 하루 1회, 48시간 제한. 이름은 T5.12a로 찾고, 못 찾으면 "어제 가신 곳은 어땠어요?" + 카카오맵 링크 문구 (FB-01, FB-04, FB-05, T0.16-2)
+- [ ] T6.8 "어제 ○○ 어땠어요?" 카드: 👍/👎/안 갔어요, 하루 1회, 48시간 제한. 이름은 T5.12a로 찾고, 못 찾으면 "어제 가신 곳은 어땠어요?" + 카카오맵 링크 문구 (FB-01, FB-04, FB-05, T0.16-2). 배치는 G3 D1의 홈 머리 아래 한 줄 띠(답하면 고마움 한 줄로 접힘, DESIGN.md 5장). 답한 뒤에는 그날 다시 묻지 않음(FB-04). D1에는 "나중에"가 없으므로, 답하지 않고 지나간 띠를 그날 계속 둘지와 "나중에"(D3에서 시험)를 둘지는 6단계 시안에서 정함 (D-05)
 - [ ] T6.9 선택 입력: 1인 가격, 태그 8종, 한 줄 후기 100자, 공개 토글과 집계 포함 고지 (FB-02, FB-03)
 - [ ] T6.10 상세에서 직접 후기 작성, 내 후기 수정/삭제 (FB-06, FB-07)
 - [ ] T6.11 선호도 갱신: 지수 감쇠, 다시 뽑기 3연속 약한 부정, 투표 승리 약한 긍정 + 테스트 (AC-REC-5)
@@ -720,3 +720,4 @@ PRD 5.1절 범위를 따릅니다. 각 기능도 시안 3안 이상 절차를 �
 | 2026-10-28 | v0.1.3 | 문서 정합성 정리: 문서 우선순위 명시, T0.1~T0.3 완료(CLAUDE.md, PRD 반영), 외부 등록 순서 변경(Vercel 도메인 먼저), T0.16 장소명 처리 조사 확장, G1/G3 비교 범위 구분, 다양성 제약을 샘플링 중 적용, 공개 프로필 뷰, 투표 확정 시 방문 후보 보안 함수, 투표방 rate limit, 탈퇴 삭제 범위, 지표용 이벤트 3종, 진행 현황 수치와 커밋 예시 정정 |
 | 2026-10-28 | v0.1.4 | 0단계 조사 결과 반영(T0.14~T0.20, T0.27): 카카오, 네이버 커스텀 OIDC 로그인(T0.6, T0.7, T0.10, T4.6, T4.7), 장소 데이터와 위치 규칙(T4.4, T4.16, T5.14, T5.24, T6.8, T7.6, T7.14, T7.20, T8.3, T8.4, T8.14, T10.1, T10.2), T5.12a 장소 이름 해석 공통 모듈 추가, 2.4절 Base UI Drawer와 번들 규칙, T0.30 `next analyze` |
 | 2026-10-29 | v0.1.5 | 1단계 완료: G1에서 시안 B "Quiet Stone" 선택(design-decisions D-01), 루트 DESIGN.md와 생성 tokens.css, 하드코딩 색 금지 린트, 미선택 시안 코드 삭제 |
+| 2026-10-30 | v0.1.6 | 3단계 완료: G3에서 홈 D1(D + 어제 피드백 한 줄 띠), 랜딩 B 선택(design-decisions D-05, D-06), 안건 8건 확정. DESIGN.md 5장 홈, 그냥 골라줘, 랜딩, 배지 calm 보강, PRD REC-04, REC-12, FB-01 정리, 후속 메모(T4.7 네이버 BI, T4.28 공식 심볼, T5.17 배지 Tooltip 분리, T5.22 R1과 직전 제외, T6.8 띠 배치) |

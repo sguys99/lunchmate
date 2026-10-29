@@ -1,19 +1,16 @@
 "use client";
-// "그냥 골라줘" 시안 (REC-12, T3.3): 고르기 상태 훅 + 결과 패널을 늦게 받는 자리.
+// "그냥 골라줘" (REC-12, G3 D-05): 고르기 상태 훅 + 결과 패널을 늦게 받는 자리.
 //
-// 흐름: 버튼 → pickByScore(점수 비례, rng 주입)로 결과를 먼저 정함 → 안별 연출(rolling) → 결과(result) → 닫기(closing → 없음).
-// - 연출 안은 ?roulette=r1|r2|r3(비교 스위처 "골라줘")로 바꾸고, 생략하면 시안별 기본값(DEFAULT_ROULETTE).
-// - r1 하이라이트 순회는 세 곳이 한 화면에 다 보이는 시안(C, D)에서는 화면의 카드 위에서 돌고(page),
-//   한 장만 보이는 시안(A, B)에서는 패널 안 세 줄 목록에서 돈다(panel).
+// 흐름: 버튼 → pickByScore(점수 비례, rng 주입)로 결과를 먼저 정함 → R1 하이라이트 순회(rolling) → 결과(result) → 닫기(closing → 없음).
+// - R1은 화면의 큰 카드와 대안 카드 위에서 돈다(세 곳이 한 화면에 다 보이는 D1). 연출 중에는 결과 패널을 열지 않는다.
+// - 다시 고르기는 직전 결과를 빼고 남은 곳에서 점수 비례로 고른다(G3 안건 3, PRD REC-12).
 // - 건너뛰기: 연출 중 화면 어디든 누르거나 Esc, Enter, Space. 축소 모드면 연출 없이 바로 결과.
-// - 결과가 나오면 onSettle(번호)로 시안 화면도 그 곳으로 옮겨 둔다(닫은 뒤 바로 그 카드가 보이게).
+// - 결과가 나오면 onSettle(번호)로 화면도 그 곳으로 옮겨 둔다(닫은 뒤 바로 그 카드가 보이게, 데스크톱 지도 핀도 따라감).
 // - 결과 패널(just-pick-panel.tsx)은 처음 누를 때 받는다(React.lazy). 버튼에 손이나 포커스가 닿으면 미리 받는다.
 //   Motion을 쓰지 않고 CSS 전환과 타이머만 쓴다(첫 로드 증가 0, 패널 청크만 추가).
-// - 햅틱(T3.5에서 src/lib/haptics 규칙 "타이머, 효과 안에서 부르지 않는다"에 맞춤):
-//   누르는 순간(그냥 골라줘, 다른 곳) tap. 연출이 끝나 결과가 정해지는 순간은 타이머라 진동하지 않는다(시각 전환과 status 안내가 알린다).
+// - 햅틱(src/lib/haptics 규칙 "타이머, 효과 안에서 부르지 않는다"):
+//   누르는 순간(그냥 골라줘, 다시 고르기) tap. 연출이 끝나 결과가 정해지는 순간은 타이머라 진동하지 않는다(시각 전환과 status 안내가 알린다).
 //   연출 중 사용자가 눌러 건너뛰면 그 누름 안에서 select.
-//   이유: 타이머 진동은 sticky activation 덕에 Android Chrome에서는 울리지만, 규칙이 막는 패턴이고
-//   백그라운드 탭이나 권한 정책에서 조용히 무시되어 기기마다 결과가 달라진다. 누름에 바로 붙는 진동이 가장 예측 가능하다.
 import {
   lazy,
   Suspense,
@@ -26,40 +23,15 @@ import { designLabHomeCopy } from "@/copy/design-lab-home";
 import type { MockPick, MockPlace } from "@/features/design-lab/mock";
 import {
   highlightSchedule,
-  settleMs,
+  highlightSettleMs,
   type HighlightStep,
-  type RouletteMode,
 } from "@/features/rec/roulette";
 import { haptic } from "@/lib/haptics";
 import { useMotionReduced } from "@/lib/motion";
 import { pickByScore, seededRng, type Rng } from "@/lib/reco/pick-one";
-import type { HomeVariantId } from "../types";
-import type { JustPickPlacement } from "./just-pick-panel";
 import { useHomeLabOptions } from "./lab-options-context";
 
 const copy = designLabHomeCopy.screen.justPick;
-
-/** 시안별 기본 연출. 이유는 T3.3 보고와 design-lab-home 문구 참고 */
-export const DEFAULT_ROULETTE: Readonly<Record<HomeVariantId, RouletteMode>> = {
-  a: "r2",
-  b: "r2",
-  c: "r1",
-  d: "r1",
-  d1: "r1",
-  d2: "r1",
-  d3: "r1",
-};
-
-/** r1을 화면의 카드 위에서 돌릴 수 있는 시안(세 곳이 한 화면에 다 보임) */
-const PAGE_HIGHLIGHT: Readonly<Record<HomeVariantId, boolean>> = {
-  a: false,
-  b: false,
-  c: true,
-  d: true,
-  d1: true,
-  d2: true,
-  d3: true,
-};
 
 export type JustPickPhase = "rolling" | "result" | "closing";
 
@@ -67,9 +39,6 @@ export type JustPickRun = {
   id: number;
   /** 이 결과를 낸 카드 세트(다시 뽑기 등으로 세트가 바뀌면 무효) */
   setKey: string;
-  mode: RouletteMode;
-  /** r1을 어디서 돌리는가. r2, r3은 항상 panel */
-  stage: "page" | "panel";
   target: number;
   /** 연출이 시작하는 카드(지금 보고 있는 곳) */
   start: number;
@@ -78,13 +47,12 @@ export type JustPickRun = {
 };
 
 export type JustPick = {
-  mode: RouletteMode;
   run: JustPickRun | null;
-  /** r1 연출 중 강조된 카드 번호. 아니면 null */
+  /** 연출 중 강조된 카드 번호. 아니면 null */
   cursor: number | null;
-  /** r1이 마지막 칸에 닿았다(나머지가 물러난다) */
+  /** 순회가 마지막 칸에 닿았다(나머지가 물러난다) */
   landed: boolean;
-  /** 화면 카드 위에서 r1이 돌고 있다(C, D 시안이 카드에 강조를 그린다) */
+  /** 화면 카드 위에서 순회가 돌고 있다(카드가 강조를 그린다, 버튼은 "바로 보기") */
   pageHighlight: boolean;
   begin: (trigger: HTMLElement | null, from?: number) => void;
   skip: () => void;
@@ -105,16 +73,13 @@ function keyOf(picks: MockPick): string {
 }
 
 export function useJustPick({
-  variant,
   picks,
   onSettle,
 }: {
-  variant: HomeVariantId;
   picks: MockPick;
   onSettle?: (index: number) => void;
 }): JustPick {
-  const { roulette, seed } = useHomeLabOptions();
-  const mode = roulette === "auto" ? DEFAULT_ROULETTE[variant] : roulette;
+  const { seed } = useHomeLabOptions();
   const reduced = useMotionReduced();
 
   const [rawRun, setRun] = useState<JustPickRun | null>(null);
@@ -158,46 +123,40 @@ export function useJustPick({
     if (target < 0) return;
     // 누르는 순간의 진동(제스처 핸들러 안). 축소 모드면 haptic이 스스로 건너뛴다
     haptic("tap", { reduced });
-    const stage: JustPickRun["stage"] =
-      mode === "r1" && PAGE_HIGHLIGHT[variant] ? "page" : "panel";
     const r: JustPickRun = {
       id: nextId.current++,
       setKey,
-      mode,
-      stage,
       target,
       start: from,
-      steps: mode === "r1" ? highlightSchedule(picks.length, target, from) : [],
+      steps: highlightSchedule(picks.length, target, from),
       phase: "rolling",
     };
     if (reduced) {
       settle(r);
       return;
     }
-    setCursor(mode === "r1" ? from : null);
+    setCursor(from);
     setLanded(false);
     setRun(r);
   }
 
-  // 연출 타이머: r1은 칸마다 강조를 옮기고, 모든 안은 settleMs에 결과로 넘어간다
+  // 연출 타이머: 칸마다 강조를 옮기고, 마지막 칸 + 머묾 뒤 결과로 넘어간다
   const rollingId = run?.phase === "rolling" ? run.id : null;
   useEffect(() => {
     if (rollingId === null || !run) return;
     const timers: number[] = [];
-    if (run.mode === "r1") {
-      const last = run.steps.length - 1;
-      run.steps.forEach((s, k) => {
-        if (k === 0) return;
-        timers.push(
-          window.setTimeout(() => {
-            setCursor(s.index);
-            if (k === last) setLanded(true);
-          }, s.atMs),
-        );
-      });
-    }
+    const last = run.steps.length - 1;
+    run.steps.forEach((s, k) => {
+      if (k === 0) return;
+      timers.push(
+        window.setTimeout(() => {
+          setCursor(s.index);
+          if (k === last) setLanded(true);
+        }, s.atMs),
+      );
+    });
     timers.push(
-      window.setTimeout(() => settle(run), settleMs(run.mode, run.steps)),
+      window.setTimeout(() => settle(run), highlightSettleMs(run.steps)),
     );
     return () => timers.forEach((t) => window.clearTimeout(t));
     // run은 rollingId가 같으면 같은 값이다
@@ -249,11 +208,10 @@ export function useJustPick({
   }, [closingId]);
 
   return {
-    mode,
     run,
     cursor: run?.phase === "rolling" ? cursor : null,
     landed: run?.phase === "rolling" && landed,
-    pageHighlight: run?.phase === "rolling" && run.stage === "page",
+    pageHighlight: run?.phase === "rolling",
     begin: (el, from = 0) => {
       if (run) return;
       trigger.current = el;
@@ -261,6 +219,7 @@ export function useJustPick({
       start(from, null);
     },
     skip,
+    // 다시 고르기: 직전 결과에서 순회를 시작하고, 결과 후보에서는 직전 곳을 뺀다(G3 안건 3)
     again: () => {
       if (run?.phase !== "result") return;
       start(run.target, run.target);
@@ -280,19 +239,17 @@ export function useJustPick({
 }
 
 /**
- * 결과 패널 자리 + 스크린 리더 안내. 시안 화면 끝에 한 번 둔다.
- * 패널은 r1 page 연출 중에는 열지 않고(화면 카드가 무대), 그 밖에는 누르는 순간 연다.
+ * 결과 패널 자리 + 스크린 리더 안내. 화면 끝에 한 번 둔다.
+ * 패널은 연출 중에는 열지 않고(화면 카드가 무대) 결과가 정해지면 연다.
  */
 export function JustPickLayer({
   pick,
   picks,
-  placement,
   formatReason,
 }: {
   pick: JustPick;
   picks: MockPick;
-  placement?: JustPickPlacement;
-  formatReason?: (place: MockPlace) => string;
+  formatReason: (place: MockPlace) => string;
 }) {
   const { run } = pick;
   const announcement = !run
@@ -300,7 +257,7 @@ export function JustPickLayer({
     : run.phase === "rolling"
       ? copy.picking
       : copy.announce(picks[run.target]?.name ?? "");
-  const showPanel = run && !(run.phase === "rolling" && run.stage === "page");
+  const showPanel = run && run.phase !== "rolling";
   return (
     <>
       <p role="status" className="sr-only">
@@ -312,11 +269,7 @@ export function JustPickLayer({
             key={run.id}
             run={run}
             picks={picks}
-            placement={placement}
             formatReason={formatReason}
-            cursor={pick.cursor}
-            landed={pick.landed}
-            onSkip={pick.skip}
             onAgain={pick.again}
             onClose={pick.close}
           />

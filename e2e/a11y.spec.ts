@@ -70,56 +70,47 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       await expectNoA11yViolations(page);
     });
 
-    // G3 시안 단독 화면 (T3.5): 홈 4안 x (정상 + 4상태), 랜딩 3안 x (정상 + 상태 + 카카오톡 인앱)
-    // D 수정 시안 D1~D3 (2026-10-30)은 어제 피드백이 없는 날(?feedback=none)도 본다.
-    for (const variant of ["a", "b", "c", "d", "d1", "d2", "d3"]) {
-      for (const query of [
-        "",
-        "?state=loading",
-        "?state=empty",
-        "?state=error",
-        "?state=offline",
-        "?deck=overflow",
-        ...(variant.length > 1 ? ["?feedback=none"] : []),
-      ]) {
-        test(`홈 시안 ${variant}${query}`, async ({ page }) => {
-          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
-          await openLabRoute(page, `/design-lab/home/${variant}${query}`);
-          await expectNoA11yViolations(page);
-        });
-      }
-    }
-    // D1~D3 어제 피드백에 답한 뒤(고마움 줄, D2는 카드가 사라진 뒤, D3는 오늘의 추천으로 넘어간 뒤)
-    for (const variant of ["d1", "d2", "d3"]) {
-      test(`홈 시안 ${variant} 어제 피드백 답한 뒤`, async ({ page }) => {
+    // G3 선택안 (design-decisions D-05, D-06): 홈 D1 x (정상 + 4상태 + 배지 넘침 + 어제 피드백 없는 날), 랜딩 B x (정상 + 상태 + 카카오톡 인앱)
+    for (const query of [
+      "",
+      "?state=loading",
+      "?state=empty",
+      "?state=error",
+      "?state=offline",
+      "?deck=overflow",
+      "?feedback=none",
+    ]) {
+      test(`홈 D1${query}`, async ({ page }) => {
         test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
-        await openLabRoute(page, `/design-lab/home/${variant}`);
-        await page.getByRole("button", { name: "좋았어요" }).first().click();
-        await expect(
-          page.getByText("알려 줘서 고마워요", { exact: false }).first(),
-        ).toBeAttached();
-        if (variant === "d2") await page.waitForTimeout(1700);
+        await openLabRoute(page, `/design-lab/home/d1${query}`);
         await expectNoA11yViolations(page);
       });
     }
-    for (const variant of ["a", "b", "c"]) {
-      for (const query of [
-        "",
-        "?state=loading",
-        "?state=error",
-        "?state=offline",
-        "?inapp=kakao",
-      ]) {
-        test(`랜딩 시안 ${variant}${query}`, async ({ page }) => {
-          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
-          await openLabRoute(page, `/design-lab/landing/${variant}${query}`);
-          // 네이버 로그인 버튼은 네이버 가이드 색(초록 면 + 흰 글자, 대비 약 2.3:1)을 그대로 쓴다.
-          // 브랜드 가이드가 정한 색이라 대비 검사에서만 뺀다. 결정 대기: docs/design/g3-qa.md "남은 문제"
-          await expectNoA11yViolations(page, {
-            exclude: ['[data-provider="naver"]'],
-          });
+    test("홈 D1 어제 피드백 답한 뒤", async ({ page }) => {
+      test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+      await openLabRoute(page, "/design-lab/home/d1");
+      await page.getByRole("button", { name: "좋았어요" }).first().click();
+      await expect(
+        page.getByText("알려 줘서 고마워요", { exact: false }).first(),
+      ).toBeAttached();
+      await expectNoA11yViolations(page);
+    });
+    for (const query of [
+      "",
+      "?state=loading",
+      "?state=error",
+      "?state=offline",
+      "?inapp=kakao",
+    ]) {
+      test(`랜딩 B${query}`, async ({ page }) => {
+        test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+        await openLabRoute(page, `/design-lab/landing/b${query}`);
+        // 네이버 로그인 버튼은 네이버 가이드 색(초록 면 + 흰 글자, 대비 약 2.3:1)을 그대로 쓴다.
+        // 브랜드 예외로 기록(G3 안건 7, DESIGN.md 5장 소셜 로그인 버튼)하고 대비 검사에서만 뺀다. 4단계 로그인 전 네이버 BI 원문 확인
+        await expectNoA11yViolations(page, {
+          exclude: ['[data-provider="naver"]'],
         });
-      }
+      });
     }
 
     test("PoC 목록", async ({ page }) => {

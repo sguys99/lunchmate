@@ -63,7 +63,7 @@ export const designLabComponentsCopy = {
     },
     placeBadges: {
       title: "도메인 배지",
-      body: "추정, 제보, 할인, 웨이팅 3단계, 기피 경고입니다. 카드에는 우선순위로 2개까지만 보이고, 추정은 배지 줄 대신 가격 옆에 붙습니다.",
+      body: "추정, 제보, 할인, 웨이팅 3단계, 기피 경고입니다. 의미 색은 기피 경고에만 쓰고 나머지는 중립 선과 아이콘입니다. 카드에는 우선순위로 2개까지만 보이고, 추정은 배지 줄 대신 가격 옆 글자(EstimateMark)로 붙습니다.",
     },
     illustrations: {
       title: "카테고리 일러스트",
@@ -123,7 +123,7 @@ export const designLabComponentsCopy = {
     offline: "OfflineState",
     online: "useOnlineStatus",
     badgeAll:
-      "EstimateBadge, ReportBadge, DealBadge, WaitingBadge, AvoidWarningBadge",
+      "EstimateBadge, ReportBadge, DealBadge, WaitingBadge, AvoidWarningBadge, EstimateMark",
     waiting: "WaitingBadge level",
     badgeTooltip: "withTooltip",
     placeBadges: "PlaceBadges",
