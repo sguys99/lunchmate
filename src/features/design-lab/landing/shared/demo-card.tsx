@@ -11,7 +11,22 @@ import { cn } from "@/lib/utils";
 
 const copy = landingLabCopy.b;
 
-export function DemoCard({ place }: { place: MockPlace }) {
+/**
+ * 이유 문장 앞의 "도보 약 N분, "을 뗀다. 도보 분은 숫자 칸에 이미 있어 중복이다(홈 카드와 같은 규칙, G3 선택 후).
+ * 목업(places.ts)은 홈 시안과 같이 쓰므로 데이터는 두고 표시에서만 뗀다.
+ */
+export function reasonWithoutWalk(reason: string): string {
+  return reason.replace(/^도보 약 \d+분,\s*/, "");
+}
+
+export function DemoCard({
+  place,
+  dedupeWalk = false,
+}: {
+  place: MockPlace;
+  /** 이유에서 도보 분을 뗀다(랜딩 B). C 둘째 장면은 시안 그대로 둔다 */
+  dedupeWalk?: boolean;
+}) {
   const price = priceBandParts(place.priceKRW);
   const cells = [
     {
@@ -77,7 +92,7 @@ export function DemoCard({ place }: { place: MockPlace }) {
         </dl>
         {/* 이유는 잘리지 않게 두 줄까지(360px에서 긴 이유가 말줄임되던 문제, T3.5) */}
         <p className="line-clamp-2 type-body-sm break-keep text-muted-foreground">
-          {place.reason}
+          {dedupeWalk ? reasonWithoutWalk(place.reason) : place.reason}
         </p>
       </div>
     </article>

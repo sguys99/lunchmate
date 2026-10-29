@@ -182,3 +182,46 @@
     transform: scaleX(1);
   }
 }
+
+/* ---------- B 다시 뽑기 셔플 (G3 선택 후, Motion 대신 CSS) ----------
+ * PoC 셔플(D-02)과 같은 순서: 지금 세 장이 함께 흐려지고(exit, fast) → 새 세 장이 70ms 간격으로 떠오른다(reveal, slow).
+ * 한 순간에 움직이는 효과는 하나다(퇴장이 끝난 뒤 등장). data-shuffle은 landing-b.tsx가 붙인다.
+ * 축소 모드에서는 JS가 애니메이션 없이 바로 바꾸고, 여기서도 모두 끈다.
+ */
+@keyframes lm-shuffle-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes lm-shuffle-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.lm-shuffle[data-shuffle="leaving"] > li {
+  animation: lm-shuffle-exit var(--lm-duration-fast) var(--lm-ease-exit)
+    forwards;
+}
+.lm-shuffle[data-shuffle="entering"] > li {
+  animation: lm-shuffle-reveal var(--lm-duration-slow) var(--lm-ease-enter)
+    both;
+}
+.lm-shuffle[data-shuffle="entering"] > li:nth-child(2) {
+  animation-delay: var(--lm-stagger);
+}
+.lm-shuffle[data-shuffle="entering"] > li:nth-child(3) {
+  animation-delay: calc(2 * var(--lm-stagger));
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-shuffle > li {
+    animation: none !important;
+  }
+}

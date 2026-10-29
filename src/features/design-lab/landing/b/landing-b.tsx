@@ -1,17 +1,19 @@
 "use client";
 // 랜딩 시안 B "바로 해 보는 데모" (T3.4).
 // - 히어로가 데모다. 예시 동네의 카드 3장을 처음부터 그려 두고(정적, LCP), "다시 뽑기"로 실제처럼 바꿔 본다.
-// - Motion은 첫 상호작용 뒤에만: 버튼에 손을 올리거나 포커스하면 덩어리를 미리 받고, 누르면 셔플 모션 목록으로 바뀐다.
-//   그 전까지 랜딩의 움직임은 CSS 손짓(다시 뽑기 아이콘이 2.4초 뒤 한 바퀴) 하나뿐이다.
+// - Motion을 쓰지 않는다(G3 선택 후). 셔플은 CSS 전환(landing.css lm-shuffle): 세 장이 함께 흐려지고(exit, fast)
+//   새 세 장이 70ms 간격으로 떠오른다(reveal, slow). 축소 모드면 애니메이션 없이 바로 바꾼다.
+//   첫 화면의 움직임은 CSS 손짓(다시 뽑기 아이콘이 2.4초 뒤 한 바퀴) 하나뿐이다.
 // - 포인트 컬러 버튼은 "추천 먼저 받아 보기" 하나. 다시 뽑기는 테두리 버튼.
 // - 상태: ?state=loading이면 데모 자리에 스켈레톤 3장, 오프라인이면 데모는 그대로 두고(목업이라 동작) 체험과 로그인만 막는다.
 import { RotateCcw } from "lucide-react";
-import { lazy, Suspense, useState } from "react";
+import { useEffect, useRef, useState, type AnimationEvent } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
 import { focusRing } from "@/components/ui/interaction";
 import { commonCopy } from "@/copy/common";
 import { landingLabCopy } from "@/copy/design-lab-landing";
 import { MOCK_HOME_ALL_SETS, type MockPick } from "@/features/design-lab/mock";
+import { useMotionPreference } from "@/lib/motion/preference";
 import { cn } from "@/lib/utils";
 import type { LandingParams } from "../shared/params";
 import {
@@ -27,8 +29,8 @@ import { useLandingEnv } from "../shared/use-landing-env";
 import { DemoCard, DemoCardSkeleton } from "../shared/demo-card";
 
 const copy = landingLabCopy;
-const loadMotionList = () => import("./demo-motion-list");
-const DemoMotionList = lazy(loadMotionList);
+/** 퇴장 애니메이션 끝 이벤트가 오지 않을 때(탭 숨김 등) 바꿔 끼우는 안전 시간. exit fast(180ms)보다 넉넉하게 */
+const EXIT_FALLBACK_MS = 400;
 const TOTAL = MOCK_HOME_ALL_SETS.length;
 const LOGIN_ID = "landing-b-login";
 
@@ -37,12 +39,27 @@ const headerLinkClass = cn(
   focusRing,
 );
 
-function StaticList({ picks }: { picks: MockPick }) {
+type Shuffle = "idle" | "leaving" | "entering";
+
+function DemoList({
+  picks,
+  shuffle,
+  onAnimationEnd,
+}: {
+  picks: MockPick;
+  shuffle: Shuffle;
+  onAnimationEnd?: (e: AnimationEvent<HTMLOListElement>) => void;
+}) {
   return (
-    <ol aria-label={copy.b.demoLabel} className="flex flex-col gap-3">
+    <ol
+      aria-label={copy.b.demoLabel}
+      data-shuffle={shuffle}
+      onAnimationEnd={onAnimationEnd}
+      className="lm-shuffle flex flex-col gap-3"
+    >
       {picks.map((p) => (
         <li key={p.id}>
-          <DemoCard place={p} />
+          <DemoCard place={p} dedupeWalk />
         </li>
       ))}
     </ol>
@@ -51,20 +68,52 @@ function StaticList({ picks }: { picks: MockPick }) {
 
 export function LandingB({ params }: { params: LandingParams }) {
   const env = useLandingEnv(params);
+  const preference = useMotionPreference();
   const [round, setRound] = useState(0);
-  const [animated, setAnimated] = useState(false);
+  const [shuffle, setShuffle] = useState<Shuffle>("idle");
   const [announce, setAnnounce] = useState("");
+  const fallback = useRef<number | null>(null);
   const loading = env.state === "loading";
   const picks = MOCK_HOME_ALL_SETS[round % TOTAL] ?? MOCK_HOME_ALL_SETS[0]!;
 
-  function reroll() {
-    const next = round + 1;
-    setAnimated(true);
+  useEffect(
+    () => () => {
+      if (fallback.current !== null) window.clearTimeout(fallback.current);
+    },
+    [],
+  );
+
+  function show(next: number, nextShuffle: Shuffle) {
+    if (fallback.current !== null) window.clearTimeout(fallback.current);
+    fallback.current = null;
     setRound(next);
+    setShuffle(nextShuffle);
     setAnnounce(copy.b.rerolled((next % TOTAL) + 1));
   }
 
-  const preload = () => void loadMotionList();
+  function reroll() {
+    if (loading || shuffle === "leaving") return;
+    const next = round + 1;
+    const reduced =
+      preference === "reduce" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      show(next, "idle");
+      return;
+    }
+    setShuffle("leaving");
+    fallback.current = window.setTimeout(
+      () => show(next, "entering"),
+      EXIT_FALLBACK_MS,
+    );
+  }
+
+  // 퇴장은 세 장이 함께 끝나므로 아무 한 장의 끝 이벤트에서 새 묶음으로 바꾼다
+  function onListAnimationEnd(e: AnimationEvent<HTMLOListElement>) {
+    if (shuffle === "leaving" && e.animationName === "lm-shuffle-exit") {
+      show(round + 1, "entering");
+    }
+  }
 
   return (
     <LandingShell>
@@ -145,23 +194,18 @@ export function LandingB({ params }: { params: LandingParams }) {
                 <DemoCardSkeleton />
                 <DemoCardSkeleton />
               </div>
-            ) : animated ? (
-              <Suspense fallback={<StaticList picks={picks} />}>
-                <DemoMotionList
-                  round={round}
-                  picks={picks}
-                  label={copy.b.demoLabel}
-                />
-              </Suspense>
             ) : (
-              <StaticList picks={picks} />
+              <DemoList
+                key={round}
+                picks={picks}
+                shuffle={shuffle}
+                onAnimationEnd={onListAnimationEnd}
+              />
             )}
 
             <button
               type="button"
               onClick={reroll}
-              onPointerEnter={preload}
-              onFocus={preload}
               aria-disabled={loading || undefined}
               className={cn(
                 buttonClass("secondary"),
@@ -171,7 +215,7 @@ export function LandingB({ params }: { params: LandingParams }) {
             >
               <RotateCcw
                 aria-hidden
-                className={cn("size-4", !animated && !loading && "lm-nudge")}
+                className={cn("size-4", round === 0 && !loading && "lm-nudge")}
                 strokeWidth={1.5}
               />
               {copy.b.reroll}
