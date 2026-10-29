@@ -2,12 +2,15 @@
 import type { CategorySlug } from "@/features/place/categories";
 import type { MockPlaceId } from "./places";
 
-/** 최대 2개까지 담는 목록 (태그, 상태 배지). 타입에서 개수를 막는다. */
+/** 최대 2개까지 담는 목록 (태그). 타입에서 개수를 막는다. */
 export type UpToTwo<T> = readonly [] | readonly [T] | readonly [T, T];
 
 export type PriceSource = "report" | "estimate";
 
-/** 카드 상태 배지 (REC-06). 우선순위 규칙은 T3.2에서 정한다. */
+/**
+ * 카드 상태 배지 후보 (REC-06). 카드에는 pickBadges 규칙(T3.2: 기피 > 웨이팅 > 할인, 추정은 가격 옆)으로
+ * 배지 줄 최대 2개만 보인다. 후보 자체는 2개를 넘을 수 있다(MOCK_HOME_BADGE_OVERFLOW).
+ */
 export type StatusBadge = "estimate" | "deal" | "waiting" | "avoidWarning";
 
 /** PLACE-07 웨이팅 3단계: 바로 입장 / 조금 기다려요 / 줄 길어요 */
@@ -35,7 +38,8 @@ export type MockPlace = {
   tags: UpToTwo<string>;
   /** 추천 이유 1줄 (명사형) */
   reason: string;
-  statusBadges: UpToTwo<StatusBadge>;
+  /** 상태 배지 후보. 기본 12곳은 2개 이하, 넘침 세트는 3~4개 */
+  statusBadges: readonly StatusBadge[];
   /** statusBadges에 deal이 있을 때 상세에 보여 줄 할인 내용 */
   deal?: { title: string };
   /** statusBadges에 waiting이 있을 때의 최근 제보 */

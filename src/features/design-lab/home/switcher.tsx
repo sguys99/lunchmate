@@ -1,6 +1,7 @@
 "use client";
 // /design-lab/home/compare: 홈 시안 비교 스위처 (T3.1). G1 스위처(system/switcher.tsx)와 같은 틀(ScreenViewport, DesignScope)을 쓴다.
-// 쿼리: ?v=a&state=ready&theme=system&view=frame&reduce=1 (기본값은 생략). 리로드 없이 바꾸고 주소에 남긴다.
+// 쿼리: ?v=a&state=ready&theme=system&view=frame&reduce=1&badges=calm&deck=overflow (기본값은 생략). 리로드 없이 바꾸고 주소에 남긴다.
+// badges, deck은 T3.2 비교 옵션(shared/lab-options.ts): 배지 색 체계와 배지 넘침 카드 세트.
 // 모션 줄이기는 MotionProvider preference="reduce"로 넘겨 OS 설정을 바꾸지 않고 축소 모드를 본다.
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -23,6 +24,14 @@ import {
 import { MotionProvider } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { HOME_VARIANTS } from "./registry";
+import {
+  BADGE_PALETTES,
+  HOME_DECKS,
+  parseHomeLabOptions,
+  writeHomeLabOptions,
+  type HomeLabOptions,
+} from "./shared/lab-options";
+import { HomeLabOptionsProvider } from "./shared/lab-options-context";
 import { HOME_VARIANT_IDS, type HomeVariantId } from "./types";
 
 type Option<T extends string> = { value: T; label: string; title?: string };
@@ -78,7 +87,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
 const copy = designLabHomeCopy.switcher;
 const systemCopy = designLabCopy.switcher;
 
-type Selection = {
+type Selection = HomeLabOptions & {
   v: HomeVariantId;
   state: DesignState;
   theme: DesignTheme;
@@ -92,6 +101,8 @@ const DEFAULTS: Selection = {
   theme: "system",
   view: "frame",
   reduce: false,
+  badges: "current",
+  deck: "today",
 };
 
 function pick<T extends string>(
@@ -111,6 +122,7 @@ function parse(params: URLSearchParams): Selection {
     theme: pick(DESIGN_THEMES, params.get("theme"), DEFAULTS.theme),
     view: pick(SCREEN_VIEWS, params.get("view"), DEFAULTS.view),
     reduce: params.get("reduce") === "1",
+    ...parseHomeLabOptions(params),
   };
 }
 
@@ -121,12 +133,20 @@ function serialize(sel: Selection): string {
   if (sel.theme !== DEFAULTS.theme) params.set("theme", sel.theme);
   if (sel.view !== DEFAULTS.view) params.set("view", sel.view);
   if (sel.reduce) params.set("reduce", "1");
+  writeHomeLabOptions(params, sel);
   return params.toString();
 }
 
 function standaloneHref(sel: Selection): string {
-  const base = `/design-lab/home/${sel.v}`;
-  return sel.state === "ready" ? base : `${base}?state=${sel.state}`;
+  const params = new URLSearchParams();
+  if (sel.state !== "ready") params.set("state", sel.state);
+  writeHomeLabOptions(params, sel);
+  const qs = params.toString();
+  return `/design-lab/home/${sel.v}${qs ? `?${qs}` : ""}`;
+}
+
+function toggle<T extends string>(options: readonly T[], value: T): T {
+  return options[(options.indexOf(value) + 1) % options.length] ?? value;
 }
 
 export function HomeSwitcher() {
@@ -160,6 +180,9 @@ export function HomeSwitcher() {
       else if (key === "f")
         update({ view: current.view === "frame" ? "full" : "frame" });
       else if (key === "m") update({ reduce: !current.reduce });
+      else if (key === "b")
+        update({ badges: toggle(BADGE_PALETTES, current.badges) });
+      else if (key === "k") update({ deck: toggle(HOME_DECKS, current.deck) });
       else return;
       e.preventDefault();
     }
@@ -216,6 +239,26 @@ export function HomeSwitcher() {
             label: systemCopy.views[id],
           }))}
         />
+        <Segmented
+          label={copy.groups.badges}
+          value={sel.badges}
+          onChange={(badges) => update({ badges })}
+          options={BADGE_PALETTES.map((id) => ({
+            value: id,
+            label: copy.badgePalettes[id].label,
+            title: copy.badgePalettes[id].title,
+          }))}
+        />
+        <Segmented
+          label={copy.groups.deck}
+          value={sel.deck}
+          onChange={(deck) => update({ deck })}
+          options={HOME_DECKS.map((id) => ({
+            value: id,
+            label: copy.decks[id].label,
+            title: copy.decks[id].title,
+          }))}
+        />
         <button
           type="button"
           aria-pressed={sel.reduce}
@@ -250,8 +293,15 @@ export function HomeSwitcher() {
         <ScreenViewport view={sel.view}>
           <DesignScope className="h-full overflow-y-auto">
             <MotionProvider preference={sel.reduce ? "reduce" : "system"}>
-              {/* 시안이나 상태를 바꾸면 화면 상태(넘긴 카드, 회차)를 처음부터 */}
-              <Home key={`${sel.v}-${sel.state}`} state={sel.state} />
+              <HomeLabOptionsProvider
+                value={{ badges: sel.badges, deck: sel.deck }}
+              >
+                {/* 시안, 상태, 카드 세트를 바꾸면 화면 상태(넘긴 카드, 회차)를 처음부터. 배지 색은 상태를 지킨 채 바꾼다 */}
+                <Home
+                  key={`${sel.v}-${sel.state}-${sel.deck}`}
+                  state={sel.state}
+                />
+              </HomeLabOptionsProvider>
             </MotionProvider>
           </DesignScope>
         </ScreenViewport>

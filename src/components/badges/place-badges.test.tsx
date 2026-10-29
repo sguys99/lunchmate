@@ -114,7 +114,7 @@ describe("툴팁", () => {
 });
 
 describe("PlaceBadges", () => {
-  it("후보가 많아도 카드에는 우선순위 2개만", () => {
+  it("후보가 많아도 카드에는 우선순위 2개만, 추정은 배지 줄에서 빠진다", () => {
     render(
       <PlaceBadges
         badges={[
@@ -128,7 +128,15 @@ describe("PlaceBadges", () => {
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(2);
     expect(items[0]).toHaveTextContent("웨이팅 5분 전, 줄 길어요");
-    expect(items[1]).toHaveTextContent("추정 가격");
+    expect(items[1]).toHaveTextContent("할인 정보 있음");
+    expect(screen.queryByText("추정 가격")).not.toBeInTheDocument();
+  });
+
+  it("추정만 있으면 배지 줄을 그리지 않는다", () => {
+    const { container } = render(
+      <PlaceBadges badges={[{ kind: "estimate" }]} />,
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("후보가 없으면 아무것도 그리지 않는다", () => {

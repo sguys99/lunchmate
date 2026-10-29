@@ -5,6 +5,7 @@ import { CATEGORY_SLUGS } from "@/features/place/categories";
 import {
   DESIGN_STATES,
   MOCK_HOME_ALL_SETS,
+  MOCK_HOME_BADGE_OVERFLOW,
   MOCK_HOME_EMPTY,
   MOCK_HOME_TODAY,
   MOCK_PLACES,
@@ -81,6 +82,23 @@ describe("홈 시나리오", () => {
   it("홈 카드는 허용 도보 10분 안이다", () => {
     for (const set of MOCK_HOME_ALL_SETS)
       for (const p of set) expect(p.walkMinutes).toBeLessThanOrEqual(10);
+  });
+
+  it("배지 넘침 세트: 서로 다른 카테고리 3장, 후보 배지 3개 이상, 필드 규칙 유지", () => {
+    const set = MOCK_HOME_BADGE_OVERFLOW;
+    expect(new Set(set.map((p) => p.category)).size).toBe(3);
+    for (const p of set) {
+      expect(p.statusBadges.length).toBeGreaterThanOrEqual(3);
+      expect(new Set(p.statusBadges).size).toBe(p.statusBadges.length);
+      expect(p.walkMinutes).toBeLessThanOrEqual(10);
+      const badges: readonly string[] = p.statusBadges;
+      expect(badges.includes("estimate")).toBe(p.priceSource === "estimate");
+      expect(badges.includes("deal")).toBe("deal" in p);
+      expect(badges.includes("waiting")).toBe("waiting" in p);
+    }
+    // 4종이 모두 겹치는 카드가 하나 이상
+    expect(set.some((p) => p.statusBadges.length === 4)).toBe(true);
+    expect(collectStrings(set).filter((s) => FORBIDDEN.test(s))).toEqual([]);
   });
 
   it("빈 상태는 0곳이다", () => {

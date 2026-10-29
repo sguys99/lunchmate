@@ -50,9 +50,31 @@ export const designLabHomeCopy = {
       state: "상태",
       theme: "테마",
       view: "보기",
+      badges: "배지 색",
+      deck: "카드",
+    },
+    /** T3.2 배지 색 체계 (D-04 안건) */
+    badgePalettes: {
+      current: {
+        label: "지금",
+        title: "의미 색 3가지(웨이팅, 할인, 바로 입장)",
+      },
+      calm: {
+        label: "차분",
+        title: "기피 경고만 의미 색, 나머지는 중립과 아이콘",
+      },
+    },
+    /** T3.2 카드 세트 */
+    decks: {
+      today: { label: "기본", title: "오늘 추천 세트" },
+      overflow: {
+        label: "배지 넘침",
+        title: "후보 배지가 3개 이상인 카드 세트",
+      },
     },
     reduce: "모션 줄이기",
-    shortcuts: "단축키: 1~4 시안, [ ] 상태, O/L/D 테마, F 보기, M 모션",
+    shortcuts:
+      "단축키: 1~4 시안, [ ] 상태, O/L/D 테마, F 보기, M 모션, B 배지 색, K 카드",
   },
 
   /** 시안 화면 안 문구 */

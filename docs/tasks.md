@@ -322,7 +322,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T2.6 (10/29 완료, `src/components/app-shell`, AppShell/ShellSplit/BottomTabBar/PageHeader, 경로 /today /map /poll /me, 데스크톱 1024px 이상 좌 리스트 + 우 지도이고 탭은 좌 칸 아래(사용자 확정), safe-area는 (app) viewport-fit=cover, MotionProvider와 Toaster는 (app)/layout, 플래그 appShell은 프로덕션 꺼짐) 앱 셸: 하단 탭 4개(오늘, 지도, 투표, 나), safe-area 대응, 데스크톱 좌 리스트 + 우 지도 2단 틀, 페이지 헤더
 - [x] T2.7 (10/29 완료, `src/components/states`: CardSkeleton, ListSkeleton, SheetSkeleton(SkeletonLine으로 줄 높이 고정), EmptyState, ErrorState(alert), OfflineState(status), 기본 문구 commonCopy.states, `useOnlineStatus`는 `src/lib/network`, Drawer 제목 title 세리프, 확인 `/design-lab/states`) 상태 컴포넌트: Skeleton 패턴(카드, 리스트, 시트), EmptyState, ErrorState, OfflineState
 - [x] T2.8 (10/29 완료, `src/features/place/illustrations`, `<CategoryIllustration slug size variant decorative />`, 64px 미만 icon 변형, 음식 한 곳 16% 톤 면(사용자 확정), 확인 `/design-lab/illustrations`) 카테고리 아이콘/일러스트 12종 SVG 자체 제작 (한식, 중식, 일식, 양식, 분식, 국밥/탕, 고기, 아시안, 패스트푸드, 샐러드/건강식, 카페/베이커리, 술집), 라이트/다크 대응
-- [x] T2.9 (10/29 완료, `src/components/badges` 배지 5종 + PlaceBadges/pickBadges(카드당 2개), 문구 정본 `src/copy/badges.ts`, 기본 우선순위 기피 > 줄 길어요 > 추정 > 조금 기다려요 > 할인 > 바로 입장 > 제보(T3.2에서 확정), 추정 배지 색(warning/중립)은 G3에서 재검토, 확인 `/design-lab/badges`) 공통 배지: `추정`, `제보`, `할인`, 웨이팅 3단계, 투표 기피 경고
+- [x] T2.9 (10/29 완료, `src/components/badges` 배지 5종 + PlaceBadges/pickBadges(카드당 2개), 문구 정본 `src/copy/badges.ts`, 기본 우선순위는 T3.2에서 기피 > 웨이팅(줄 길어요 > 조금 기다려요 > 바로 입장) > 할인 > 제보로 확정, 추정은 가격 옆 표시로 이동, 추정 배지 색(warning/중립)은 G3에서 재검토, 확인 `/design-lab/badges`) 공통 배지: `추정`, `제보`, `할인`, 웨이팅 3단계, 투표 기피 경고
 - [x] T2.10 (10/29 완료, `/design-lab/components` 12섹션 + `data-gallery-section`, 쿼리 `?theme=light|dark&motion=reduce&static=1`로 결정적 렌더, 페이지 안 테마/모션/정지 전환, states와 badges 확인 페이지는 갤러리로 흡수, illustrations 페이지는 정밀 확인용 유지) `/design-lab/components`: 모든 공통 컴포넌트와 상태를 한 페이지에서 보는 갤러리
 
 #### 2.3 모션 시스템
@@ -361,7 +361,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
   - B **피크 캐러셀**: 가운데 카드와 양옆 일부가 보이는 가로 3장
   - C **세로 3단 비교**: 세 곳을 한눈에, 숫자 열 정렬로 비교 중심
   - 공통 포함: 끼니 토글, 기준 위치 칩, 다시 뽑기, 그냥 골라줘, 친구랑 정하기, 회식 모드 진입, 어제 피드백 카드, 할인/웨이팅 배지
-- [ ] T3.2 카드 정보 위계 실험: 식당명, 숫자 3개(도보, 가격, 👍 비율), 이유 1줄, 배지 최대 2개. 숫자 크기와 순서를 시안마다 다르게. 후보 배지(추정, 할인, 웨이팅, 투표 기피 경고)가 2개를 넘을 때의 **배지 우선순위 규칙**을 함께 정합니다.
+- [x] T3.2 (10/29 완료, 규칙 `docs/design/g3-card-rules.md`, 배지 색 current/calm은 G3 안건) 카드 정보 위계 실험: 식당명, 숫자 3개(도보, 가격, 👍 비율), 이유 1줄, 배지 최대 2개. 숫자 크기와 순서를 시안마다 다르게. 후보 배지(추정, 할인, 웨이팅, 투표 기피 경고)가 2개를 넘을 때의 **배지 우선순위 규칙**을 함께 정합니다.
 - [ ] T3.3 "그냥 골라줘" 룰렛과 확정 결과 카드 모션 2안 이상 (REC-12)
 - [x] T3.4 랜딩 시안 3안 이상: 가치 제안 한 줄, 추천 체험 버튼, 카카오/네이버/구글 시작 버튼. 동적 효과는 이 화면에서 가장 적극적으로 시도합니다.
 - [ ] T3.5 4상태, 다크, 360px 최소 폭 확인

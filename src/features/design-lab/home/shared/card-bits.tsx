@@ -1,8 +1,10 @@
-// 홈 시안 공용 카드 조각 (T3.1): 숫자 3개, 배지, 카테고리 줄.
-// 숫자 크기와 배치는 시안마다 다르게 고른다(T3.2 실험 전 기본값). 숫자는 항상 tabular-nums,
+"use client";
+// 홈 시안 공용 카드 조각 (T3.1, T3.2): 숫자 3개, 배지, 카테고리 줄.
+// 숫자 크기와 배치는 시안마다 다르게 고른다(안별 위계는 docs/design/g3-card-rules.md). 숫자는 항상 tabular-nums,
 // 숫자와 단위는 priceBandParts처럼 포매터가 나눠 준 값을 쓴다(copy-guide 3장).
 // 숫자 칸 구분은 문자 대신 1px 세로선(CLAUDE.md 9장).
-import { PlaceBadges } from "@/components/badges/place-badges";
+// 추정 가격은 배지 줄이 아니라 가격 칸 라벨("1인") 옆 EstimateMark로 표시한다(T3.2).
+// 배지 색은 비교 옵션(?badges=current|calm)을 따른다(lab-badges.tsx).
 import type { PlaceBadge } from "@/components/badges/pick-badges";
 import { designLabHomeCopy } from "@/copy/design-lab-home";
 import { homeCopy } from "@/copy/home";
@@ -11,6 +13,8 @@ import { CATEGORY_INK } from "@/features/design-lab/system/b/parts";
 import { categoryLabel } from "@/features/place/categories";
 import { priceBandParts } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { EstimateMark, LabPlaceBadges } from "./lab-badges";
+import { useHomeLabOptions } from "./lab-options-context";
 
 const copy = designLabHomeCopy.screen.numbers;
 
@@ -22,6 +26,8 @@ export type NumberCell = {
   /** null이면 콜드 스타트(후기 3건 미만) */
   value: string | null;
   unit: string;
+  /** 가격 칸만: 제보가 없어 카테고리 추정값이다(PLACE-02) */
+  estimate?: boolean;
 };
 
 /** 도보 분, 1인 가격대, 만족 비율 세 칸. 가격은 "9천" + "원대"처럼 숫자와 단위를 나눈다 */
@@ -40,6 +46,7 @@ export function numberCells(place: MockPlace): NumberCell[] {
       // "9" + "천 원대" → "9천" + "원대": 천, 만은 숫자에 붙여 읽는다
       value: `${price.amount}${price.unit.slice(0, 1)}`,
       unit: price.unit.slice(1).trim(),
+      estimate: place.priceSource === "estimate",
     },
     {
       key: "thumbs",
@@ -124,7 +131,10 @@ export function NumberGrid({
           key={c.key}
           className="flex min-w-0 flex-col gap-1.5 px-4 first:pl-0 last:pr-0 @max-[23.75rem]/screen:px-3"
         >
-          <dt className="type-caption text-muted-foreground">{c.label}</dt>
+          <dt className="flex items-baseline gap-1.5 type-caption text-muted-foreground">
+            {c.label}
+            {c.estimate ? <CellEstimateMark /> : null}
+          </dt>
           <dd
             className={cn(
               "flex items-end",
@@ -155,15 +165,34 @@ export function placeBadges(place: MockPlace): PlaceBadge[] {
   });
 }
 
-/** 카드 배지 한 줄 (최대 2개, 우선순위는 pickBadges 기본안, T3.2에서 확정) */
+/**
+ * 카드 배지 한 줄. 규칙은 공용 pickBadges(T3.2): 최대 2개, 기피 > 웨이팅 > 할인, 추정은 가격 옆이라 여기서 빠진다.
+ * 색은 비교 옵션의 배지 체계를 따른다.
+ */
 export function CardBadges({
   place,
+  max,
   className,
 }: {
   place: MockPlace;
+  max?: number;
   className?: string;
 }) {
-  return <PlaceBadges badges={placeBadges(place)} className={className} />;
+  const { badges } = useHomeLabOptions();
+  return (
+    <LabPlaceBadges
+      badges={placeBadges(place)}
+      palette={badges}
+      max={max}
+      className={className}
+    />
+  );
+}
+
+/** 가격 칸의 "추정" 표시. 비교 옵션의 배지 체계를 따른다 */
+export function CellEstimateMark({ className }: { className?: string }) {
+  const { badges } = useHomeLabOptions();
+  return <EstimateMark palette={badges} className={className} />;
 }
 
 /* ---------- 카테고리 ---------- */

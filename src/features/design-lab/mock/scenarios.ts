@@ -34,6 +34,33 @@ export const MOCK_HOME_ALL_SETS: readonly MockPick[] = [
   ...MOCK_HOME_REROLL_SETS,
 ];
 
+/**
+ * 배지 넘침 세트 (T3.2): 후보 배지가 3개 이상 겹치는 카드 3장. 기본 12곳을 바탕으로 배지와 웨이팅만 덧씌운다.
+ * 홈 시안 비교에서 `?deck=overflow`로 본다. 랜딩과 PoC가 쓰는 MOCK_HOME_ALL_SETS에는 넣지 않는다.
+ *  1. 홍운각: 기피 경고 + 줄 길어요 + 할인 (3개 → 기피, 웨이팅. 할인 빠짐). 기피 경고는 투표 후보 카드(POLL-13)에서만 생기지만,
+ *     배지 줄 폭이 가장 넓어지는 조합이라 홈 카드에서도 확인한다.
+ *  2. 초록접시: 추정 + 할인 + 조금 기다려요 (3개 → 웨이팅, 할인. 추정은 가격 옆)
+ *  3. 화로담: 추정 + 바로 입장 + 할인 + 기피 경고 (4개 → 기피, 웨이팅. 할인 빠짐, 추정은 가격 옆)
+ */
+export const MOCK_HOME_BADGE_OVERFLOW: MockPick = [
+  {
+    ...getMockPlace("mock-jungsik"),
+    statusBadges: ["avoidWarning", "waiting", "deal"],
+    deal: { title: "탕수육 소 3천 원 할인" },
+  },
+  {
+    ...getMockPlace("mock-salad"),
+    statusBadges: ["estimate", "deal", "waiting"],
+    waiting: { level: "short", minutesAgo: 3 },
+  },
+  {
+    ...getMockPlace("mock-gogi"),
+    statusBadges: ["estimate", "waiting", "deal", "avoidWarning"],
+    waiting: { level: "walkIn", minutesAgo: 6 },
+    deal: { title: "점심 특선 2천 원 할인" },
+  },
+];
+
 export const MOCK_HOME_DEFAULT: MockHomeScenario = {
   walkLimitMinutes: 10,
   expandToMinutes: 15,

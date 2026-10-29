@@ -2,8 +2,10 @@
 // 홈 시안 D "오늘의 한 곳 + 대안 2곳" (T3.1, 오케스트레이터 제안안).
 //
 // 의도: 고르는 일을 앱이 먼저 끝내 둔다. 1순위 한 곳을 크게 권하고, 나머지 두 곳은 작은 줄로만 둔다. 10초 원칙에 가장 가깝다.
-// 구성: 머리 → 큰 카드 1장(일러스트 152px가 시각적 주인공, 식당명 30px 세리프, 숫자 28px 3칸,
-//       이유, 길찾기 + 상세) → "또는 이 두 곳" 두 줄 → 다시 뽑기, 그냥 골라줘 → 어제 피드백 카드 → 진입점 알약.
+// 구성: 머리 → 큰 카드 1장(일러스트 152px가 시각적 주인공, 식당명 30px 세리프, 이유 16px 본문 글자, 배지,
+//       숫자 18px 3칸, 길찾기 + 상세) → "또는 이 두 곳" 두 줄 → 다시 뽑기, 그냥 골라줘 → 어제 피드백 카드 → 진입점 알약.
+// T3.2 위계: "이름과 이유를 먼저 읽는다". 앱이 이미 골랐으니 왜 이 집인지가 설득의 중심이고, 숫자는 확인용으로 낮춘다.
+//       이유를 식당명 바로 아래로 올리고 보조 색 15px에서 본문 색 16px(두 줄까지)로 키웠다. 숫자는 28px에서 18px.
 // 대안 줄을 누르면 그 곳이 큰 카드로 올라오고 원래 큰 카드는 대안 줄로 내려간다(순서 교환).
 // 모션: 교환은 큰 카드가 fast로 흐려진 뒤 새 카드가 8px 아래에서 slow로 떠오른다(AnimatePresence mode="wait").
 //       다시 뽑기는 블록 순차 등장. 첫 화면은 CSS 페이드(D-04).
@@ -26,6 +28,7 @@ import { cn } from "@/lib/utils";
 import {
   CardBadges,
   CategoryCaption,
+  CellEstimateMark,
   NumberGrid,
   NumberValue,
   numberCells,
@@ -209,16 +212,16 @@ function HeroCard({ place }: { place: MockPlace }) {
           className="-mt-3 -mr-4 shrink-0 @max-[23.75rem]/screen:size-28"
         />
       </ShuffleBlock>
-      <ShuffleBlock index={1} className="mt-3 min-h-6">
-        <CardBadges place={place} />
-      </ShuffleBlock>
-      <ShuffleBlock index={2} className="mt-7">
-        <NumberGrid place={place} />
-      </ShuffleBlock>
-      <ShuffleBlock index={3} className="mt-6">
-        <p className="truncate type-body-sm text-muted-foreground">
+      <ShuffleBlock index={1} className="mt-3">
+        <p className="line-clamp-2 type-body text-pretty text-foreground">
           {place.reason}
         </p>
+      </ShuffleBlock>
+      <ShuffleBlock index={2} className="mt-4 min-h-6">
+        <CardBadges place={place} />
+      </ShuffleBlock>
+      <ShuffleBlock index={3} className="mt-7">
+        <NumberGrid place={place} size="md" />
       </ShuffleBlock>
       <ShuffleBlock index={4} className="mt-7 flex gap-2">
         <Button
@@ -262,7 +265,12 @@ function AltRow({
       </span>
       <span className="flex shrink-0 items-baseline gap-3">
         {walk ? <NumberValue cell={walk} size="md" /> : null}
-        {price ? <NumberValue cell={price} size="md" /> : null}
+        {price ? (
+          <span className="flex items-baseline gap-1.5">
+            <NumberValue cell={price} size="md" />
+            {price.estimate ? <CellEstimateMark /> : null}
+          </span>
+        ) : null}
       </span>
       <ArrowUpRight
         aria-hidden
@@ -296,12 +304,8 @@ function LoadingD({ label }: { label: string }) {
             <Skeleton className="absolute top-[24px] left-[21px] size-[71px] rounded-full" />
           </div>
         </div>
-        <SkeletonLine
-          type="numeric-lg"
-          lineClassName="mt-10"
-          className="w-4/5"
-        />
-        <SkeletonLine type="body-sm" lineClassName="mt-6" className="w-3/5" />
+        <SkeletonLine type="body" lineClassName="mt-3" className="w-4/5" />
+        <SkeletonLine type="label" lineClassName="mt-14" className="w-3/5" />
         <Skeleton className="mt-7 h-12 w-full rounded-button" />
       </div>
       <SkeletonLine type="caption" lineClassName="mt-10" className="w-20" />

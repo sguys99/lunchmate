@@ -3,7 +3,18 @@
 // 목업이라 끼니나 기준 위치를 바꾸면 다른 세트로 넘어가고, 다시 뽑기와 같은 셔플 모션을 탄다.
 import { useState } from "react";
 import { designLabHomeCopy } from "@/copy/design-lab-home";
-import { MOCK_HOME_ALL_SETS, type MockPick } from "@/features/design-lab/mock";
+import {
+  MOCK_HOME_ALL_SETS,
+  MOCK_HOME_BADGE_OVERFLOW,
+  type MockPick,
+} from "@/features/design-lab/mock";
+import { useHomeLabOptions } from "./lab-options-context";
+
+/** ?deck=overflow면 배지 넘침 세트(T3.2)에서 시작하고, 다시 뽑기로 기본 세트를 돈다 */
+const OVERFLOW_SETS: readonly MockPick[] = [
+  MOCK_HOME_BADGE_OVERFLOW,
+  ...MOCK_HOME_ALL_SETS,
+];
 
 const copy = designLabHomeCopy.screen;
 
@@ -30,7 +41,8 @@ export function useHomeLab(): HomeLab {
   const [location, setLocation] = useState<BaseLocation>("office");
   const [round, setRound] = useState(0);
   const [announcement, setAnnouncement] = useState("");
-  const sets = MOCK_HOME_ALL_SETS;
+  const { deck } = useHomeLabOptions();
+  const sets = deck === "overflow" ? OVERFLOW_SETS : MOCK_HOME_ALL_SETS;
   const picks = sets[round % sets.length] ?? sets[0]!;
 
   return {

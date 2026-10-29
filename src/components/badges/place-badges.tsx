@@ -11,7 +11,7 @@
 // - 스크린 리더: 보이는 글자와 아이콘은 aria-hidden, 대신 sr-only로 "추정 가격"처럼 무엇에 대한 배지인지 읽힌다.
 // - 툴팁: withTooltip이면 배지가 포커스를 받고(키보드), 설명 문장을 T2.5 Tooltip으로 보여준다.
 //   터치 기기에는 hover가 없으니 꼭 알아야 하는 고지(DEAL-02)는 상세 화면 본문에도 따로 둔다.
-// - 카드당 최대 2개는 PlaceBadges가 pickBadges로 지킨다.
+// - 카드당 최대 2개는 PlaceBadges가 pickBadges로 지킨다. 추정은 배지 줄 대신 가격 옆에 붙는다(T3.2).
 import {
   DoorOpenIcon,
   HourglassIcon,
@@ -213,7 +213,9 @@ export function BadgeFor({
 
 /**
  * 카드의 배지 한 줄(DESIGN.md 5장: 식당명 아래, 왼쪽 정렬, 최대 2개).
- * 후보를 다 넘기면 pickBadges 우선순위로 max개만 그린다. 남는 배지가 없으면 아무것도 그리지 않는다.
+ * 후보를 다 넘기면 pickBadges 우선순위(기피 > 웨이팅 > 할인 > 제보, T3.2)로 max개만 그린다.
+ * 추정은 배지 줄에 오지 않는다. 가격 숫자 옆에 EstimateBadge나 그에 맞는 표시를 따로 둔다.
+ * 남는 배지가 없으면 아무것도 그리지 않는다.
  */
 export function PlaceBadges({
   badges,

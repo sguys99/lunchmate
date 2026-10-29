@@ -3,8 +3,10 @@
 //
 // 의도: 세 곳을 넘기지 않고 한 화면에서 비교한다. 카드보다 표에 가까운 밀도로, 숫자 열(도보, 1인, 만족)을 세 줄에 맞춰 세로로 읽는다.
 // 구성: 머리(제목 옆 다시 뽑기 아이콘) → 열 머리글 → 세 줄 → 그냥 골라줘 → 어제 피드백 띠 → 진입점 목록.
-// 줄: 일러스트 아이콘 40px(열 0) + 식당명 세리프와 카테고리(열 1~3) / 숫자 18px 세 칸(열 1~3) / 이유 한 줄과 배지.
+// 줄: 일러스트 아이콘 40px(열 0) + 식당명 세리프와 카테고리(열 1~3) / 숫자 18px 세 칸(열 1~3) / 이유 한 줄 / 배지(있을 때만).
 // 열마다 가장 나은 값(가장 가까움, 가장 쌈, 만족 가장 높음)만 진한 글자, 나머지는 보조 색. 색이 아니라 명도 차이라 단색 화면을 지킨다.
+// T3.2 위계: "세 곳의 같은 숫자를 위아래로 먼저 읽는다". 추정 가격은 "가장 쌈" 후보에서 뺀다(추정값으로 최선을 주장하지 않는다).
+// 배지는 접힌 줄에도 보인다(줄 길어요, 기피 경고는 비교에 필요한 사실이라 펼쳐야만 보이면 안 된다).
 // 고르기: 줄을 누르면 그 줄만 카드 면(bg-card, 1px 선)으로 떠오르고 아래로 길찾기(주 버튼) + 상세가 펼쳐진다. 한 번에 한 줄.
 // 모션: 펼침은 CSS grid-rows 0fr → 1fr(base, standard), 면 전환도 CSS. 다시 뽑기는 줄 단위 순차 등장(ShuffleSwap).
 // 데스크톱: 같은 표를 좌 칸에 두고 고른 줄의 핀을 지도 자리에서 올리브로.
@@ -22,6 +24,7 @@ import { cn } from "@/lib/utils";
 import {
   CardBadges,
   CategoryCaption,
+  CellEstimateMark,
   NumberValue,
   numberCells,
   type NumberCell,
@@ -47,20 +50,33 @@ const gridCols = "grid grid-cols-[2.5rem_0.8fr_1.25fr_0.9fr] gap-x-3";
 
 type Best = Record<NumberCell["key"], number>;
 
-/** 열마다 가장 나은 줄의 번호. 만족이 모두 null이면 -1 */
-function bestOf(picks: MockPick): Best {
-  const minBy = (f: (p: MockPlace) => number) =>
-    picks.reduce((b, p, i) => (f(p) < f(picks[b]!) ? i : b), 0);
-  let thumbs = -1;
+/** 값이 null인 줄은 건너뛰고 가장 작은 값의 줄 번호. 모두 null이면 -1 */
+function bestIndex(
+  picks: MockPick,
+  score: (p: MockPlace) => number | null,
+): number {
+  let best = -1;
+  let bestScore = Number.POSITIVE_INFINITY;
   picks.forEach((p, i) => {
-    if (p.thumbsUpRate === null) return;
-    const cur = thumbs === -1 ? null : picks[thumbs]!.thumbsUpRate;
-    if (cur === null || p.thumbsUpRate > cur) thumbs = i;
+    const v = score(p);
+    if (v !== null && v < bestScore) {
+      best = i;
+      bestScore = v;
+    }
   });
+  return best;
+}
+
+/** 열마다 가장 나은 줄의 번호. 콜드 스타트 만족(null)과 추정 가격은 후보가 아니다. 후보가 없으면 -1 */
+function bestOf(picks: MockPick): Best {
   return {
-    walk: minBy((p) => p.walkMinutes),
-    price: minBy((p) => p.priceKRW),
-    thumbs,
+    walk: bestIndex(picks, (p) => p.walkMinutes),
+    price: bestIndex(picks, (p) =>
+      p.priceSource === "estimate" ? null : p.priceKRW,
+    ),
+    thumbs: bestIndex(picks, (p) =>
+      p.thumbsUpRate === null ? null : -p.thumbsUpRate,
+    ),
   };
 }
 
@@ -256,8 +272,9 @@ function Row({
             return (
               <div key={c.key} className="flex min-w-0 flex-col">
                 <dt className="sr-only">{c.label}</dt>
-                <dd>
+                <dd className="flex flex-wrap items-baseline gap-x-1.5">
                   <NumberValue cell={c} size="md" emphasis={isBest} />
+                  {c.estimate ? <CellEstimateMark /> : null}
                   {isBest ? (
                     <span className="sr-only">{copy.compare.best}</span>
                   ) : null}
@@ -269,9 +286,10 @@ function Row({
         <p className="col-span-3 truncate type-body-sm text-muted-foreground">
           {place.reason}
         </p>
+        <CardBadges place={place} className="col-span-3 col-start-2" />
       </div>
 
-      {/* 펼침: 배지 + 길찾기(주 버튼) + 상세. grid-rows 0fr → 1fr */}
+      {/* 펼침: 길찾기(주 버튼) + 상세. grid-rows 0fr → 1fr */}
       <div
         id={panelId}
         className={cn(
@@ -284,7 +302,6 @@ function Row({
       >
         <div className="overflow-hidden">
           <div className="flex flex-col gap-4 pb-4 pl-[3.25rem]">
-            <CardBadges place={place} />
             <div className="flex gap-2">
               <Button
                 variant="primary"

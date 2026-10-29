@@ -63,7 +63,7 @@ export const designLabComponentsCopy = {
     },
     placeBadges: {
       title: "도메인 배지",
-      body: "추정, 제보, 할인, 웨이팅 3단계, 기피 경고입니다. 카드에는 우선순위로 2개까지만 보입니다.",
+      body: "추정, 제보, 할인, 웨이팅 3단계, 기피 경고입니다. 카드에는 우선순위로 2개까지만 보이고, 추정은 배지 줄 대신 가격 옆에 붙습니다.",
     },
     illustrations: {
       title: "카테고리 일러스트",
