@@ -30,6 +30,7 @@ import {
   type NumberCell,
 } from "../shared/card-bits";
 import { HomeHeader, JustPickButton, RerollButton } from "../shared/controls";
+import { JustPickLayer, useJustPick } from "../shared/just-pick";
 import { EntryLinks } from "../shared/entries";
 import { YesterdayFeedback } from "../shared/feedback";
 import {
@@ -84,6 +85,12 @@ export function HomeC({ state }: HomeVariantProps) {
   const content = getHomeContent(state);
   const lab = useHomeLab();
   const [selected, setSelected] = useState(0);
+  // 그냥 골라줘(T3.3): 기본 r1은 이 표의 세 줄 위에서 돈다. 결과가 나오면 그 줄을 펼쳐 둔다(닫으면 바로 길찾기)
+  const pick = useJustPick({
+    variant: "c",
+    picks: lab.picks,
+    onSettle: setSelected,
+  });
 
   const header = (
     <HomeHeader
@@ -164,6 +171,15 @@ export function HomeC({ state }: HomeVariantProps) {
                     order={i}
                     selected={i === selected}
                     neighborSelected={i - 1 === selected}
+                    spot={
+                      !pick.pageHighlight
+                        ? undefined
+                        : pick.cursor === i
+                          ? "on"
+                          : pick.landed
+                            ? "dim"
+                            : "off"
+                    }
                     onSelect={() => {
                       if (i === selected) return;
                       setSelected(i);
@@ -180,11 +196,12 @@ export function HomeC({ state }: HomeVariantProps) {
         </section>
 
         <div className="mt-6 flex">
-          <JustPickButton className="flex-1" />
+          <JustPickButton pick={pick} from={selected} className="flex-1" />
         </div>
 
         <YesterdayFeedback layout="line" className="mt-10" />
         <EntryLinks layout="rows" className="mt-8" />
+        <JustPickLayer pick={pick} picks={lab.picks} />
       </HomeColumn>
     </HomeFrame>
   );
@@ -198,6 +215,7 @@ function Row({
   order,
   selected,
   neighborSelected,
+  spot,
   onSelect,
 }: {
   place: MockPlace;
@@ -206,6 +224,8 @@ function Row({
   selected: boolean;
   /** 바로 위 줄이 골라져 떠 있으면 이 줄의 윗선을 지운다(선 두 겹 방지) */
   neighborSelected: boolean;
+  /** 그냥 골라줘 r1 연출 중: on 강조, dim 물러남(멈춘 뒤 나머지), off 그대로. 연출 밖이면 undefined */
+  spot?: "on" | "off" | "dim";
   onSelect: () => void;
 }) {
   const panelId = `home-c-actions-${place.id}`;
@@ -213,15 +233,21 @@ function Row({
     <article
       aria-label={place.name}
       className={cn(
-        "rounded-card border px-4 transition-[background-color,border-color] duration-(--lm-duration-base) ease-standard motion-reduce:transition-none",
-        selected
-          ? "border-border bg-card"
-          : cn(
-              "rounded-none border-x-transparent border-b-transparent bg-transparent",
-              order === 0 || neighborSelected
-                ? "border-t-transparent"
-                : "border-t-border",
-            ),
+        "rounded-card border px-4 transition-[background-color,border-color,opacity] ease-standard motion-reduce:transition-none",
+        spot
+          ? "duration-(--lm-duration-fast)"
+          : "duration-(--lm-duration-base)",
+        spot === "dim" && "opacity-40",
+        spot === "on"
+          ? "border-primary bg-card"
+          : selected
+            ? "border-border bg-card"
+            : cn(
+                "rounded-none border-x-transparent border-b-transparent bg-transparent",
+                order === 0 || neighborSelected
+                  ? "border-t-transparent"
+                  : "border-t-border",
+              ),
       )}
     >
       {/* 줄 전체를 눌러도 고른다(터치 편의). 키보드와 보조 기술은 식당명 버튼 하나로 조작한다 */}

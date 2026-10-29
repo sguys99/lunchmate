@@ -30,6 +30,7 @@ import { useMotionReduced } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { CardBadges, CategoryCaption, NumberGrid } from "../shared/card-bits";
 import { HomeHeader, JustPickButton, RerollButton } from "../shared/controls";
+import { JustPickLayer, useJustPick } from "../shared/just-pick";
 import { EntryLinks } from "../shared/entries";
 import { YesterdayFeedback } from "../shared/feedback";
 import {
@@ -53,6 +54,16 @@ export function HomeB({ state }: HomeVariantProps) {
   const content = getHomeContent(state);
   const lab = useHomeLab();
   const [active, setActive] = useState(0);
+  /** 그냥 골라줘(T3.3) 결과로 캐러셀을 옮겨 달라는 요청. n이 바뀔 때마다 한 번 */
+  const [scrollRequest, setScrollRequest] = useState<ScrollRequest | null>(
+    null,
+  );
+  const pick = useJustPick({
+    variant: "b",
+    picks: lab.picks,
+    onSettle: (index) =>
+      setScrollRequest((r) => ({ index, n: (r?.n ?? 0) + 1 })),
+  });
 
   const header = (
     <HomeHeader
@@ -98,7 +109,12 @@ export function HomeB({ state }: HomeVariantProps) {
         <YesterdayFeedback layout="card" className="mt-7" />
 
         <ShuffleSwap round={lab.round} className="mt-8">
-          <Carousel picks={lab.picks} active={active} onActive={setActive} />
+          <Carousel
+            picks={lab.picks}
+            active={active}
+            onActive={setActive}
+            request={scrollRequest}
+          />
         </ShuffleSwap>
 
         <div className="mt-6 grid grid-cols-2 gap-2">
@@ -108,10 +124,11 @@ export function HomeB({ state }: HomeVariantProps) {
               lab.reroll();
             }}
           />
-          <JustPickButton />
+          <JustPickButton pick={pick} from={active} />
         </div>
 
         <EntryLinks layout="pills" className="mt-10" />
+        <JustPickLayer pick={pick} picks={lab.picks} />
       </HomeColumn>
     </HomeFrame>
   );
@@ -119,14 +136,19 @@ export function HomeB({ state }: HomeVariantProps) {
 
 /* ---------- 캐러셀 ---------- */
 
+type ScrollRequest = { index: number; n: number };
+
 function Carousel({
   picks,
   active,
   onActive,
+  request,
 }: {
   picks: MockPick;
   active: number;
   onActive: (i: number) => void;
+  /** 바깥(그냥 골라줘 결과)에서 이 카드로 옮겨 달라는 요청 */
+  request: ScrollRequest | null;
 }) {
   const track = useRef<HTMLUListElement>(null);
   const frame = useRef(0);
@@ -173,6 +195,19 @@ function Carousel({
       behavior: reduced ? "auto" : "smooth",
     });
   }
+
+  const requestN = request?.n ?? 0;
+  const requestIndex = request?.index ?? 0;
+  useEffect(() => {
+    if (requestN === 0) return;
+    const el = track.current;
+    const child = el?.children[requestIndex] as HTMLElement | undefined;
+    if (!el || !child) return;
+    el.scrollTo({
+      left: child.offsetLeft - (el.clientWidth - child.offsetWidth) / 2,
+      behavior: "auto",
+    });
+  }, [requestN, requestIndex]);
 
   function onKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.target !== event.currentTarget) return;

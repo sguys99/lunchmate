@@ -38,6 +38,11 @@ export type MockPlace = {
   tags: UpToTwo<string>;
   /** 추천 이유 1줄 (명사형) */
   reason: string;
+  /**
+   * 추천 점수 S(REC-03)를 0~1로 정규화한 목업값. "그냥 골라줘"(REC-12)가 이 값에 비례해 한 곳을 고른다.
+   * 실제 앱에서는 src/lib/reco 점수 함수의 결과를 쓴다.
+   */
+  score: number;
   /** 상태 배지 후보. 기본 12곳은 2개 이하, 넘침 세트는 3~4개 */
   statusBadges: readonly StatusBadge[];
   /** statusBadges에 deal이 있을 때 상세에 보여 줄 할인 내용 */

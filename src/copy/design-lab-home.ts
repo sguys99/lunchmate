@@ -52,6 +52,14 @@ export const designLabHomeCopy = {
       view: "보기",
       badges: "배지 색",
       deck: "카드",
+      roulette: "골라줘",
+    },
+    /** T3.3 "그냥 골라줘" 연출 */
+    roulettes: {
+      auto: { label: "기본", title: "시안별 기본 연출" },
+      r1: { label: "R1", title: "하이라이트 순회" },
+      r2: { label: "R2", title: "이름 롤링" },
+      r3: { label: "R3", title: "조용한 확정" },
     },
     /** T3.2 배지 색 체계 (D-04 안건) */
     badgePalettes: {
@@ -74,7 +82,7 @@ export const designLabHomeCopy = {
     },
     reduce: "모션 줄이기",
     shortcuts:
-      "단축키: 1~4 시안, [ ] 상태, O/L/D 테마, F 보기, M 모션, B 배지 색, K 카드",
+      "단축키: 1~4 시안, [ ] 상태, O/L/D 테마, F 보기, M 모션, B 배지 색, K 카드, R 골라줘",
   },
 
   /** 시안 화면 안 문구 */
@@ -159,6 +167,20 @@ export const designLabHomeCopy = {
       best: "가장 나음",
       select: (name: string) => `${name} 고르기`,
       selected: (name: string) => `고른 곳은 ${name}입니다.`,
+    },
+
+    /** "그냥 골라줘" 연출과 결과 카드 (REC-12, T3.3) */
+    justPick: {
+      dialogLabel: "그냥 골라줘 결과",
+      picking: "세 곳 중에서 고르고 있습니다.",
+      skip: "바로 보기",
+      skipHint: "화면을 누르거나 Esc로 바로 결과를 봅니다",
+      /** 결과 카드 위 세리프 한 줄 (축하, 해요체) */
+      settled: "오늘은 여기로 가요.",
+      /** 스크린 리더 결과 안내 */
+      announce: (name: string) => `${name}, 오늘은 여기로 가요.`,
+      again: "다시 고르기",
+      close: "닫기",
     },
 
     /** D 오늘의 한 곳 */

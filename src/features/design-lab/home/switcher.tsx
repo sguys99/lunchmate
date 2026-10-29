@@ -2,6 +2,7 @@
 // /design-lab/home/compare: 홈 시안 비교 스위처 (T3.1). G1 스위처(system/switcher.tsx)와 같은 틀(ScreenViewport, DesignScope)을 쓴다.
 // 쿼리: ?v=a&state=ready&theme=system&view=frame&reduce=1&badges=calm&deck=overflow (기본값은 생략). 리로드 없이 바꾸고 주소에 남긴다.
 // badges, deck은 T3.2 비교 옵션(shared/lab-options.ts): 배지 색 체계와 배지 넘침 카드 세트.
+// roulette, seed는 T3.3 "그냥 골라줘" 연출 비교(auto는 시안별 기본값). seed는 토글 없이 주소로만 준다(캡처 재현).
 // 모션 줄이기는 MotionProvider preference="reduce"로 넘겨 OS 설정을 바꾸지 않고 축소 모드를 본다.
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -27,6 +28,7 @@ import { HOME_VARIANTS } from "./registry";
 import {
   BADGE_PALETTES,
   HOME_DECKS,
+  ROULETTE_CHOICES,
   parseHomeLabOptions,
   writeHomeLabOptions,
   type HomeLabOptions,
@@ -103,6 +105,8 @@ const DEFAULTS: Selection = {
   reduce: false,
   badges: "current",
   deck: "today",
+  roulette: "auto",
+  seed: null,
 };
 
 function pick<T extends string>(
@@ -183,6 +187,8 @@ export function HomeSwitcher() {
       else if (key === "b")
         update({ badges: toggle(BADGE_PALETTES, current.badges) });
       else if (key === "k") update({ deck: toggle(HOME_DECKS, current.deck) });
+      else if (key === "r")
+        update({ roulette: toggle(ROULETTE_CHOICES, current.roulette) });
       else return;
       e.preventDefault();
     }
@@ -259,6 +265,16 @@ export function HomeSwitcher() {
             title: copy.decks[id].title,
           }))}
         />
+        <Segmented
+          label={copy.groups.roulette}
+          value={sel.roulette}
+          onChange={(roulette) => update({ roulette })}
+          options={ROULETTE_CHOICES.map((id) => ({
+            value: id,
+            label: copy.roulettes[id].label,
+            title: copy.roulettes[id].title,
+          }))}
+        />
         <button
           type="button"
           aria-pressed={sel.reduce}
@@ -294,11 +310,16 @@ export function HomeSwitcher() {
           <DesignScope className="h-full overflow-y-auto">
             <MotionProvider preference={sel.reduce ? "reduce" : "system"}>
               <HomeLabOptionsProvider
-                value={{ badges: sel.badges, deck: sel.deck }}
+                value={{
+                  badges: sel.badges,
+                  deck: sel.deck,
+                  roulette: sel.roulette,
+                  seed: sel.seed,
+                }}
               >
-                {/* 시안, 상태, 카드 세트를 바꾸면 화면 상태(넘긴 카드, 회차)를 처음부터. 배지 색은 상태를 지킨 채 바꾼다 */}
+                {/* 시안, 상태, 카드 세트, 룰렛 안을 바꾸면 화면 상태(넘긴 카드, 회차)를 처음부터. 배지 색은 상태를 지킨 채 바꾼다 */}
                 <Home
-                  key={`${sel.v}-${sel.state}-${sel.deck}`}
+                  key={`${sel.v}-${sel.state}-${sel.deck}-${sel.roulette}`}
                   state={sel.state}
                 />
               </HomeLabOptionsProvider>

@@ -37,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CardBadges, CategoryCaption, NumberGrid } from "../shared/card-bits";
 import { HomeHeader, JustPickButton, RerollButton } from "../shared/controls";
+import { JustPickLayer, useJustPick } from "../shared/just-pick";
 import { EntryLinks } from "../shared/entries";
 import { YesterdayFeedback } from "../shared/feedback";
 import {
@@ -86,6 +87,12 @@ export function HomeA({ state }: HomeVariantProps) {
     onKeyDown: withNav(stack.onKeyDown),
     onDragEnd: withNav(stack.onDragEnd),
   };
+  // 그냥 골라줘(T3.3): 결과가 나오면 더미도 그 카드로 넘겨 둔다(닫으면 바로 그 카드)
+  const pick = useJustPick({
+    variant: "a",
+    picks: lab.picks,
+    onSettle: (i) => nav.goTo(i),
+  });
   const resetting = (fn: () => void) => () => {
     stack.reset();
     fn();
@@ -157,11 +164,17 @@ export function HomeA({ state }: HomeVariantProps) {
           </ShuffleSwap>
           <div className="mt-3 flex items-center justify-between gap-3">
             <Pager stack={nav} />
-            <JustPickButton variant="ghost" className="-mr-3" />
+            <JustPickButton
+              variant="ghost"
+              pick={pick}
+              from={stack.index}
+              className="-mr-3"
+            />
           </div>
         </section>
 
         <EntryLinks layout="rows" className="mt-10" />
+        <JustPickLayer pick={pick} picks={lab.picks} />
       </HomeColumn>
     </HomeFrame>
   );

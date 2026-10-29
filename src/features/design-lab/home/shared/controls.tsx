@@ -9,6 +9,7 @@ import { designLabHomeCopy } from "@/copy/design-lab-home";
 import { MOCK_POLL } from "@/features/design-lab/mock";
 import { getKstParts } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import type { JustPick } from "./just-pick";
 import type { BaseLocation, Meal } from "./use-home-lab";
 
 const copy = designLabHomeCopy.screen;
@@ -132,22 +133,40 @@ export function RerollButton({
   );
 }
 
-/** "그냥 골라줘" 자리 (REC-12). 룰렛과 결과 카드는 T3.3에서 만든다 */
+/**
+ * "그냥 골라줘" (REC-12, T3.3). 누르면 useJustPick().begin, 손이나 포커스가 닿으면 결과 패널을 미리 받는다.
+ * 화면 카드 위에서 r1이 도는 동안(C, D)에는 같은 자리에서 "바로 보기"가 된다(건너뛰기를 눈에 보이게).
+ */
 export function JustPickButton({
   variant = "secondary",
+  pick,
+  from = 0,
   className,
 }: {
   variant?: "secondary" | "ghost";
+  pick: JustPick;
+  /** 연출을 시작할 카드(지금 보고 있는 곳) */
+  from?: number;
   className?: string;
 }) {
+  const skipping = pick.pageHighlight;
   return (
     <Button
       variant={variant}
       data-entry="just-pick"
+      aria-haspopup="dialog"
+      onPointerEnter={pick.prefetch}
+      onFocus={pick.prefetch}
+      onClick={(e) => {
+        if (skipping) pick.skip();
+        else pick.begin(e.currentTarget, from);
+      }}
       className={cn("pr-5 pl-4", className)}
     >
       <Dices aria-hidden className="size-4" strokeWidth={1.5} />
-      {copy.actions.justPick}
+      {skipping
+        ? designLabHomeCopy.screen.justPick.skip
+        : copy.actions.justPick}
     </Button>
   );
 }

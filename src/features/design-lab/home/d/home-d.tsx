@@ -34,6 +34,7 @@ import {
   numberCells,
 } from "../shared/card-bits";
 import { HomeHeader, JustPickButton, RerollButton } from "../shared/controls";
+import { JustPickLayer, useJustPick, type JustPick } from "../shared/just-pick";
 import { EntryLinks } from "../shared/entries";
 import { YesterdayFeedback } from "../shared/feedback";
 import {
@@ -55,6 +56,25 @@ export function HomeD({ state }: HomeVariantProps) {
   const [order, setOrder] = useState<[number, number, number]>([0, 1, 2]);
   /** 마지막으로 교환한 회차. 지금 회차와 같으면 새 큰 카드는 블록 순차 등장 대신 통째로 떠오른다 */
   const [swapRound, setSwapRound] = useState(-1);
+  // 그냥 골라줘(T3.3): 기본 r1은 큰 카드와 대안 두 줄 위에서 돈다. 결과가 대안이면 큰 카드로 올려 둔다(닫으면 바로 길찾기)
+  const pick = useJustPick({
+    variant: "d",
+    picks: lab.picks,
+    onSettle: (index) => {
+      const slot = order.indexOf(index);
+      if (slot === 1 || slot === 2) swapTo(slot, false);
+    },
+  });
+
+  function swapTo(slot: 1 | 2, announce: boolean) {
+    const next = [...order] as [number, number, number];
+    [next[0], next[slot]] = [next[slot], next[0]];
+    setOrder(next);
+    setSwapRound(lab.round);
+    // 그냥 골라줘 결과는 JustPickLayer가 따로 읽는다
+    if (announce)
+      lab.announce(copy.single.swapped(lab.picks[next[0]]?.name ?? ""));
+  }
 
   const resetOrder = () => setOrder([0, 1, 2]);
   const header = (
@@ -95,12 +115,7 @@ export function HomeD({ state }: HomeVariantProps) {
   const swapped = swapRound === lab.round;
 
   function promote(slot: 1 | 2) {
-    const next = [...order] as [number, number, number];
-    [next[0], next[slot]] = [next[slot], next[0]];
-    setOrder(next);
-    setSwapRound(lab.round);
-    const name = lab.picks[next[0]]?.name ?? "";
-    lab.announce(copy.single.swapped(name));
+    swapTo(slot, true);
   }
 
   return (
@@ -116,7 +131,7 @@ export function HomeD({ state }: HomeVariantProps) {
           <AnimatePresence mode="wait" initial={lab.round > 0}>
             <HeroSlot key={hero.id} animate={swapped}>
               <RevealProvider value={lab.round > 0 && !swapped}>
-                <HeroCard place={hero} />
+                <HeroCard place={hero} spot={spotOf(pick, heroIndex)} />
               </RevealProvider>
             </HeroSlot>
           </AnimatePresence>
@@ -138,6 +153,7 @@ export function HomeD({ state }: HomeVariantProps) {
                   >
                     <AltRow
                       place={place}
+                      spot={spotOf(pick, idx)}
                       onPromote={() => promote((slot + 1) as 1 | 2)}
                     />
                   </ShuffleBlock>
@@ -154,15 +170,25 @@ export function HomeD({ state }: HomeVariantProps) {
               lab.reroll();
             }}
           />
-          <JustPickButton />
+          <JustPickButton pick={pick} from={heroIndex} />
         </div>
 
         {/* 결정이 먼저라 어제 피드백은 대안 아래로 내린다 */}
         <YesterdayFeedback layout="card" className="mt-10" />
         <EntryLinks layout="pills" className="mt-4" />
+        <JustPickLayer pick={pick} picks={lab.picks} />
       </HomeColumn>
     </HomeFrame>
   );
+}
+
+type Spot = "on" | "off" | "dim" | undefined;
+
+/** 그냥 골라줘 r1 연출 중 이 카드의 상태. 연출 밖이면 undefined */
+function spotOf(pick: JustPick, index: number): Spot {
+  if (!pick.pageHighlight) return undefined;
+  if (pick.cursor === index) return "on";
+  return pick.landed ? "dim" : "off";
 }
 
 /** 큰 카드 자리. 교환으로 들어올 때만 8px 아래에서 떠오르고, 나갈 때는 fast로 흐려진다 */
@@ -189,11 +215,18 @@ function HeroSlot({
   );
 }
 
-function HeroCard({ place }: { place: MockPlace }) {
+function HeroCard({ place, spot }: { place: MockPlace; spot?: Spot }) {
   return (
     <article
       aria-label={place.name}
-      className="flex flex-col rounded-card border border-border bg-card p-7 text-card-foreground @max-[23.75rem]/screen:p-5"
+      className={cn(
+        "flex flex-col rounded-card border bg-card p-7 text-card-foreground transition-[border-color,opacity] ease-standard @max-[23.75rem]/screen:p-5",
+        spot
+          ? "duration-(--lm-duration-fast)"
+          : "duration-(--lm-duration-base)",
+        spot === "on" ? "border-primary" : "border-border",
+        spot === "dim" && "opacity-40",
+      )}
     >
       <ShuffleBlock
         index={0}
@@ -242,9 +275,11 @@ function HeroCard({ place }: { place: MockPlace }) {
 /** 대안 한 줄: 아이콘 + 식당명과 카테고리 + 도보와 가격. 줄 전체가 "크게 보기" 버튼 */
 function AltRow({
   place,
+  spot,
   onPromote,
 }: {
   place: MockPlace;
+  spot?: Spot;
   onPromote: () => void;
 }) {
   const [walk, price] = numberCells(place);
@@ -254,7 +289,12 @@ function AltRow({
       onClick={onPromote}
       aria-label={copy.single.swap(place.name)}
       className={cn(
-        "group flex min-h-18 w-full items-center gap-4 py-3 text-left",
+        "group -mx-3 flex min-h-18 w-[calc(100%+1.5rem)] items-center gap-4 rounded-card border px-3 py-3 text-left transition-[border-color,background-color,opacity] ease-standard",
+        spot
+          ? "duration-(--lm-duration-fast)"
+          : "duration-(--lm-duration-base)",
+        spot === "on" ? "border-primary bg-card" : "border-transparent",
+        spot === "dim" && "opacity-40",
         focusRing,
       )}
     >
