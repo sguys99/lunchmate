@@ -39,6 +39,12 @@ export default function DesignLabPage() {
         <p className="text-muted-foreground">{designLabCopy.description}</p>
       </header>
 
+      <Section title={copy.homeTitle} body={copy.homeBody}>
+        <Link href="/design-lab/home" className={linkClass}>
+          {copy.homeLink}
+        </Link>
+      </Section>
+
       <Section title={copy.systemTitle} body={copy.switcherBody}>
         <Link href="/design-lab/system" className={linkClass}>
           {copy.switcherLink}

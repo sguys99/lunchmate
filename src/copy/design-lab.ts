@@ -23,6 +23,10 @@ export const designLabCopy = {
     pocBody:
       "스와이프 스택, 바텀시트 스냅, 셔플, 결정 축하, 숫자 롤링, 랜딩 효과를 따로 시험합니다. 각 화면에서 모션 줄이기를 켤 수 있습니다.",
     pocLink: "PoC 목록",
+    homeTitle: "오늘(홈) 시안 (G3)",
+    homeBody:
+      "스와이프 스택, 피크 캐러셀, 세로 3단 비교, 오늘의 한 곳 네 안을 같은 목업으로 비교합니다.",
+    homeLink: "홈 시안 목록",
     illustrationsTitle: "카테고리 일러스트",
     illustrationsBody:
       "운영용 선화 12종을 카드, 큰 카드, 리스트 아이콘 크기로 봅니다. 라이트와 다크를 나란히 둡니다.",
@@ -71,8 +75,7 @@ export const designLabCopy = {
     },
     openStandalone: "단독 화면",
     shortcuts: "단축키: H/S 화면, [ ] 상태, O/L/D 테마, F 보기",
-    shortcutsMulti:
-      "단축키: 숫자 시안, H/S 화면, [ ] 상태, O/L/D 테마, F 보기",
+    shortcutsMulti: "단축키: 숫자 시안, H/S 화면, [ ] 상태, O/L/D 테마, F 보기",
     finalLabel: (name: string) => `확정 ${name}`,
   },
 
