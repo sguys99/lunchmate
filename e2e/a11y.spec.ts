@@ -71,7 +71,8 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
     });
 
     // G3 시안 단독 화면 (T3.5): 홈 4안 x (정상 + 4상태), 랜딩 3안 x (정상 + 상태 + 카카오톡 인앱)
-    for (const variant of ["a", "b", "c", "d"]) {
+    // D 수정 시안 D1~D3 (2026-10-30)은 어제 피드백이 없는 날(?feedback=none)도 본다.
+    for (const variant of ["a", "b", "c", "d", "d1", "d2", "d3"]) {
       for (const query of [
         "",
         "?state=loading",
@@ -79,6 +80,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
         "?state=error",
         "?state=offline",
         "?deck=overflow",
+        ...(variant.length > 1 ? ["?feedback=none"] : []),
       ]) {
         test(`홈 시안 ${variant}${query}`, async ({ page }) => {
           test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
@@ -86,6 +88,19 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
           await expectNoA11yViolations(page);
         });
       }
+    }
+    // D1~D3 어제 피드백에 답한 뒤(고마움 줄, D2는 카드가 사라진 뒤, D3는 오늘의 추천으로 넘어간 뒤)
+    for (const variant of ["d1", "d2", "d3"]) {
+      test(`홈 시안 ${variant} 어제 피드백 답한 뒤`, async ({ page }) => {
+        test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+        await openLabRoute(page, `/design-lab/home/${variant}`);
+        await page.getByRole("button", { name: "좋았어요" }).first().click();
+        await expect(
+          page.getByText("알려 줘서 고마워요", { exact: false }).first(),
+        ).toBeAttached();
+        if (variant === "d2") await page.waitForTimeout(1700);
+        await expectNoA11yViolations(page);
+      });
     }
     for (const variant of ["a", "b", "c"]) {
       for (const query of [

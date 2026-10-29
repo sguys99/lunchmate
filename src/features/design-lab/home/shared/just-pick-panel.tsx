@@ -2,6 +2,8 @@
 // "그냥 골라줘" 결과 패널 (REC-12, T3.3). just-pick.tsx가 처음 누를 때 React.lazy로 받는다(홈 첫 로드 0).
 //
 // 모양: 모바일은 아래에 붙는 시트(엄지 쪽), 데스크톱(화면 1024px 이상)은 가운데 카드. 뒤는 overlay 딤, 흐림 없음.
+// placement="list"(D1~D3, G3 안건 4 추천안): 데스크톱에서 좌 리스트 칸만 덮고 그 칸 아래(하단 탭 위)에 카드를 띄운다.
+//   지도 칸은 덮지 않아 결과 곳의 핀 강조(시안이 onSettle로 옮김)가 그대로 보인다.
 // 패널 높이는 처음부터 결과 카드 높이로 고정한다. 결과 카드는 연출 중에도 보이지 않게 깔려 있고(inert),
 // 연출 무대(r1 목록, r3 가는 선)는 그 위에 겹쳐 있다가 결과가 나오면 흐려진다. 그래서 결과로 넘어갈 때 패널이 출렁이지 않는다.
 // - r1(panel): 세 줄 목록 위로 강조 테두리가 점점 느리게 옮겨 다니다 멈추고, 나머지 두 줄이 흐려진 뒤 결과 카드.
@@ -44,9 +46,14 @@ const LINE = "2.75rem";
 const FOCUSABLE =
   'button:not([disabled]), [href], input, [tabindex]:not([tabindex="-1"])';
 
+export type JustPickPlacement = "center" | "list";
+
 export type JustPickPanelProps = {
   run: JustPickRun;
   picks: MockPick;
+  placement?: JustPickPlacement;
+  /** 결과 카드 이유 문장. 생략하면 목업 이유 그대로 */
+  formatReason?: (place: MockPlace) => string;
   cursor: number | null;
   landed: boolean;
   onSkip: () => void;
@@ -57,6 +64,8 @@ export type JustPickPanelProps = {
 export default function JustPickPanel({
   run,
   picks,
+  placement = "center",
+  formatReason,
   cursor,
   landed,
   onSkip,
@@ -108,7 +117,15 @@ export default function JustPickPanel({
     : "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center desktop:items-center desktop:p-10">
+    <div
+      className={cn(
+        "fixed inset-0 z-50 flex items-end justify-center",
+        placement === "center"
+          ? "desktop:items-center desktop:p-10"
+          : // 좌 리스트 칸(2fr / 5fr = 40%)만 덮는다. 카드는 하단 탭 위
+            "desktop:right-[60%] desktop:px-8 desktop:pb-[calc(var(--lm-layout-tab-bar-height)+1.5rem)]",
+      )}
+    >
       <div
         aria-hidden
         onClick={rolling ? onSkip : onClose}
@@ -149,6 +166,7 @@ export default function JustPickPanel({
               picks={picks}
               revealed={!rolling}
               instant={openedAtResult || reduced}
+              reason={(formatReason ?? defaultReason)(place)}
               onAgain={onAgain}
               onClose={onClose}
             />
@@ -225,12 +243,15 @@ function Reveal({
   );
 }
 
+const defaultReason = (place: MockPlace) => place.reason;
+
 function ResultCard({
   run,
   place,
   picks,
   revealed,
   instant,
+  reason,
   onAgain,
   onClose,
 }: {
@@ -239,6 +260,7 @@ function ResultCard({
   picks: MockPick;
   revealed: boolean;
   instant: boolean;
+  reason: string;
   onAgain: () => void;
   onClose: () => void;
 }) {
@@ -316,7 +338,7 @@ function ResultCard({
 
       <Reveal index={2} revealed={revealed} instant={instant} className="mt-2">
         <p className="line-clamp-2 type-body-sm text-pretty text-muted-foreground">
-          {place.reason}
+          {reason}
         </p>
         <CardBadges place={place} className="mt-3 empty:hidden" />
       </Reveal>

@@ -11,13 +11,14 @@ export const designLabHomeCopy = {
     eyebrow: "T3.1 G3",
     title: "오늘(홈) 시안",
     description:
-      "같은 목업 데이터로 배치가 다른 네 안을 만들었습니다. 안마다 4상태, 다크, 핵심 모션을 담았습니다.",
+      "같은 목업 데이터로 배치가 다른 네 안을 만들었습니다. 안마다 4상태, 다크, 핵심 모션을 담았습니다. D1~D3은 G3에서 고른 D에 어제 피드백 자리를 달리 둔 수정안입니다.",
     compareTitle: "나란히 바꿔 보기",
     compareBody:
       "한 화면에서 시안, 상태, 테마, 보기, 모션 줄이기를 바꿉니다. 선택값은 주소에 남습니다.",
     compareLink: "비교 스위처 열기",
     standalone: "단독 화면",
     states: "상태",
+    noFeedback: "어제 피드백 없음",
     back: "디자인 랩",
   },
 
@@ -39,6 +40,21 @@ export const designLabHomeCopy = {
       name: "오늘의 한 곳",
       intent: "한 곳을 크게 권하고 대안 두 곳은 작은 줄로 둡니다.",
     },
+    d1: {
+      name: "D1 머리 아래 한 줄 띠",
+      intent:
+        "제목 바로 아래 한 줄 띠로 어제 간 곳을 묻습니다. 답하면 고맙다는 한 줄로 접힙니다.",
+    },
+    d2: {
+      name: "D2 큰 카드 위 질문 카드",
+      intent:
+        "큰 카드 위에 같은 폭의 얇은 카드로 묻습니다. 답하면 카드가 사라지고 큰 카드가 올라옵니다.",
+    },
+    d3: {
+      name: "D3 먼저 묻기",
+      intent:
+        "어제 간 곳이 있는 날은 첫 화면이 질문입니다. 답하거나 미루면 오늘의 추천으로 넘어갑니다.",
+    },
   },
 
   /** /design-lab/home/compare 스위처 */
@@ -53,6 +69,12 @@ export const designLabHomeCopy = {
       badges: "배지 색",
       deck: "카드",
       roulette: "골라줘",
+      feedback: "어제",
+    },
+    /** 어제 피드백이 있는 날과 없는 날 (D1~D3) */
+    feedbacks: {
+      ask: { label: "있음", title: "어제 간 곳을 묻는 날" },
+      none: { label: "없음", title: "물을 곳이 없는 날" },
     },
     /** T3.3 "그냥 골라줘" 연출 */
     roulettes: {
@@ -63,6 +85,10 @@ export const designLabHomeCopy = {
     },
     /** T3.2 배지 색 체계 (D-04 안건) */
     badgePalettes: {
+      auto: {
+        label: "기본",
+        title: "시안별 기본(A~D 지금, D1~D3 차분)",
+      },
       current: {
         label: "지금",
         title: "의미 색 3가지(웨이팅, 할인, 바로 입장)",
@@ -82,7 +108,7 @@ export const designLabHomeCopy = {
     },
     reduce: "모션 줄이기",
     shortcuts:
-      "단축키: 1~4 시안, [ ] 상태, O/L/D 테마, F 보기, M 모션, B 배지 색, K 카드, R 골라줘",
+      "단축키: 1~7 시안, [ ] 상태, O/L/D 테마, F 보기, M 모션, B 배지 색, K 카드, R 골라줘, Y 어제",
   },
 
   /** 시안 화면 안 문구 */
@@ -144,6 +170,24 @@ export const designLabHomeCopy = {
       skipped: "안 갔어요",
       thanks: "알려 줘서 고마워요",
       thanksBody: "다음 추천에 반영합니다.",
+      /** 안 갔어요: 부정 신호로 쓰지 않는다(FB-05) */
+      skippedBody: "추천 점수에는 쓰지 않습니다.",
+      /** 스크린 리더 안내 (D2는 카드가 사라지므로 화면 단위 안내로) */
+      announce: "알려 줘서 고마워요. 다음 추천에 반영합니다.",
+      announceSkipped: "알려 줘서 고마워요. 추천 점수에는 쓰지 않습니다.",
+      /** D1~D3: 질문 위 caption */
+      eyebrow: "어제 점심",
+      /** D3: 이름을 따로 크게 쓰고 묻는 말만 */
+      ask: "어땠어요?",
+      /** D2: 위에 "어제 점심" caption이 있어 "어제 간"을 뺀다 */
+      questionShort: (name: string) => `${name}, 어땠어요?`,
+      /** 한 탭 뒤 선택 입력(FB-02) 진입 */
+      more: "가격, 태그 남기기",
+      /** D3: 질문 아래 한 줄 설명 */
+      lead: "한 번만 누르면 다음 추천이 더 잘 맞습니다.",
+      /** D3: 오늘의 추천을 먼저 보는 줄 */
+      later: "나중에",
+      laterAnnounce: "오늘의 추천을 먼저 보여 드립니다.",
     },
 
     rerolled: "새 추천 세 곳을 불러왔습니다.",
@@ -190,6 +234,8 @@ export const designLabHomeCopy = {
       /** 대안 줄 버튼의 보이지 않는 끝말. 이름은 보이는 글자(식당명, 숫자) + 이 말이 된다(axe label-content-name-mismatch, T3.5) */
       swapHint: "크게 보기",
       swapped: (name: string) => `오늘의 한 곳을 바꿨습니다. ${name}입니다.`,
+      /** D1~D3 하단 고정 행동 줄 */
+      actionsLabel: "오늘의 한 곳 행동",
     },
   },
 } as const;

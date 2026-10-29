@@ -23,7 +23,7 @@ import {
   useState,
 } from "react";
 import { designLabHomeCopy } from "@/copy/design-lab-home";
-import type { MockPick } from "@/features/design-lab/mock";
+import type { MockPick, MockPlace } from "@/features/design-lab/mock";
 import {
   highlightSchedule,
   settleMs,
@@ -34,6 +34,7 @@ import { haptic } from "@/lib/haptics";
 import { useMotionReduced } from "@/lib/motion";
 import { pickByScore, seededRng, type Rng } from "@/lib/reco/pick-one";
 import type { HomeVariantId } from "../types";
+import type { JustPickPlacement } from "./just-pick-panel";
 import { useHomeLabOptions } from "./lab-options-context";
 
 const copy = designLabHomeCopy.screen.justPick;
@@ -44,6 +45,9 @@ export const DEFAULT_ROULETTE: Readonly<Record<HomeVariantId, RouletteMode>> = {
   b: "r2",
   c: "r1",
   d: "r1",
+  d1: "r1",
+  d2: "r1",
+  d3: "r1",
 };
 
 /** r1을 화면의 카드 위에서 돌릴 수 있는 시안(세 곳이 한 화면에 다 보임) */
@@ -52,6 +56,9 @@ const PAGE_HIGHLIGHT: Readonly<Record<HomeVariantId, boolean>> = {
   b: false,
   c: true,
   d: true,
+  d1: true,
+  d2: true,
+  d3: true,
 };
 
 export type JustPickPhase = "rolling" | "result" | "closing";
@@ -279,9 +286,13 @@ export function useJustPick({
 export function JustPickLayer({
   pick,
   picks,
+  placement,
+  formatReason,
 }: {
   pick: JustPick;
   picks: MockPick;
+  placement?: JustPickPlacement;
+  formatReason?: (place: MockPlace) => string;
 }) {
   const { run } = pick;
   const announcement = !run
@@ -301,6 +312,8 @@ export function JustPickLayer({
             key={run.id}
             run={run}
             picks={picks}
+            placement={placement}
+            formatReason={formatReason}
             cursor={pick.cursor}
             landed={pick.landed}
             onSkip={pick.skip}

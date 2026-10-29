@@ -3,6 +3,7 @@
 // 쿼리: ?v=a&state=ready&theme=system&view=frame&reduce=1&badges=calm&deck=overflow (기본값은 생략). 리로드 없이 바꾸고 주소에 남긴다.
 // badges, deck은 T3.2 비교 옵션(shared/lab-options.ts): 배지 색 체계와 배지 넘침 카드 세트.
 // roulette, seed는 T3.3 "그냥 골라줘" 연출 비교(auto는 시안별 기본값). seed는 토글 없이 주소로만 준다(캡처 재현).
+// feedback은 어제 피드백이 있는 날과 없는 날(D1~D3 수정 시안, 2026-10-30). badges의 기본(auto)은 시안별 기본값.
 // 모션 줄이기는 MotionProvider preference="reduce"로 넘겨 OS 설정을 바꾸지 않고 축소 모드를 본다.
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -26,7 +27,8 @@ import { MotionProvider } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { HOME_VARIANTS } from "./registry";
 import {
-  BADGE_PALETTES,
+  BADGE_CHOICES,
+  FEEDBACK_CHOICES,
   HOME_DECKS,
   ROULETTE_CHOICES,
   parseHomeLabOptions,
@@ -103,10 +105,11 @@ const DEFAULTS: Selection = {
   theme: "system",
   view: "frame",
   reduce: false,
-  badges: "current",
+  badges: "auto",
   deck: "today",
   roulette: "auto",
   seed: null,
+  feedback: "ask",
 };
 
 function pick<T extends string>(
@@ -185,10 +188,12 @@ export function HomeSwitcher() {
         update({ view: current.view === "frame" ? "full" : "frame" });
       else if (key === "m") update({ reduce: !current.reduce });
       else if (key === "b")
-        update({ badges: toggle(BADGE_PALETTES, current.badges) });
+        update({ badges: toggle(BADGE_CHOICES, current.badges) });
       else if (key === "k") update({ deck: toggle(HOME_DECKS, current.deck) });
       else if (key === "r")
         update({ roulette: toggle(ROULETTE_CHOICES, current.roulette) });
+      else if (key === "y")
+        update({ feedback: toggle(FEEDBACK_CHOICES, current.feedback) });
       else return;
       e.preventDefault();
     }
@@ -249,7 +254,7 @@ export function HomeSwitcher() {
           label={copy.groups.badges}
           value={sel.badges}
           onChange={(badges) => update({ badges })}
-          options={BADGE_PALETTES.map((id) => ({
+          options={BADGE_CHOICES.map((id) => ({
             value: id,
             label: copy.badgePalettes[id].label,
             title: copy.badgePalettes[id].title,
@@ -273,6 +278,16 @@ export function HomeSwitcher() {
             value: id,
             label: copy.roulettes[id].label,
             title: copy.roulettes[id].title,
+          }))}
+        />
+        <Segmented
+          label={copy.groups.feedback}
+          value={sel.feedback}
+          onChange={(feedback) => update({ feedback })}
+          options={FEEDBACK_CHOICES.map((id) => ({
+            value: id,
+            label: copy.feedbacks[id].label,
+            title: copy.feedbacks[id].title,
           }))}
         />
         <button
@@ -315,11 +330,12 @@ export function HomeSwitcher() {
                   deck: sel.deck,
                   roulette: sel.roulette,
                   seed: sel.seed,
+                  feedback: sel.feedback,
                 }}
               >
                 {/* 시안, 상태, 카드 세트, 룰렛 안을 바꾸면 화면 상태(넘긴 카드, 회차)를 처음부터. 배지 색은 상태를 지킨 채 바꾼다 */}
                 <Home
-                  key={`${sel.v}-${sel.state}-${sel.deck}-${sel.roulette}`}
+                  key={`${sel.v}-${sel.state}-${sel.deck}-${sel.roulette}-${sel.feedback}`}
                   state={sel.state}
                 />
               </HomeLabOptionsProvider>

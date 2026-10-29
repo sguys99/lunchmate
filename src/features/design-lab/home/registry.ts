@@ -5,6 +5,9 @@ import { HomeA } from "./a/home-a";
 import { HomeB } from "./b/home-b";
 import { HomeC } from "./c/home-c";
 import { HomeD } from "./d/home-d";
+import { HomeD1 } from "./d1/home-d1";
+import { HomeD2 } from "./d2/home-d2";
+import { HomeD3 } from "./d3/home-d3";
 import type { HomeVariantId, HomeVariantProps } from "./types";
 
 export const HOME_VARIANTS: Readonly<
@@ -14,4 +17,7 @@ export const HOME_VARIANTS: Readonly<
   b: HomeB,
   c: HomeC,
   d: HomeD,
+  d1: HomeD1,
+  d2: HomeD2,
+  d3: HomeD3,
 };

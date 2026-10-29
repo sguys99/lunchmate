@@ -16,6 +16,7 @@ import { SkeletonLine } from "@/components/states";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { EstimateMark, LabPlaceBadges } from "./lab-badges";
+import { resolveBadgePalette } from "./lab-options";
 import { useHomeLabOptions } from "./lab-options-context";
 
 const copy = designLabHomeCopy.screen.numbers;
@@ -184,7 +185,7 @@ export function CardBadges({
   return (
     <LabPlaceBadges
       badges={placeBadges(place)}
-      palette={badges}
+      palette={resolveBadgePalette(badges)}
       max={max}
       className={className}
     />
@@ -194,7 +195,9 @@ export function CardBadges({
 /** 가격 칸의 "추정" 표시. 비교 옵션의 배지 체계를 따른다 */
 export function CellEstimateMark({ className }: { className?: string }) {
   const { badges } = useHomeLabOptions();
-  return <EstimateMark palette={badges} className={className} />;
+  return (
+    <EstimateMark palette={resolveBadgePalette(badges)} className={className} />
+  );
 }
 
 /* ---------- 카테고리 ---------- */

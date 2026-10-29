@@ -68,6 +68,15 @@ export default function HomeLabIndexPage() {
                     {stateLabels[s]}
                   </Link>
                 ))}
+                {/* D1~D3: 어제 피드백이 없는 날 */}
+                {id.length > 1 ? (
+                  <Link
+                    href={`/design-lab/home/${id}?feedback=none`}
+                    className={smallLink}
+                  >
+                    {copy.index.noFeedback}
+                  </Link>
+                ) : null}
                 <Link
                   href={`/design-lab/home/compare?v=${id}`}
                   className={smallLink}
