@@ -8,6 +8,7 @@
 import { RotateCcw } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
+import { focusRing } from "@/components/ui/interaction";
 import { commonCopy } from "@/copy/common";
 import { landingLabCopy } from "@/copy/design-lab-landing";
 import { MOCK_HOME_ALL_SETS, type MockPick } from "@/features/design-lab/mock";
@@ -29,6 +30,12 @@ const copy = landingLabCopy;
 const loadMotionList = () => import("./demo-motion-list");
 const DemoMotionList = lazy(loadMotionList);
 const TOTAL = MOCK_HOME_ALL_SETS.length;
+const LOGIN_ID = "landing-b-login";
+
+const headerLinkClass = cn(
+  "inline-flex h-11 min-w-11 items-center justify-center type-label underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground desktop:hidden",
+  focusRing,
+);
 
 function StaticList({ picks }: { picks: MockPick }) {
   return (
@@ -65,8 +72,12 @@ export function LandingB({ params }: { params: LandingParams }) {
         aria-label={copy.common.homeLabel}
         className="mx-auto flex w-full max-w-(--lm-layout-max-width) flex-1 flex-col px-(--lm-layout-gutter) pt-6 pb-10 desktop:max-w-[72rem] desktop:px-16 desktop:pt-10"
       >
-        <header>
+        {/* 모바일은 데모가 첫 화면을 차지해 로그인 버튼이 둘째 화면으로 내려간다. 머리에 바로가기 링크를 둔다(데스크톱은 첫 화면에 다 보여 숨김, T3.5) */}
+        <header className="-my-3 flex items-center justify-between">
           <Wordmark />
+          <a href={`#${LOGIN_ID}`} className={headerLinkClass}>
+            {copy.b.login}
+          </a>
         </header>
 
         <div className="flex flex-1 flex-col gap-10 pt-10 desktop:grid desktop:grid-cols-[minmax(0,26rem)_minmax(0,30rem)] desktop:items-center desktop:justify-between desktop:gap-20 desktop:pt-0">
@@ -93,7 +104,7 @@ export function LandingB({ params }: { params: LandingParams }) {
                   {copy.common.tryNote}
                 </p>
               </div>
-              <LoginDivider className="pt-2" />
+              <LoginDivider className="scroll-mt-6 pt-2" id={LOGIN_ID} />
               <SocialLogin env={env} />
               <TermsNote className="pt-1" />
             </section>

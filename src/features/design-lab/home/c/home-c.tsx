@@ -22,6 +22,7 @@ import { getHomeContent } from "@/features/design-lab/system/states";
 import { CategoryIllustration } from "@/features/place/illustrations";
 import { cn } from "@/lib/utils";
 import {
+  BadgeRowSkeleton,
   CardBadges,
   CategoryCaption,
   CellEstimateMark,
@@ -47,7 +48,12 @@ const copy = designLabHomeCopy.screen;
 const numbers = copy.numbers;
 
 /** 열 0 아이콘, 열 1~3 숫자. 가격 칸이 조금 넓다(DESIGN.md 4장 360px 대응과 같은 비율) */
-const gridCols = "grid grid-cols-[2.5rem_0.8fr_1.25fr_0.9fr] gap-x-3";
+// 360px(화면 380px 미만)에서는 가격 칸을 넓히고 칸 사이와 좌우 여백을 줄인다. "1.1만원대 추정"이 한 줄에 들어가고
+// "후기 모으는 중"이 칸을 넘지 않게 한다(T3.5). 열 머리글, 줄, 스켈레톤이 같은 값을 쓴다.
+const gridCols =
+  "grid grid-cols-[2.5rem_0.8fr_1.25fr_0.9fr] gap-x-3 @max-[23.75rem]/screen:grid-cols-[2.5rem_0.5fr_1.4fr_1.1fr] @max-[23.75rem]/screen:gap-x-2";
+const rowPad = "px-4 @max-[23.75rem]/screen:px-3";
+const actionsPad = "pl-[3.25rem] @max-[23.75rem]/screen:pl-12";
 
 type Best = Record<NumberCell["key"], number>;
 
@@ -149,7 +155,7 @@ export function HomeC({ state }: HomeVariantProps) {
 
         <section aria-label={copy.compare.tableLabel} className="mt-9">
           {/* 열 머리글. 각 줄 숫자에도 같은 라벨이 dt로 있어 보조 기술에는 숨긴다 */}
-          <div aria-hidden className={cn(gridCols, "px-4 pb-2")}>
+          <div aria-hidden className={cn(gridCols, rowPad, "pb-2")}>
             <span />
             <span className="type-caption text-muted-foreground">
               {numbers.walk}
@@ -190,7 +196,7 @@ export function HomeC({ state }: HomeVariantProps) {
               ))}
             </ol>
           </ShuffleSwap>
-          <p className="mt-3 px-4 type-caption text-muted-foreground">
+          <p className={cn("mt-3 type-caption text-muted-foreground", rowPad)}>
             {copy.compare.bestHint}
           </p>
         </section>
@@ -233,7 +239,8 @@ function Row({
     <article
       aria-label={place.name}
       className={cn(
-        "rounded-card border px-4 transition-[background-color,border-color,opacity] ease-standard motion-reduce:transition-none",
+        rowPad,
+        "rounded-card border transition-[background-color,border-color,opacity] ease-standard motion-reduce:transition-none",
         spot
           ? "duration-(--lm-duration-fast)"
           : "duration-(--lm-duration-base)",
@@ -274,7 +281,7 @@ function Row({
               onSelect();
             }}
             className={cn(
-              "-my-1 flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-sm py-1 text-left",
+              "-my-[0.4375rem] flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-sm py-[0.4375rem] text-left",
               focusRing,
             )}
           >
@@ -327,7 +334,7 @@ function Row({
         inert={!selected}
       >
         <div className="overflow-hidden">
-          <div className="flex flex-col gap-4 pb-4 pl-[3.25rem]">
+          <div className={cn("flex flex-col gap-4 pb-4", actionsPad)}>
             <div className="flex gap-2">
               <Button
                 variant="primary"
@@ -352,38 +359,67 @@ function Row({
 function LoadingC({ label }: { label: string }) {
   return (
     <LoadingRegion label={label} className="mt-9 flex flex-col">
-      <div aria-hidden className={cn(gridCols, "px-4 pb-2")}>
+      <div aria-hidden className={cn(gridCols, rowPad, "pb-2")}>
         <span />
         <SkeletonLine type="caption" className="w-7" />
         <SkeletonLine type="caption" className="w-6" />
         <SkeletonLine type="caption" className="w-7" />
       </div>
+      {/* 첫 줄은 실제 화면처럼 펼친 모양(카드 면, 배지, 길찾기 자리)으로 둔다. 로딩 뒤 출렁임 방지(T3.5) */}
       {[0, 1, 2].map((i) => (
         <div
           key={i}
           aria-hidden
           className={cn(
-            gridCols,
-            "gap-y-3 px-4 py-4",
-            i > 0 && "border-t border-border",
+            "border",
+            rowPad,
+            i === 0
+              ? "rounded-card border-border bg-card"
+              : "border-x-transparent border-b-transparent",
+            i === 2 && "border-t-border",
+            i === 1 && "border-t-transparent",
           )}
         >
-          <Skeleton className="row-span-3 size-10 rounded-full" />
-          <SkeletonLine
-            type="heading"
-            lineClassName="col-span-3"
-            className={["w-28", "w-24", "w-32"][i]}
-          />
-          <SkeletonLine type="label" className="w-8" />
-          <SkeletonLine type="label" className="w-16" />
-          <SkeletonLine type="label" className="w-9" />
-          <SkeletonLine
-            type="body-sm"
-            lineClassName="col-span-3"
-            className="w-4/5"
-          />
+          <div className={cn(gridCols, "gap-y-3 py-4")}>
+            <Skeleton className="row-span-3 size-10 rounded-full" />
+            <SkeletonLine
+              type="heading"
+              lineClassName="col-span-3"
+              className={["w-28", "w-24", "w-32"][i]}
+            />
+            <SkeletonLine
+              type="label"
+              lineClassName="min-h-[1.375rem]"
+              className="w-8"
+            />
+            <SkeletonLine
+              type="label"
+              lineClassName="min-h-[1.375rem]"
+              className="w-16"
+            />
+            <SkeletonLine
+              type="label"
+              lineClassName="min-h-[1.375rem]"
+              className="w-9"
+            />
+            <SkeletonLine
+              type="body-sm"
+              lineClassName="col-span-3"
+              className="w-4/5"
+            />
+            {i === 0 ? (
+              <BadgeRowSkeleton className="col-span-3 col-start-2" />
+            ) : null}
+          </div>
+          {i === 0 ? (
+            <div className={cn("flex gap-2 pb-4", actionsPad)}>
+              <Skeleton className="h-12 flex-1 rounded-button" />
+              <Skeleton className="h-12 w-20 rounded-button" />
+            </div>
+          ) : null}
         </div>
       ))}
+      <SkeletonLine type="caption" lineClassName="mt-3" className="w-48" />
       <Skeleton aria-hidden className="mt-6 h-12 w-full rounded-button" />
     </LoadingRegion>
   );

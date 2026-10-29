@@ -12,6 +12,8 @@ import type { MockPlace } from "@/features/design-lab/mock";
 import { CATEGORY_INK } from "@/features/design-lab/system/b/parts";
 import { categoryLabel } from "@/features/place/categories";
 import { priceBandParts } from "@/lib/format";
+import { SkeletonLine } from "@/components/states";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { EstimateMark, LabPlaceBadges } from "./lab-badges";
 import { useHomeLabOptions } from "./lab-options-context";
@@ -210,5 +212,64 @@ export function CategoryCaption({
     >
       {categoryLabel(place.category)}
     </span>
+  );
+}
+
+/* ---------- 스켈레톤 (T3.5) ---------- */
+
+const NUMBER_SKELETON_WIDTHS = ["w-6", "w-14", "w-9"] as const;
+
+/**
+ * NumberGrid 자리. 같은 격자, 같은 줄 높이(라벨 caption + 숫자 min-h)라 로딩 뒤 출렁이지 않는다.
+ * 숫자 막대는 type-numeric-* 줄 상자 안에 둔다.
+ */
+export function NumberGridSkeleton({
+  size = "lg",
+  className,
+}: {
+  size?: "lg" | "md";
+  className?: string;
+}) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "grid grid-cols-[0.8fr_1.3fr_0.9fr] divide-x divide-border",
+        className,
+      )}
+    >
+      {NUMBER_SKELETON_WIDTHS.map((w) => (
+        <div
+          key={w}
+          className="flex min-w-0 flex-col gap-1.5 px-4 first:pl-0 last:pr-0 @max-[23.75rem]/screen:px-3"
+        >
+          <SkeletonLine type="caption" className="w-7" />
+          <div
+            className={cn(
+              "flex items-end",
+              size === "lg" ? "min-h-[1.84rem]" : "min-h-[1.35rem]",
+            )}
+          >
+            <Skeleton
+              className={cn(
+                "rounded-badge",
+                w,
+                size === "lg" ? "mb-1 h-5" : "mb-0.5 h-3.5",
+              )}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** 배지 한 줄 자리(배지 높이 24px). 실제 배지가 없을 카드도 있지만 오늘 덱의 첫 카드는 배지가 있다 */
+export function BadgeRowSkeleton({ className }: { className?: string }) {
+  return (
+    <div aria-hidden className={cn("flex gap-1.5", className)}>
+      <Skeleton className="h-6 w-36 rounded-badge" />
+      <Skeleton className="h-6 w-11 rounded-badge" />
+    </div>
   );
 }

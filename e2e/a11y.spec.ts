@@ -1,8 +1,16 @@
 // axe 접근성 검사 (T2.17). WCAG 2.1 AA + best-practice, 위반 0 (helpers/axe.ts).
 // 실행: pnpm test:e2e:a11y (디자인 랩 켜고 mobile, desktop 두 뷰포트). pnpm test:e2e에서는 갤러리와 PoC를 건너뛴다.
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { expectNoA11yViolations } from "./helpers/axe";
 import { designLabOn, openGallery, type GalleryTheme } from "./helpers/gallery";
+
+/** 시안 단독 화면을 열고 하이드레이션, 글꼴, 지연 일러스트까지 기다린다 */
+async function openLabRoute(page: Page, path: string) {
+  const res = await page.goto(path);
+  expect(res?.status()).toBe(200);
+  await page.waitForLoadState("networkidle");
+  await page.evaluate(() => document.fonts.ready);
+}
 
 for (const theme of ["light", "dark"] as GalleryTheme[]) {
   test.describe(`테마 ${theme}`, () => {
@@ -61,6 +69,43 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       expect(res?.status()).toBe(404);
       await expectNoA11yViolations(page);
     });
+
+    // G3 시안 단독 화면 (T3.5): 홈 4안 x (정상 + 4상태), 랜딩 3안 x (정상 + 상태 + 카카오톡 인앱)
+    for (const variant of ["a", "b", "c", "d"]) {
+      for (const query of [
+        "",
+        "?state=loading",
+        "?state=empty",
+        "?state=error",
+        "?state=offline",
+        "?deck=overflow",
+      ]) {
+        test(`홈 시안 ${variant}${query}`, async ({ page }) => {
+          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+          await openLabRoute(page, `/design-lab/home/${variant}${query}`);
+          await expectNoA11yViolations(page);
+        });
+      }
+    }
+    for (const variant of ["a", "b", "c"]) {
+      for (const query of [
+        "",
+        "?state=loading",
+        "?state=error",
+        "?state=offline",
+        "?inapp=kakao",
+      ]) {
+        test(`랜딩 시안 ${variant}${query}`, async ({ page }) => {
+          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+          await openLabRoute(page, `/design-lab/landing/${variant}${query}`);
+          // 네이버 로그인 버튼은 네이버 가이드 색(초록 면 + 흰 글자, 대비 약 2.3:1)을 그대로 쓴다.
+          // 브랜드 가이드가 정한 색이라 대비 검사에서만 뺀다. 결정 대기: docs/design/g3-qa.md "남은 문제"
+          await expectNoA11yViolations(page, {
+            exclude: ['[data-provider="naver"]'],
+          });
+        });
+      }
+    }
 
     test("PoC 목록", async ({ page }) => {
       test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");

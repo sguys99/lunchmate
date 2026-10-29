@@ -61,9 +61,6 @@ export const landingLabCopy = {
     kakaoShort: "로그인",
     naverShort: "로그인",
     googleShort: "로그인",
-    kakaoAria: "카카오로 로그인",
-    naverAria: "네이버로 로그인",
-    googleAria: "Google 계정으로 로그인",
     pending: "연결하는 중입니다",
     labToast: "시안이라 실제 로그인은 하지 않습니다",
     loginError: "로그인을 시작하지 못했습니다",
@@ -93,6 +90,8 @@ export const landingLabCopy = {
 
   /** B 바로 해 보는 데모 */
   b: {
+    /** 모바일 머리의 로그인 바로가기(로그인 버튼이 데모 아래 둘째 화면에 있어서, T3.5) */
+    login: "로그인",
     eyebrow: "직접 눌러 보세요",
     headline: "오늘 점심, 세 곳이면 충분해요",
     body: "예시 동네에서 뽑은 카드입니다. 마음에 안 들면 다시 뽑아 보세요.",

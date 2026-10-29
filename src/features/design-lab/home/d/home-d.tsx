@@ -29,7 +29,9 @@ import {
   CardBadges,
   CategoryCaption,
   CellEstimateMark,
+  BadgeRowSkeleton,
   NumberGrid,
+  NumberGridSkeleton,
   NumberValue,
   numberCells,
 } from "../shared/card-bits";
@@ -287,7 +289,6 @@ function AltRow({
     <button
       type="button"
       onClick={onPromote}
-      aria-label={copy.single.swap(place.name)}
       className={cn(
         "group -mx-3 flex min-h-18 w-[calc(100%+1.5rem)] items-center gap-4 rounded-card border px-3 py-3 text-left transition-[border-color,background-color,opacity] ease-standard",
         spot
@@ -312,6 +313,7 @@ function AltRow({
           </span>
         ) : null}
       </span>
+      <span className="sr-only">{copy.single.swapHint}</span>
       <ArrowUpRight
         aria-hidden
         className="size-4 shrink-0 text-muted-foreground transition-transform duration-(--lm-duration-fast) ease-standard group-hover:-translate-y-0.5 motion-reduce:transition-none"
@@ -328,7 +330,7 @@ function LoadingD({ label }: { label: string }) {
     <LoadingRegion label={label} className="mt-7 flex flex-col">
       <div
         aria-hidden
-        className="flex flex-col rounded-card border border-border bg-card p-7"
+        className="flex flex-col rounded-card border border-border bg-card p-7 @max-[23.75rem]/screen:p-5"
       >
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-2 pt-1">
@@ -340,13 +342,15 @@ function LoadingD({ label }: { label: string }) {
             />
             <SkeletonLine type="title" className="w-32" />
           </div>
-          <div className="relative -mt-3 -mr-4 size-[8.5rem] shrink-0">
-            <Skeleton className="absolute top-[24px] left-[21px] size-[71px] rounded-full" />
+          <div className="relative -mt-3 -mr-4 size-[9.5rem] shrink-0 @max-[23.75rem]/screen:size-28">
+            <Skeleton className="absolute top-[27px] left-[23px] size-[79px] rounded-full @max-[23.75rem]/screen:top-5 @max-[23.75rem]/screen:left-[17px] @max-[23.75rem]/screen:size-[58px]" />
           </div>
         </div>
         <SkeletonLine type="body" lineClassName="mt-3" className="w-4/5" />
-        <SkeletonLine type="label" lineClassName="mt-14" className="w-3/5" />
-        <Skeleton className="mt-7 h-12 w-full rounded-button" />
+        {/* 배지 줄과 숫자 3칸도 실제 카드와 같은 자리에 둔다. 로딩 뒤 출렁임 방지(T3.5) */}
+        <BadgeRowSkeleton className="mt-[0.9375rem]" />
+        <NumberGridSkeleton size="md" className="mt-7" />
+        <Skeleton className="mt-[1.8125rem] h-12 w-full rounded-button" />
       </div>
       <SkeletonLine type="caption" lineClassName="mt-10" className="w-20" />
       <ListSkeleton bare rows={2} className="mt-2 border-t border-border" />

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, WifiOff } from "lucide-react";
 import type { ReactNode } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
-import { focusRing } from "@/components/ui/interaction";
+import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { LazyToaster, toast } from "@/components/ui/lazy-toaster";
 import { landingLabCopy } from "@/copy/design-lab-landing";
 import { cn } from "@/lib/utils";
@@ -107,9 +107,17 @@ export function OfflineNote({
 }
 
 /** 로그인 버튼 위 구분 줄: 가는 선 사이 caption 한 줄 */
-export function LoginDivider({ className }: { className?: string }) {
+export function LoginDivider({
+  className,
+  id,
+}: {
+  className?: string;
+  /** 바로가기 링크의 도착점(B 모바일 머리 링크) */
+  id?: string;
+}) {
   return (
     <div
+      id={id}
       className={cn(
         "flex items-center gap-3 type-caption text-muted-foreground",
         className,
@@ -122,7 +130,9 @@ export function LoginDivider({ className }: { className?: string }) {
   );
 }
 
+// 문장 안 링크라 글자 크기는 그대로 두고 터치 영역만 44px로 넓힌다(T3.5)
 const termsLink = cn(
+  hitArea44,
   "text-foreground underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground",
   focusRing,
 );

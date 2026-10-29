@@ -113,7 +113,7 @@ export default function JustPickPanel({
         aria-hidden
         onClick={rolling ? onSkip : onClose}
         className={cn(
-          "absolute inset-0 bg-overlay transition-opacity duration-(--lm-duration-fast) ease-exit",
+          "absolute inset-0 bg-overlay transition-opacity duration-(--lm-duration-fast) ease-exit motion-reduce:transition-none",
           !reduced &&
             "animate-in fade-in-0 [animation-duration:var(--lm-duration-base)]",
           closing && "opacity-0",
@@ -131,7 +131,7 @@ export default function JustPickPanel({
         className={cn(
           "relative w-full max-w-(--lm-layout-max-width) rounded-t-sheet border border-b-0 border-border bg-popover px-7 pt-7 pb-[calc(1.75rem+env(safe-area-inset-bottom))] text-popover-foreground shadow-sheet outline-none @max-[23.75rem]/screen:px-5",
           "desktop:max-w-[26rem] desktop:rounded-card desktop:border-b desktop:pb-7",
-          "transition-[opacity,translate] duration-(--lm-duration-fast) ease-exit",
+          "transition-[opacity,translate] duration-(--lm-duration-fast) ease-exit motion-reduce:transition-none",
           enter,
           closing && "translate-y-2 opacity-0",
         )}
@@ -179,7 +179,7 @@ export default function JustPickPanel({
           ) : null}
           {run.mode === "r3" ? (
             <Stage visible={rolling} reduced={reduced}>
-              <QuietThinking />
+              <QuietThinking reduced={reduced} />
             </Stage>
           ) : null}
         </div>
@@ -252,7 +252,7 @@ function ResultCard({
             <p
               aria-hidden
               className={cn(
-                "absolute inset-x-0 top-2 type-caption text-muted-foreground transition-opacity duration-(--lm-duration-fast) ease-exit",
+                "absolute inset-x-0 top-2 type-caption text-muted-foreground transition-opacity duration-(--lm-duration-fast) ease-exit motion-reduce:transition-none",
                 revealed && "opacity-0",
               )}
             >
@@ -477,7 +477,7 @@ function HighlightList({
           <li
             key={p.id}
             className={cn(
-              "flex min-h-16 items-center gap-4 rounded-card border px-4 transition-[border-color,background-color,opacity] duration-(--lm-duration-fast) ease-standard",
+              "flex min-h-16 items-center gap-4 rounded-card border px-4 transition-[border-color,background-color,opacity] duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
               on ? "border-primary bg-card" : "border-transparent",
               landed && i !== target && "opacity-30",
             )}
@@ -497,7 +497,8 @@ function HighlightList({
   );
 }
 
-function QuietThinking() {
+/** 축소 모드면 선이 차오르지 않는다(무대가 보이지 않아도 전환을 돌리지 않게, T3.5) */
+function QuietThinking({ reduced }: { reduced: boolean }) {
   const [filled, setFilled] = useState(false);
   useEffect(() => {
     let inner = 0;
@@ -515,7 +516,9 @@ function QuietThinking() {
         className="h-full origin-left bg-primary"
         style={{
           transform: `scaleX(${filled ? 1 : 0})`,
-          transition: `transform ${QUIET.thinkMs}ms var(--lm-ease-standard)`,
+          transition: reduced
+            ? "none"
+            : `transform ${QUIET.thinkMs}ms var(--lm-ease-standard)`,
         }}
       />
     </div>

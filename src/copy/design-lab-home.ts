@@ -187,7 +187,8 @@ export const designLabHomeCopy = {
     single: {
       eyebrow: "오늘의 한 곳",
       alternatives: "또는 이 두 곳",
-      swap: (name: string) => `${name} 크게 보기`,
+      /** 대안 줄 버튼의 보이지 않는 끝말. 이름은 보이는 글자(식당명, 숫자) + 이 말이 된다(axe label-content-name-mismatch, T3.5) */
+      swapHint: "크게 보기",
       swapped: (name: string) => `오늘의 한 곳을 바꿨습니다. ${name}입니다.`,
     },
   },

@@ -9,7 +9,11 @@
 // - 결과가 나오면 onSettle(번호)로 시안 화면도 그 곳으로 옮겨 둔다(닫은 뒤 바로 그 카드가 보이게).
 // - 결과 패널(just-pick-panel.tsx)은 처음 누를 때 받는다(React.lazy). 버튼에 손이나 포커스가 닿으면 미리 받는다.
 //   Motion을 쓰지 않고 CSS 전환과 타이머만 쓴다(첫 로드 증가 0, 패널 청크만 추가).
-// - 햅틱: 결과가 정해지는 순간 select. 타이머 안에서 부르지만 버튼을 누른 직후라 sticky user activation이 있다(T3.3 보고 참고).
+// - 햅틱(T3.5에서 src/lib/haptics 규칙 "타이머, 효과 안에서 부르지 않는다"에 맞춤):
+//   누르는 순간(그냥 골라줘, 다른 곳) tap. 연출이 끝나 결과가 정해지는 순간은 타이머라 진동하지 않는다(시각 전환과 status 안내가 알린다).
+//   연출 중 사용자가 눌러 건너뛰면 그 누름 안에서 select.
+//   이유: 타이머 진동은 sticky activation 덕에 Android Chrome에서는 울리지만, 규칙이 막는 패턴이고
+//   백그라운드 탭이나 권한 정책에서 조용히 무시되어 기기마다 결과가 달라진다. 누름에 바로 붙는 진동이 가장 예측 가능하다.
 import {
   lazy,
   Suspense,
@@ -131,17 +135,12 @@ export function useJustPick({
     return rngRef.current.rng();
   }
 
-  const settle = useCallback(
-    (r: JustPickRun) => {
-      setRun({ ...r, phase: "result" });
-      setCursor(null);
-      setLanded(false);
-      // 진동은 보조 신호. 제스처(건너뛰기, 축소 모드 누름) 안이거나, 누른 직후 시작한 연출이 끝난 순간
-      haptic("select", { reduced });
-      settleRef.current?.(r.target);
-    },
-    [reduced],
-  );
+  const settle = useCallback((r: JustPickRun) => {
+    setRun({ ...r, phase: "result" });
+    setCursor(null);
+    setLanded(false);
+    settleRef.current?.(r.target);
+  }, []);
 
   function start(from: number, exclude: number | null) {
     const target = pickByScore(
@@ -150,6 +149,8 @@ export function useJustPick({
       { exclude },
     );
     if (target < 0) return;
+    // 누르는 순간의 진동(제스처 핸들러 안). 축소 모드면 haptic이 스스로 건너뛴다
+    haptic("tap", { reduced });
     const stage: JustPickRun["stage"] =
       mode === "r1" && PAGE_HIGHLIGHT[variant] ? "page" : "panel";
     const r: JustPickRun = {
@@ -201,8 +202,10 @@ export function useJustPick({
   const skip = useCallback(() => {
     if (run?.phase !== "rolling") return;
     skippedAt.current = performance.now();
+    // 건너뛰기는 사용자의 누름(pointerdown, keydown) 안에서 불린다. 결과 확정 진동은 이 경우에만
+    haptic("select", { reduced });
     settle(run);
-  }, [run, settle]);
+  }, [run, settle, reduced]);
 
   // 연출 중 건너뛰기: 화면 어디든 누르기, Esc, Enter, Space
   useEffect(() => {

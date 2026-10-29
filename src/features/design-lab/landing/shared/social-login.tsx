@@ -2,6 +2,7 @@
 // 소셜 로그인 버튼 3종 (T3.4, DESIGN.md 5장 "소셜 로그인 버튼").
 // - 색과 심볼은 각 사 가이드 그대로(토큰 brand-*), 높이 48, 라운드 12px(카카오 가이드), 심볼 왼쪽, 레이블 가운데.
 //   레이블 서체는 카카오 가이드("OS별 기본 시스템 서체")를 따라 system-ui.
+//   font-[system-ui]는 cn(tailwind-merge)이 굵기 클래스로 읽어 font-medium과 겹친다며 지운다. 그래서 family-name 힌트를 붙인다(T3.5).
 // - 브랜드 버튼은 포인트 컬러(primary) 개수에 세지 않는다. 화면의 primary는 "추천 체험" 하나뿐이다.
 // - 시안 동작: 누르면 "연결하는 중" 상태가 0.7초 이어진 뒤 토스트. ?state=error면 오류 토스트(다음 행동 안내).
 // - 오프라인이면 모두 aria-disabled. 카카오톡 인앱이면(AUTH-04) 구글만 막고 외부 브라우저 안내를 붙인다.
@@ -20,28 +21,24 @@ type Provider = "kakao" | "naver" | "google";
 const PROVIDERS: readonly {
   id: Provider;
   label: string;
-  aria: string;
   symbol: ReactNode;
   className: string;
 }[] = [
   {
     id: "kakao",
     label: copy.kakao,
-    aria: copy.kakaoAria,
     symbol: <KakaoSymbol />,
     className: "bg-brand-kakao text-brand-kakao-foreground",
   },
   {
     id: "naver",
     label: copy.naver,
-    aria: copy.naverAria,
     symbol: <NaverSymbol />,
     className: "bg-brand-naver text-brand-naver-foreground",
   },
   {
     id: "google",
     label: copy.google,
-    aria: copy.googleAria,
     symbol: <GoogleSymbol />,
     className:
       "border border-brand-google-border bg-brand-google text-brand-google-foreground",
@@ -81,7 +78,7 @@ export function SocialLogin({
             <li key={p.id}>
               <button
                 type="button"
-                aria-label={p.aria}
+                data-provider={p.id}
                 aria-disabled={blocked || undefined}
                 aria-busy={busy || undefined}
                 aria-describedby={
@@ -93,7 +90,7 @@ export function SocialLogin({
                   if (!blocked) start(p.id);
                 }}
                 className={cn(
-                  "relative flex h-12 w-full items-center justify-center rounded-md px-12 font-[system-ui] text-[0.9375rem] leading-none font-medium",
+                  "relative flex h-12 w-full items-center justify-center rounded-md px-12 font-[family-name:system-ui] text-[0.9375rem] leading-none font-medium",
                   focusRing,
                   pressMotion,
                   p.className,
@@ -104,7 +101,8 @@ export function SocialLogin({
                 <span className="absolute top-1/2 left-4 flex size-6 -translate-y-1/2 items-center justify-center">
                   {p.symbol}
                 </span>
-                <span aria-hidden>{p.label}</span>
+                {/* 이름은 보이는 레이블 그대로(음성 입력으로 "카카오 로그인"을 말해 누를 수 있게, axe label-content-name-mismatch, T3.5) */}
+                <span>{p.label}</span>
                 {busy ? <span className="sr-only">{copy.pending}</span> : null}
               </button>
             </li>

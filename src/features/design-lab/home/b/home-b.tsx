@@ -28,7 +28,13 @@ import { keyTarget } from "@/features/rec/swipe-stack";
 import { CategoryIllustration } from "@/features/place/illustrations";
 import { useMotionReduced } from "@/lib/motion";
 import { cn } from "@/lib/utils";
-import { CardBadges, CategoryCaption, NumberGrid } from "../shared/card-bits";
+import {
+  BadgeRowSkeleton,
+  CardBadges,
+  CategoryCaption,
+  NumberGrid,
+  NumberGridSkeleton,
+} from "../shared/card-bits";
 import { HomeHeader, JustPickButton, RerollButton } from "../shared/controls";
 import { JustPickLayer, useJustPick } from "../shared/just-pick";
 import { EntryLinks } from "../shared/entries";
@@ -150,7 +156,7 @@ function Carousel({
   /** 바깥(그냥 골라줘 결과)에서 이 카드로 옮겨 달라는 요청 */
   request: ScrollRequest | null;
 }) {
-  const track = useRef<HTMLUListElement>(null);
+  const track = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
   const reduced = useMotionReduced();
   const [announcement, setAnnouncement] = useState("");
@@ -229,7 +235,8 @@ function Carousel({
       <p id="home-b-hint" className="sr-only">
         {copy.deck.hint}
       </p>
-      <ul
+      {/* 목록 대신 group 슬라이드(APG 캐러셀). li에 role=group을 주면 axe list, aria-allowed-role 위반(T3.5) */}
+      <div
         ref={track}
         tabIndex={0}
         onScroll={onScroll}
@@ -241,11 +248,15 @@ function Carousel({
         )}
       >
         {picks.map((p, i) => (
-          <li
+          // 옆 카드는 흐린 미리보기다(inert). 보조 기술과 키보드에는 지금 카드 하나만 닿고(이전/다음 버튼, 화살표 키, 위치 안내가 따로 있음),
+          // 흐린 글자는 대비 검사 대상에서 빠진다(T3.5 axe color-contrast). 가로 끌기로 넘기는 동작은 그대로다.
+          // 옆 카드를 눌러 그 카드로 넘어가던 동작(안쪽 버튼 포커스)은 없어진다.
+          <div
             key={p.id}
             role="group"
             aria-roledescription="slide"
             aria-label={copy.deck.slide(i + 1, total)}
+            inert={i !== active}
             className={slideClass}
           >
             <CardB
@@ -254,9 +265,9 @@ function Carousel({
               order={i}
               onFocusCard={() => goTo(i)}
             />
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
       <div className="flex items-center justify-between">
         <Button
@@ -351,7 +362,8 @@ function CardB({
 function LoadingB({ label }: { label: string }) {
   return (
     <LoadingRegion label={label} className="mt-7 flex flex-col">
-      <Skeleton className="h-28 w-full rounded-card" />
+      {/* 블록 높이는 실제 화면과 맞춘다(피드백 126px, 카드 해부도 그대로). 로딩 뒤 출렁임 방지(T3.5) */}
+      <Skeleton className="h-[7.875rem] w-full rounded-card" />
       <div aria-hidden className={cn(trackClass, "mt-8 overflow-hidden py-1")}>
         {[0, 1, 2].map((i) => (
           <div
@@ -365,7 +377,7 @@ function LoadingB({ label }: { label: string }) {
             <Skeleton className="mt-1 size-[3.25rem] rounded-full" />
             <SkeletonLine
               type="caption"
-              lineClassName="mt-10"
+              lineClassName="mt-12"
               className="w-12"
             />
             <SkeletonLine
@@ -373,17 +385,15 @@ function LoadingB({ label }: { label: string }) {
               lineClassName="mt-2"
               className="w-32"
             />
-            <SkeletonLine
-              type="label"
-              lineClassName="mt-12"
-              className="w-4/5"
-            />
+            <BadgeRowSkeleton className="mt-3" />
+            <NumberGridSkeleton size="md" className="mt-6" />
             <SkeletonLine
               type="body-sm"
               lineClassName="mt-3"
-              className="w-3/5"
+              className="w-4/5"
             />
-            <Skeleton className="mt-8 h-12 w-full rounded-button" />
+            <SkeletonLine type="body-sm" className="w-2/5" />
+            <Skeleton className="mt-6 h-12 w-full rounded-button" />
           </div>
         ))}
       </div>

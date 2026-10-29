@@ -40,7 +40,7 @@ const POLL_MAX = Math.max(...POLL_ROWS.map((r) => r.votes), 1);
 const POLL_VOTERS = POLL_ROWS.reduce((sum, r) => sum + r.votes, 0);
 
 const linkClass = cn(
-  "inline-flex h-11 items-center type-label underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground",
+  "inline-flex h-11 min-w-11 items-center justify-center type-label underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground",
   focusRing,
 );
 
@@ -102,25 +102,28 @@ export function LandingC({ params }: { params: LandingParams }) {
       >
         {/* 장면 1: 고민 */}
         <section className="flex min-h-[calc(100dvh-4.25rem)] flex-col justify-between gap-10 pt-12 pb-8 desktop:min-h-[calc(100dvh-6rem)] desktop:justify-center desktop:gap-14 desktop:pt-0">
-          <SceneText
-            as="h1"
-            eyebrow={s1.eyebrow}
-            title={s1.headline}
-            body={s1.body}
-          >
-            <ul className="flex flex-col gap-2 pt-4 type-body text-muted-foreground desktop:flex-row desktop:gap-8">
-              {s1.thoughts.map((t, i) => (
-                <li key={t}>
-                  <span
-                    className="lm-strike"
-                    style={{ "--lm-strike-i": i } as CSSProperties}
-                  >
-                    {t}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </SceneText>
+          {/* 모바일: 제목 덩어리를 머리와 체험 버튼 사이 가운데에 둔다. 버튼은 하단 1/3에 남기고 가운데 큰 빈칸을 위아래로 나눈다(T3.5) */}
+          <div className="flex flex-1 flex-col justify-center desktop:flex-none">
+            <SceneText
+              as="h1"
+              eyebrow={s1.eyebrow}
+              title={s1.headline}
+              body={s1.body}
+            >
+              <ul className="flex flex-col gap-2 pt-4 type-body text-muted-foreground desktop:flex-row desktop:gap-8">
+                {s1.thoughts.map((t, i) => (
+                  <li key={t}>
+                    <span
+                      className="lm-strike"
+                      style={{ "--lm-strike-i": i } as CSSProperties}
+                    >
+                      {t}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </SceneText>
+          </div>
           <div className="flex flex-col gap-4 desktop:max-w-[22rem]">
             {env.offline ? <OfflineNote /> : null}
             <TryButton env={env} />

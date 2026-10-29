@@ -306,19 +306,21 @@ function CardA({ place }: { place: MockPlace }) {
       aria-label={place.name}
       className="flex flex-col gap-6 rounded-card border border-border bg-card p-7 text-card-foreground @max-[23.75rem]/screen:p-5"
     >
-      <ShuffleBlock
-        index={0}
-        className="flex items-start justify-between gap-4"
-      >
-        <div className="flex min-w-0 flex-col gap-2 pt-1">
-          <CategoryCaption place={place} />
-          <h2 className="type-heading text-balance break-keep">{place.name}</h2>
-          <CardBadges place={place} className="pt-1" />
+      {/* 배지는 일러스트 옆 좁은 칸이 아니라 카드 폭 전체 줄에 둔다. 390px에서 배지 2개가 두 줄로 쌓이던 문제(T3.5) */}
+      <ShuffleBlock index={0} className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-2 pt-1">
+            <CategoryCaption place={place} />
+            <h2 className="type-heading text-balance break-keep">
+              {place.name}
+            </h2>
+          </div>
+          <CategoryIllustration
+            slug={place.category}
+            className="-mt-2 -mr-2 -mb-3 shrink-0"
+          />
         </div>
-        <CategoryIllustration
-          slug={place.category}
-          className="-mt-2 -mr-2 shrink-0"
-        />
+        <CardBadges place={place} />
       </ShuffleBlock>
       <ShuffleBlock index={1}>
         <NumberGrid place={place} />
@@ -382,8 +384,9 @@ function Pager({ stack }: { stack: UseSwipeStack }) {
 function LoadingA({ label }: { label: string }) {
   return (
     <LoadingRegion label={label} className="mt-7 flex flex-col">
-      <Skeleton className="h-16 w-full rounded-none" />
-      <div className="relative mt-8">
+      {/* 높이는 실제 블록과 맞춘다(피드백 줄 73px, 카드 약 368px). 로딩 뒤 출렁임 방지(T3.5) */}
+      <Skeleton className="h-18 w-full rounded-none @max-[23.75rem]/screen:h-24" />
+      <div className="relative mt-8 [&_[data-slot=card-skeleton]]:min-h-92 @max-[23.75rem]/screen:[&_[data-slot=card-skeleton]]:min-h-88">
         <div
           aria-hidden
           className="absolute inset-0 translate-y-5 scale-x-[0.9] rounded-card border border-border bg-card"
