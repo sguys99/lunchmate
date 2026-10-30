@@ -14,10 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      avoid_rules: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          user_id?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          user_id?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      offices: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          lat: number
+          lng: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          lat: number
+          lng: number
+          name: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          lat?: number
+          lng?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      preferences: {
+        Row: {
+          craving_categories: string[]
+          craving_until: string | null
+          created_at: string
+          dinner_budget: number
+          lunch_budget: number
+          updated_at: string
+          user_id: string
+          walk_minutes: number
+        }
+        Insert: {
+          craving_categories?: string[]
+          craving_until?: string | null
+          created_at?: string
+          dinner_budget?: number
+          lunch_budget?: number
+          updated_at?: string
+          user_id: string
+          walk_minutes?: number
+        }
+        Update: {
+          craving_categories?: string[]
+          craving_until?: string | null
+          created_at?: string
+          dinner_budget?: number
+          lunch_budget?: number
+          updated_at?: string
+          user_id?: string
+          walk_minutes?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          birth_confirmed_at: string | null
+          created_at: string
+          nickname: string | null
+          provider: string | null
+          role: string
+          status: string
+          terms_agreed_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          birth_confirmed_at?: string | null
+          created_at?: string
+          nickname?: string | null
+          provider?: string | null
+          role?: string
+          status?: string
+          terms_agreed_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          birth_confirmed_at?: string | null
+          created_at?: string
+          nickname?: string | null
+          provider?: string | null
+          role?: string
+          status?: string
+          terms_agreed_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          nickname: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

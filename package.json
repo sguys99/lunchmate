@@ -17,6 +17,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:rls": "RUN_RLS_TESTS=1 vitest run src/lib/supabase/rls",
+    "test:rls:cleanup": "node scripts/rls-cleanup.mjs",
     "test:e2e": "playwright test --project=mobile --project=desktop",
     "test:e2e:visual": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=visual-mobile --project=visual-desktop",
     "test:e2e:a11y": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=mobile --project=desktop e2e/a11y.spec.ts",
