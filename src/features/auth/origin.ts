@@ -9,3 +9,20 @@ export function authOrigin(requestOrigin: string): string {
 }
 
 export const CALLBACK_PATH = "/auth/callback";
+
+/**
+ * 같은 출처에서 온 POST인가 (로그아웃, 탈퇴의 CSRF 방지). Origin 헤더가 있으면 요청 출처와 같아야 한다.
+ * Origin이 없으면 Sec-Fetch-Site로 본다. strict면 둘 다 없을 때도 거부한다(탈퇴).
+ */
+export function isSameOriginPost(
+  headers: Headers,
+  requestOrigin: string,
+  strict = false,
+): boolean {
+  const origin = headers.get("origin");
+  if (origin)
+    return origin === requestOrigin || origin === authOrigin(requestOrigin);
+  const site = headers.get("sec-fetch-site");
+  if (site) return site === "same-origin";
+  return !strict;
+}

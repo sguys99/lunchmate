@@ -2,6 +2,8 @@
 // 서버에서 signInWithOAuth를 불러 PKCE code verifier를 쿠키에 두고 제공자 인증 화면으로 303 이동한다.
 // 브라우저 번들에 supabase-js를 싣지 않기 위해 서버에서 시작한다(홈 200KB 예산, research-notes T0.27).
 // GET이 아니라 POST인 이유: 링크 미리 가져오기(prefetch)나 크롤러가 로그인을 시작하지 않게.
+// 인앱 브라우저(UA 판정, src/lib/inapp.ts)에서 구글을 고르면 OAuth로 보내지 않고 /login?view=inapp 안내로 돌려보낸다
+// (AC-AUTH-2 이중 안전장치: 화면 JS가 막지 못한 경우, research-notes T0.17).
 //
 // 출처 (2026-10-30 확인): Supabase "OAuth PKCE flow" 서버 시작 예시(signInWithOAuth on server, 303 + Set-Cookie),
 // supabase-js 2.118 Provider 타입의 `custom:${string}` (커스텀 OIDC provider)
@@ -12,6 +14,7 @@ import { authOrigin, CALLBACK_PATH } from "@/features/auth/origin";
 import { LOGIN_PROVIDERS, SUPABASE_PROVIDER } from "@/features/auth/providers";
 import { sanitizeNext } from "@/features/auth/redirect";
 import { loginUrl } from "@/features/auth/routes";
+import { detectInApp, googleBlocked } from "@/lib/inapp";
 import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
 
@@ -38,6 +41,16 @@ export async function POST(request: NextRequest) {
     });
 
   if (!parsed.success) return back("failed");
+
+  if (
+    parsed.data.provider === "google" &&
+    googleBlocked(detectInApp(request.headers.get("user-agent")))
+  ) {
+    const guide = new URL("/login", request.url);
+    guide.searchParams.set("next", next);
+    guide.searchParams.set("view", "inapp");
+    return NextResponse.redirect(guide, { status: 303, headers: NO_STORE });
+  }
 
   const supabase = await createServerSupabase();
   if (!supabase) return back("failed");

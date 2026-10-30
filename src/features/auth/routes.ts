@@ -80,3 +80,15 @@ export function hasSessionCookie(names: readonly string[]): boolean {
     (n) => n.startsWith("sb-") && /-auth-token(\.\d+)?$/.test(n),
   );
 }
+
+/** 약관 동의를 먼저 받아야 하는 앱 경로 (T4.11). 로그인 사용자가 동의 전이면 proxy가 약관 화면으로 보낸다 */
+const TERMS_GATED_ROOTS = ["/today", "/map", "/poll", "/me", "/admin"] as const;
+
+export function isTermsGatedPath(pathname: string): boolean {
+  return TERMS_GATED_ROOTS.some((r) => underRoot(pathname, r));
+}
+
+/** 약관 화면 주소. next는 지금 경로(검사 후) */
+export function termsUrl(next: string): string {
+  return `${TERMS_PATH}?${new URLSearchParams({ next: sanitizeNext(next) }).toString()}`;
+}

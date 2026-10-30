@@ -22,6 +22,7 @@ export const authLabCopy = {
     names: {
       a: "A 이어지는 시트",
       b: "B 전용 화면",
+      sheet: "로그인 유도 시트 (T4.13 실제 구현)",
     },
   },
 
@@ -76,7 +77,8 @@ export const authLabCopy = {
     googleBlocked: (app: string) =>
       `${app} 안에서는 구글 로그인을 쓸 수 없습니다. 누르면 여는 방법을 알려 드립니다.`,
     redirecting: (provider: string) => `${provider}로 이동하는 중입니다`,
-    redirectingBody: "잠시만 기다려 주세요. 화면이 바뀌지 않으면 다시 눌러 주세요.",
+    redirectingBody:
+      "잠시만 기다려 주세요. 화면이 바뀌지 않으면 다시 눌러 주세요.",
     cancelled: "로그인을 취소했습니다",
     cancelledBody: "준비되면 다시 로그인해 볼까요?",
     error: "로그인하지 못했습니다",
@@ -120,7 +122,8 @@ export const authLabCopy = {
     } satisfies Record<AuthTermId, string>,
     itemNotes: {
       age: "만 14세 미만은 가입할 수 없습니다.",
-      marketing: "새 기능과 이벤트를 앱 알림으로 받습니다. 언제든 끌 수 있습니다.",
+      marketing:
+        "새 기능과 이벤트를 앱 알림으로 받습니다. 언제든 끌 수 있습니다.",
     } as Partial<Record<AuthTermId, string>>,
     /** PRD 11.2: 가입 화면에 한 줄 고지 */
     reviewNotice:
@@ -232,7 +235,8 @@ export const authLabCopy = {
     copyFailed: "링크를 복사하지 못했습니다. 메뉴에서 열기를 이용해 주세요.",
     orKakao: "또는 여기서 바로",
     kakaoFaster: "구글 대신 여기서 바로 카카오 로그인을 해 볼까요?",
-    offlineBody: "연결되면 다른 브라우저로 열 수 있습니다. 링크는 지금 복사해 둘 수 있습니다.",
+    offlineBody:
+      "연결되면 다른 브라우저로 열 수 있습니다. 링크는 지금 복사해 둘 수 있습니다.",
     manualTitle: "직접 여는 방법",
     androidAuto: "누르면 지금 화면이 기본 브라우저에서 열립니다.",
   },

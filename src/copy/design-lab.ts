@@ -31,7 +31,11 @@ export const designLabCopy = {
     authTitle: "로그인, 약관, 인앱 안내 (D-08 선택안)",
     authBody:
       "기본은 B 전용 화면(로그인, 약관, 인앱 안내), 둘러보기 중 행동은 A 시트로 묻습니다. ?view=prompt, terms, inapp과 ?inapp=kakao, ?os=android, ?state=를 붙입니다.",
-    authLinks: { b: "B 전용 화면", a: "A 시트 (둘러보기 중 행동)" },
+    authLinks: {
+      b: "B 전용 화면",
+      a: "A 시트 (둘러보기 중 행동)",
+      sheet: "실제 로그인 유도 시트 (T4.13)",
+    },
     illustrationsTitle: "카테고리 일러스트",
     illustrationsBody:
       "운영용 선화 12종을 카드, 큰 카드, 리스트 아이콘 크기로 봅니다. 라이트와 다크를 나란히 둡니다.",

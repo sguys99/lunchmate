@@ -390,12 +390,12 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T4.7 네이버 로그인: `signInWithOAuth({ provider: 'custom:naver' })`. state, PKCE, nonce는 Supabase가 처리하고, `/auth/callback` Route Handler에서 provider가 `custom:naver`이고 닉네임이 없을 때 `provider_token`으로 네이버 프로필 API를 한 번 호출해 닉네임과 사진만 `profiles`에 저장(토큰 저장, 로깅 금지). 실측에서 토큰 교환, 프로필 API, `provider_token` 중 하나라도 실패하면 research-notes T0.14 대안 설계(서버 직접 구현, `NAVER_LOGIN_*` 서버 전용 키 추가)로 전환 (AUTH-01N, T0.14). 구현 전 네이버 로그인 BI 가이드 원문(https://developers.naver.com/docs/login/bi/bi.md)을 확인해, 초록 면 흰 글자(대비 약 2.3:1, G3 브랜드 예외)보다 대비가 높은 공식 버튼 유형이 있으면 그 유형으로 교체 [확인 필요] (G3 안건 7, D-05, D-06)
 - [x] T4.8 (10/30 완료, Next 16 `src/proxy.ts`, 로그인 필요 /me, /poll, /poll/new, /welcome, /admin. /today, /map, /poll/<code>는 둘러보기 허용) 세션 처리 미들웨어, `(app)` 경로 보호
 - [x] T4.9 (10/30 완료, `sanitizeNext` 단위 테스트, 복귀 경로는 HttpOnly 쿠키 `lm_auth_next`) 로그인 후 원래 경로 복귀, redirect는 내부 경로만 허용 (AUTH-03)
-- [ ] T4.10 인앱 브라우저 감지(카카오톡, 인스타그램, 네이버 등), 카카오 로그인 우선 노출, 구글 탭 시 iOS와 Android 모두 `kakaotalk://web/openExternal` 자동 시도 후 실패하면 수동 안내 + 링크 복사(전용 화면 B). 네이버 앱 인앱도 T4.14 확인 전까지 구글 안내 표시 (AUTH-04, D-08 안건 10, 11)
-- [ ] T4.11 첫 로그인 약관 동의와 만 14세 확인 → 온보딩 연결. 전용 화면 B, 필수 3개만(마케팅 없음), 필수 미체크 시 버튼 `aria-disabled` + "필수 항목 N개에 동의해 주세요", 버튼 문구는 하려던 일을 이음("동의하고 투표 만들기"), "나중에 하기"는 로그아웃 후 둘러보기 복귀, 위치정보는 처리방침 안 한 단락 (AUTH-02, AUTH-06, D-08 안건 6, 8, 9, 12)
-- [ ] T4.12 로그아웃, 회원 탈퇴 뼈대 (삭제 범위는 테이블이 생길 때마다 6.8, 7.x에서 확장) (AUTH-05)
-- [ ] T4.13 비로그인 둘러보기와 로그인 유도 시트(A 시트, Drawer는 행동을 누른 뒤 지연 로딩해 홈 첫 로드 밖) (AUTH-07, D-08)
+- [x] T4.10 (10/30 완료, `src/lib/inapp.ts` UA 판정, 카카오톡 양쪽 OS 스킴 시도 후 1.5초 뒤 수동 안내, 서버 /auth/sign-in에서도 UA 재확인) 인앱 브라우저 감지(카카오톡, 인스타그램, 네이버 등), 카카오 로그인 우선 노출, 구글 탭 시 iOS와 Android 모두 `kakaotalk://web/openExternal` 자동 시도 후 실패하면 수동 안내 + 링크 복사(전용 화면 B). 네이버 앱 인앱도 T4.14 확인 전까지 구글 안내 표시 (AUTH-04, D-08 안건 10, 11)
+- [x] T4.11 (10/30 완료, /welcome/terms 필수 3개, 서버 액션 저장, proxy에서 미동의 사용자 이동, 나중에 하기는 로그아웃) 첫 로그인 약관 동의와 만 14세 확인 → 온보딩 연결. 전용 화면 B, 필수 3개만(마케팅 없음), 필수 미체크 시 버튼 `aria-disabled` + "필수 항목 N개에 동의해 주세요", 버튼 문구는 하려던 일을 이음("동의하고 투표 만들기"), "나중에 하기"는 로그아웃 후 둘러보기 복귀, 위치정보는 처리방침 안 한 단락 (AUTH-02, AUTH-06, D-08 안건 6, 8, 9, 12)
+- [x] T4.12 (10/30 완료, /auth/sign-out, /auth/delete-account Admin API 완전 삭제 + cascade, 삭제 범위 주석 ACCOUNT_DELETION_SCOPE) 로그아웃, 회원 탈퇴 뼈대 (삭제 범위는 테이블이 생길 때마다 6.8, 7.x에서 확장) (AUTH-05)
+- [x] T4.13 (10/30 완료, `useLoginPrompt` 첫 호출 때 시트 지연 로딩, 실제 화면 연결은 T5, 확인 화면 /design-lab/auth/sheet) 비로그인 둘러보기와 로그인 유도 시트(A 시트, Drawer는 행동을 누른 뒤 지연 로딩해 홈 첫 로드 밖) (AUTH-07, D-08)
 - [ ] T4.14 `[실기기]` 카카오톡 인앱에서 카카오/네이버 로그인, 구글 안내 확인 (AC-AUTH-1, AC-AUTH-2)
-- [ ] T4.15 AC-AUTH-3 테스트: 탈퇴 후 재가입 시 새 사용자
+- [x] T4.15 (10/30 완료, `t4-delete-account.rls.test.ts` 같은 이메일 재가입 시 새 id, 이전 행 없음) AC-AUTH-3 테스트: 탈퇴 후 재가입 시 새 사용자
 
 #### 4.3 온보딩
 

@@ -4,6 +4,8 @@ import {
   hasSessionCookie,
   isLoginPath,
   isProtectedPath,
+  isTermsGatedPath,
+  termsUrl,
 } from "./routes";
 
 describe("isProtectedPath (T4.8)", () => {
@@ -103,5 +105,34 @@ describe("hasSessionCookie", () => {
     expect(hasSessionCookie(["sb-abc-auth-token-code-verifier"])).toBe(false);
     expect(hasSessionCookie(["lm_auth_next", "ph_x"])).toBe(false);
     expect(hasSessionCookie([])).toBe(false);
+  });
+});
+
+describe("isTermsGatedPath (T4.11)", () => {
+  it.each([
+    "/today",
+    "/map",
+    "/poll",
+    "/poll/abc123defg",
+    "/poll/new",
+    "/me",
+    "/me/account",
+    "/admin",
+  ])("동의 확인: %s", (p) => expect(isTermsGatedPath(p)).toBe(true));
+  it.each([
+    "/",
+    "/login",
+    "/welcome/terms",
+    "/auth/sign-out",
+    "/terms",
+    "/privacy",
+    "/design-lab",
+    "/todays",
+  ])("확인 안 함: %s", (p) => expect(isTermsGatedPath(p)).toBe(false));
+  it("약관 주소는 next를 검사해 싣는다", () => {
+    expect(termsUrl("/poll/abc?x=1")).toBe(
+      "/welcome/terms?next=%2Fpoll%2Fabc%3Fx%3D1",
+    );
+    expect(termsUrl("//evil.com")).toBe("/welcome/terms?next=%2Ftoday");
   });
 });

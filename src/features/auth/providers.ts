@@ -17,3 +17,10 @@ export function isLoginProvider(v: unknown): v is LoginProvider {
     typeof v === "string" && (LOGIN_PROVIDERS as readonly string[]).includes(v)
   );
 }
+
+/** profiles.provider 값(custom:kakao 등)을 화면 id로. 목록 밖이면 null */
+export function fromSupabaseProvider(
+  v: string | null | undefined,
+): LoginProvider | null {
+  return LOGIN_PROVIDERS.find((k) => SUPABASE_PROVIDER[k] === v) ?? null;
+}

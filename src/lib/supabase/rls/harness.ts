@@ -232,6 +232,29 @@ async function signIn(
   );
 }
 
+/**
+ * 정해진 이메일로 테스트 사용자 생성 + 세션 발급. 탈퇴 후 같은 계정 재가입(AC-AUTH-3)처럼 이메일을 다시 써야 할 때.
+ * 이메일은 정리 스크립트가 찾도록 test_rls_로 시작해야 한다.
+ */
+export async function createTestUserWithEmail(
+  env: RlsEnv,
+  email: string,
+  nickname: string,
+): Promise<TestUser> {
+  if (!email.startsWith(`${TEST_PREFIX}rls_`)) {
+    throw new Error("[rls] 테스트 이메일은 test_rls_로 시작해야 합니다");
+  }
+  const password = randomPassword();
+  const id = await createAuthUser(env, email, password, nickname);
+  try {
+    const token = await signIn(env, email, password);
+    return { id, email, nickname, token };
+  } catch (e) {
+    await deleteAuthUser(env, id);
+    throw e;
+  }
+}
+
 /** 테스트 사용자 생성 + 세션 발급. label은 a, b 같은 짧은 이름 */
 export async function createTestUser(
   env: RlsEnv,

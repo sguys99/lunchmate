@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { loginContext, parseLoginParams } from "./login-params";
+import {
+  loginContext,
+  parseLoginParams,
+  parseLoginView,
+  resolveInAppEnv,
+} from "./login-params";
 
 describe("parseLoginParams", () => {
   it("초대 링크 복귀를 지킨다 (AUTH-03)", () => {
@@ -32,5 +37,33 @@ describe("loginContext", () => {
     ["/today", "default"],
   ] as const)("%s → %s", (next, ctx) => {
     expect(loginContext(next)).toBe(ctx);
+  });
+});
+
+describe("resolveInAppEnv (T4.10)", () => {
+  const kakaoIos =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 KAKAOTALK 10.8.5";
+  it("UA로 판정한다", () => {
+    expect(resolveInAppEnv({}, kakaoIos, false)).toEqual({
+      inApp: "kakaotalk",
+      os: "ios",
+    });
+    expect(resolveInAppEnv({}, null, false)).toEqual({
+      inApp: null,
+      os: null,
+    });
+  });
+  it("쿼리 흉내는 개발 환경(allowOverride)에서만", () => {
+    const q = { inapp: "instagram", os: "android" };
+    expect(resolveInAppEnv(q, null, false).inApp).toBeNull();
+    expect(resolveInAppEnv(q, null, true)).toEqual({
+      inApp: "instagram",
+      os: "android",
+    });
+    expect(resolveInAppEnv({ inapp: "evil" }, null, true).inApp).toBeNull();
+  });
+  it("view=inapp만 안내 화면", () => {
+    expect(parseLoginView({ view: "inapp" })).toBe("inapp");
+    expect(parseLoginView({ view: "x" })).toBe("login");
   });
 });
