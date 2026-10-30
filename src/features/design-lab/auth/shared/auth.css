@@ -1,0 +1,95 @@
+/*
+ * 로그인 시안 CSS 모션 (T4.2). Motion 없이 CSS만 쓴다. 시간과 곡선은 토큰 변수, 색은 토큰 변수만(check-css-colors).
+ * - 단계 전환: 새 단계가 slow 300 enter로 8px 아래에서 떠오른다(한 순간에 하나).
+ * - 이동 중 표시: 스피너 대신 2px 선 위를 짧은 막대가 지나간다(CLAUDE.md 6.3 "스피너만 있는 로딩" 금지).
+ * - 메뉴 그림 강조: 메뉴 버튼 둘레 링이 두 번 숨 쉬고 멈춘다.
+ * - 펼침(C): grid-template-rows 0fr → 1fr, base 260 standard.
+ * prefers-reduced-motion이면 모두 끄고 끝 상태로 보인다.
+ */
+
+@keyframes la-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.la-step {
+  animation: la-step-in var(--lm-duration-slow) var(--lm-ease-enter) both;
+}
+
+/* 이동 중 선: 트랙 border, 막대 primary. 1.2초 왕복이 아니라 한 방향으로 흘러 "넘어가는 중"을 말한다 */
+@keyframes la-progress-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+.la-progress {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--border);
+}
+.la-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: inherit;
+  background: var(--primary);
+  animation: la-progress-run 1.2s var(--lm-ease-standard) infinite;
+}
+
+/* 메뉴 버튼 강조 링: 두 번 숨 쉬고 멈춘다(계속 움직이지 않는다) */
+@keyframes la-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.55;
+  }
+}
+.la-ring {
+  animation: la-ring calc(var(--lm-duration-slow) * 3) var(--lm-ease-standard)
+    0.6s 2;
+}
+
+/* 펼침 상자: 바깥 grid, 안쪽 min-height 0 */
+.la-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--lm-duration-base)
+    var(--lm-ease-standard);
+}
+.la-reveal[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+.la-reveal > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .la-step,
+  .la-ring {
+    animation: none;
+  }
+  .la-progress::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.6;
+  }
+  .la-reveal {
+    transition: none;
+  }
+}

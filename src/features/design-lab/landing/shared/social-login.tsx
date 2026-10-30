@@ -6,44 +6,21 @@
 // - 브랜드 버튼은 포인트 컬러(primary) 개수에 세지 않는다. 화면의 primary는 "추천 체험" 하나뿐이다.
 // - 시안 동작: 누르면 "연결하는 중" 상태가 0.7초 이어진 뒤 토스트. ?state=error면 오류 토스트(다음 행동 안내).
 // - 오프라인이면 모두 aria-disabled. 카카오톡 인앱이면(AUTH-04) 구글만 막고 외부 브라우저 안내를 붙인다.
-import { useState, type ReactNode } from "react";
-import { focusRing, pressMotion } from "@/components/ui/interaction";
+import { useState } from "react";
+import { focusRing } from "@/components/ui/interaction";
 import { toast } from "@/components/ui/lazy-toaster";
 import { landingLabCopy } from "@/copy/design-lab-landing";
 import { cn } from "@/lib/utils";
-import { GoogleSymbol, KakaoSymbol, NaverSymbol } from "./brand-symbols";
+import {
+  BRAND_PROVIDERS,
+  BrandLoginButton,
+  type BrandProvider,
+} from "./brand-button";
 import type { LandingEnv } from "./use-landing-env";
 
 const copy = landingLabCopy.common;
 
-type Provider = "kakao" | "naver" | "google";
-
-const PROVIDERS: readonly {
-  id: Provider;
-  label: string;
-  symbol: ReactNode;
-  className: string;
-}[] = [
-  {
-    id: "kakao",
-    label: copy.kakao,
-    symbol: <KakaoSymbol />,
-    className: "bg-brand-kakao text-brand-kakao-foreground",
-  },
-  {
-    id: "naver",
-    label: copy.naver,
-    symbol: <NaverSymbol />,
-    className: "bg-brand-naver text-brand-naver-foreground",
-  },
-  {
-    id: "google",
-    label: copy.google,
-    symbol: <GoogleSymbol />,
-    className:
-      "border border-brand-google-border bg-brand-google text-brand-google-foreground",
-  },
-];
+type Provider = BrandProvider;
 
 export function SocialLogin({
   env,
@@ -70,41 +47,23 @@ export function SocialLogin({
   return (
     <div className={cn("flex flex-col gap-2.5", className)}>
       <ul aria-label={copy.loginGroupLabel} className="flex flex-col gap-2.5">
-        {PROVIDERS.map((p) => {
+        {BRAND_PROVIDERS.map((p) => {
           const blocked =
             env.offline || (env.inApp && p.id === "google") || pending !== null;
           const busy = pending === p.id;
           return (
             <li key={p.id}>
-              <button
-                type="button"
-                data-provider={p.id}
-                aria-disabled={blocked || undefined}
-                aria-busy={busy || undefined}
-                aria-describedby={
+              <BrandLoginButton
+                provider={p.id}
+                blocked={blocked}
+                busy={busy}
+                onPress={() => start(p.id)}
+                describedBy={
                   env.inApp && p.id === "google"
                     ? "landing-inapp-note"
                     : undefined
                 }
-                onClick={() => {
-                  if (!blocked) start(p.id);
-                }}
-                className={cn(
-                  "relative flex h-12 w-full items-center justify-center rounded-md px-12 font-[family-name:system-ui] text-[0.9375rem] leading-none font-medium",
-                  focusRing,
-                  pressMotion,
-                  p.className,
-                  blocked && !busy && "cursor-not-allowed opacity-45",
-                  busy && "opacity-80",
-                )}
-              >
-                <span className="absolute top-1/2 left-4 flex size-6 -translate-y-1/2 items-center justify-center">
-                  {p.symbol}
-                </span>
-                {/* 이름은 보이는 레이블 그대로(음성 입력으로 "카카오 로그인"을 말해 누를 수 있게, axe label-content-name-mismatch, T3.5) */}
-                <span>{p.label}</span>
-                {busy ? <span className="sr-only">{copy.pending}</span> : null}
-              </button>
+              />
             </li>
           );
         })}

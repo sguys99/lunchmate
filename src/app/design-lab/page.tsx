@@ -46,6 +46,20 @@ export default function DesignLabPage() {
         </Link>
       </Section>
 
+      <Section title={copy.authTitle} body={copy.authBody}>
+        <div className="flex flex-wrap gap-4">
+          {(["a", "b", "c"] as const).map((id) => (
+            <Link
+              key={id}
+              href={`/design-lab/auth/${id}`}
+              className={linkClass}
+            >
+              {copy.authLinks[id]}
+            </Link>
+          ))}
+        </div>
+      </Section>
+
       <Section title={copy.systemTitle} body={copy.switcherBody}>
         <Link href="/design-lab/system" className={linkClass}>
           {copy.switcherLink}
