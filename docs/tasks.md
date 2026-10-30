@@ -382,7 +382,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 #### 4.1 데이터
 
 - [x] T4.4 (10/30 완료, 클라우드 개발 DB 적용, 공개 프로필은 private 스키마 보안 함수 + security_invoker 뷰, 테마와 모션 설정은 기기별 저장이라 DB 제외) 마이그레이션: `profiles`(role, birth_confirmed_at, terms_agreed_at, status, provider. 마케팅 동의 없음, D-08), `offices`(사용자가 놓은 핀 좌표와 이름만, 지오코딩 주소 문자열 없음, T0.16), `avoid_rules`, `preferences` + RLS. `profiles`는 본인만 읽기이므로 공개 후기 작성자와 투표 참여자 표시용 **공개 프로필 뷰**(닉네임, 아바타만)를 함께 만듭니다.
-- [ ] T4.5 RLS 테스트 (본인, 타인, 비로그인), 마이그레이션 내용 보여주고 승인 후 `db:push`, `db:types`
+- [x] T4.5 (10/30 완료, `pnpm test:rls` 28건 통과, 클라우드 개발 DB, test_ 계정 자동 정리) RLS 테스트 (본인, 타인, 비로그인), 마이그레이션 내용 보여주고 승인 후 `db:push`, `db:types`
 
 #### 4.2 인증
 
