@@ -1,7 +1,7 @@
 /**
  * 햅틱 유틸 (T2.14)
  * - 지원 기기에서만 kind별 패턴으로 진동, 미지원(SSR, iOS Safari)이면 아무 동작 없음.
- * - 앱 설정 off, OS 축소 모드, 호출자 reduced면 진동하지 않는다.
+ * - 앱 설정 "진동" off일 때만 끈다. OS 축소 모드, 앱 "모션 줄이기"와는 무관하다(D-04).
  * - MIN_INTERVAL_MS 안의 연속 호출은 버린다.
  * - 브라우저 거부, 예외는 삼키고 false.
  */
@@ -102,17 +102,11 @@ describe("미지원 환경", () => {
   });
 });
 
-describe("축소 모드", () => {
-  it("OS prefers-reduced-motion: reduce면 진동하지 않는다", () => {
+describe("모션 줄이기와 분리 (D-04)", () => {
+  it("OS prefers-reduced-motion: reduce여도 진동 설정이 켜져 있으면 진동한다", () => {
     stubBrowser({ reducedMotion: true });
-    expect(haptic("tap")).toBe(false);
-    expect(vibrate).not.toHaveBeenCalled();
-  });
-
-  it("호출자가 reduced: true(앱 모션 설정)를 넘기면 진동하지 않는다", () => {
-    stubBrowser();
-    expect(haptic("select", { reduced: true })).toBe(false);
-    expect(vibrate).not.toHaveBeenCalled();
+    expect(haptic("tap")).toBe(true);
+    expect(vibrate).toHaveBeenCalledWith(10);
   });
 });
 
@@ -147,9 +141,11 @@ describe("스로틀", () => {
     expect(vibrate).toHaveBeenCalledTimes(2);
   });
 
-  it("꺼짐이나 축소로 버린 호출은 스로틀 시각을 바꾸지 않는다", () => {
+  it("꺼짐으로 버린 호출은 스로틀 시각을 바꾸지 않는다", () => {
     stubBrowser();
-    haptic("tap", { reduced: true });
+    setHapticsEnabled(false);
+    haptic("tap");
+    setHapticsEnabled(true);
     expect(haptic("tap")).toBe(true);
   });
 });

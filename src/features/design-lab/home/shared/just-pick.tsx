@@ -122,7 +122,7 @@ export function useJustPick({
     );
     if (target < 0) return;
     // 누르는 순간의 진동(제스처 핸들러 안). 축소 모드면 haptic이 스스로 건너뛴다
-    haptic("tap", { reduced });
+    haptic("tap");
     const r: JustPickRun = {
       id: nextId.current++,
       setKey,
@@ -169,9 +169,9 @@ export function useJustPick({
     if (run?.phase !== "rolling") return;
     skippedAt.current = performance.now();
     // 건너뛰기는 사용자의 누름(pointerdown, keydown) 안에서 불린다. 결과 확정 진동은 이 경우에만
-    haptic("select", { reduced });
+    haptic("select");
     settle(run);
-  }, [run, settle, reduced]);
+  }, [run, settle]);
 
   // 연출 중 건너뛰기: 화면 어디든 누르기, Esc, Enter, Space
   useEffect(() => {

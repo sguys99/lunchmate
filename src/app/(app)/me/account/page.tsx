@@ -1,4 +1,5 @@
-// /me/account 계정 뼈대 (T4.12, AUTH-05). 로그아웃과 회원 탈퇴. 나 탭 실제 화면(T4.27)에서 이 내용을 옮겨 붙인다.
+// /me/account 계정 관리 (T4.12, T4.27, AUTH-05). 이름(닉네임) 보기와 수정, 로그아웃, 회원 탈퇴.
+// 나 탭(/me)의 "이름", "계정 관리" 줄이 여기로 온다. 이름은 다른 사람에게 보이는 값이라 고지와 함께 둔다(T4.27).
 // 로그인 필요 경로(proxy). flags.auth가 꺼진 환경(프로덕션)에서는 404. 세션은 요청 시점 값이라 Suspense 안에서 읽는다.
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -7,10 +8,12 @@ import { Suspense } from "react";
 import { PageColumn, PageHeader } from "@/components/app-shell";
 import { authCopy } from "@/copy/auth";
 import { AccountScreen } from "@/features/auth/account-screen";
+import { NicknameForm } from "@/features/me/nickname-form";
 import { fromSupabaseProvider } from "@/features/auth/providers";
 import { loginUrl } from "@/features/auth/routes";
 import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { saveNicknameAction } from "../actions";
 import "@/features/auth/auth.css";
 
 export const metadata: Metadata = { title: authCopy.account.metaTitle };
@@ -33,14 +36,20 @@ async function Route({
   if (!supabase || !userId) redirect(loginUrl("/me/account"));
   const { data: profile } = await supabase
     .from("profiles")
-    .select("provider")
+    .select("provider, nickname")
     .eq("user_id", userId)
     .maybeSingle();
   return (
-    <AccountScreen
-      provider={fromSupabaseProvider(profile?.provider)}
-      failed={failed}
-    />
+    <>
+      <NicknameForm
+        initial={profile?.nickname ?? null}
+        submit={saveNicknameAction}
+      />
+      <AccountScreen
+        provider={fromSupabaseProvider(profile?.provider)}
+        failed={failed}
+      />
+    </>
   );
 }
 

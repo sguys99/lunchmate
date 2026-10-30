@@ -3,9 +3,9 @@
 //
 // - 의미 기반 4종만 둔다. 화면 코드는 밀리초를 직접 쓰지 않고 kind를 고른다.
 // - 진동은 "보조" 신호다. 진동만으로 결과를 알리지 않는다(시각 피드백이 항상 함께 있어야 한다).
-// - 끄는 조건: 앱 설정 off(setHapticsEnabled(false)), OS prefers-reduced-motion: reduce,
-//   호출자가 넘긴 reduced: true(앱 모션 설정 "줄이기", useMotionReduced() 값).
-//   설정(SET) 단계에서 "모션 줄이기"와 "진동"을 두 토글로 나누면 축소 모드 연동을 풀고 진동 설정만 따른다(design-decisions D-04).
+// - 끄는 조건은 앱 설정 "진동" off(setHapticsEnabled(false)) 하나뿐이다. 나 탭 화면 설정(T4.25)이 "모션 줄이기"와
+//   "진동"을 두 토글로 나눴으므로 OS prefers-reduced-motion과 앱 "모션 줄이기"는 진동을 끄지 않는다(design-decisions D-04).
+//   값은 src/lib/ui-prefs(UiPrefsProvider)가 저장소에서 읽어 setHapticsEnabled로 맞춘다.
 // - 사용자 제스처 제약: Chrome은 페이지에 사용자 활성화(sticky user activation)가 한 번도 없으면
 //   vibrate를 무시하고 false를 돌려준다(콘솔 경고 포함). 그래서 탭, 스와이프 손 뗌, 버튼 클릭 같은
 //   제스처 핸들러 안에서만 부른다. Realtime 수신, 타이머, 효과(useEffect) 안에서 부르지 않는다.
@@ -36,15 +36,10 @@ export const HAPTIC_PATTERNS: Readonly<
 /** 이 간격(ms) 안의 연속 호출은 무시한다. */
 export const MIN_INTERVAL_MS = 80;
 
-const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-
 let enabled = true;
 let lastAt = Number.NEGATIVE_INFINITY;
 
-/**
- * 앱 설정의 햅틱 켜기/끄기. 설정 저장소가 아직 없어 모듈 변수로만 들고 있다.
- * 설정 화면(나 탭)이 생기면 그 저장소가 이 함수를 불러 동기화한다.
- */
+/** 앱 설정 "진동" 켜기/끄기. 화면 설정 저장소(src/lib/ui-prefs)가 값이 바뀔 때마다 부른다. */
 export function setHapticsEnabled(value: boolean): void {
   enabled = value;
 }
@@ -60,33 +55,15 @@ export function isHapticsSupported(): boolean {
   );
 }
 
-function prefersReducedMotion(): boolean {
-  try {
-    return (
-      typeof window !== "undefined" &&
-      typeof window.matchMedia === "function" &&
-      window.matchMedia(REDUCED_MOTION_QUERY).matches
-    );
-  } catch {
-    return false;
-  }
-}
-
-export interface HapticOptions {
-  /** 앱 모션 설정 "줄이기" 등 호출자가 아는 축소 여부. 보통 useMotionReduced() 값을 넘긴다. */
-  reduced?: boolean;
-}
-
 /**
  * 짧은 진동을 요청한다. 실제로 vibrate를 불렀고 브라우저가 받아들였으면 true.
- * 미지원, 꺼짐, 축소 모드, 스로틀, 브라우저 거부(제스처 밖 호출 등), 예외는 모두 false.
+ * 미지원, 꺼짐, 스로틀, 브라우저 거부(제스처 밖 호출 등), 예외는 모두 false.
  * 반환값으로 UI를 분기하지 않는다(진동은 보조 신호).
  */
-export function haptic(kind: HapticKind, options: HapticOptions = {}): boolean {
+export function haptic(kind: HapticKind): boolean {
   try {
-    if (!enabled || options.reduced) return false;
+    if (!enabled) return false;
     if (!isHapticsSupported()) return false;
-    if (prefersReducedMotion()) return false;
 
     const now = Date.now();
     if (now - lastAt < MIN_INTERVAL_MS) return false;

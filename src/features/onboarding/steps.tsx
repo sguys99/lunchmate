@@ -40,6 +40,28 @@ import { mapMoveTarget } from "./pin";
 import { useLocationSearch } from "./use-kakao-queries";
 import type { CustomAddResult, Onboarding } from "./use-onboarding";
 
+// 화면 조각은 필요한 필드만 받는다. 나 탭 설정(T4.23, T4.24)이 같은 조각을 자기 상태로 쓴다.
+export type LocationSearchState = Pick<
+  Onboarding,
+  "online" | "chooseSearchResult"
+>;
+export type LocateButtonState = Pick<
+  Onboarding,
+  "online" | "locating" | "locate"
+>;
+export type LocationNotesState = Pick<
+  Onboarding,
+  "locateHidden" | "locateFailed"
+> & { office: Pick<Onboarding["office"], "pin"> };
+export type BudgetState = Pick<
+  Onboarding,
+  "prefs" | "setWalk" | "setLunch" | "setDinner"
+>;
+export type AvoidState = Pick<
+  Onboarding,
+  "avoid" | "setFoods" | "setAllergies" | "addCustom" | "removeCustom"
+>;
+
 const copy = onboardingCopy;
 const SEARCH_DEBOUNCE_MS = 350;
 
@@ -107,7 +129,7 @@ export function SaveErrorNote() {
 /* ---------- 1단계: 위치 ---------- */
 
 /** 회사 주소, 건물명 검색. 결과(최대 3개)를 고르면 지도 중심만 옮긴다(핀은 비움) */
-export function LocationSearch({ ob }: { ob: Onboarding }) {
+export function LocationSearch({ ob }: { ob: LocationSearchState }) {
   const inputId = useId();
   const listId = useId();
   const [input, setInput] = useState("");
@@ -252,7 +274,7 @@ export function LocationSearch({ ob }: { ob: Onboarding }) {
 }
 
 /** 현위치 버튼: 지도 중심만 옮긴다(저장하지 않음). 권한 거부를 알면 화면이 숨긴다 */
-export function LocateButton({ ob }: { ob: Onboarding }) {
+export function LocateButton({ ob }: { ob: LocateButtonState }) {
   const disabled = !ob.online || ob.locating;
   return (
     <button
@@ -279,7 +301,7 @@ export function LocateButton({ ob }: { ob: Onboarding }) {
 }
 
 /** 1단계 시트 안내: 권한, 현위치 실패, 핀 상태(지도 위 말풍선 대신 시트에 둔다), 저장 고지 */
-export function LocationNotes({ ob }: { ob: Onboarding }) {
+export function LocationNotes({ ob }: { ob: LocationNotesState }) {
   return (
     <div className="flex flex-col gap-4">
       {ob.locateHidden ? (
@@ -326,7 +348,7 @@ export function BudgetFields({
   ob,
   nearby,
 }: {
-  ob: Onboarding;
+  ob: BudgetState;
   nearby: ReactNode;
 }) {
   return (
@@ -445,7 +467,7 @@ export function NearbyLine({
 
 /* ---------- 3단계: 못 먹는 음식 ---------- */
 
-export function AvoidFields({ ob }: { ob: Onboarding }) {
+export function AvoidFields({ ob }: { ob: AvoidState }) {
   const foodsId = useId();
   const allergyId = useId();
   return (
@@ -489,7 +511,7 @@ export function AvoidFields({ ob }: { ob: Onboarding }) {
   );
 }
 
-function CustomAvoid({ ob }: { ob: Onboarding }) {
+function CustomAvoid({ ob }: { ob: AvoidState }) {
   const inputId = useId();
   const hintId = useId();
   const [draft, setDraft] = useState("");

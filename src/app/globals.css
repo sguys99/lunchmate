@@ -28,6 +28,40 @@
 }
 
 /*
+ * motion-safe:, motion-reduce: 변형 (T4.25, SET-04, D-04). OS prefers-reduced-motion에 더해
+ * 나 탭 화면 설정 "모션 줄이기"(<html data-motion="reduce">, src/lib/ui-prefs)도 줄이기로 본다.
+ * 특이도는 Tailwind 기본(@media만)과 같게 :where로 0을 유지한다.
+ */
+@custom-variant motion-reduce {
+  @media (prefers-reduced-motion: reduce) {
+    @slot;
+  }
+  &:where([data-motion="reduce"], [data-motion="reduce"] *) {
+    @slot;
+  }
+}
+@custom-variant motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    &:not(:where([data-motion="reduce"], [data-motion="reduce"] *)) {
+      @slot;
+    }
+  }
+}
+
+/*
+ * 모션 줄이기 안전망 (T4.25). 기능 CSS 파일(onboarding.css, auth.css 등)은 @media (prefers-reduced-motion)만 보므로
+ * 앱 설정으로 줄였을 때도 전환과 애니메이션이 즉시 끝나게 한다. OS 줄이기는 각 파일의 규칙이 그대로 맡는다.
+ */
+:root[data-motion="reduce"] *,
+:root[data-motion="reduce"] *::before,
+:root[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/*
  * desktop: 변형 (T1.14). 뷰포트가 아니라 가장 가까운 화면 컨테이너(@container/screen) 폭 기준.
  * 디자인 랩 390px 프레임 안에서도 모바일 배치를 유지하기 위해서다. 기준 1024px = 시안 3안의 layout.desktop.breakpoint.
  * 화면 루트에 `@container/screen` 클래스가 있어야 동작한다(DesignScope가 붙인다).

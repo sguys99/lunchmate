@@ -8,7 +8,7 @@
 //
 // 건너뛰기 (ONB-04, D-07 안건 3): 그 단계를 "시작 값"(기본값, 또는 둘러보기에서 이어받은 값, T4.20)으로 두고 다음으로.
 // "여기까지 하고 시작"(C 단축): 지금까지 고른 값은 그대로, 나머지는 시작 값으로 두고 바로 저장한다.
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { onboardingCopy } from "@/copy/onboarding";
 import { searchRadiusFromWalkMinutes } from "@/lib/format";
 import { useOnlineStatus } from "@/lib/network";
@@ -19,17 +19,12 @@ import {
   type Prefs,
 } from "./constants";
 import type { GeoPermission, LocateResult } from "./geolocation";
-import {
-  canSaveOffice,
-  EMPTY_OFFICE_DRAFT,
-  officeReducer,
-  officeSaveInput,
-} from "./office-draft";
-import type { MapMoveTarget, PinGesture } from "./pin";
+import { canSaveOffice, officeSaveInput } from "./office-draft";
 import type {
   FinishOnboardingRequest,
   FinishOnboardingResponse,
 } from "./request";
+import { usePinPlacement } from "./use-pin-placement";
 
 const copy = onboardingCopy;
 
@@ -44,7 +39,7 @@ export type OnboardingDeps = {
   stepCompleted?: (step: OnboardingStep, skipped: boolean) => void;
 };
 
-export type MapMover = (target: MapMoveTarget) => void;
+export type { MapMover } from "./use-pin-placement";
 
 export type CustomAddResult = "added" | "duplicate" | "empty" | "limit";
 
@@ -62,50 +57,27 @@ export function useOnboarding({
   const online = useOnlineStatus();
   const [step, setStep] = useState<OnboardingStep>(1);
   const [visited, setVisited] = useState(0);
-  const [office, dispatch] = useReducer(officeReducer, EMPTY_OFFICE_DRAFT);
   const [prefs, setPrefs] = useState<Prefs>(initialPrefs);
   const [avoid, setAvoid] = useState<AvoidChoice>(initialAvoid);
   const [announce, setAnnounce] = useState("");
-  const [permission, setPermission] = useState<GeoPermission>("unknown");
-  const [locating, setLocating] = useState(false);
-  const [locateFailed, setLocateFailed] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [saveError, setSaveError] = useState(false);
 
-  const moverRef = useRef<MapMover | null>(null);
   const depsRef = useRef(deps);
   useEffect(() => {
     depsRef.current = deps;
   });
-
-  useEffect(() => {
-    let alive = true;
-    void depsRef.current.readPermission().then((p) => {
-      if (alive) setPermission(p);
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const pin = usePinPlacement({
+    enabled: step === 1,
+    announce: setAnnounce,
+    deps,
+  });
+  const office = pin.office;
 
   const go = useCallback((target: OnboardingStep) => {
     setStep(target);
     setVisited((v) => v + 1);
   }, []);
-
-  /** 지도 컴포넌트가 이동 함수를 등록한다 */
-  const registerMover = useCallback((mover: MapMover | null) => {
-    moverRef.current = mover;
-  }, []);
-
-  /** 검색, 현위치: 지도 중심만 옮기고 핀을 비운다 */
-  const moveMap = useCallback(
-    (target: MapMoveTarget, by: "search" | "current-location") => {
-      moverRef.current?.(target);
-      dispatch({ type: "map-moved", by });
-    },
-    [],
-  );
 
   async function finish(finalAvoid: AvoidChoice, finalPrefs: Prefs) {
     const officeInput = officeSaveInput(office);
@@ -145,42 +117,20 @@ export function useOnboarding({
     initialPrefs,
     radiusM,
     announce,
-    permission,
+    permission: pin.permission,
     /** 권한 거부를 알고 있으면 현위치 버튼을 숨긴다 */
-    locateHidden: permission === "denied",
-    locating,
-    locateFailed,
+    locateHidden: pin.locateHidden,
+    locating: pin.locating,
+    locateFailed: pin.locateFailed,
     finishing,
     saveError,
 
-    registerMover,
+    registerMover: pin.registerMover,
     /** 사용자의 핀 놓기 동작(지도 컴포넌트만 부른다) */
-    placePin(gesture: PinGesture) {
-      if (step !== 1) return;
-      dispatch({ type: "pin", gesture });
-      setAnnounce(copy.location.placedAnnounce);
-    },
+    placePin: pin.placePin,
     /** 검색 결과를 골랐다: 지도 이동만 */
-    chooseSearchResult(name: string, target: MapMoveTarget) {
-      moveMap(target, "search");
-      setAnnounce(copy.location.movedTo(name));
-    },
-    async locate() {
-      if (locating) return;
-      setLocating(true);
-      setLocateFailed(false);
-      const r = await depsRef.current.locate();
-      setLocating(false);
-      if (r.ok) {
-        moveMap(r.target, "current-location");
-        setAnnounce(copy.location.movedToCurrent);
-      } else if (r.reason === "denied") {
-        // 안내는 시트의 role=status 안내가 읽는다(중복 낭독 방지)
-        setPermission("denied");
-      } else {
-        setLocateFailed(true);
-      }
-    },
+    chooseSearchResult: pin.chooseSearchResult,
+    locate: pin.locate,
 
     setLunch: (lunch: number) => setPrefs((p) => ({ ...p, lunch })),
     setDinner: (dinner: number) => setPrefs((p) => ({ ...p, dinner })),

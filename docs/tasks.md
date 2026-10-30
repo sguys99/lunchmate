@@ -386,8 +386,8 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 4.2 인증
 
-- [ ] T4.6 카카오, 구글 로그인 (Supabase Auth): 카카오는 `signInWithOAuth({ provider: 'custom:kakao' })`, 구글은 내장 provider. 카카오 토큰 교환 인증 방식(`client_secret_post`)과 부분 동의 시 닉네임 누락 처리를 개발 프로젝트에서 실측 (AUTH-01, T0.20)
-- [ ] T4.7 네이버 로그인: `signInWithOAuth({ provider: 'custom:naver' })`. state, PKCE, nonce는 Supabase가 처리하고, `/auth/callback` Route Handler에서 provider가 `custom:naver`이고 닉네임이 없을 때 `provider_token`으로 네이버 프로필 API를 한 번 호출해 닉네임과 사진만 `profiles`에 저장(토큰 저장, 로깅 금지). 실측에서 토큰 교환, 프로필 API, `provider_token` 중 하나라도 실패하면 research-notes T0.14 대안 설계(서버 직접 구현, `NAVER_LOGIN_*` 서버 전용 키 추가)로 전환 (AUTH-01N, T0.14). 구현 전 네이버 로그인 BI 가이드 원문(https://developers.naver.com/docs/login/bi/bi.md)을 확인해, 초록 면 흰 글자(대비 약 2.3:1, G3 브랜드 예외)보다 대비가 높은 공식 버튼 유형이 있으면 그 유형으로 교체 [확인 필요] (G3 안건 7, D-05, D-06)
+- [x] T4.6 (10/30 완료, 사용자 실측: 카카오 custom:kakao, 구글 로그인 후 닉네임, 사진(kakaocdn, googleusercontent), 약관 동의 저장 확인) 카카오, 구글 로그인 (Supabase Auth): 카카오는 `signInWithOAuth({ provider: 'custom:kakao' })`, 구글은 내장 provider. 카카오 토큰 교환 인증 방식(`client_secret_post`)과 부분 동의 시 닉네임 누락 처리를 개발 프로젝트에서 실측 (AUTH-01, T0.20)
+- [x] T4.7 (10/30 완료, 사용자 실측: custom:naver 토큰 교환과 콜백 프로필 동기화 성공, pstatic 사진. 대안 설계 불필요. 네이버 BI 원문 확인은 T4.28 공식 에셋 교체와 함께 남음) 네이버 로그인: `signInWithOAuth({ provider: 'custom:naver' })`. state, PKCE, nonce는 Supabase가 처리하고, `/auth/callback` Route Handler에서 provider가 `custom:naver`이고 닉네임이 없을 때 `provider_token`으로 네이버 프로필 API를 한 번 호출해 닉네임과 사진만 `profiles`에 저장(토큰 저장, 로깅 금지). 실측에서 토큰 교환, 프로필 API, `provider_token` 중 하나라도 실패하면 research-notes T0.14 대안 설계(서버 직접 구현, `NAVER_LOGIN_*` 서버 전용 키 추가)로 전환 (AUTH-01N, T0.14). 구현 전 네이버 로그인 BI 가이드 원문(https://developers.naver.com/docs/login/bi/bi.md)을 확인해, 초록 면 흰 글자(대비 약 2.3:1, G3 브랜드 예외)보다 대비가 높은 공식 버튼 유형이 있으면 그 유형으로 교체 [확인 필요] (G3 안건 7, D-05, D-06)
 - [x] T4.8 (10/30 완료, Next 16 `src/proxy.ts`, 로그인 필요 /me, /poll, /poll/new, /welcome, /admin. /today, /map, /poll/<code>는 둘러보기 허용) 세션 처리 미들웨어, `(app)` 경로 보호
 - [x] T4.9 (10/30 완료, `sanitizeNext` 단위 테스트, 복귀 경로는 HttpOnly 쿠키 `lm_auth_next`) 로그인 후 원래 경로 복귀, redirect는 내부 경로만 허용 (AUTH-03)
 - [x] T4.10 (10/30 완료, `src/lib/inapp.ts` UA 판정, 카카오톡 양쪽 OS 스킴 시도 후 1.5초 뒤 수동 안내, 서버 /auth/sign-in에서도 UA 재확인) 인앱 브라우저 감지(카카오톡, 인스타그램, 네이버 등), 카카오 로그인 우선 노출, 구글 탭 시 iOS와 Android 모두 `kakaotalk://web/openExternal` 자동 시도 후 실패하면 수동 안내 + 링크 복사(전용 화면 B). 네이버 앱 인앱도 T4.14 확인 전까지 구글 안내 표시 (AUTH-04, D-08 안건 10, 11)
@@ -409,11 +409,11 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 4.4 설정과 랜딩
 
-- [ ] T4.23 사무실 최대 5곳, 기본 지정, 이름 편집 (SET-01)
-- [ ] T4.24 예산, 도보 분, 기피 음식 수정 (SET-02, SET-03)
-- [ ] T4.25 다크 모드 시스템/라이트/다크 (SET-04)
-- [ ] T4.26 "요즘 이게 땡겨요" 7일 가중치 (SET-05)
-- [ ] T4.27 '나' 탭 골격 (설정, 계정, 약관 링크)
+- [x] T4.23 (10/30 완료, /me/offices, 기본 사무실을 지우면 가장 먼저 저장한 곳을 기본으로, 마지막 1곳은 지울 수 없음, 추가는 온보딩 핀 조각 재사용) 사무실 최대 5곳, 기본 지정, 이름 편집 (SET-01)
+- [x] T4.24 (10/30 완료, /me/budget, /me/avoid) 예산, 도보 분, 기피 음식 수정 (SET-02, SET-03)
+- [x] T4.25 (10/30 완료, 기기별 저장 lm-ui-prefs, 첫 페인트 전 인라인 스크립트, 모션 줄이기와 진동 분리 D-04) 다크 모드 시스템/라이트/다크 (SET-04)
+- [x] T4.26 (10/30 완료, /me/craving 3개까지, KST 남은 날) "요즘 이게 땡겨요" 7일 가중치 (SET-05)
+- [x] T4.27 (10/30 완료, 골격만. 시각 방향은 6단계 나 시안에서) '나' 탭 골격 (설정, 계정, 약관 링크)
 - [ ] T4.28 랜딩 구현 (G3 선택안 B, D-06, DESIGN.md 5장 "랜딩"), SEO, OG 메타 (APP-04). 출시 전 카카오, 네이버, 구글 로그인 심볼을 각 사 공식 에셋으로 교체(시안 SVG는 다시 그린 것, G3 안건 7)
 - [ ] T4.29 이벤트: `login_started`, `login_completed`, `onboarding_step_completed`
 - [ ] T4.30 **G4 확인**: AUTH, ONB, SET P0 AC 통과, 3종 로그인 동작, E2E 온보딩 통과
