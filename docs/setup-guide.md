@@ -82,7 +82,7 @@
 - 이후 Claude가 할 일
   - 개발 프로젝트 생성 (리전 서울 `ap-northeast-2`), DB 비밀번호는 Claude가 만들어 사용자에게 보관을 요청
   - `SUPABASE_PROJECT_REF`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`를 `.env.local`에 기록
-  - Auth 설정: Site URL `https://lunchmate-kr.vercel.app`, Redirect URLs에 `https://lunchmate-kr.vercel.app`과 `http://localhost:3000`의 로그인 복귀 경로(정확한 경로는 4단계 인증 구현에서 확정, 와일드카드 미사용)
+  - Auth 설정: Site URL `https://lunchmate-kr.vercel.app`, Redirect URLs에 `https://lunchmate-kr.vercel.app/auth/callback`, `http://localhost:3000/auth/callback`, `http://localhost:3100/auth/callback`(와일드카드 미사용, T4.6에서 확정. 돌아갈 경로는 쿼리가 아니라 `lm_auth_next` 쿠키에 담으므로 콜백 주소는 고정)
   - provider 등록 자리 준비와 값 안내(비밀값 입력은 사용자가 2.1절대로 직접)
 - Supabase 개발 프로젝트 `lunchmate-dev`(ref `shgpenqvdlvbpynzgfes`, 서울)를 만들었습니다. **콜백 URL** `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback`을 카카오(3.3), 네이버(4.1), 구글(5.3)에 넣습니다.
 

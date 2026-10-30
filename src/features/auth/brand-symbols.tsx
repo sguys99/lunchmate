@@ -1,4 +1,4 @@
-// 소셜 로그인 심볼 (T3.4). 색은 DESIGN.md color.*.brand 토큰(Tailwind fill-brand-*)만 쓴다.
+// 소셜 로그인 심볼 (T3.4, T4.6에서 design-lab에서 옮김). 색은 DESIGN.md color.*.brand 토큰(Tailwind fill-brand-*)만 쓴다.
 // - 카카오: 말풍선 심볼, #000000 (카카오 로그인 디자인 가이드, 형태, 비율, 색 변경 금지)
 // - 네이버: N 심볼, 흰색 (네이버 로그인 BI 가이드)
 // - 구글: 표준 G 로고 4색, 흰 바탕 위 (Google Identity branding guidelines, 크기, 색 변경 금지)

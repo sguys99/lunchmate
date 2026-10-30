@@ -49,11 +49,23 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
     });
 
     // 앱 탭 화면 (appShell 플래그는 개발 환경에서 켜져 있다)
-    for (const path of ["/today", "/map", "/poll", "/me"]) {
+    // 비로그인 둘러보기 탭 (AUTH-07). 투표와 나는 로그인 필요라 /login으로 간다(T4.8, features/auth/routes.ts)
+    for (const path of ["/today", "/map"]) {
       test(`앱 탭 ${path}`, async ({ page }) => {
         const res = await page.goto(path);
         expect(res?.status()).toBe(200);
         await expect(page.getByRole("navigation").first()).toBeVisible();
+        await expectNoA11yViolations(page);
+      });
+    }
+
+    for (const path of ["/poll", "/me"]) {
+      test(`로그인 필요 ${path} → /login`, async ({ page }) => {
+        const res = await page.goto(path);
+        expect(res?.status()).toBe(200);
+        const url = new URL(page.url());
+        expect(url.pathname).toBe("/login");
+        expect(url.searchParams.get("next")).toBe(path);
         await expectNoA11yViolations(page);
       });
     }

@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/drawer";
 import { focusRing } from "@/components/ui/interaction";
 import { authLabCopy, type AuthTrigger } from "@/copy/design-lab-auth";
-import { BrandLoginButton } from "@/features/design-lab/landing/shared/brand-button";
+import { BrandLoginButton } from "@/features/auth/brand-button";
 import { cn } from "@/lib/utils";
 import type { AuthParams } from "../shared/params";
 import {

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { authLabCopy } from "@/copy/design-lab-auth";
 import { AuthA } from "@/features/design-lab/auth/a/auth-a";
 import { parseAuthParams } from "@/features/design-lab/auth/shared/params";
-import "@/features/design-lab/auth/shared/auth.css";
+import "@/features/auth/auth.css";
 
 export const metadata: Metadata = {
   title: authLabCopy.index.names.a,

@@ -45,6 +45,14 @@ export const FLAGS = {
     owner: "T2.6 (해제: 오늘 탭 실제 화면 T5)",
     productionOff: true,
   },
+  auth: {
+    description:
+      "로그인 묶음: /login, /auth/sign-in, /auth/callback, 약관 자리 /welcome/terms, proxy의 경로 보호. 약관과 로그아웃(T4.11, T4.12)이 생기기 전까지 프로덕션에서 숨김.",
+    default: false,
+    source: { type: "const", value: true },
+    owner: "T4.6 (해제: T4.11, T4.12 완료 후)",
+    productionOff: true,
+  },
   pollEntry: {
     description: "홈과 상세의 투표 관련 진입점 (친구랑 정하기, 회식 모드 등).",
     default: false,

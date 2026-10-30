@@ -15,7 +15,7 @@ import {
   BRAND_PROVIDERS,
   BrandLoginButton,
   type BrandProvider,
-} from "./brand-button";
+} from "@/features/auth/brand-button";
 import type { LandingEnv } from "./use-landing-env";
 
 const copy = landingLabCopy.common;

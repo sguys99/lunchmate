@@ -388,8 +388,8 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 - [ ] T4.6 카카오, 구글 로그인 (Supabase Auth): 카카오는 `signInWithOAuth({ provider: 'custom:kakao' })`, 구글은 내장 provider. 카카오 토큰 교환 인증 방식(`client_secret_post`)과 부분 동의 시 닉네임 누락 처리를 개발 프로젝트에서 실측 (AUTH-01, T0.20)
 - [ ] T4.7 네이버 로그인: `signInWithOAuth({ provider: 'custom:naver' })`. state, PKCE, nonce는 Supabase가 처리하고, `/auth/callback` Route Handler에서 provider가 `custom:naver`이고 닉네임이 없을 때 `provider_token`으로 네이버 프로필 API를 한 번 호출해 닉네임과 사진만 `profiles`에 저장(토큰 저장, 로깅 금지). 실측에서 토큰 교환, 프로필 API, `provider_token` 중 하나라도 실패하면 research-notes T0.14 대안 설계(서버 직접 구현, `NAVER_LOGIN_*` 서버 전용 키 추가)로 전환 (AUTH-01N, T0.14). 구현 전 네이버 로그인 BI 가이드 원문(https://developers.naver.com/docs/login/bi/bi.md)을 확인해, 초록 면 흰 글자(대비 약 2.3:1, G3 브랜드 예외)보다 대비가 높은 공식 버튼 유형이 있으면 그 유형으로 교체 [확인 필요] (G3 안건 7, D-05, D-06)
-- [ ] T4.8 세션 처리 미들웨어, `(app)` 경로 보호
-- [ ] T4.9 로그인 후 원래 경로 복귀, redirect는 내부 경로만 허용 (AUTH-03)
+- [x] T4.8 (10/30 완료, Next 16 `src/proxy.ts`, 로그인 필요 /me, /poll, /poll/new, /welcome, /admin. /today, /map, /poll/<code>는 둘러보기 허용) 세션 처리 미들웨어, `(app)` 경로 보호
+- [x] T4.9 (10/30 완료, `sanitizeNext` 단위 테스트, 복귀 경로는 HttpOnly 쿠키 `lm_auth_next`) 로그인 후 원래 경로 복귀, redirect는 내부 경로만 허용 (AUTH-03)
 - [ ] T4.10 인앱 브라우저 감지(카카오톡, 인스타그램, 네이버 등), 카카오 로그인 우선 노출, 구글 탭 시 iOS와 Android 모두 `kakaotalk://web/openExternal` 자동 시도 후 실패하면 수동 안내 + 링크 복사(전용 화면 B). 네이버 앱 인앱도 T4.14 확인 전까지 구글 안내 표시 (AUTH-04, D-08 안건 10, 11)
 - [ ] T4.11 첫 로그인 약관 동의와 만 14세 확인 → 온보딩 연결. 전용 화면 B, 필수 3개만(마케팅 없음), 필수 미체크 시 버튼 `aria-disabled` + "필수 항목 N개에 동의해 주세요", 버튼 문구는 하려던 일을 이음("동의하고 투표 만들기"), "나중에 하기"는 로그아웃 후 둘러보기 복귀, 위치정보는 처리방침 안 한 단락 (AUTH-02, AUTH-06, D-08 안건 6, 8, 9, 12)
 - [ ] T4.12 로그아웃, 회원 탈퇴 뼈대 (삭제 범위는 테이블이 생길 때마다 6.8, 7.x에서 확장) (AUTH-05)

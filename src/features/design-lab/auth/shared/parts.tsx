@@ -27,9 +27,9 @@ import {
   GoogleSymbol,
   KakaoSymbol,
   NaverSymbol,
-} from "@/features/design-lab/landing/shared/brand-symbols";
+} from "@/features/auth/brand-symbols";
 import { DemoCard } from "@/features/design-lab/landing/shared/demo-card";
-import { BrandLoginButton } from "@/features/design-lab/landing/shared/brand-button";
+import { BrandLoginButton } from "@/features/auth/brand-button";
 import { cn } from "@/lib/utils";
 import type { InAppGuide } from "./inapp";
 import type { AuthProvider } from "./params";
