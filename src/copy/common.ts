@@ -11,6 +11,8 @@ export const siteCopy = {
   tagline,
   /** <meta name="description">. 지금은 tagline과 같고, 따로 고칠 수 있게 키를 나눈다 */
   description: tagline,
+  /** 하위 페이지 <title> 틀 (copy-guide 4.14 "투표 | 런치메이트") */
+  titleTemplate: "%s | 런치메이트",
 } as const;
 
 /** 버튼과 아이콘 버튼 라벨 */

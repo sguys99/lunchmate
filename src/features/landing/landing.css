@@ -1,5 +1,5 @@
 /*
- * 랜딩 B CSS 모션 (T3.4, G3 D-06). Motion 없이 CSS만 쓴다. 시간과 곡선은 모두 토큰 변수.
+ * 랜딩 CSS 모션 (T3.4 시안, T4.28 실제 랜딩, G3 D-06). Motion 없이 CSS만 쓴다. 시간과 곡선은 모두 토큰 변수.
  * - 첫 화면 효과는 opacity 0에서 시작하지 않는다(LCP 요소가 첫 프레임부터 그려지게).
  * - prefers-reduced-motion이면 모두 끈다(끝 상태로 바로 보임).
  * 색은 토큰 변수만 쓴다(check-css-colors).
@@ -27,7 +27,7 @@
 
 /* ---------- B 다시 뽑기 셔플 (G3 선택 후, Motion 대신 CSS) ----------
  * PoC 셔플(D-02)과 같은 순서: 지금 세 장이 함께 흐려지고(exit, fast) → 새 세 장이 70ms 간격으로 떠오른다(reveal, slow).
- * 한 순간에 움직이는 효과는 하나다(퇴장이 끝난 뒤 등장). data-shuffle은 landing-b.tsx가 붙인다.
+ * 한 순간에 움직이는 효과는 하나다(퇴장이 끝난 뒤 등장). data-shuffle은 demo-section.tsx가 붙인다.
  * 축소 모드에서는 JS가 애니메이션 없이 바로 바꾸고, 여기서도 모두 끈다.
  */
 @keyframes lm-shuffle-exit {
@@ -53,8 +53,7 @@
     forwards;
 }
 .lm-shuffle[data-shuffle="entering"] > li {
-  animation: lm-shuffle-reveal var(--lm-duration-slow) var(--lm-ease-enter)
-    both;
+  animation: lm-shuffle-reveal var(--lm-duration-slow) var(--lm-ease-enter) both;
 }
 .lm-shuffle[data-shuffle="entering"] > li:nth-child(2) {
   animation-delay: var(--lm-stagger);

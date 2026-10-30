@@ -74,7 +74,7 @@ function Panel({ mode }: { mode: "light" | "dark" }) {
             <li key={place.id} className="flex items-center gap-3 py-3">
               <CategoryIllustration slug={place.category} size={40} />
               <div className="flex min-w-0 flex-col">
-                <span className="type-body truncate">{place.name}</span>
+                <span className="truncate type-body">{place.name}</span>
                 <span className="type-caption text-muted-foreground">
                   {categoryLabel(place.category)}
                   <span className="mx-2 inline-block h-3 w-px translate-y-0.5 bg-border" />
@@ -96,7 +96,7 @@ export default function IllustrationsPage() {
         <header className="flex flex-col gap-3 px-2">
           <p className="type-caption text-muted-foreground">{copy.eyebrow}</p>
           <h1 className="type-display text-balance break-keep">{copy.title}</h1>
-          <p className="type-body max-w-xl text-muted-foreground">
+          <p className="max-w-xl type-body text-muted-foreground">
             {copy.description}
           </p>
         </header>

@@ -35,3 +35,30 @@ export function motionTokensFile(tokens: DesignFrontmatter): string {
     "",
   ].join("\n");
 }
+
+/** 생성 경로 (저장소 루트 기준). 루트 layout의 viewport.themeColor가 읽는다(T4.28). */
+export const THEME_COLOR_OUT = "src/lib/design/theme-color.generated.ts";
+
+/**
+ * 확정본 background 색 → <meta name="theme-color"> 값 (라이트, 다크).
+ * 메타 태그는 CSS 변수를 읽지 못해 값을 그대로 옮긴다. 브라우저 주소 표시줄이 화면 바탕과 이어지게 한다.
+ */
+export function themeColorFile(tokens: DesignFrontmatter): string {
+  const header = [
+    "/*",
+    " * 생성물, 직접 수정 금지. 원본: DESIGN.md (루트) 프런트매터 color.{light,dark}.shadcn.background",
+    " * 다시 만들기: pnpm tokens (scripts/build-tokens.ts, 변환: src/lib/design/to-ts.ts)",
+    ` * ${metaLine(tokens)}`,
+    " */",
+  ].join("\n");
+  const value = {
+    light: tokens.color.light.shadcn.background,
+    dark: tokens.color.dark.shadcn.background,
+  };
+  return [
+    header,
+    "",
+    `export const themeColor = ${JSON.stringify(value)} as const;`,
+    "",
+  ].join("\n");
+}

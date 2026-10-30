@@ -27,6 +27,11 @@ export const designLabCopy = {
     homeBody:
       "오늘의 한 곳 큰 카드, 대안 두 곳, 머리 아래 어제 피드백 한 줄 띠입니다. 상태는 ?state=loading, empty, error, offline, 확인용으로 ?deck=overflow, ?feedback=none, ?seed=7을 붙입니다.",
     homeLink: "홈 D1 열기",
+    landingTitle: "랜딩 (G3 선택안 B, T4.28 구현)",
+    landingBody:
+      "실제 랜딩(/)과 같은 컴포넌트에 상태를 입혀 봅니다. 주소 끝에 ?state=loading, offline과 ?inapp=kakao를 붙이고, 플래그가 꺼진 운영 화면은 ?flags=off로 봅니다.",
+    landingLink: "랜딩 확인 화면 열기",
+    landingName: "랜딩 확인 화면",
     onboardingLink: "B 지도 위 시트 열기",
     authTitle: "로그인, 약관, 인앱 안내 (D-08 선택안)",
     authBody:

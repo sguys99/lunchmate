@@ -89,6 +89,19 @@ describe("decideProxy", () => {
       }),
     ).toEqual({ type: "redirect", location: "/today" });
   });
+  it("랜딩 + 로그인 → /today, 비로그인 → 통과 (T4.28)", () => {
+    expect(
+      decideProxy({
+        ...base,
+        pathname: "/",
+        search: "?utm_source=x",
+        signedIn: true,
+      }),
+    ).toEqual({ type: "redirect", location: "/today" });
+    expect(decideProxy({ ...base, pathname: "/", signedIn: false })).toEqual({
+      type: "pass",
+    });
+  });
   it("/login + 비로그인 → 통과", () => {
     expect(
       decideProxy({ ...base, pathname: "/login", signedIn: false }),

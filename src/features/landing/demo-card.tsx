@@ -1,19 +1,21 @@
-// 랜딩 B 데모 카드 (T3.4, G3 D-06). 세 장을 한 화면에 두는 압축형: 왼쪽 선화 56, 오른쪽 식당명, 숫자 3개, 이유 두 줄까지.
-// 시안 B 조각(system/b/parts)은 Motion을 함께 가져와서 쓰지 않는다. 이 파일은 Motion 의존이 없다.
+// 랜딩 데모 카드 (T3.4 시안, T4.28 실제 랜딩으로 옮김, G3 D-06). 세 장을 한 화면에 두는 압축형:
+// 왼쪽 선화 56, 오른쪽 식당명, 숫자 3개, 이유 두 줄까지. Motion 의존이 없다(서버, 클라이언트 어디서든 렌더).
+// design-lab 온보딩 완료와 로그인 시안도 이 카드를 쓴다(MockPlace가 DemoPlace 모양을 만족).
 import { SkeletonLine } from "@/components/states";
 import { Skeleton } from "@/components/ui/skeleton";
-import { landingLabCopy } from "@/copy/design-lab-landing";
-import type { MockPlace } from "@/features/design-lab/mock";
+import { landingCopy } from "@/copy/landing";
 import { categoryLabel } from "@/features/place/categories";
 import { CategoryIllustration } from "@/features/place/illustrations";
 import { reasonWithoutWalk } from "@/features/rec/reason";
 import { priceBandParts } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-const copy = landingLabCopy.b;
+import type { DemoPlace } from "./types";
+
+const copy = landingCopy.demo;
 
 /** 이유 문장에서는 도보 분을 뗀다(숫자 칸과 중복, 홈 카드와 같은 규칙) */
-export function DemoCard({ place }: { place: MockPlace }) {
+export function DemoCard({ place }: { place: DemoPlace }) {
   const price = priceBandParts(place.priceKRW);
   const cells = [
     {

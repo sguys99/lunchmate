@@ -222,6 +222,10 @@ try {
       file: toTs.MOTION_TOKENS_OUT,
       content: toTs.motionTokensFile(final.tokens),
     });
+    outputs.push({
+      file: toTs.THEME_COLOR_OUT,
+      content: toTs.themeColorFile(final.tokens),
+    });
   } else {
     console.log(
       `확정본 없음: 루트 ${FINAL_SRC}가 없어 ${FINAL_OUT}는 그대로 둡니다 (G1 확정 후 생성).`,

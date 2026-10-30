@@ -7,7 +7,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
 import { onboardingLabCopy } from "@/copy/design-lab-onboarding";
 import { MOCK_HOME_TODAY } from "@/features/design-lab/mock";
-import { DemoCard } from "@/features/design-lab/landing/shared/demo-card";
+import { DemoCard } from "@/features/landing/demo-card";
 import { cn } from "@/lib/utils";
 
 const copy = onboardingLabCopy;

@@ -28,7 +28,7 @@ import {
   KakaoSymbol,
   NaverSymbol,
 } from "@/features/auth/brand-symbols";
-import { DemoCard } from "@/features/design-lab/landing/shared/demo-card";
+import { DemoCard } from "@/features/landing/demo-card";
 import { BrandLoginButton } from "@/features/auth/brand-button";
 import { cn } from "@/lib/utils";
 import type { InAppGuide } from "./inapp";

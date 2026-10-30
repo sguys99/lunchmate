@@ -9,6 +9,8 @@
 //   /poll/new처럼 만들기 하위 경로는 로그인 필요.
 // - 약관 자리(/welcome/*)와 관리자(/admin)는 로그인 필요(관리자 role 판정은 그 화면에서 따로).
 // - /login은 로그인 상태면 next로 보낸다(proxy).
+// - 랜딩(/)은 로그인 상태면 오늘(/today)로 보낸다(T4.28, PRD 4.2 "앱 열기 → 오늘 카드"). 세션 쿠키가 있을 때만
+//   판정하므로 비로그인 첫 방문에는 비용이 없다. 쿼리(utm 등)는 버린다.
 
 import { sanitizeNext } from "./redirect";
 
@@ -16,6 +18,9 @@ export const LOGIN_PATH = "/login";
 export const TERMS_PATH = "/welcome/terms";
 /** 온보딩(T4.16). 약관 동의 뒤와 로그인 콜백이 사무실 없는 사용자를 여기로 보낸다 */
 export const ONBOARDING_PATH = "/welcome/onboarding";
+/** 랜딩. 로그인 사용자는 HOME_PATH로 보낸다 */
+export const LANDING_PATH = "/";
+export const HOME_PATH = "/today";
 
 /** 이 경로 자체와 그 아래 전부 로그인 필요 */
 const PROTECTED_ROOTS = ["/me", "/welcome", "/admin"] as const;
@@ -55,6 +60,7 @@ export type ProxyDecision =
  * proxy가 할 일을 정한다 (순수 함수). location은 같은 사이트 안 경로(+쿼리)다.
  * - 보호 경로 + 비로그인 → /login?next=<지금 경로>
  * - /login + 로그인 → next(검사 후) 또는 기본 경로
+ * - / + 로그인 → /today
  */
 export function decideProxy(input: {
   pathname: string;
@@ -72,6 +78,9 @@ export function decideProxy(input: {
   }
   if (signedIn && isLoginPath(pathname)) {
     return { type: "redirect", location: sanitizeNext(input.nextParam) };
+  }
+  if (signedIn && pathname === LANDING_PATH) {
+    return { type: "redirect", location: HOME_PATH };
   }
   return { type: "pass" };
 }

@@ -2,7 +2,7 @@
 // 컴포넌트 안에 문장을 직접 쓰지 않는다 (CLAUDE.md 4장).
 // 문체 (tasks.md 2.2절): 상태, 설명, 오류, 정책은 습니다체, 질문과 제안은 해요체. 버튼과 라벨은 명사형.
 // 약관 본문(documents)은 습니다체 100%. 로그인 버튼 레이블은 각 사 가이드 문구(copy-guide 4.6)라
-// 랜딩 문구(design-lab-landing.ts common)를 그대로 쓴다.
+// 랜딩 문구(src/copy/landing.ts, authCopy.providers)와 같다.
 // 선택 게이트(T4.3) 뒤 src/copy/auth.ts로 옮기고 이 파일은 지운다.
 
 const brand = "런치메이트";

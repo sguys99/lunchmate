@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { designLabCopy } from "@/copy/design-lab";
-import { landingLabCopy } from "@/copy/design-lab-landing";
 import { onboardingLabCopy } from "@/copy/design-lab-onboarding";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
@@ -109,12 +108,9 @@ export default function DesignLabPage() {
         </Link>
       </Section>
 
-      <Section
-        title={landingLabCopy.index.title}
-        body={landingLabCopy.index.labBody}
-      >
+      <Section title={copy.landingTitle} body={copy.landingBody}>
         <Link href="/design-lab/landing/b" className={linkClass}>
-          {landingLabCopy.index.labLink}
+          {copy.landingLink}
         </Link>
       </Section>
 

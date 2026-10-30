@@ -82,7 +82,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       await expectNoA11yViolations(page);
     });
 
-    // G3 선택안 (design-decisions D-05, D-06): 홈 D1 x (정상 + 4상태 + 배지 넘침 + 어제 피드백 없는 날), 랜딩 B x (정상 + 상태 + 카카오톡 인앱)
+    // G3 선택안 (design-decisions D-05, D-06): 홈 D1 x (정상 + 4상태 + 배지 넘침 + 어제 피드백 없는 날). 랜딩은 아래 실제 / 와 확인 화면
     for (const query of [
       "",
       "?state=loading",
@@ -107,18 +107,39 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       ).toBeAttached();
       await expectNoA11yViolations(page);
     });
+    // 실제 랜딩 / (T4.28). 디자인 랩 없이도 돈다. 개발 환경은 appShell, auth 플래그가 켜져 체험과 로그인이 보인다.
+    // 네이버 로그인 버튼은 네이버 가이드 색(초록 면 + 흰 글자, 대비 약 2.3:1)을 그대로 쓴다.
+    // 브랜드 예외로 기록(G3 안건 7, DESIGN.md 5장 소셜 로그인 버튼)하고 대비 검사에서만 뺀다.
+    test("랜딩 /", async ({ page }) => {
+      await openLabRoute(page, "/");
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "오늘 점심, 세 곳이면 충분해요",
+        }),
+      ).toBeVisible();
+      await expectNoA11yViolations(page, {
+        exclude: ['[data-provider="naver"]'],
+      });
+    });
+    test("랜딩 / 다시 뽑기 뒤", async ({ page }) => {
+      await openLabRoute(page, "/");
+      await page.getByRole("button", { name: "다시 뽑기" }).click();
+      await expect(page.getByText("2/3")).toBeVisible();
+      await expectNoA11yViolations(page, {
+        exclude: ['[data-provider="naver"]'],
+      });
+    });
+    // 랜딩 확인 화면(같은 컴포넌트, 상태 흉내). ?flags=off는 운영(플래그 꺼짐) 화면
     for (const query of [
-      "",
       "?state=loading",
-      "?state=error",
       "?state=offline",
       "?inapp=kakao",
+      "?flags=off",
     ]) {
-      test(`랜딩 B${query}`, async ({ page }) => {
+      test(`랜딩 확인 화면${query}`, async ({ page }) => {
         test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
         await openLabRoute(page, `/design-lab/landing/b${query}`);
-        // 네이버 로그인 버튼은 네이버 가이드 색(초록 면 + 흰 글자, 대비 약 2.3:1)을 그대로 쓴다.
-        // 브랜드 예외로 기록(G3 안건 7, DESIGN.md 5장 소셜 로그인 버튼)하고 대비 검사에서만 뺀다. 4단계 로그인 전 네이버 BI 원문 확인
         await expectNoA11yViolations(page, {
           exclude: ['[data-provider="naver"]'],
         });
