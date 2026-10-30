@@ -14,6 +14,8 @@ import { sanitizeNext } from "./redirect";
 
 export const LOGIN_PATH = "/login";
 export const TERMS_PATH = "/welcome/terms";
+/** 온보딩(T4.16). 약관 동의 뒤와 로그인 콜백이 사무실 없는 사용자를 여기로 보낸다 */
+export const ONBOARDING_PATH = "/welcome/onboarding";
 
 /** 이 경로 자체와 그 아래 전부 로그인 필요 */
 const PROTECTED_ROOTS = ["/me", "/welcome", "/admin"] as const;

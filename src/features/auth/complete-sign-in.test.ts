@@ -207,3 +207,36 @@ describe("completeSignIn: 약관과 복귀 (T4.9)", () => {
     expect(r.location).toContain("/welcome/terms");
   });
 });
+
+describe("온보딩 연결 고리 (T4.16)", () => {
+  const agreed = {
+    nickname: "기존",
+    avatar_url: null,
+    terms_agreed_at: "2026-10-30T00:00:00Z",
+  };
+  it("동의했지만 사무실이 없으면 온보딩으로 next를 이어 보낸다", async () => {
+    const d = deps({ profile: agreed, hasOffice: vi.fn(async () => false) });
+    const r = await completeSignIn(base, d);
+    expect(r.location).toBe("/welcome/onboarding?next=%2Fpoll%2FAbCdEf1234");
+  });
+  it("사무실이 있거나 확인에 실패하면 next로", async () => {
+    for (const hasOffice of [
+      vi.fn(async () => true),
+      vi.fn(async () => {
+        throw new Error("db");
+      }),
+    ]) {
+      const r = await completeSignIn(
+        base,
+        deps({ profile: agreed, hasOffice }),
+      );
+      expect(r.location).toBe("/poll/AbCdEf1234");
+    }
+  });
+  it("약관 전이면 사무실을 묻지 않는다", async () => {
+    const hasOffice = vi.fn(async () => false);
+    const r = await completeSignIn(base, deps({ hasOffice }));
+    expect(hasOffice).not.toHaveBeenCalled();
+    expect(r.location).toContain("/welcome/terms");
+  });
+});

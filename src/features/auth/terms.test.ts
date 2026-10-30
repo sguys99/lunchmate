@@ -51,8 +51,17 @@ describe("동의 버튼 문구는 하려던 일을 잇는다 (D-08 C)", () => {
 
 describe("동의 뒤 갈 곳 (온보딩 연결 고리, T4.16)", () => {
   it("온보딩 경로가 없으면 next 그대로", () => {
-    expect(afterTermsLocation({ next: "/poll/abc", hasOffice: false })).toBe(
-      "/poll/abc",
+    expect(
+      afterTermsLocation({
+        next: "/poll/abc",
+        hasOffice: false,
+        onboardingPath: null,
+      }),
+    ).toBe("/poll/abc");
+  });
+  it("기본 온보딩 경로는 /welcome/onboarding", () => {
+    expect(afterTermsLocation({ next: "/today", hasOffice: false })).toBe(
+      "/welcome/onboarding?next=%2Ftoday",
     );
   });
   it("온보딩 경로가 있고 사무실이 없으면 온보딩으로 next를 이어 보낸다", () => {

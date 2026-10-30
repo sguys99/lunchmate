@@ -24,6 +24,12 @@ export type MarkerOptions = {
   title?: string;
   zIndex?: number;
   onClick?: () => void;
+  /** true면 사용자가 마커를 끌어 옮길 수 있다 */
+  draggable?: boolean;
+  /** 끌기 시작(사용자 조작) */
+  onDragStart?: () => void;
+  /** 끌기 끝(사용자 조작). 놓인 좌표를 넘긴다 */
+  onDragEnd?: (position: LatLng) => void;
 };
 
 export interface MarkerHandle {
@@ -33,11 +39,41 @@ export interface MarkerHandle {
 
 export type Unsubscribe = () => void;
 
+/** 지도 위 원(반경 표시). 색은 호출하는 쪽이 디자인 토큰에서 읽어 넘긴다(하드코딩 금지) */
+export type CircleOptions = {
+  center: LatLng;
+  /** 반지름(m) */
+  radius: number;
+  strokeColor: string;
+  fillColor: string;
+  strokeOpacity?: number;
+  fillOpacity?: number;
+  strokeWeight?: number;
+};
+
+export interface CircleHandle {
+  setCenter(center: LatLng): void;
+  setRadius(radius: number): void;
+  remove(): void;
+}
+
 export interface MapInstance {
   setCenter(center: LatLng): void;
   getCenter(): LatLng;
   setZoom(zoom: number): void;
+  /** 부드럽게 이동한다(공급자가 지원하면 애니메이션) */
+  panTo(center: LatLng): void;
+  /** 지도 요소 크기가 바뀌었을 때 알린다(네이버는 생성 시 크기에 고정된다). 중심은 유지한다 */
+  setSize(size: { width: number; height: number }): void;
+  /** 화면 px만큼 옮긴다(방향키 조작) */
+  panBy(offset: { x: number; y: number }): void;
   addMarker(options: MarkerOptions): MarkerHandle;
+  addCircle(options: CircleOptions): CircleHandle;
+  /**
+   * 사용자가 지도를 눌렀을 때(끌기 제외) 그 지점 좌표로 호출된다.
+   * 사용자 조작에서만 불린다. 코드가 setCenter, panTo를 불러도 호출되지 않는다.
+   */
+  onClick(callback: (position: LatLng) => void): Unsubscribe;
   /** 영역이 모두 보이도록 맞춘다. padding 은 네 방향 여백(px) */
   fitBounds(bounds: Bounds, padding?: number): void;
   /** 지도 이동, 확대가 멈출 때마다 호출된다 */

@@ -60,6 +60,13 @@ export async function GET(request: NextRequest) {
         return !error;
       },
       fetchNaverProfile: (token) => fetchNaverProfile(token),
+      async hasOffice(userId) {
+        const { count, error } = await supabase!
+          .from("offices")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId);
+        return error ? true : (count ?? 0) > 0;
+      },
     },
   );
 

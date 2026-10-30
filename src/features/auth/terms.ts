@@ -2,6 +2,7 @@
 // 항목은 필수 3개뿐이다(만 14세 이상, 이용약관, 개인정보 수집 이용). 마케팅 동의는 받지 않는다.
 // zod 스키마는 브라우저 번들에 싣지 않으려고 terms-submit.ts(서버 액션 쪽)에 둔다.
 import { loginContext } from "./login-params";
+import { ONBOARDING_PATH as ONBOARDING_ROUTE } from "./routes";
 
 export const TERM_IDS = ["age", "service", "privacy"] as const;
 export type TermId = (typeof TERM_IDS)[number];
@@ -79,11 +80,10 @@ export function termsAction(next: string): TermsAction {
 }
 
 /**
- * 동의를 마친 뒤 갈 곳. 온보딩 연결 고리(T4.16): 사무실이 없으면 온보딩으로 보낸다.
- * 온보딩 화면이 생기기 전(ONBOARDING_PATH null)에는 next 그대로.
- * 온보딩 경로를 정하면 여기 한 줄만 바꾸면 된다(서버 액션은 hasOffice를 이미 넘긴다).
+ * 동의를 마친 뒤 갈 곳. 온보딩 연결 고리(T4.16): 사무실이 없으면 온보딩(/welcome/onboarding)으로 next를 이어 보낸다.
+ * onboardingPath에 null을 넘기면 next 그대로(온보딩을 끈 환경, 테스트).
  */
-export const ONBOARDING_PATH: string | null = null;
+export const ONBOARDING_PATH: string | null = ONBOARDING_ROUTE;
 
 export function afterTermsLocation(input: {
   next: string;

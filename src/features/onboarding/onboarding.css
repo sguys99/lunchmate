@@ -1,0 +1,97 @@
+/*
+ * 온보딩 CSS (T4.16~T4.19, DESIGN.md 5장 "온보딩"). Motion 없이 CSS만 쓴다. 시간과 곡선, 색은 모두 토큰 변수.
+ * - 단계가 바뀌면 시트 내용이 8px 아래에서 slow 300 enter로 떠오른다(첫 화면은 정적, LCP).
+ * - 핀을 끄는 동안 6px 들렸다가 내려앉는다(fast).
+ * - 한 순간에 움직이는 것은 하나. prefers-reduced-motion이면 모두 끈다.
+ * 지도 마커(핀, 식당 점)는 SDK가 그리는 DOM이라 Tailwind 대신 이 파일의 클래스를 쓴다.
+ */
+@keyframes ob-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ob-rise {
+  animation: ob-rise var(--lm-duration-slow) var(--lm-ease-enter) both;
+}
+
+/* 회사 핀: 올리브 원 + 건물 아이콘 + 가는 기둥 + 바닥 그림자. 끝(가운데 아래)이 좌표에 닿는다 */
+.ob-pin {
+  display: flex;
+  width: 32px;
+  height: 48px;
+  flex-direction: column;
+  align-items: center;
+  cursor: grab;
+  transition: transform var(--lm-duration-fast) var(--lm-ease-standard);
+}
+.ob-pin[data-draggable="false"] {
+  cursor: default;
+}
+.ob-pin[data-lifted="true"] {
+  cursor: grabbing;
+  transform: translateY(-6px);
+}
+.ob-pin-head {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--primary);
+  border-radius: 9999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 0 0 3px var(--card);
+}
+.ob-pin-head svg {
+  width: 16px;
+  height: 16px;
+}
+.ob-pin-stem {
+  width: 1.5px;
+  height: 12px;
+  background: var(--primary);
+}
+.ob-pin-shadow {
+  width: 12px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 20%, transparent);
+}
+
+/* 근처 식당 점: 원 안은 primary, 밖은 muted */
+.ob-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--card);
+  border-radius: 9999px;
+  background: var(--muted-foreground);
+  opacity: 0.55;
+  transition:
+    background-color var(--lm-duration-base) var(--lm-ease-standard),
+    opacity var(--lm-duration-base) var(--lm-ease-standard);
+}
+.ob-dot[data-inside="true"] {
+  background: var(--primary);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-rise {
+    animation: none !important;
+  }
+  .ob-pin,
+  .ob-dot {
+    transition: none !important;
+  }
+  .ob-pin[data-lifted="true"] {
+    transform: none;
+  }
+}

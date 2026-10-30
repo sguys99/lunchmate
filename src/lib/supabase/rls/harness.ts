@@ -183,12 +183,30 @@ export async function deleteAuthUser(env: RlsEnv, id: string): Promise<void> {
  * 둘 다 실패하면 대시보드 Authentication > Sign In / Providers에서 Email을 켜되
  * "Allow new users to sign up"은 끄고 확인 메일을 유지하는 방법을 안내한다.
  */
+/** Auth 세션 응답(비밀번호 로그인, 매직 링크 검증 공통). E2E가 브라우저 세션 쿠키를 만들 때 쓴다 */
+export type AuthSession = {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  expires_at?: number;
+  token_type: string;
+  user: { id: string } & Record<string, unknown>;
+};
+
 async function signIn(
   env: RlsEnv,
   email: string,
   password: string,
 ): Promise<string> {
-  const pw = await parse<{ access_token: string }>(
+  return (await signInSession(env, email, password)).access_token;
+}
+
+async function signInSession(
+  env: RlsEnv,
+  email: string,
+  password: string,
+): Promise<AuthSession> {
+  const pw = await parse<AuthSession>(
     await fetch(`${env.url}/auth/v1/token?grant_type=password`, {
       method: "POST",
       headers: {
@@ -198,7 +216,7 @@ async function signIn(
       body: JSON.stringify({ email, password }),
     }),
   );
-  if (pw.data?.access_token) return pw.data.access_token;
+  if (pw.data?.access_token) return pw.data;
 
   const link = await parse<{
     hashed_token?: string;
@@ -213,7 +231,7 @@ async function signIn(
   const tokenHash =
     link.data?.hashed_token ?? link.data?.properties?.hashed_token;
   if (tokenHash) {
-    const verified = await parse<{ access_token: string }>(
+    const verified = await parse<AuthSession>(
       await fetch(`${env.url}/auth/v1/verify`, {
         method: "POST",
         headers: {
@@ -223,7 +241,7 @@ async function signIn(
         body: JSON.stringify({ type: "email", token_hash: tokenHash }),
       }),
     );
-    if (verified.data?.access_token) return verified.data.access_token;
+    if (verified.data?.access_token) return verified.data;
   }
 
   throw new Error(
@@ -292,4 +310,29 @@ export async function adminCount(
   if (!Number.isFinite(total))
     throw new Error(`[rls] ${table} 개수 조회 실패 (${res.status})`);
   return total;
+}
+
+/**
+ * 테스트 사용자 생성 + 전체 세션(refresh_token 포함). E2E(e2e/helpers/session.ts)가 브라우저 쿠키로 넣는다.
+ * 이메일은 test_rls_로 시작해 정리 스크립트(pnpm test:rls:cleanup)가 지운다.
+ */
+export async function createTestUserSession(
+  env: RlsEnv,
+  runId: string,
+  label: string,
+): Promise<{ user: TestUser; session: AuthSession }> {
+  const nickname = `${TEST_PREFIX}${label}_${runId}`.slice(0, 20);
+  const email = `${TEST_PREFIX}rls_${runId}_${label}@${env.emailDomain}`;
+  const password = randomPassword();
+  const id = await createAuthUser(env, email, password, nickname);
+  try {
+    const session = await signInSession(env, email, password);
+    return {
+      user: { id, email, nickname, token: session.access_token },
+      session,
+    };
+  } catch (e) {
+    await deleteAuthUser(env, id);
+    throw e;
+  }
 }

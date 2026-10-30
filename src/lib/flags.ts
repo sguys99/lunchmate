@@ -47,7 +47,7 @@ export const FLAGS = {
   },
   auth: {
     description:
-      "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 약관 초안 /terms와 /privacy, 계정 /me/account, proxy의 경로 보호와 약관 확인. 약관 최종 전문과 실기기 확인(T4.14) 전까지 프로덕션에서 숨김.",
+      "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 초안 /terms와 /privacy, 계정 /me/account, proxy의 경로 보호와 약관 확인. 약관 최종 전문과 실기기 확인(T4.14) 전까지 프로덕션에서 숨김.",
     default: false,
     source: { type: "const", value: true },
     owner: "T4.6 (해제: T4.11, T4.12 완료 후)",

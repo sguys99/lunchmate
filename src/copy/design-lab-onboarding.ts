@@ -1,6 +1,6 @@
 // 온보딩 3단계 시안 문구 (T4.1, PRD ONB-01~05, copy-guide 4.6). 컴포넌트 안에 문장을 직접 쓰지 않는다 (CLAUDE.md 4장).
 // 문체 (tasks.md 2.2절): 상태, 결과, 설명, 오류, 권한, 정책은 습니다체, 질문과 부탁은 해요체. 버튼, 칩, 라벨은 명사형.
-// 선택 게이트(T4.3) 뒤 실제 구현(T4.16~T4.21) 때 src/copy/onboarding.ts로 옮기고 이 파일은 지운다.
+// 실제 화면 문구는 src/copy/onboarding.ts(T4.16~T4.21)로 옮겼다. 이 파일은 확인 화면 /design-lab/onboarding/b 전용이다.
 
 const STEP_TOTAL = 3;
 

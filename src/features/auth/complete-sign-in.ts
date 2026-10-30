@@ -4,7 +4,9 @@
 // 2. code를 세션으로 교환(PKCE, code verifier는 /auth/sign-in이 쿠키에 둔 것) 실패 → /login?error=failed
 // 3. 네이버(custom:naver)이고 닉네임이 비어 있으면 provider_token으로 프로필 API를 한 번 불러 닉네임, 사진만 채운다.
 //    실패는 무시(온보딩에서 닉네임 입력). 토큰은 이 함수 밖으로 나가지 않고 로그도 남기지 않는다.
-// 4. 약관 동의 전(terms_agreed_at null)이면 약관 화면으로, 아니면 next로.
+// 4. 약관 동의 전(terms_agreed_at null)이면 약관 화면으로(약관 뒤 온보딩 연결은 terms.ts).
+// 5. 동의했지만 사무실이 없으면(온보딩을 마치지 않음, T4.16) 온보딩으로 next를 이어 보낸다. 확인에 실패하면 next로.
+import { afterTermsLocation } from "./terms";
 import { loginUrl, TERMS_PATH } from "./routes";
 import type { ProfilePatch } from "./naver-profile";
 
@@ -32,6 +34,8 @@ export type CompleteSignInDeps = {
   readProfile: (userId: string) => Promise<ProfileRow | null>;
   updateProfile: (userId: string, patch: ProfilePatch) => Promise<boolean>;
   fetchNaverProfile: (accessToken: string) => Promise<ProfilePatch | null>;
+  /** 사무실이 1곳 이상 있는가(온보딩 연결 고리). 없으면 확인하지 않고 next로 */
+  hasOffice?: (userId: string) => Promise<boolean>;
 };
 
 export type CompleteSignInInput = {
@@ -116,8 +120,13 @@ export async function completeSignIn(
 
   // 프로필을 못 읽었으면 약관 화면이 다시 확인한다(그쪽이 로그인 필요 경로라 안전).
   const needsTerms = !profile?.terms_agreed_at;
+  let location = needsTerms ? termsUrl(next) : next;
+  if (!needsTerms && deps.hasOffice) {
+    const hasOffice = await deps.hasOffice(userId).catch(() => true);
+    location = afterTermsLocation({ next, hasOffice });
+  }
   return {
-    location: needsTerms ? termsUrl(next) : next,
+    location,
     outcome: { type: "signed-in", provider, naverSync, needsTerms },
   };
 }

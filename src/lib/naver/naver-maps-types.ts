@@ -19,6 +19,9 @@ export interface NaverMap {
   setCenter(center: NaverLatLng): void;
   getCenter(): NaverLatLng;
   setZoom(zoom: number): void;
+  panTo(center: NaverLatLng): void;
+  panBy(offset: NaverPoint): void;
+  setSize(size: { width: number; height: number }): void;
   fitBounds(
     bounds: NaverLatLngBounds,
     margin?: { top: number; right: number; bottom: number; left: number },
@@ -27,13 +30,35 @@ export interface NaverMap {
 }
 export interface NaverMarker {
   setPosition(position: NaverLatLng): void;
+  getPosition(): NaverLatLng;
   setMap(map: NaverMap | null): void;
+}
+export interface NaverCircle {
+  setCenter(center: NaverLatLng): void;
+  setRadius(radius: number): void;
+  setMap(map: NaverMap | null): void;
+}
+export interface NaverCircleOptions {
+  map: NaverMap;
+  center: NaverLatLng;
+  radius: number;
+  strokeColor: string;
+  strokeOpacity: number;
+  strokeWeight: number;
+  fillColor: string;
+  fillOpacity: number;
+  clickable: boolean;
+}
+/** 지도 click 이벤트 인자 중 쓰는 것 */
+export interface NaverPointerEvent {
+  coord: NaverLatLng;
 }
 export interface NaverMarkerOptions {
   position: NaverLatLng;
   map: NaverMap;
   title?: string;
   zIndex?: number;
+  draggable?: boolean;
   icon: { content: string | HTMLElement; anchor?: NaverPoint };
 }
 
@@ -46,11 +71,13 @@ export interface NaverMapsApi {
   LatLngBounds: new (sw: NaverLatLng, ne: NaverLatLng) => NaverLatLngBounds;
   Point: new (x: number, y: number) => NaverPoint;
   Marker: new (options: NaverMarkerOptions) => NaverMarker;
+  Circle: new (options: NaverCircleOptions) => NaverCircle;
   Event: {
     addListener(
       target: object,
       eventName: string,
-      handler: () => void,
+      // 이벤트마다 인자가 다르다(click은 NaverPointerEvent). 받는 쪽에서 좁힌다
+      handler: (event?: unknown) => void,
     ): NaverListener;
     removeListener(listener: NaverListener): void;
   };
