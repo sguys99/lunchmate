@@ -113,6 +113,48 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       });
     }
 
+    // T4.1 온보딩 시안
+    for (const id of ["a", "b", "c"]) {
+      for (const query of [
+        "",
+        "?state=loading",
+        "?state=empty",
+        "?state=error",
+        "?state=offline",
+        "?perm=denied",
+        "?step=2",
+        "?step=3",
+        "?step=done",
+      ]) {
+        test(`온보딩 ${id}${query}`, async ({ page }) => {
+          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+          await openLabRoute(page, `/design-lab/onboarding/${id}${query}`);
+          await expectNoA11yViolations(page);
+        });
+      }
+    }
+
+    // T4.2 로그인, 약관, 인앱 안내 시안. 네이버 버튼은 랜딩 B와 같은 브랜드 예외
+    for (const id of ["a", "b", "c"]) {
+      for (const query of [
+        "",
+        "?view=terms",
+        "?view=inapp",
+        "?view=inapp&os=android",
+        "?state=loading",
+        "?state=error",
+        "?state=offline",
+      ]) {
+        test(`로그인 ${id}${query}`, async ({ page }) => {
+          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+          await openLabRoute(page, `/design-lab/auth/${id}${query}`);
+          await expectNoA11yViolations(page, {
+            exclude: ['[data-provider="naver"]'],
+          });
+        });
+      }
+    }
+
     test("PoC 목록", async ({ page }) => {
       test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
       const res = await page.goto("/design-lab/poc");

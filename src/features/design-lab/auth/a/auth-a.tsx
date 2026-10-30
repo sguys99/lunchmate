@@ -107,11 +107,21 @@ export function AuthA({ params }: { params: AuthParams }) {
                       : null
                 }
               />
-              <div key={page} className={cn("flex min-h-0 flex-1 flex-col", page !== params.view && "la-step")}>
+              <div
+                key={page}
+                className={cn(
+                  "flex min-h-0 flex-1 flex-col",
+                  page !== params.view && "la-step",
+                )}
+              >
                 {flow.doc ? (
                   <DocPage flow={flow} titleRef={titleRef} />
                 ) : flow.step === "prompt" ? (
-                  <PromptPage flow={flow} trigger={trigger} titleRef={titleRef} />
+                  <PromptPage
+                    flow={flow}
+                    trigger={trigger}
+                    titleRef={titleRef}
+                  />
                 ) : flow.step === "terms" ? (
                   <TermsPage flow={flow} titleRef={titleRef} />
                 ) : (
@@ -199,7 +209,11 @@ function PromptPage({
 
         <div className="flex items-center justify-between gap-4 border-t border-border pt-3">
           <p className="flex items-center gap-2 type-caption break-keep text-muted-foreground">
-            <CornerDownLeft aria-hidden className="size-3.5 shrink-0" strokeWidth={1.5} />
+            <CornerDownLeft
+              aria-hidden
+              className="size-3.5 shrink-0"
+              strokeWidth={1.5}
+            />
             {copy.prompt.returnNoteShort}
           </p>
           <DrawerClose
@@ -343,11 +357,7 @@ function DocPage({ flow, titleRef }: PageProps) {
   return (
     <DrawerContent className="px-7 @max-[23.75rem]/screen:px-5">
       <div className="flex flex-col gap-5 pt-1">
-        <DrawerTitle
-          ref={titleRef}
-          tabIndex={-1}
-          className="outline-none"
-        >
+        <DrawerTitle ref={titleRef} tabIndex={-1} className="outline-none">
           {copy.documents[flow.doc].title}
         </DrawerTitle>
         <TermsDocumentBody id={flow.doc} />
@@ -381,11 +391,23 @@ function InAppPage({ flow, titleRef }: PageProps) {
         </div>
 
         {flow.env.offline ? (
-          <AuthNote kind="offline" title={copy.prompt.offline} body={copy.inapp.offlineBody} />
+          <AuthNote
+            kind="offline"
+            title={copy.prompt.offline}
+            body={copy.inapp.offlineBody}
+          />
         ) : flow.opening ? (
-          <AuthNote kind="progress" title={copy.inapp.opening} body={copy.inapp.openingBody} />
+          <AuthNote
+            kind="progress"
+            title={copy.inapp.opening}
+            body={copy.inapp.openingBody}
+          />
         ) : flow.openFailed ? (
-          <AuthNote kind="error" title={copy.inapp.openFailed} body={copy.inapp.openFailedBody} />
+          <AuthNote
+            kind="error"
+            title={copy.inapp.openFailed}
+            body={copy.inapp.openFailedBody}
+          />
         ) : null}
 
         {android && !flow.openFailed ? (

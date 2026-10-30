@@ -274,7 +274,9 @@ export function ProviderMark({
   className?: string;
 }) {
   if (provider === "google") {
-    return <GoogleSymbol className={cn("size-5 [&_svg]:size-3.5", className)} />;
+    return (
+      <GoogleSymbol className={cn("size-5 [&_svg]:size-3.5", className)} />
+    );
   }
   return (
     <span
@@ -395,10 +397,7 @@ export function TermsDocumentBody({
 export function ReviewNotice({ className }: { className?: string }) {
   return (
     <p
-      className={cn(
-        "type-caption break-keep text-muted-foreground",
-        className,
-      )}
+      className={cn("type-caption break-keep text-muted-foreground", className)}
     >
       {copy.terms.reviewNotice}
     </p>
@@ -431,14 +430,24 @@ export function MenuDiagram({
         top ? "border-b border-border" : "border-t border-border",
       )}
     >
-      <span aria-hidden className="h-2 w-6 rounded-full bg-muted-foreground/20" />
-      <span aria-hidden className="h-5 flex-1 rounded-full bg-muted-foreground/20" />
+      <span
+        aria-hidden
+        className="h-2 w-6 rounded-full bg-muted-foreground/20"
+      />
+      <span
+        aria-hidden
+        className="h-5 flex-1 rounded-full bg-muted-foreground/20"
+      />
       <span className="relative flex size-8 items-center justify-center">
         <span
           aria-hidden
           className="la-ring absolute inset-0 rounded-full border-[1.5px] border-primary"
         />
-        <MenuIcon aria-hidden className="size-4 text-foreground" strokeWidth={2} />
+        <MenuIcon
+          aria-hidden
+          className="size-4 text-foreground"
+          strokeWidth={2}
+        />
       </span>
     </div>
   );
@@ -449,12 +458,22 @@ export function MenuDiagram({
         top ? "top-12" : "bottom-12",
       )}
     >
-      <span aria-hidden className="mx-3 my-2 h-2 w-20 rounded-full bg-muted-foreground/20" />
+      <span
+        aria-hidden
+        className="mx-3 my-2 h-2 w-20 rounded-full bg-muted-foreground/20"
+      />
       <span className="mx-1.5 flex items-center gap-2 rounded-md border border-primary px-2 py-1.5 type-caption text-foreground">
-        <ExternalLink aria-hidden className="size-3.5 shrink-0" strokeWidth={1.75} />
+        <ExternalLink
+          aria-hidden
+          className="size-3.5 shrink-0"
+          strokeWidth={1.75}
+        />
         <span className="truncate">{guide.menuItem}</span>
       </span>
-      <span aria-hidden className="mx-3 my-2 h-2 w-16 rounded-full bg-muted-foreground/20" />
+      <span
+        aria-hidden
+        className="mx-3 my-2 h-2 w-16 rounded-full bg-muted-foreground/20"
+      />
     </div>
   );
   return (
@@ -574,9 +593,9 @@ export function ContextScene({
         <h1 className="type-title">{copy.context.title}</h1>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="type-caption text-muted-foreground">
+        <h2 className="type-caption text-muted-foreground">
           {copy.context.pickCaption}
-        </p>
+        </h2>
         <DemoCard place={place} />
       </div>
       <div

@@ -94,7 +94,11 @@ export function useAuthFlow(params: AuthParams) {
     at("prompt", "loading") ? "kakao" : null,
   );
   const [notice, setNotice] = useState<PromptNotice>(
-    at("prompt", "error") ? "error" : at("prompt", "empty") ? "cancelled" : null,
+    at("prompt", "error")
+      ? "error"
+      : at("prompt", "empty")
+        ? "cancelled"
+        : null,
   );
   const [provider, setProvider] = useState<AuthProvider>(params.provider);
   // 저장 실패 상태는 "고른 항목은 그대로" 보여 주려고 필수를 켠 채 시작한다
@@ -127,7 +131,8 @@ export function useAuthFlow(params: AuthParams) {
   const inApp = env.inApp;
   const guide: InAppGuide | null = inApp ? inAppGuide(inApp, env.os) : null;
   const appName = inApp ? copy.inapp.appNames[inApp] : "";
-  const termsLoading = step === "terms" && params.view === "terms" && params.state === "loading";
+  const termsLoading =
+    step === "terms" && params.view === "terms" && params.state === "loading";
 
   function pick(id: AuthProvider) {
     if (env.offline || pending) return;

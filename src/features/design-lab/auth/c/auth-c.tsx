@@ -77,7 +77,9 @@ export function AuthC({ params }: { params: AuthParams }) {
     if (prevKey.current === key) return;
     prevKey.current = key;
     if (!open) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     cardRef.current?.scrollIntoView({
       behavior: reduce ? "auto" : "smooth",
       block: "nearest",
@@ -118,7 +120,12 @@ export function AuthC({ params }: { params: AuthParams }) {
                             : "right-4",
                       )}
                     />
-                    <div key={stage} className={cn(stage !== params.view && stage === "terms" && "la-step")}>
+                    <div
+                      key={stage}
+                      className={cn(
+                        stage !== params.view && stage === "terms" && "la-step",
+                      )}
+                    >
                       {stage === "terms" ? (
                         <TermsCard
                           flow={flow}
@@ -177,7 +184,10 @@ function PromptCard({
   const inApp = flow.env.inApp !== null;
   const showGuide = flow.step === "inapp";
   return (
-    <section aria-labelledby={`${ID}-title`} className="flex flex-col gap-5 p-5 @max-[23.75rem]/screen:p-4">
+    <section
+      aria-labelledby={`${ID}-title`}
+      className="flex flex-col gap-5 p-5 @max-[23.75rem]/screen:p-4"
+    >
       <div className="flex items-start gap-3">
         <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
           <h2
@@ -221,11 +231,16 @@ function PromptCard({
                 if (id === "google" && showGuide) flow.backToPrompt();
                 else flow.pick(id);
               }}
-              describedBy={inApp && id === "google" ? `${ID}-google-note` : undefined}
+              describedBy={
+                inApp && id === "google" ? `${ID}-google-note` : undefined
+              }
             />
             {id === "kakao" && inApp ? (
               <p className="flex items-center gap-2 pt-2 pb-1 type-caption text-foreground">
-                <ProviderMark provider="kakao" className="size-4 rounded-[0.3rem] [&_svg]:size-2.5" />
+                <ProviderMark
+                  provider="kakao"
+                  className="size-4 rounded-[0.3rem] [&_svg]:size-2.5"
+                />
                 {copy.prompt.inappHint(flow.appName)}
               </p>
             ) : null}
@@ -234,7 +249,11 @@ function PromptCard({
                 <p id={`${ID}-google-note`} className="sr-only">
                   {copy.prompt.googleBlocked(flow.appName)}
                 </p>
-                <div className="la-reveal" data-open={showGuide} inert={!showGuide || undefined}>
+                <div
+                  className="la-reveal"
+                  data-open={showGuide}
+                  inert={!showGuide || undefined}
+                >
                   <div>
                     <InAppGuide flow={flow} />
                   </div>
@@ -265,18 +284,34 @@ function InAppGuide({ flow }: { flow: AuthFlow }) {
       className="mt-3 flex flex-col gap-4 border-t border-border pt-4"
     >
       <div className="flex flex-col gap-1">
-        <p className="type-label break-keep">{copy.inapp.bodyShort(flow.appName)}</p>
+        <p className="type-label break-keep">
+          {copy.inapp.bodyShort(flow.appName)}
+        </p>
         <p className="type-caption break-keep text-muted-foreground">
-          {android && !flow.openFailed ? copy.inapp.androidAuto : copy.inapp.titleShort}
+          {android && !flow.openFailed
+            ? copy.inapp.androidAuto
+            : copy.inapp.titleShort}
         </p>
       </div>
 
       {flow.env.offline ? (
-        <AuthNote kind="offline" title={copy.prompt.offline} body={copy.inapp.offlineBody} />
+        <AuthNote
+          kind="offline"
+          title={copy.prompt.offline}
+          body={copy.inapp.offlineBody}
+        />
       ) : flow.opening ? (
-        <AuthNote kind="progress" title={copy.inapp.opening} body={copy.inapp.openingBody} />
+        <AuthNote
+          kind="progress"
+          title={copy.inapp.opening}
+          body={copy.inapp.openingBody}
+        />
       ) : flow.openFailed ? (
-        <AuthNote kind="error" title={copy.inapp.openFailed} body={copy.inapp.openFailedBody} />
+        <AuthNote
+          kind="error"
+          title={copy.inapp.openFailed}
+          body={copy.inapp.openFailedBody}
+        />
       ) : null}
 
       {manual ? (
@@ -351,7 +386,12 @@ function TermsCard({
       </div>
 
       {flow.termsLoading ? (
-        <div role="status" aria-busy aria-label={copy.terms.loading} className="flex items-center gap-4 border-y border-border px-5 py-5">
+        <div
+          role="status"
+          aria-busy
+          aria-label={copy.terms.loading}
+          className="flex items-center gap-4 border-y border-border px-5 py-5"
+        >
           <span className="size-[1.625rem] rounded-[0.4375rem] bg-skeleton" />
           <span className="flex flex-1 flex-col gap-2">
             <span className="h-3 w-32 rounded-full bg-skeleton" />
@@ -381,7 +421,9 @@ function TermsCard({
               type="button"
               aria-expanded={expanded}
               aria-controls={listId}
-              aria-label={expanded ? copy.terms.detailsHide : copy.terms.details}
+              aria-label={
+                expanded ? copy.terms.detailsHide : copy.terms.details
+              }
               onClick={() => setExpanded((v) => !v)}
               className={cn(
                 "-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -399,7 +441,12 @@ function TermsCard({
             </button>
           </div>
 
-          <div id={listId} className="la-reveal" data-open={expanded} inert={!expanded || undefined}>
+          <div
+            id={listId}
+            className="la-reveal"
+            data-open={expanded}
+            inert={!expanded || undefined}
+          >
             <div>
               <ul className="flex flex-col border-t border-border bg-background/50 px-5 py-2 @max-[23.75rem]/screen:px-4">
                 {TERM_ITEMS.map((t) => {
@@ -422,16 +469,25 @@ function TermsCard({
                           <button
                             type="button"
                             aria-expanded={docOpen}
-                            aria-label={copy.terms.viewLabel(copy.terms.items[t.id])}
+                            aria-label={copy.terms.viewLabel(
+                              copy.terms.items[t.id],
+                            )}
                             onClick={() => setOpenDoc(docOpen ? null : t.id)}
-                            className={cn(textButton, "px-1 text-muted-foreground")}
+                            className={cn(
+                              textButton,
+                              "px-1 text-muted-foreground",
+                            )}
                           >
                             {copy.terms.view}
                           </button>
                         ) : null}
                       </div>
                       {t.id !== "age" ? (
-                        <div className="la-reveal" data-open={docOpen} inert={!docOpen || undefined}>
+                        <div
+                          className="la-reveal"
+                          data-open={docOpen}
+                          inert={!docOpen || undefined}
+                        >
                           <div>
                             <TermsDocumentBody
                               id={t.id}
@@ -453,7 +509,13 @@ function TermsCard({
         <ReviewNotice />
         <TermsStatus flow={flow} />
         {!flow.env.offline && !flow.submitError ? (
-          <p role="status" className={cn("type-caption", missing ? "text-muted-foreground" : "text-foreground")}>
+          <p
+            role="status"
+            className={cn(
+              "type-caption",
+              missing ? "text-muted-foreground" : "text-foreground",
+            )}
+          >
             {missing ? copy.terms.missing(missing) : copy.terms.ready}
           </p>
         ) : null}

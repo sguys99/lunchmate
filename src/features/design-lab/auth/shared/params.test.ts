@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  detectInAppUserAgent,
-  detectOs,
-  parseAuthParams,
-} from "./params";
+import { detectInAppUserAgent, detectOs, parseAuthParams } from "./params";
 
 describe("parseAuthParams", () => {
   it("쿼리가 없으면 로그인 유도, 정상, 인앱 아님, iOS, 투표, 카카오", () => {

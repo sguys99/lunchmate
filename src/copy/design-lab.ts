@@ -27,6 +27,11 @@ export const designLabCopy = {
     homeBody:
       "오늘의 한 곳 큰 카드, 대안 두 곳, 머리 아래 어제 피드백 한 줄 띠입니다. 상태는 ?state=loading, empty, error, offline, 확인용으로 ?deck=overflow, ?feedback=none, ?seed=7을 붙입니다.",
     homeLink: "홈 D1 열기",
+    onboardingLinks: {
+      a: "A 한 장씩 넘기기",
+      b: "B 지도 위 시트",
+      c: "C 답이 쌓이는 한 장",
+    },
     authTitle: "로그인, 약관, 인앱 안내 (T4.2 시안)",
     authBody:
       "A 이어지는 시트, B 전용 화면, C 제자리 카드입니다. ?view=prompt, terms, inapp과 ?inapp=kakao, ?os=android, ?state=를 붙입니다.",

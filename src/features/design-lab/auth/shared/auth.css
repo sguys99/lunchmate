@@ -68,8 +68,7 @@
 .la-reveal {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows var(--lm-duration-base)
-    var(--lm-ease-standard);
+  transition: grid-template-rows var(--lm-duration-base) var(--lm-ease-standard);
 }
 .la-reveal[data-open="true"] {
   grid-template-rows: 1fr;

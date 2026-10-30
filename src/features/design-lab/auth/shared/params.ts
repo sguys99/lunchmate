@@ -8,11 +8,7 @@
 //   ?os=ios | android                   인앱 안내 OS (기본 ios)
 //   ?trigger=poll | save | review       로그인을 부른 행동 (AUTH-07, 기본 poll)
 //   ?provider=kakao | naver | google    약관 화면의 "○○ 계정으로 로그인했습니다" (기본 kakao)
-import type {
-  AuthInApp,
-  AuthOs,
-  AuthTrigger,
-} from "@/copy/design-lab-auth";
+import type { AuthInApp, AuthOs, AuthTrigger } from "@/copy/design-lab-auth";
 import {
   parseDesignState,
   type DesignState,
@@ -69,8 +65,11 @@ export function parseAuthParams(
     inApp: inAppQuery ?? (view === "inapp" ? "kakao" : null),
     os: pick(read(searchParams, "os"), ["ios", "android"] as const) ?? "ios",
     trigger:
-      pick(read(searchParams, "trigger"), ["poll", "save", "review"] as const) ??
-      "poll",
+      pick(read(searchParams, "trigger"), [
+        "poll",
+        "save",
+        "review",
+      ] as const) ?? "poll",
     provider:
       pick(read(searchParams, "provider"), [
         "kakao",

@@ -24,7 +24,11 @@ describe("약관 동의 모델", () => {
   it("처음에는 아무것도 켜져 있지 않고 시작할 수 없다", () => {
     expect(allState(EMPTY_CONSENT)).toBe("none");
     expect(canSubmit(EMPTY_CONSENT)).toBe(false);
-    expect(missingRequired(EMPTY_CONSENT)).toEqual(["age", "service", "privacy"]);
+    expect(missingRequired(EMPTY_CONSENT)).toEqual([
+      "age",
+      "service",
+      "privacy",
+    ]);
   });
 
   it("모두 동의는 전부 켜고, 다시 누르면 전부 끈다", () => {

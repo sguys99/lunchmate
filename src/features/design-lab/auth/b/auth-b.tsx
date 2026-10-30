@@ -5,11 +5,7 @@
 // - 약관은 헤어라인으로만 나눈 목록(카드 면 없음). 주 버튼은 늘 눌리고, 필수가 비어 있으면 누를 때 빠진 줄을 짚어 준다
 //   (빠진 줄의 "필수"가 destructive 글자로 바뀌고 첫 빠진 체크박스로 포커스, 버튼 위 한 줄로 개수 안내).
 // - 데스크톱(1024 이상): 왼쪽 카드 면 칸(세리프 문장, 로그인하면 되는 일 3가지 또는 그림) + 오른쪽 행동 칸 2단.
-import {
-  ArrowLeft,
-  ChevronRight,
-  CornerDownLeft,
-} from "lucide-react";
+import { ArrowLeft, ChevronRight, CornerDownLeft } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -117,7 +113,13 @@ export function AuthB({ params }: { params: AuthParams }) {
 function Aside({ flow }: { flow: AuthFlow }) {
   let body: ReactNode;
   if (flow.step === "inapp" && flow.guide) {
-    body = <MenuDiagram guide={flow.guide} size="lg" className="w-full max-w-[22rem]" />;
+    body = (
+      <MenuDiagram
+        guide={flow.guide}
+        size="lg"
+        className="w-full max-w-[22rem]"
+      />
+    );
   } else if (flow.step === "terms") {
     body = (
       <div className="flex flex-col gap-6">
@@ -214,7 +216,9 @@ function PromptPage({ flow, titleRef }: PageProps) {
         <dl className="flex flex-col divide-y divide-border border-y border-border desktop:hidden">
           {copy.prompt.benefits.map((b) => (
             <div key={b.title} className="flex items-baseline gap-5 py-3">
-              <dt className="w-12 shrink-0 type-caption text-foreground">{b.title}</dt>
+              <dt className="w-12 shrink-0 type-caption text-foreground">
+                {b.title}
+              </dt>
               <dd className="type-caption text-muted-foreground">{b.body}</dd>
             </div>
           ))}
@@ -251,7 +255,9 @@ function TermsPage({ flow, titleRef }: PageProps) {
     setShown(true);
     if (r.firstMissing) {
       document
-        .querySelector<HTMLElement>(`#${ID}-term-${r.firstMissing} [role=checkbox]`)
+        .querySelector<HTMLElement>(
+          `#${ID}-term-${r.firstMissing} [role=checkbox]`,
+        )
         ?.focus();
     }
   }
@@ -268,15 +274,27 @@ function TermsPage({ flow, titleRef }: PageProps) {
           >
             {copy.terms.title}
           </h1>
-          <p className="type-body-sm text-muted-foreground">{copy.terms.body}</p>
+          <p className="type-body-sm text-muted-foreground">
+            {copy.terms.body}
+          </p>
         </div>
 
         {flow.termsLoading ? (
-          <div role="status" aria-busy aria-label={copy.terms.loading} className="flex flex-col divide-y divide-border border-y border-border">
+          <div
+            role="status"
+            aria-busy
+            aria-label={copy.terms.loading}
+            className="flex flex-col divide-y divide-border border-y border-border"
+          >
             {[0, 1, 2, 3, 4].map((i) => (
               <div key={i} className="flex h-14 items-center gap-4">
                 <span className="size-[1.375rem] rounded-[0.4375rem] bg-skeleton" />
-                <span className={cn("h-3 rounded-full bg-skeleton", i % 2 ? "w-40" : "w-28")} />
+                <span
+                  className={cn(
+                    "h-3 rounded-full bg-skeleton",
+                    i % 2 ? "w-40" : "w-28",
+                  )}
+                />
               </div>
             ))}
           </div>
@@ -294,7 +312,8 @@ function TermsPage({ flow, titleRef }: PageProps) {
             </label>
             <ul className="flex flex-col divide-y divide-border border-b border-border">
               {TERM_ITEMS.map((t) => {
-                const flagged = flow.attempted && t.required && !flow.consent[t.id];
+                const flagged =
+                  flow.attempted && t.required && !flow.consent[t.id];
                 const note = copy.terms.itemNotes[t.id];
                 return (
                   <li
@@ -312,7 +331,10 @@ function TermsPage({ flow, titleRef }: PageProps) {
                       <span className="flex min-w-0 flex-col gap-0.5">
                         <span className="flex flex-wrap items-baseline gap-x-2 type-body-sm break-keep">
                           {copy.terms.items[t.id]}
-                          <RequiredTag required={t.required} emphasize={flagged} />
+                          <RequiredTag
+                            required={t.required}
+                            emphasize={flagged}
+                          />
                         </span>
                         {note ? (
                           <span className="type-caption break-keep text-muted-foreground">
@@ -385,11 +407,7 @@ function DocPage({ flow, titleRef }: PageProps) {
   return (
     <>
       <div className="flex flex-col gap-6 pt-4 pb-8 desktop:pt-0">
-        <h1
-          ref={titleRef}
-          tabIndex={-1}
-          className="type-title outline-none"
-        >
+        <h1 ref={titleRef} tabIndex={-1} className="type-title outline-none">
           {copy.documents[id].title}
         </h1>
         <TermsDocumentBody id={id} />
@@ -435,11 +453,23 @@ function InAppPage({ flow, titleRef }: PageProps) {
         </div>
 
         {flow.env.offline ? (
-          <AuthNote kind="offline" title={copy.prompt.offline} body={copy.inapp.offlineBody} />
+          <AuthNote
+            kind="offline"
+            title={copy.prompt.offline}
+            body={copy.inapp.offlineBody}
+          />
         ) : flow.opening ? (
-          <AuthNote kind="progress" title={copy.inapp.opening} body={copy.inapp.openingBody} />
+          <AuthNote
+            kind="progress"
+            title={copy.inapp.opening}
+            body={copy.inapp.openingBody}
+          />
         ) : flow.openFailed ? (
-          <AuthNote kind="error" title={copy.inapp.openFailed} body={copy.inapp.openFailedBody} />
+          <AuthNote
+            kind="error"
+            title={copy.inapp.openFailed}
+            body={copy.inapp.openFailedBody}
+          />
         ) : null}
 
         {showManual ? (
@@ -471,7 +501,9 @@ function InAppPage({ flow, titleRef }: PageProps) {
         )}
         <div className="flex items-center gap-3 py-1" aria-hidden>
           <span className="h-px flex-1 bg-border" />
-          <span className="type-caption text-muted-foreground">{copy.inapp.orKakao}</span>
+          <span className="type-caption text-muted-foreground">
+            {copy.inapp.orKakao}
+          </span>
           <span className="h-px flex-1 bg-border" />
         </div>
         <BrandLoginButton
