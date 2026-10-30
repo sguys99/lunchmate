@@ -51,22 +51,14 @@ export default function DesignLabPage() {
         title={onboardingLabCopy.index.title}
         body={onboardingLabCopy.index.body}
       >
-        <div className="flex flex-wrap gap-4">
-          {(["a", "b", "c"] as const).map((id) => (
-            <Link
-              key={id}
-              href={`/design-lab/onboarding/${id}`}
-              className={linkClass}
-            >
-              {copy.onboardingLinks[id]}
-            </Link>
-          ))}
-        </div>
+        <Link href="/design-lab/onboarding/b" className={linkClass}>
+          {copy.onboardingLink}
+        </Link>
       </Section>
 
       <Section title={copy.authTitle} body={copy.authBody}>
         <div className="flex flex-wrap gap-4">
-          {(["a", "b", "c"] as const).map((id) => (
+          {(["b", "a"] as const).map((id) => (
             <Link
               key={id}
               href={`/design-lab/auth/${id}`}

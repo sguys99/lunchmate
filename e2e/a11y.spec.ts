@@ -113,8 +113,8 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       });
     }
 
-    // T4.1 온보딩 시안
-    for (const id of ["a", "b", "c"]) {
+    // T4.1 온보딩 시안. T4.3(D-07)에서 B만 남김
+    for (const id of ["b"]) {
       for (const query of [
         "",
         "?state=loading",
@@ -134,8 +134,8 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       }
     }
 
-    // T4.2 로그인, 약관, 인앱 안내 시안. 네이버 버튼은 랜딩 B와 같은 브랜드 예외
-    for (const id of ["a", "b", "c"]) {
+    // T4.2 로그인, 약관, 인앱 안내 시안. T4.3(D-08)에서 B와 A(시트) 남김. 네이버 버튼은 랜딩 B와 같은 브랜드 예외
+    for (const id of ["a", "b"]) {
       for (const query of [
         "",
         "?view=terms",

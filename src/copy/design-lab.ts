@@ -27,15 +27,11 @@ export const designLabCopy = {
     homeBody:
       "오늘의 한 곳 큰 카드, 대안 두 곳, 머리 아래 어제 피드백 한 줄 띠입니다. 상태는 ?state=loading, empty, error, offline, 확인용으로 ?deck=overflow, ?feedback=none, ?seed=7을 붙입니다.",
     homeLink: "홈 D1 열기",
-    onboardingLinks: {
-      a: "A 한 장씩 넘기기",
-      b: "B 지도 위 시트",
-      c: "C 답이 쌓이는 한 장",
-    },
-    authTitle: "로그인, 약관, 인앱 안내 (T4.2 시안)",
+    onboardingLink: "B 지도 위 시트 열기",
+    authTitle: "로그인, 약관, 인앱 안내 (D-08 선택안)",
     authBody:
-      "A 이어지는 시트, B 전용 화면, C 제자리 카드입니다. ?view=prompt, terms, inapp과 ?inapp=kakao, ?os=android, ?state=를 붙입니다.",
-    authLinks: { a: "A 이어지는 시트", b: "B 전용 화면", c: "C 제자리 카드" },
+      "기본은 B 전용 화면(로그인, 약관, 인앱 안내), 둘러보기 중 행동은 A 시트로 묻습니다. ?view=prompt, terms, inapp과 ?inapp=kakao, ?os=android, ?state=를 붙입니다.",
+    authLinks: { b: "B 전용 화면", a: "A 시트 (둘러보기 중 행동)" },
     illustrationsTitle: "카테고리 일러스트",
     illustrationsBody:
       "운영용 선화 12종을 카드, 큰 카드, 리스트 아이콘 크기로 봅니다. 라이트와 다크를 나란히 둡니다.",

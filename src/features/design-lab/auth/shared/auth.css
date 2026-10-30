@@ -3,7 +3,6 @@
  * - 단계 전환: 새 단계가 slow 300 enter로 8px 아래에서 떠오른다(한 순간에 하나).
  * - 이동 중 표시: 스피너 대신 2px 선 위를 짧은 막대가 지나간다(CLAUDE.md 6.3 "스피너만 있는 로딩" 금지).
  * - 메뉴 그림 강조: 메뉴 버튼 둘레 링이 두 번 숨 쉬고 멈춘다.
- * - 펼침(C): grid-template-rows 0fr → 1fr, base 260 standard.
  * prefers-reduced-motion이면 모두 끄고 끝 상태로 보인다.
  */
 
@@ -64,20 +63,6 @@
     0.6s 2;
 }
 
-/* 펼침 상자: 바깥 grid, 안쪽 min-height 0 */
-.la-reveal {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--lm-duration-base) var(--lm-ease-standard);
-}
-.la-reveal[data-open="true"] {
-  grid-template-rows: 1fr;
-}
-.la-reveal > * {
-  min-height: 0;
-  overflow: hidden;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .la-step,
   .la-ring {
@@ -87,8 +72,5 @@
     animation: none;
     width: 100%;
     opacity: 0.6;
-  }
-  .la-reveal {
-    transition: none;
   }
 }

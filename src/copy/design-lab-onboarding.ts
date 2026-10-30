@@ -8,15 +8,12 @@ export const onboardingLabCopy = {
   /** 디자인 랩 단독 화면 제목과 시안 이름 */
   metaTitle: "온보딩 시안",
   names: {
-    a: "A 한 장씩 넘기기",
     b: "B 지도 위 시트",
-    c: "C 답이 쌓이는 한 장",
   },
   screenLabel: "처음 설정",
 
   /** 진행 표시 */
   progress: {
-    count: (current: number) => `${current}/${STEP_TOTAL}`,
     label: (current: number) => `${STEP_TOTAL}단계 중 ${current}단계`,
     steps: ["위치", "예산과 거리", "못 먹는 음식"] as const,
   },
@@ -27,8 +24,6 @@ export const onboardingLabCopy = {
     save: "이 위치로 저장",
     done: "완료",
     skip: "건너뛰기",
-    back: "이전 단계",
-    edit: "고치기",
     add: "추가",
     widen: "10분으로 넓히기",
     seeHome: "홈에서 이어 보기",
@@ -44,9 +39,7 @@ export const onboardingLabCopy = {
     searchClear: "검색어 지우기",
     resultsLabel: "검색 결과",
     locateLabel: "현위치로 지도 옮기기",
-    pinHintTap: "지도에서 회사 입구를 눌러 핀을 놓아 주세요.",
     pinHintCenter: "지도를 움직여 회사 입구를 가운데 핀에 맞춰 주세요.",
-    pinPlaced: "핀을 놓았습니다. 다른 곳을 누르면 옮겨집니다.",
     pinPlacedCenter: "핀을 놓았습니다. 지도를 움직이면 다시 맞출 수 있습니다.",
     pinNotice:
       "검색 결과는 지도 이동에만 씁니다. 저장하는 것은 직접 놓은 핀 위치뿐입니다.",
@@ -78,7 +71,6 @@ export const onboardingLabCopy = {
 
   /** 2단계 예산과 거리 (ONB-02) */
   budget: {
-    title: "점심 예산과 걷는 거리를 정해 주세요",
     titleShort: "예산과 걷는 거리",
     body: "기본값 그대로 두어도 됩니다. 나중에 나 탭에서 바꿀 수 있습니다.",
     lunch: "점심 예산",
@@ -131,23 +123,9 @@ export const onboardingLabCopy = {
     loading: "고를 수 있는 음식을 불러오는 중입니다",
   },
 
-  /** C 요약 줄 (지난 단계와 다음 단계를 한 줄로) */
-  summary: {
-    officePlaced: "직접 놓은 핀",
-    officeEmpty: "아직 없음",
-    budget: (lunch: string, dinner: string, walk: number) =>
-      `점심 ${lunch}, 저녁 ${dinner}, 도보 ${walk}분`,
-    avoidNone: "없음",
-    avoidMany: (first: string, rest: number) => `${first} 외 ${rest}개`,
-    editLabel: (stepName: string) => `${stepName} 고치기`,
-  },
-
-  /** C 답이 쌓이는 한 장 */
-  c: {
-    title: "세 가지면 끝납니다",
-    body: "꼭 필요한 것은 위치 하나입니다. 나머지는 기본값으로 시작합니다.",
+  /** C에서 가져온 단축 (D-07 조합): 위치만 정하고 나머지는 기본값으로 바로 시작. 실제 화면 T4.17~T4.19에서 B 하단 줄에 붙인다 */
+  shortcut: {
     finishNow: "여기까지 하고 시작",
-    stepsLabel: "설정 세 가지",
   },
 
   /** 완료 직후 (ONB-05) */
@@ -173,7 +151,7 @@ export const onboardingLabCopy = {
 
   /** 디자인 랩 첫 화면 소개 (이 시안 묶음) */
   index: {
-    title: "온보딩 (T4.1 시안)",
+    title: "온보딩 (D-07 선택안 B 지도 위 시트)",
     body: "쿼리: ?step=1|2|3|done, ?state=loading|empty|error|offline, ?perm=denied, ?pin=placed",
   },
 } as const;

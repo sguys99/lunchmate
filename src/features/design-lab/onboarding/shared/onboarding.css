@@ -1,36 +1,9 @@
 /*
  * 온보딩 시안 CSS 모션 (T4.1). Motion 없이 CSS만 쓴다. 시간과 곡선은 모두 토큰 변수, 색은 토큰 변수만(check-css-colors).
+ * 남은 것은 B 확인 화면(D-07)의 시트 내용 떠오름과 목업 지도 전환이다. A 단계 슬라이드와 C 접힘은 T4.3에서 지웠다.
  * - 단계 전환 하나만 움직인다(한 순간에 효과 하나). 오버슈트 없음(DESIGN.md 7장).
  * - prefers-reduced-motion이면 모두 끈다(끝 상태로 바로 보임).
  */
-
-/* ---------- A 한 장씩: 앞으로는 오른쪽 16px에서, 뒤로는 왼쪽 16px에서 페이드인 ---------- */
-@keyframes ob-from-right {
-  from {
-    opacity: 0;
-    transform: translateX(16px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes ob-from-left {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.ob-step[data-dir="next"] {
-  animation: ob-from-right var(--lm-duration-slow) var(--lm-ease-enter) both;
-}
-.ob-step[data-dir="back"] {
-  animation: ob-from-left var(--lm-duration-slow) var(--lm-ease-enter) both;
-}
 
 /* ---------- B 시트 내용, 완료 화면 카드: 8px 아래에서 떠오름 (stagger는 --ob-i) ---------- */
 @keyframes ob-rise {
@@ -46,23 +19,6 @@
 .ob-rise {
   animation: ob-rise var(--lm-duration-slow) var(--lm-ease-enter) both;
   animation-delay: calc(var(--ob-i, 0) * var(--lm-stagger));
-}
-
-/* ---------- C 접힘과 펼침: grid 행 높이 0fr <-> 1fr (base, standard) ---------- */
-.ob-fold {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--lm-duration-base) var(--lm-ease-standard);
-}
-.ob-fold[data-open="true"] {
-  grid-template-rows: 1fr;
-}
-.ob-fold > * {
-  min-height: 0;
-  overflow: hidden;
-}
-.ob-fold[data-open="true"] > * {
-  overflow: visible;
 }
 
 /* ---------- 목업 지도: 검색과 현위치 이동, 축척 변화만 미끄러지듯(끄는 동안은 즉시) ---------- */
@@ -86,11 +42,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ob-step,
   .ob-rise {
     animation: none !important;
   }
-  .ob-fold,
   .ob-map-world,
   .ob-map-ring,
   .ob-map-dot,

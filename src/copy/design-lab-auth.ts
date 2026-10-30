@@ -18,11 +18,10 @@ export const authLabCopy = {
   brand,
 
   index: {
-    title: "로그인과 약관 (T4.2 시안)",
+    title: "로그인과 약관 (D-08 선택안 B + A 시트)",
     names: {
       a: "A 이어지는 시트",
       b: "B 전용 화면",
-      c: "C 제자리 카드",
     },
   },
 
@@ -109,13 +108,10 @@ export const authLabCopy = {
     body: "처음 한 번만 묻습니다. 필수 세 가지만 골라도 시작할 수 있어요.",
     all: "모두 동의합니다",
     allNote: "선택 항목을 포함한 전체 동의입니다",
-    allSummary: "만 14세 이상 확인, 이용약관, 개인정보 수집 이용 (필수) 그리고 혜택 알림 (선택)",
     required: "필수",
     optional: "선택",
     view: "보기",
     viewLabel: (title: string) => `${title} 전문 보기`,
-    details: "항목 펼치기",
-    detailsHide: "항목 접기",
     items: {
       age: "만 14세 이상입니다",
       service: "이용약관 동의",
@@ -130,6 +126,7 @@ export const authLabCopy = {
     reviewNotice:
       "비공개로 남긴 후기도 가격, 👍, 태그는 이름 없이 식당 집계에 들어갑니다.",
     submit: "동의하고 시작하기",
+    /** C에서 가져온 문구 (D-08 조합): 하려던 행동을 동의 버튼에 잇는다. 실제 화면 T4.11에서 쓴다 */
     submitContinue: (action: string) => `동의하고 ${action}`,
     missing: (n: number) => `필수 항목 ${n}개에 동의해 주세요`,
     ready: "필수 항목에 모두 동의했습니다",
@@ -214,8 +211,6 @@ export const authLabCopy = {
     titleShort: "다른 브라우저에서 열어 주세요",
     body: (app: string) =>
       `${app} 안의 브라우저에서는 구글이 로그인을 막습니다. 지금 보던 화면 그대로 다른 브라우저에서 열 수 있습니다.`,
-    bodyShort: (app: string) =>
-      `${app} 안에서는 구글 로그인을 쓸 수 없습니다.`,
     stepsLabel: "여는 방법",
     /** 메뉴 위치와 메뉴 이름은 앱과 OS마다 다르다([실기기 확인]) */
     stepMenu: (where: string) => `${where} 메뉴 버튼을 눌러 주세요.`,
@@ -240,8 +235,6 @@ export const authLabCopy = {
     offlineBody: "연결되면 다른 브라우저로 열 수 있습니다. 링크는 지금 복사해 둘 수 있습니다.",
     manualTitle: "직접 여는 방법",
     androidAuto: "누르면 지금 화면이 기본 브라우저에서 열립니다.",
-    toggleSteps: "직접 여는 방법 보기",
-    hideSteps: "접기",
   },
 
   /** 시안 공통 */
