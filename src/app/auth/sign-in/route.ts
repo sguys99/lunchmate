@@ -4,16 +4,30 @@
 // GET이 아니라 POST인 이유: 링크 미리 가져오기(prefetch)나 크롤러가 로그인을 시작하지 않게.
 // 인앱 브라우저(UA 판정, src/lib/inapp.ts)에서 구글을 고르면 OAuth로 보내지 않고 /login?view=inapp 안내로 돌려보낸다
 // (AC-AUTH-2 이중 안전장치: 화면 JS가 막지 못한 경우, research-notes T0.17).
+// 제공자 화면으로 보낼 때 login_started를 서버에서 보낸다(T4.29, features/auth/login-analytics.ts). 응답 뒤(after)에
+// 보내므로 리다이렉트를 늦추거나 막지 않는다. 익명 id는 lm_aid 쿠키로 콜백까지 잇는다.
 //
 // 출처 (2026-10-30 확인): Supabase "OAuth PKCE flow" 서버 시작 예시(signInWithOAuth on server, 303 + Set-Cookie),
 // supabase-js 2.118 Provider 타입의 `custom:${string}` (커스텀 OIDC provider)
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import * as z from "zod";
+import {
+  loginAnalyticsId,
+  loginEvent,
+  sendLoginEvent,
+} from "@/features/auth/login-analytics";
 import { NEXT_COOKIE, nextCookieOptions } from "@/features/auth/next-cookie";
 import { authOrigin, CALLBACK_PATH } from "@/features/auth/origin";
 import { LOGIN_PROVIDERS, SUPABASE_PROVIDER } from "@/features/auth/providers";
 import { sanitizeNext } from "@/features/auth/redirect";
 import { loginUrl } from "@/features/auth/routes";
+import {
+  ANALYTICS_ID_COOKIE,
+  analyticsIdCookieOptions,
+  runAfterResponse,
+  serverCaptureConfig,
+} from "@/lib/analytics/server-capture";
+import { clientEnv } from "@/lib/env/client";
 import { detectInApp, googleBlocked } from "@/lib/inapp";
 import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -65,14 +79,23 @@ export async function POST(request: NextRequest) {
   });
   if (error || !data.url) return back("failed");
 
+  const secure = request.nextUrl.protocol === "https:";
   const res = NextResponse.redirect(data.url, {
     status: 303,
     headers: NO_STORE,
   });
-  res.cookies.set(
-    NEXT_COOKIE,
-    next,
-    nextCookieOptions(request.nextUrl.protocol === "https:"),
-  );
+  res.cookies.set(NEXT_COOKIE, next, nextCookieOptions(secure));
+
+  const capture = serverCaptureConfig(clientEnv());
+  if (capture) {
+    const aid = loginAnalyticsId(request.cookies, capture);
+    res.cookies.set(ANALYTICS_ID_COOKIE, aid, analyticsIdCookieOptions(secure));
+    const event = loginEvent(
+      "login_started",
+      parsed.data.provider,
+      request.headers.get("user-agent"),
+    );
+    runAfterResponse(() => sendLoginEvent(capture, event, aid), after);
+  }
   return res;
 }

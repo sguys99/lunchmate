@@ -4,7 +4,7 @@
 import type { CaptureResult, PostHogConfig, Properties } from "posthog-js";
 import { scrubCoordinates } from "./scrub";
 
-const DEFAULT_HOST = "https://us.i.posthog.com";
+export const POSTHOG_DEFAULT_HOST = "https://us.i.posthog.com";
 
 // autocapture, 히트맵이 붙이는 요소 정보. autocapture를 꺼 두지만 설정이 바뀌어도 새지 않게 전송 직전에 한 번 더 뺀다.
 // 요소 텍스트, href, 클릭 위치(화면 좌표)가 여기에 들어간다.
@@ -39,7 +39,7 @@ export function posthogConfig(
   host: string | undefined,
 ): Partial<PostHogConfig> {
   return {
-    api_host: host || DEFAULT_HOST,
+    api_host: host || POSTHOG_DEFAULT_HOST,
     autocapture: false,
     // 혹시 autocapture나 툴바가 켜져도 요소 텍스트와 속성(href, value)을 모으지 않는다.
     mask_all_text: true,

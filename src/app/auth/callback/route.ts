@@ -5,15 +5,30 @@
 // - provider_token은 네이버 프로필 1회 조회에만 쓰고 저장, 로깅하지 않는다(CLAUDE.md 13장, T0.14).
 // - next는 쿠키에서 꺼내 다시 검사하고 쿠키를 지운다(AUTH-03, 오픈 리다이렉트 방지).
 // - 리다이렉트는 항상 우리 출처의 절대 URL로 만든다.
+// - 세션 교환에 성공하면 login_completed를 서버에서 보낸다(T4.29, features/auth/login-analytics.ts).
+//   provider, in_app_browser만 보내고 user id, 닉네임, 토큰은 넣지 않는다. 응답 뒤(after)에 보내 리다이렉트를 막지 않는다.
 //
 // 출처 (2026-10-30 확인): Supabase "OAuth PKCE flow" app/auth/callback/route.ts 예시(exchangeCodeForSession),
 // Supabase social-login "Provider tokens"(provider_token은 교환 결과 세션에만 있고 DB에 저장되지 않음)
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { completeSignIn } from "@/features/auth/complete-sign-in";
+import {
+  loginAnalyticsId,
+  loginEvent,
+  sendLoginEvent,
+} from "@/features/auth/login-analytics";
 import { fetchNaverProfile } from "@/features/auth/naver-profile";
 import { NEXT_COOKIE, nextCookieOptions } from "@/features/auth/next-cookie";
 import { authOrigin } from "@/features/auth/origin";
+import { fromSupabaseProvider } from "@/features/auth/providers";
 import { sanitizeNext } from "@/features/auth/redirect";
+import {
+  ANALYTICS_ID_COOKIE,
+  analyticsIdCookieOptions,
+  runAfterResponse,
+  serverCaptureConfig,
+} from "@/lib/analytics/server-capture";
+import { clientEnv } from "@/lib/env/client";
 import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
 
@@ -70,15 +85,39 @@ export async function GET(request: NextRequest) {
     },
   );
 
-  // TODO(T4.29): result.outcome으로 login_completed 이벤트(provider만, 식별 정보 없음)
+  const secure = request.nextUrl.protocol === "https:";
+  const capture = serverCaptureConfig(clientEnv());
+  const provider =
+    result.outcome.type === "signed-in"
+      ? fromSupabaseProvider(result.outcome.provider)
+      : null;
+  if (capture && provider) {
+    const aid = loginAnalyticsId(request.cookies, capture);
+    const event = loginEvent(
+      "login_completed",
+      provider,
+      request.headers.get("user-agent"),
+    );
+    runAfterResponse(() => sendLoginEvent(capture, event, aid), after);
+  }
 
   const origin = authOrigin(request.nextUrl.origin);
   const res = NextResponse.redirect(new URL(result.location, origin), {
     headers: { "Cache-Control": "private, no-store" },
   });
   res.cookies.set(NEXT_COOKIE, "", {
-    ...nextCookieOptions(request.nextUrl.protocol === "https:"),
+    ...nextCookieOptions(secure),
     maxAge: 0,
   });
+  // 실패해서 /login으로 돌아가면 다시 시도할 때 같은 id를 쓰도록 남겨 둔다(10분 뒤 만료).
+  if (
+    result.outcome.type === "signed-in" &&
+    request.cookies.has(ANALYTICS_ID_COOKIE)
+  ) {
+    res.cookies.set(ANALYTICS_ID_COOKIE, "", {
+      ...analyticsIdCookieOptions(secure),
+      maxAge: 0,
+    });
+  }
   return res;
 }
