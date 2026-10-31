@@ -2,12 +2,13 @@
 //
 // 이 파일은 의존성이 없다(cva, tailwind-merge, Base UI 없음). 루트 오류 경계(error.tsx, global-error.tsx)는
 // 모든 라우트 첫 로드에 들어가므로 Button 대신 일반 <button>, <Link>에 buttonClass()를 붙여 쓴다.
-// 기본 variant와 size 조합끼리는 충돌하는 클래스가 없어 tailwind-merge 없이 이어 붙여도 결과가 같다.
+// 테두리 색은 variant마다 하나만 둔다(Tailwind v4는 같은 속성 클래스를 이름순으로 내보내 기본에 border-transparent를 두면
+// border-border를 덮는다). 기본 variant와 size 조합끼리는 충돌하는 클래스가 없어 tailwind-merge 없이 이어 붙여도 결과가 같다.
 // 바깥에서 className을 덮어써야 하면 Button과 buttonVariants(cn 적용)를 쓴다.
 import { focusRing, hitArea44, pressMotion } from "./interaction";
 
 export const buttonBaseClass = [
-  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-button border border-transparent type-label whitespace-nowrap select-none",
+  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-button border type-label whitespace-nowrap select-none",
   "disabled:pointer-events-none aria-disabled:pointer-events-none",
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   hitArea44,
@@ -17,12 +18,12 @@ export const buttonBaseClass = [
 
 export const buttonVariantClasses = {
   primary:
-    "bg-primary text-primary-foreground hover:brightness-97 active:brightness-95 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground",
+    "border-transparent bg-primary text-primary-foreground hover:brightness-97 active:brightness-95 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground",
   secondary:
     "border-border text-foreground hover:bg-muted active:bg-muted disabled:text-muted-foreground disabled:opacity-60 aria-disabled:opacity-60 aria-expanded:bg-muted",
   ghost:
-    "text-foreground hover:bg-muted active:bg-muted disabled:text-muted-foreground disabled:opacity-60 aria-disabled:opacity-60 aria-expanded:bg-muted",
-  link: "rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:scale-100 disabled:text-muted-foreground disabled:opacity-60",
+    "border-transparent text-foreground hover:bg-muted active:bg-muted disabled:text-muted-foreground disabled:opacity-60 aria-disabled:opacity-60 aria-expanded:bg-muted",
+  link: "border-transparent rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:scale-100 disabled:text-muted-foreground disabled:opacity-60",
   destructive:
     "border-destructive/40 text-destructive hover:bg-muted active:bg-muted disabled:opacity-60 aria-disabled:opacity-60",
 } as const;
