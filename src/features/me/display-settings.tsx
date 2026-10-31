@@ -1,6 +1,7 @@
 "use client";
 // 화면 설정 (T4.25, SET-04, D-04): 화면 모드(시스템, 라이트, 다크), 모션 줄이기, 진동. 이 기기에만 저장한다(src/lib/ui-prefs).
 // 누르면 바로 적용되고 저장 버튼이 없다. 저장소를 읽기 전에는 컨트롤을 잠근다(기본값이 잠깐 보였다 바뀌지 않게).
+// 로그인 없이 쓰는 기기 저장이라, 로그인이 꺼진 환경의 /me 안내 화면(app/(app)/coming-soon.tsx)에서도 그대로 쓴다.
 // 화면 모드는 칩 세 개(단일 선택, 칩 규칙), 켜고 끄기는 체크박스 줄(약관 화면과 같은 컴포넌트).
 import { useId, useSyncExternalStore } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,7 +51,12 @@ function ToggleRow({
   );
 }
 
-export function DisplaySettings() {
+/** title: 섹션 제목. 기본은 로그인된 /me의 "화면", 로그인이 꺼진 /me 안내 화면은 "화면 설정"을 넘긴다 */
+export function DisplaySettings({
+  title = meCopy.sections.display,
+}: {
+  title?: string;
+} = {}) {
   const themeId = useId();
   const hydrated = useUiPrefs((s) => s.hydrated);
   const theme = useUiPrefs((s) => s.theme);
@@ -68,9 +74,7 @@ export function DisplaySettings() {
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="type-caption text-muted-foreground">
-        {meCopy.sections.display}
-      </h2>
+      <h2 className="type-caption text-muted-foreground">{title}</h2>
       <ul className="flex flex-col divide-y divide-border border-y border-border">
         <li className="flex flex-col gap-3 py-4">
           <span id={themeId} className="type-body">

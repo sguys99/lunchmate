@@ -48,6 +48,36 @@ for (const [path, title] of [
   });
 }
 
+test("나 탭: 화면 설정에서 다크를 고르면 바로 적용되고 새로고침 후에도 유지", async ({
+  page,
+}) => {
+  await page.goto("/me");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "화면 설정" }),
+  ).toBeVisible();
+  const dark = page.getByRole("button", { name: "다크" });
+  // 저장소를 읽기 전에는 잠겨 있다
+  await expect(dark).toBeEnabled();
+  await dark.click();
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  await page.reload();
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  await expect(page.getByRole("button", { name: "다크" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+});
+
+test("나 탭 하위 경로와 투표 탭에는 화면 설정이 없다", async ({ page }) => {
+  for (const path of ["/me/avoid", "/poll"]) {
+    await page.goto(path);
+    await expect(
+      page.getByRole("link", { name: "오늘 추천 보기" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "다크" })).toHaveCount(0);
+  }
+});
+
 test.describe("둘러보기 행동", () => {
   test.use({ geolocation: HERE, permissions: ["geolocation"] });
   test.beforeEach(async ({ page }) => {

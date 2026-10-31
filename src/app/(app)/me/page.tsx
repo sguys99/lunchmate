@@ -118,8 +118,8 @@ async function Settings() {
 }
 
 export default function Page() {
-  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
-  if (!isEnabled("auth")) return <ComingSoon kind="me" />;
+  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리). 루트만 화면 설정을 함께 연다(기기 저장)
+  if (!isEnabled("auth")) return <ComingSoon kind="me" displaySettings />;
   return (
     <PageColumn>
       <PageHeader title={meCopy.title} />
