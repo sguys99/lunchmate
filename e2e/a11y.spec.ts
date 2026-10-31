@@ -66,7 +66,10 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
         const url = new URL(page.url());
         expect(url.pathname).toBe("/login");
         expect(url.searchParams.get("next")).toBe(path);
-        await expectNoA11yViolations(page);
+        // /login의 네이버 버튼은 브랜드 예외(랜딩 / 검사와 같은 이유, G3 안건 7). 대비 검사에서만 뺀다
+        await expectNoA11yViolations(page, {
+          exclude: ['[data-provider="naver"]'],
+        });
       });
     }
 
