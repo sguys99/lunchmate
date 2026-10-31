@@ -4,9 +4,10 @@
 // QueryProvider(T2.19)는 가장 바깥: 데이터 캐시는 모션 설정과 무관하고, 토스트와 셸 어디서든 쿼리를 쓸 수 있게 한다.
 // 루트 layout은 랜딩과 약관도 감싸므로 건드리지 않는다. 랜딩에 모션이 필요해지면 그쪽 레이아웃에서 따로 감싼다.
 // 로그인 확인(AUTH)은 T4에서 이 레이아웃에 더한다.
+// 데스크톱 우측 지도 칸은 @map 슬롯(T5.17)이 채운다. 오늘은 추천 핀 지도, 나머지 화면은 빈 지도 자리(@map/default, [...rest]).
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { AppShell, BottomTabBar, TabBarView } from "@/components/app-shell";
 import { LazyToaster } from "@/components/ui/lazy-toaster";
 import { AnalyticsPageviews } from "@/lib/analytics/provider";
@@ -20,13 +21,21 @@ export const viewport: Viewport = { viewportFit: "cover" };
 // 탭 화면이 자리 표시뿐인 동안 검색 엔진에 노출하지 않는다.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
-export default function AppLayout({ children }: LayoutProps<"/">) {
+export default function AppLayout({
+  children,
+  map,
+}: {
+  children: ReactNode;
+  /** @map 슬롯: 데스크톱 우측 지도 칸 */
+  map?: ReactNode;
+}) {
   // 미완성 화면은 프로덕션에서 404 (CLAUDE.md 11장, flags.appShell)
   if (!isEnabled("appShell")) notFound();
   return (
     <QueryProvider>
       <UiPrefsProvider>
         <AppShell
+          map={map}
           tabBar={
             // usePathname을 읽는 클라이언트 경계. 경로를 모르는 순간에는 활성 없는 같은 막대를 보여 준다.
             <Suspense fallback={<TabBarView activeId={null} />}>

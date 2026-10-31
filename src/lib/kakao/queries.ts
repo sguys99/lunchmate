@@ -6,14 +6,16 @@
 // - 이름이 들어 있는 결과는 모두 KAKAO_PLACES_KEY 아래에 둔다. 장소 이름 해석(T5.12a)의 1단계가
 //   이 접두로 세션 메모리를 훑는다. 새 검색 화면을 만들면 이 파일에 옵션을 추가한다.
 // - 쿼리 키의 좌표는 메모리 안에서만 쓰인다. 키를 로그, 분석 이벤트, 서버로 보내지 않는다.
+// - 검색 함수(local.ts, SDK 로더)는 queryFn 안에서 동적으로 받는다. 키만 쓰는 화면(오늘 첫 로드)에 검색 코드가 붙지 않게 한다(T5.17 홈 예산).
 import { queryOptions } from "@tanstack/react-query";
 import type { Bounds, LatLng } from "@/lib/map/types";
-import {
-  nearbyRestaurants,
-  searchRestaurants,
-  searchRestaurantsInRect,
-  toKakaoRect,
-} from "./local";
+
+const local = () => import("./local");
+
+/** local.ts toKakaoRect와 같은 값(키 계산만 하려고 검색 모듈을 끌어오지 않게 여기 둔다) */
+function rectKey({ sw, ne }: Bounds): string {
+  return [sw.lng, sw.lat, ne.lng, ne.lat].map((n) => n.toFixed(6)).join(",");
+}
 
 /** 이름이 들어 있는 카카오 장소 결과의 공통 접두 */
 export const KAKAO_PLACES_KEY = ["kakao", "places"] as const;
@@ -35,7 +37,7 @@ export const kakaoKeys = {
     [
       ...KAKAO_PLACES_KEY,
       "rect",
-      toKakaoRect(bounds),
+      rectKey(bounds),
       ...coord(sortFrom),
     ] as const,
   /** 온보딩 개수 세기(이름 없음). 이름 해석 대상이 아니라 places 접두 밖에 둔다 */
@@ -50,7 +52,7 @@ export const KAKAO_PLACES_STALE_MS = 5 * 60 * 1000;
 export function restaurantsInRadiusQuery(center: LatLng, radius: number) {
   return queryOptions({
     queryKey: kakaoKeys.radius(center, radius),
-    queryFn: () => searchRestaurants(center, radius),
+    queryFn: () => local().then((m) => m.searchRestaurants(center, radius)),
     staleTime: KAKAO_PLACES_STALE_MS,
     retry: false,
   });
@@ -60,7 +62,8 @@ export function restaurantsInRadiusQuery(center: LatLng, radius: number) {
 export function restaurantsInRectQuery(bounds: Bounds, sortFrom: LatLng) {
   return queryOptions({
     queryKey: kakaoKeys.rect(bounds, sortFrom),
-    queryFn: () => searchRestaurantsInRect(bounds, sortFrom),
+    queryFn: () =>
+      local().then((m) => m.searchRestaurantsInRect(bounds, sortFrom)),
     staleTime: KAKAO_PLACES_STALE_MS,
     retry: false,
   });
@@ -70,7 +73,7 @@ export function restaurantsInRectQuery(bounds: Bounds, sortFrom: LatLng) {
 export function nearbyCountQuery(center: LatLng, radius: number) {
   return queryOptions({
     queryKey: kakaoKeys.nearbyCount(center, radius),
-    queryFn: () => nearbyRestaurants(center, radius),
+    queryFn: () => local().then((m) => m.nearbyRestaurants(center, radius)),
     staleTime: 10 * 60 * 1000,
     retry: false,
   });

@@ -5,12 +5,14 @@
 import { badgeCopy } from "./badges";
 import { commonCopy } from "./common";
 
+const actions = {
+  directions: "길찾기",
+  reroll: "다시 뽑기",
+  pollWithFriends: "친구랑 정하기",
+} as const;
+
 export const homeCopy = {
-  actions: {
-    directions: "길찾기",
-    reroll: "다시 뽑기",
-    pollWithFriends: "친구랑 정하기",
-  },
+  actions,
   /** 배지 문구 정본은 badges.ts(T2.9). 기존 사용처를 위해 같은 값을 가리킨다 */
   badges: badgeCopy.labels,
   waitingLevels: badgeCopy.waitingLevels,
@@ -40,6 +42,133 @@ export const homeCopy = {
       title: "인터넷에 연결되어 있지 않습니다",
       body: "연결되면 추천을 자동으로 다시 불러옵니다.",
       action: commonCopy.actions.retry,
+    },
+  },
+
+  /**
+   * 오늘(홈) 화면 (T5.15~T5.25, G3 D1, DESIGN.md 5장 "오늘(홈) 화면").
+   * 디자인 랩 D1 확인 화면(design-lab-home.ts)도 이 값을 그대로 쓴다.
+   */
+  today: {
+    metaTitle: "오늘",
+    title: "오늘의 추천",
+    /** 예: "10월 28일 수요일" */
+    dateLine: (month: number, day: number, weekday: string) =>
+      `${month}월 ${day}일 ${weekday}요일`,
+    weekdays: ["일", "월", "화", "수", "목", "금", "토"],
+
+    meal: {
+      label: "끼니",
+      lunch: "점심",
+      dinner: "저녁",
+      changed: (meal: string) => `${meal} 추천으로 바꿨습니다.`,
+    },
+
+    location: {
+      label: "기준 위치",
+      options: {
+        office: "기본 사무실",
+        other: "다른 사무실",
+        here: "현위치",
+      },
+      /** 칩의 스크린 리더 이름. 보이는 글자를 그대로 품는다 */
+      chipLabel: (name: string) => `기준 위치 ${name}, 바꾸기`,
+      changed: (name: string) => `${name} 기준으로 다시 추천했습니다.`,
+      menuLabel: "기준 위치 고르기",
+      defaultMark: "기본",
+      locating: "현위치를 확인하는 중입니다",
+      /** PRD 12장 위치 권한 거부 */
+      deniedNotice:
+        "현위치를 쓰려면 위치 권한이 필요합니다. 지금은 기본 사무실 기준으로 추천합니다.",
+      unavailableNotice:
+        "현위치를 확인하지 못했습니다. 지금은 기본 사무실 기준으로 추천합니다.",
+      /** 둘러보기(비로그인): 로그인 유도 시트를 연다 */
+      saveOffice: "회사 위치 저장",
+      /** 로그인했지만 사무실이 없을 때: 사무실 추가 화면으로 */
+      addOffice: "회사 위치 정하기",
+      guestNote: "둘러보기 중에는 설정이 저장되지 않습니다.",
+    },
+
+    /** 위치를 하나도 쓸 수 없을 때 (PRD 12장 사무실 미설정 + 권한 거부) */
+    needLocation: {
+      title: "위치를 알 수 없어 추천하지 못했습니다",
+      denied:
+        "위치 권한을 허용하면 현위치로 추천합니다. 회사 위치를 저장해 둘까요?",
+      unavailable:
+        "현위치를 확인하지 못했습니다. 다시 찾거나 회사 위치를 저장해 주세요.",
+      retry: "현위치 다시 찾기",
+    },
+
+    actions: {
+      ...actions,
+      justPick: "그냥 골라줘",
+      detail: "상세",
+      directionsTo: (name: string) => `${name} 길찾기`,
+      detailOf: (name: string) => `${name} 상세`,
+      why: "왜 추천했나요?",
+      party: "회식 모드",
+      entriesLabel: "같이 정하기",
+    },
+
+    numbers: {
+      walk: "도보",
+      price: "1인",
+      thumbs: "만족",
+      walkUnit: "분",
+      thumbsUnit: "%",
+    },
+
+    rerolled: "새 추천 세 곳을 불러왔습니다.",
+    /** 다시 뽑기를 거듭해 이번 세션 후보를 다 본 뒤 (REC-05) */
+    recycled: "모두 한 번씩 보여 드렸습니다. 처음부터 다시 고릅니다.",
+
+    /** 후보 부족 (REC-09, PRD 12장) */
+    shortage: {
+      few: (count: number) => `조건에 맞는 곳이 ${count}곳뿐입니다.`,
+      overBudget: (count: number) =>
+        `예산 조건을 풀면 ${count}곳이 더 있습니다.`,
+      relaxBudget: "예산 조건 풀기",
+      widen: (to: number) => `도보 ${to}분까지 넓혀볼까요?`,
+      widenAction: (to: number) => `${to}분까지 넓히기`,
+      /** 가장 넓은 도보 거리에서도 0곳일 때 */
+      maxedBody: "못 먹는 음식이나 예산 조건을 바꿔 볼까요?",
+      editSettings: "조건 바꾸기",
+      widened: (to: number) => `도보 ${to}분까지 넓혀 다시 추천했습니다.`,
+      budgetRelaxed: "예산 조건을 풀고 다시 추천했습니다.",
+    },
+
+    /** 카카오 오류, 한도 초과 (T5.24, PRD 12장) */
+    error: {
+      naverLink: "네이버 지도에서 주변 식당 보기",
+      naverQuery: "음식점",
+    },
+
+    /** "그냥 골라줘" R1 연출과 결과 카드 (REC-12, G3 D-05) */
+    justPick: {
+      dialogLabel: "그냥 골라줘 결과",
+      picking: "세 곳 중에서 고르고 있습니다.",
+      skip: "바로 보기",
+      /** 결과 카드 위 세리프 한 줄 (축하, 해요체) */
+      settled: "오늘은 여기로 가요.",
+      /** 스크린 리더 결과 안내 */
+      announce: (name: string) => `${name}, 오늘은 여기로 가요.`,
+      again: "다시 고르기",
+      close: "닫기",
+    },
+
+    /** 오늘의 한 곳 (큰 카드, 대안, 하단 행동 줄) */
+    single: {
+      eyebrow: "오늘의 한 곳",
+      alternatives: "또는 이 두 곳",
+      alternativesOne: "또는 이 곳",
+      /** 대안 카드 버튼의 보이지 않는 끝말. 이름은 보이는 글자 + 이 말(axe label-content-name-mismatch, T3.5) */
+      swapHint: "크게 보기",
+      swapped: (name: string) => `오늘의 한 곳을 바꿨습니다. ${name}입니다.`,
+      /** 하단 고정 행동 줄 */
+      actionsLabel: "오늘의 한 곳 행동",
+      /** 카드 순서 낭독 (T5.25) */
+      order: (index: number, total: number) => `${total}곳 중 ${index}번째`,
+      listLabel: "오늘 추천 식당",
     },
   },
 } as const;

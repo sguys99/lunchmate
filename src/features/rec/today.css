@@ -1,0 +1,167 @@
+/*
+ * 오늘(홈) CSS 모션 (T5.17, T5.18, G3 D1, DESIGN.md 5장 "오늘(홈) 화면", 7장). Motion 없이 CSS만 쓴다(D-04, 홈 첫 로드 예산).
+ * 시간과 곡선, 색은 모두 토큰 변수(check-css-colors).
+ * - 첫 화면: 카드 묶음 페이드 하나(slow, enter). 동시에 움직이는 효과는 이것뿐이다.
+ * - 다시 뽑기: 지금 묶음이 fast로 흐려진 뒤(exit) 새 블록이 70ms 간격으로 slow 페이드 인
+ *   (큰 카드 윗줄 0, 이유 1, 배지 2, 숫자 3, 대안 5, 6번째). data-reveal="<순번>"을 단 블록이 따른다.
+ * - 대안 누르기(교환): 큰 카드 자리만 fast로 사라지고 새 카드가 slow로 8px 떠오른다.
+ * - 축소 모드(OS 설정, 앱 설정 <html data-motion="reduce">)면 모두 끈다. JS도 바로 바꾼다.
+ * 지도 마커는 SDK가 그리는 DOM이라 Tailwind 대신 이 파일의 클래스를 쓴다.
+ */
+@keyframes lm-today-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lm-today-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes lm-today-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 첫 화면 등장 */
+.lm-today-deck[data-phase="first"] {
+  animation: lm-today-fade-in var(--lm-duration-slow) var(--lm-ease-enter)
+    both;
+}
+/* 다시 뽑기: 퇴장 */
+.lm-today-deck[data-phase="leaving"] {
+  animation: lm-today-fade-out var(--lm-duration-fast) var(--lm-ease-exit)
+    forwards;
+}
+/* 다시 뽑기: 블록 순차 등장 */
+.lm-today-deck[data-phase="entering"] [data-reveal] {
+  animation: lm-today-fade-in var(--lm-duration-slow) var(--lm-ease-enter)
+    both;
+  animation-delay: calc(var(--reveal, 0) * var(--lm-stagger));
+}
+/* 교환: 큰 카드 자리 */
+.lm-today-hero[data-swap="out"] {
+  animation: lm-today-fade-out var(--lm-duration-fast) var(--lm-ease-exit)
+    forwards;
+}
+.lm-today-hero[data-swap="in"] {
+  animation: lm-today-rise var(--lm-duration-slow) var(--lm-ease-enter) both;
+}
+/* "왜 추천했나요?" 펼침 */
+.lm-today-why {
+  animation: lm-today-fade-in var(--lm-duration-base) var(--lm-ease-enter)
+    both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lm-today-deck,
+  .lm-today-deck [data-reveal],
+  .lm-today-hero,
+  .lm-today-why {
+    animation: none !important;
+  }
+}
+[data-motion="reduce"] .lm-today-deck,
+[data-motion="reduce"] .lm-today-deck [data-reveal],
+[data-motion="reduce"] .lm-today-hero,
+[data-motion="reduce"] .lm-today-why {
+  animation: none !important;
+}
+
+/* ---------- 데스크톱 지도 마커 ---------- */
+
+/* 기준점: 사무실은 올리브 테두리 원 + 건물, 현위치는 작은 점 */
+.lm-today-base {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--foreground);
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 0 0 3px var(--background);
+}
+.lm-today-base svg {
+  width: 14px;
+  height: 14px;
+}
+.lm-today-base[data-kind="here"] {
+  width: 14px;
+  height: 14px;
+  border-width: 3px;
+  border-color: var(--card);
+  background: var(--foreground);
+}
+
+/* 추천 핀: 이름 알약 + 점. 큰 카드의 핀만 올리브(DESIGN.md 4장).
+ * 이름 폭이 제각각이라 바깥은 0 x 0 상자(좌표 = 점 가운데)로 두고 안쪽을 가운데 아래 기준으로 띄운다(anchor 0,0) */
+.lm-today-pin {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+.lm-today-pin-inner {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transform: translateX(-50%);
+}
+.lm-today-pin[data-active="true"] {
+  z-index: 1;
+}
+.lm-today-pin-label {
+  max-width: 10rem;
+  overflow: hidden;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    border-color var(--lm-duration-base) var(--lm-ease-standard),
+    color var(--lm-duration-base) var(--lm-ease-standard);
+}
+.lm-today-pin-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--muted-foreground);
+  box-shadow: 0 0 0 4px var(--background);
+  transition: background-color var(--lm-duration-base)
+    var(--lm-ease-standard);
+}
+.lm-today-pin[data-active="true"] .lm-today-pin-label {
+  border-color: var(--primary);
+  color: var(--foreground);
+}
+.lm-today-pin[data-active="true"] .lm-today-pin-dot {
+  background: var(--primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-today-pin-label,
+  .lm-today-pin-dot {
+    transition: none !important;
+  }
+}
