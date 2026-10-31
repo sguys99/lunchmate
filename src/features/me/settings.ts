@@ -16,6 +16,7 @@ import {
   type AvoidRow,
 } from "@/features/onboarding/submit";
 import { CATEGORY_SLUGS } from "@/features/place/categories";
+import { hasBannedIssue, withoutBannedContent } from "@/lib/moderation";
 import { MAX_CRAVINGS, sameCravings } from "./craving";
 import {
   canAddOffice,
@@ -41,7 +42,10 @@ const id = z.uuid();
 
 const unique = <T>(arr: T[]) => new Set(arr).size === arr.length;
 
-export const nicknameSchema = z.strictObject({ nickname: shortName });
+/** 닉네임은 다른 사람에게 보이므로 금칙어, 연락처, 링크를 거른다(T6.17, MOD-04, 4단계 사용자 결정 10/31) */
+export const nicknameSchema = z.strictObject({
+  nickname: withoutBannedContent(shortName),
+});
 export const addOfficeSchema = z.strictObject({
   name: shortName,
   office: finishOnboardingSchema.shape.office,
@@ -83,7 +87,7 @@ export type SettingsDeps = {
   ) => Promise<{ until: string | null } | undefined>;
 };
 
-type Fail = { ok: false; error: "invalid" | "unauthenticated" };
+type Fail = { ok: false; error: "invalid" | "banned" | "unauthenticated" };
 
 /** 검사 → 로그인 확인. 실패하면 결과, 성공하면 [값, 사용자] */
 async function prepare<S extends z.ZodType>(
@@ -92,7 +96,11 @@ async function prepare<S extends z.ZodType>(
   deps: Pick<SettingsDeps, "currentUserId">,
 ): Promise<Fail | { ok: true; input: z.infer<S>; userId: string }> {
   const parsed = schema.safeParse(raw);
-  if (!parsed.success) return { ok: false, error: "invalid" };
+  if (!parsed.success)
+    return {
+      ok: false,
+      error: hasBannedIssue(parsed.error) ? "banned" : "invalid",
+    };
   const userId = await deps.currentUserId().catch(() => null);
   if (!userId) return { ok: false, error: "unauthenticated" };
   return { ok: true, input: parsed.data, userId };

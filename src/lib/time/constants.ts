@@ -27,8 +27,11 @@ export const POLL_LINK_TTL_MS = 24 * HOUR_MS;
 export const WAIT_REPORT_TTL_MS = 30 * MINUTE_MS;
 export const WAIT_REPORT_COOLDOWN_MS = 30 * MINUTE_MS;
 
-/** FB-04: 48시간 지난 방문은 묻지 않음. (주말·공휴일 제외 계산은 PRD 12장 [제안], 미적용) */
+/** FB-04: 48시간 지난 방문은 묻지 않음. 주말과 공휴일은 빼고 센다(D-11, holidays.ts businessMsBetween). */
 export const FEEDBACK_WINDOW_MS = 48 * HOUR_MS;
+
+/** HIS-01, D-12 안건 3: 나 탭 늦은 답은 방문일(KST) 포함 14일 뒤까지. DB reviews_before_insert와 같은 값 */
+export const LATE_ANSWER_DAYS = 14;
 
 /** SET-05: "요즘 이게 땡겨요" 7일간 가중치 상향. */
 export const CRAVING_TTL_MS = 7 * DAY_MS;

@@ -6,6 +6,8 @@ import type { CategorySlug } from "@/features/place/categories";
 
 export type SettingsError =
   | "invalid"
+  /** 닉네임 금칙어 (T6.17) */
+  | "banned"
   | "unauthenticated"
   | "save"
   /** 사무실 5곳 초과 */

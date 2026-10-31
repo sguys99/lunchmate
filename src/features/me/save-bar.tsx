@@ -6,6 +6,7 @@ import { CloudOff, WifiOff } from "lucide-react";
 import type { ReactNode } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
 import { meCopy } from "@/copy/me";
+import { moderationCopy } from "@/copy/moderation";
 import { Note } from "@/features/onboarding/steps";
 import { cn } from "@/lib/utils";
 import type { SaveState } from "./use-settings-save";
@@ -27,6 +28,15 @@ export function SaveNotes({ state }: { state: SaveState }) {
         live="alert"
         title={meCopy.states.limit.title}
         body={meCopy.states.limit.body}
+      />
+    );
+  if (state.error === "banned")
+    return (
+      <Note
+        icon={CloudOff}
+        live="alert"
+        title={moderationCopy.errors.banned.title}
+        body={moderationCopy.bannedNickname}
       />
     );
   if (state.error)

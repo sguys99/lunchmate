@@ -1,5 +1,7 @@
 // 나 탭 설정 서버 흐름 (T4.23~T4.27, SET-01~05): 입력 재검증, 기본 사무실 대체, 못 먹는 음식 차이 저장, 땡겨요 7일 새로 세기.
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
 import type { OfficeSummary } from "./offices";
 import {
   addOffice,
@@ -99,6 +101,27 @@ describe("이름 (T4.27)", () => {
       error: "invalid",
     });
     expect(d.updateNickname).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["욕설", "시 발 왕"],
+    ["초성", "ㅅㅂ점심"],
+    ["연락처", "01012345678"],
+    ["오픈채팅", "오픈채팅방장"],
+  ])("금칙어(%s)는 banned (T6.17)", async (_name, nickname) => {
+    const d = deps();
+    expect(await saveNickname({ nickname }, d)).toEqual({
+      ok: false,
+      error: "banned",
+    });
+    expect(d.updateNickname).not.toHaveBeenCalled();
+  });
+
+  it("시발점 같은 말은 통과한다", async () => {
+    const d = deps();
+    expect(await saveNickname({ nickname: "시발점" }, d)).toMatchObject({
+      ok: true,
+    });
   });
 });
 

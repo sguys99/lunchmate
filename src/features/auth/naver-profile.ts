@@ -7,9 +7,11 @@
 // - 이 함수는 어떤 경우에도 throw하지 않는다. 실패하면 null을 돌려주고 로그인은 그대로 진행한다(온보딩에서 닉네임 입력).
 // - 응답 값은 DB 제약(profiles_nickname_len, profiles_avatar_url_host)과 같은 규칙으로 걸러서 넘긴다.
 //   이름, 이메일 등 다른 필드는 읽지 않는다.
+// - 닉네임에 금칙어가 있으면 채우지 않는다(T6.17, MOD-04). 나 탭에서 직접 정한다.
 //
 // 출처: 네이버 회원 프로필 조회 API https://developers.naver.com/docs/login/profile/profile.md
 // (GET https://openapi.naver.com/v1/nid/me, Authorization: Bearer, 응답 { resultcode: "00", message, response: { nickname, profile_image, ... } })
+import { containsBannedContent } from "@/lib/moderation";
 
 export const NAVER_PROFILE_URL = "https://openapi.naver.com/v1/nid/me";
 export const NAVER_PROFILE_TIMEOUT_MS = 4000;
@@ -70,7 +72,7 @@ export async function fetchNaverProfile(
     const patch: ProfilePatch = {};
     const nickname = cleanNickname(r.nickname);
     const avatar = cleanAvatarUrl(r.profile_image);
-    if (nickname) patch.nickname = nickname;
+    if (nickname && !containsBannedContent(nickname)) patch.nickname = nickname;
     if (avatar) patch.avatar_url = avatar;
     return Object.keys(patch).length > 0 ? patch : null;
   } catch {
