@@ -191,8 +191,8 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       }
     }
 
-    // T5.2 식당 상세 시안 3안. T5.3 선택 뒤 남긴 안만 둔다
-    for (const id of ["a", "b", "c"]) {
+    // T5.2 식당 상세 시안. D-10에서 C안을 골라 A, B는 지웠다(캡처와 비교 문서만 남김)
+    for (const id of ["c"]) {
       for (const query of [
         "",
         "?state=loading",
@@ -201,8 +201,8 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
         "?state=error&fail=name",
         "?state=offline",
         "?data=sparse",
-        id === "b" ? "?from=map" : "?from=home",
-        ...(id === "c" ? ["?snap=full"] : []),
+        "?from=home",
+        "?snap=full",
       ]) {
         test(`식당 상세 ${id}${query}`, async ({ page }) => {
           test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
@@ -212,8 +212,8 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       }
     }
 
-    // T5.1 지도와 바텀시트 시안 (A 그림 핀과 3단 시트, B 도보 분 알약과 2단 시트, C 점 마커와 카드 넘기기)
-    for (const id of ["a", "b", "c"]) {
+    // T5.1 지도와 바텀시트 시안. D-09에서 B안(도보 분 알약과 2단 시트)을 골라 A, C는 지웠다
+    for (const id of ["b"]) {
       for (const query of [
         "",
         "?state=loading",

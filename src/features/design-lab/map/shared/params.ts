@@ -2,7 +2,7 @@
 //   ?state=loading|empty|error|offline   4상태 (scripts/shots.mjs 규약). error는 지도 로딩 실패 → 목록 보기(T5.32)
 //   ?select=<식당 id>                   마커를 고른 상태로 연다
 //   ?snap=peek|half|full                시트 높이 (안마다 쓰는 단계가 다르면 가까운 단계로 맞춘다)
-//   ?filter=open                        필터 펼침(A 카테고리 줄, B 시트 안 카테고리 줄, C 필터 시트)
+//   ?filter=open                        필터 펼침(시트 안 카테고리 줄)
 //   ?moved=1                            지도를 옮긴 뒤("이 지역에서 다시 찾기"가 보이는 상태)
 //   ?map=naver                          실제 네이버 지도(MapProvider 네이버 구현체). 기본은 목업 지도
 import {

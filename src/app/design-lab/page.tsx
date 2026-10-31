@@ -50,15 +50,12 @@ export default function DesignLabPage() {
 
       <Section title={placeLabCopy.index.title} body={placeLabCopy.index.body}>
         <div className="flex flex-wrap gap-4">
-          {(["a", "b", "c"] as const).map((id) => (
-            <Link
-              key={id}
-              href={`/design-lab/place/${id}`}
-              className={linkClass}
-            >
-              {placeLabCopy.names[id]}
-            </Link>
-          ))}
+          <Link href="/design-lab/place/c" className={linkClass}>
+            {placeLabCopy.names.c}
+          </Link>
+          <Link href="/design-lab/place/live" className={linkClass}>
+            {placeLabCopy.names.live}
+          </Link>
         </div>
       </Section>
 
@@ -73,11 +70,9 @@ export default function DesignLabPage() {
 
       <Section title={mapLabCopy.index.title} body={mapLabCopy.index.body}>
         <div className="flex flex-wrap gap-4">
-          {(["a", "b", "c"] as const).map((id) => (
-            <Link key={id} href={`/design-lab/map/${id}`} className={linkClass}>
-              {mapLabCopy.names[id]}
-            </Link>
-          ))}
+          <Link href="/design-lab/map/b" className={linkClass}>
+            {mapLabCopy.names.b}
+          </Link>
         </div>
       </Section>
 

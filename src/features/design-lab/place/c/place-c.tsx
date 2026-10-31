@@ -67,7 +67,6 @@ export function PlaceC({ params }: { params: PlaceParams }) {
     return (
       <DetailScreen
         from={from}
-        desktop="split"
         pinLabel={null}
         tallMap={half}
         footer={
@@ -84,7 +83,7 @@ export function PlaceC({ params }: { params: PlaceParams }) {
   }
   if (content.kind === "error") {
     return (
-      <DetailScreen from={from} desktop="split" pinLabel={null} tallMap={half}>
+      <DetailScreen from={from} pinLabel={null} tallMap={half}>
         <DetailError className="pb-8" />
       </DetailScreen>
     );
@@ -93,7 +92,6 @@ export function PlaceC({ params }: { params: PlaceParams }) {
   return (
     <DetailScreen
       from={from}
-      desktop="split"
       pinLabel={name}
       tallMap={half}
       footer={<FooterC detail={detail} mode={mode} poll={params.poll} />}

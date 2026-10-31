@@ -1,4 +1,4 @@
-// 식당 상세 시안 쿼리 (T5.2): /design-lab/place/<a|b|c>?...
+// 식당 상세 시안 쿼리 (T5.2): /design-lab/place/c?... (D-10 C안)
 //   state=ready|loading|empty|error|offline  4상태 (pnpm shots --states 규약)
 //   fail=fetch|name   state=error일 때 오류 종류. fetch: 카카오 실패(재시도 + 네이버 지도), name: 이름 해석 실패(T5.12a)
 //   from=map|home     모바일 컨테이너. map: 지도 바텀시트를 끝까지 연 상태, home: 홈 카드 "상세"에서 연 화면

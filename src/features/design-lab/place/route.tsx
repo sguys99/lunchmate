@@ -1,16 +1,14 @@
-// 식당 상세 시안 라우트 공용 (T5.2). 쿼리 규약은 ./params.ts 머리 주석.
+// 식당 상세 시안 라우트 (T5.2). D-10에서 C안을 골라 A, B는 지웠다. 쿼리 규약은 ./params.ts 머리 주석.
 // 쿼리는 요청 시점 값이라 Suspense 안에서 읽는다(cacheComponents). 테마는 시스템 설정을 따른다.
 import { Suspense } from "react";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
-import { PlaceA } from "./a/place-a";
-import { PlaceB } from "./b/place-b";
 import { PlaceC } from "./c/place-c";
 import { parsePlaceParams } from "./params";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-export type PlaceVariant = "a" | "b" | "c";
+export type PlaceVariant = "c";
 
-const VARIANTS = { a: PlaceA, b: PlaceB, c: PlaceC } as const;
+const VARIANTS = { c: PlaceC } as const;
 
 async function Screen({
   variant,

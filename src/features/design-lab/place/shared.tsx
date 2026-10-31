@@ -1,14 +1,13 @@
 "use client";
-// 식당 상세 시안 공용 조각 (T5.2). 세 안이 함께 쓰는 컨테이너, 행동 버튼, 상태 화면, 후기 머리줄.
-// 시안마다 다른 것(정보 배치, 👍 시각화, 가격 표현, 액션 배치)은 a, b, c 파일에 둔다.
+// 식당 상세 시안 공용 조각 (T5.2). 컨테이너, 행동 버튼, 상태 화면, 후기 머리줄.
+// D-10에서 C안을 골라 A, B 코드는 지웠다(CLAUDE.md 6.1-5, 캡처와 비교 문서는 docs/design에 남김). C안 고유 배치는 c 파일에 둔다.
 //
 // 컨테이너 (모바일)
 //   from=map  지도 바텀시트를 끝까지 연 상태. 위에 지도 띠(고정)가 보이고 시트가 그 위로 스크롤된다.
 //   from=home 홈 카드 "상세"에서 연 화면. 뒤로 버튼 머리줄 + 본문.
 //   두 경우 모두 문서가 스크롤하고, 하단 고정 줄(footer)은 하단 탭 바로 위에 붙는다(홈 D1 행동 줄과 같은 방식).
 // 컨테이너 (데스크톱 1024px 이상)
-//   split  좌 상세(최대 460) + 우 지도(이 식당 핀 강조). 앱 셸 ShellSplit과 같은 틀.
-//   wide   지도 칸 없이 넓은 2단(본문 + 오른쪽 고정 요약). B안만.
+//   좌 상세(최대 460) + 우 지도(이 식당 핀 강조). 앱 셸 ShellSplit과 같은 틀.
 import {
   ChevronLeft,
   ExternalLink,
@@ -107,14 +106,12 @@ export const btn = {
 
 export function DetailScreen({
   from,
-  desktop,
   pinLabel,
   footer,
   tallMap = false,
   children,
 }: {
   from: PlaceFrom;
-  desktop: "split" | "wide";
   pinLabel: string | null;
   footer?: ReactNode;
   /** C안 시트 절반 높이: 지도 띠를 크게 */
@@ -128,9 +125,7 @@ export function DetailScreen({
     <div
       className={cn(
         "mx-auto flex w-full max-w-(--lm-layout-max-width) flex-1 flex-col px-(--lm-layout-gutter)",
-        desktop === "split"
-          ? "desktop:max-w-(--lm-layout-desktop-list-max-width) desktop:px-10"
-          : "desktop:max-w-[60rem] desktop:px-12",
+        "desktop:max-w-(--lm-layout-desktop-list-max-width) desktop:px-10",
       )}
     >
       {children}
@@ -186,15 +181,6 @@ export function DetailScreen({
         <main className="flex flex-1 flex-col">{column}</main>
       </>
     );
-
-  if (desktop === "wide") {
-    return (
-      <div className="flex min-h-dvh flex-1 flex-col">
-        {list}
-        {tabBar}
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-dvh flex-1 flex-col desktop:grid desktop:grid-cols-(--lm-layout-desktop-columns)">
@@ -427,44 +413,6 @@ export function PrimaryAction({
     >
       {copy.actions.directions}
     </button>
-  );
-}
-
-/* ---------- 제보 진입점 (PLACE-05) ---------- */
-
-export function ReportEntry({
-  className,
-  disabled = false,
-}: {
-  className?: string;
-  disabled?: boolean;
-}) {
-  return (
-    <section
-      aria-label={copy.report.title}
-      className={cn("flex flex-col gap-3", className)}
-    >
-      <h2 className="type-caption text-muted-foreground">
-        {copy.report.title}
-      </h2>
-      <div className="flex flex-wrap gap-2">
-        {[copy.report.closed, copy.report.price, copy.report.wrong].map(
-          (label) => (
-            <button
-              key={label}
-              type="button"
-              aria-disabled={disabled || undefined}
-              className={cn(
-                btn.chip,
-                "aria-disabled:pointer-events-none aria-disabled:opacity-50",
-              )}
-            >
-              {label}
-            </button>
-          ),
-        )}
-      </div>
-    </section>
   );
 }
 

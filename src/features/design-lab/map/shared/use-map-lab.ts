@@ -1,6 +1,6 @@
 "use client";
 // 지도 시안 공용 상태 (T5.1): 필터, 고른 식당, 시트 높이, 지도 이동, 클러스터, 4상태.
-// 세 안이 같은 상태를 쓰고 그리는 방식만 다르다. 데이터는 목업(places.ts), 저장하지 않는다.
+// 시안 상태 훅(D-09 B안이 쓴다). 데이터는 목업(places.ts), 저장하지 않는다.
 import { useState } from "react";
 import { mapLabCopy } from "@/copy/design-lab-map";
 import type { CategorySlug } from "@/features/place/categories";

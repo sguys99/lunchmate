@@ -1,18 +1,17 @@
-// 식당 상세 시안 문구 (T5.2, /design-lab/place/<a|b|c>). PLACE-01~08, NAV-01~04.
+// 식당 상세 시안 문구 (T5.2, /design-lab/place/c). PLACE-01~08, NAV-01~04.
+// D-10에서 C안을 골라 A, B 화면과 그 안만 쓰던 문구는 지웠다(CLAUDE.md 6.1-5).
 // 상태 안내와 설명은 습니다체, 제안과 피드백 요청은 해요체 (tasks.md 2.2절, copy-guide 4.2, 4.3, 4.9, 4.12).
 // 배지, 버튼, 웨이팅 단계 같은 공용 라벨은 badges.ts, home.ts(placeDetailCopy), common.ts 값을 쓴다.
 // 시안을 고른 뒤(T5.3) 실제 상세(T5.33~T5.35)로 옮길 때 src/copy/place.ts로 정리한다.
 
 export const placeLabCopy = {
-  metaTitle: "식당 상세 시안",
   names: {
-    a: "시안 A 숫자 대시보드",
-    b: "시안 B 이야기형",
-    c: "시안 C 결정 집중형",
+    c: "시안 C 결정 집중형 (선택)",
+    live: "실제 상세 확인",
   },
   index: {
-    title: "식당 상세 시안 (T5.2)",
-    body: "같은 식당 상세를 세 방향으로 만들었습니다. 쿼리로 상태와 진입 경로를 바꿔 볼 수 있습니다.",
+    title: "식당 상세 시안 (T5.2, D-10 C안)",
+    body: "고른 C안과 실제 상세 구현 확인 화면입니다. 쿼리로 상태와 진입 경로를 바꿔 볼 수 있습니다.",
   },
 
   /** 컨테이너 */
@@ -53,21 +52,14 @@ export const placeLabCopy = {
     overBudget: "예산 넘음",
     scaleLabel: (median: string, budget: string) =>
       `가운데 값 ${median}, 내 예산 ${budget}`,
-    dotsLabel: (count: number, min: string, max: string) =>
-      `제보 ${count}건, ${min}~${max}`,
   },
 
   /** 👍 비율 (PLACE-03) */
   thumbs: {
     title: "만족도",
-    titleStory: "가 본 사람들",
     up: (count: number) => `👍 ${count}`,
     down: (count: number) => `👎 ${count}`,
     reviewsOf: (count: number) => `후기 ${count}건`,
-    barLabel: (up: number, down: number, percent: number) =>
-      `좋았어요 ${up}건, 별로였어요 ${down}건, 만족 ${percent}%`,
-    sentence: (total: number, up: number) =>
-      `후기 ${total}건 중 ${up}건이 좋았다고 했습니다.`,
     few: (count: number) => `아직 ${count}건이라 비율은 3건부터 보여 드립니다.`,
     none: "아직 남긴 사람이 없습니다.",
     meterLabel: (percent: number) => `10칸 중 만족 ${percent}%`,
@@ -77,8 +69,6 @@ export const placeLabCopy = {
   tags: {
     title: "자주 나온 태그",
     titleShort: "태그",
-    titleStory: "자주 나온 말",
-    count: (count: number) => `${count}회`,
     none: "아직 태그가 없습니다.",
   },
 
@@ -86,12 +76,10 @@ export const placeLabCopy = {
   reviews: {
     title: "후기",
     titleCount: (count: number) => `후기 ${count}건`,
-    latest: "최신순",
     visitMonth: (month: number) => `${month}월 방문`,
     thumbUp: "좋았어요",
     thumbDown: "별로였어요",
     more: (count: number) => `후기 ${count}건 모두 보기`,
-    report: "후기 신고",
     write: "후기 쓰기",
     empty: {
       title: "아직 후기가 없습니다",
@@ -103,29 +91,11 @@ export const placeLabCopy = {
   /** 지금 정보: 웨이팅(PLACE-07), 할인(DEAL-02) */
   now: {
     title: "지금",
-    waitingTitle: "웨이팅",
     waitingNone: "최근 30분 동안 웨이팅 제보가 없습니다.",
     waitingAsk: "지금 줄이 어떤가요?",
-    dealTitle: "할인 정보",
     dealNotice: "사용자가 제보한 정보라 실제와 다를 수 있습니다.",
-    dealNoScore: "할인 정보는 추천 순서에 쓰지 않습니다.",
     dealMeta: (daysAgo: number, until: string) =>
       `${daysAgo}일 전 제보, ${until}까지`,
-  },
-
-  /** 왜 이 집인지 (REC-07 펼침 문장과 같은 결) */
-  why: {
-    title: "왜 이 집인지",
-    lines: [
-      "회사에서 가장 가까운 곳 중 하나입니다.",
-      "지난주 좋았던 국밥과 같은 종류입니다.",
-    ],
-  },
-
-  /** 내 기록 (PLACE-06, P1) */
-  myVisit: {
-    title: "내 기록",
-    line: (dateLabel: string) => `${dateLabel}에 다녀왔고 👍를 남겼습니다.`,
   },
 
   /** 기본 정보 (PLACE-01) */
@@ -133,7 +103,6 @@ export const placeLabCopy = {
     title: "정보",
     address: "주소",
     phone: "전화",
-    category: "종류",
     naverNote: "영업시간, 메뉴, 사진은 네이버 플레이스에서 볼 수 있습니다.",
   },
 
@@ -144,7 +113,6 @@ export const placeLabCopy = {
     naver: "네이버 플레이스",
     naverLong: "네이버 플레이스에서 보기",
     favorite: "즐겨찾기",
-    favorited: "즐겨찾기 해제",
     share: "공유",
     call: "전화",
     callLong: "전화 걸기",
@@ -152,7 +120,6 @@ export const placeLabCopy = {
     more: "더 보기",
     moreLabel: "다른 행동 더 보기",
     kakaoMap: "카카오맵에서 보기",
-    naverMap: "네이버 지도에서 보기",
   },
 
   /** 제보 진입점 (PLACE-05) */
@@ -180,7 +147,6 @@ export const placeLabCopy = {
     name: {
       title: "이름을 불러오지 못했습니다",
       body: "후기와 가격 정보는 그대로 볼 수 있습니다.",
-      kakao: "카카오맵에서 보기",
       walkUnknown: "알 수 없음",
     },
     offline: {

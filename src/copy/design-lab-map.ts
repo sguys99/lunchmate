@@ -1,15 +1,14 @@
 // 지도와 바텀시트 시안 문구 (T5.1, PRD MAP-01~06, PLACE-01~04). 컴포넌트 안에 문장을 직접 쓰지 않는다 (CLAUDE.md 4장).
 // 문체 (tasks.md 2.2절): 상태, 결과, 설명, 오류는 습니다체, 제안과 질문은 해요체. 버튼, 칩, 라벨은 명사형.
-// 시안 확인 화면 /design-lab/map/<a|b|c> 전용이다. 실제 지도 탭 문구는 src/copy/map.ts(T5.26~T5.32)로 옮긴다.
+// 시안 확인 화면 /design-lab/map/b 전용이다. 실제 지도 탭 문구는 src/copy/map.ts(T5.26~T5.32).
+// D-09에서 B안을 골라 A, C 화면과 그 안만 쓰던 문구(필터 시트, 카드 넘기기 등)는 지웠다(CLAUDE.md 6.1-5).
 import { commonCopy } from "./common";
 import { homeCopy } from "./home";
 
 export const mapLabCopy = {
   metaTitle: "지도 시안",
   names: {
-    a: "A 그림 핀과 3단 시트",
-    b: "B 도보 분 알약과 2단 시트",
-    c: "C 점 마커와 카드 넘기기",
+    b: "B 도보 분 알약과 2단 시트 (선택)",
   },
   /** 화면 제목(보조 기술용 h1) */
   screenTitle: "주변 식당 지도",
@@ -34,20 +33,6 @@ export const mapLabCopy = {
     walk: "도보 5분 안",
     top: "👍 상위",
     favorites: "즐겨찾기",
-    open: "필터",
-    openWithCount: (n: number) => `필터, ${n}개 적용됨`,
-    sheetTitle: "필터",
-    sheetBody: "조건을 고르면 지도와 목록이 함께 바뀝니다.",
-    categoryTitle: "카테고리",
-    priceTitle: "가격대",
-    walkTitle: "걷는 시간",
-    moreTitle: "더 고르기",
-    priceOptions: { any: "상관없음", under10k: "1만 원 이하" },
-    walkOptions: { any: "10분 안", under5: "5분 안" },
-    reset: "모두 풀기",
-    apply: (n: number) => `${n}곳 보기`,
-    applyNone: "맞는 곳 없음",
-    close: commonCopy.actions.close,
   },
 
   /** 지도 조작 (MAP-05) */
@@ -69,8 +54,6 @@ export const mapLabCopy = {
   /** 시트 (MAP-04) */
   sheet: {
     label: "주변 식당",
-    snapGroup: "시트 높이",
-    snaps: { peek: "작게", half: "반쯤", full: "끝까지" },
     snapAnnounce: {
       peek: "시트를 작게 내렸습니다.",
       half: "시트를 반쯤 열었습니다.",
@@ -98,9 +81,6 @@ export const mapLabCopy = {
   actions: {
     directions: "길찾기",
     detail: "자세히",
-    close: commonCopy.actions.close,
-    prev: "이전 식당",
-    next: "다음 식당",
   },
 
   /** 끝까지 열림: 상세 내용 자리 (식당 상세 시안 T5.2가 채운다) */
@@ -108,11 +88,6 @@ export const mapLabCopy = {
     title: "상세 내용 자리",
     body: "식당 상세 시안(T5.2)이 이 자리에 들어옵니다. 기본 정보, 가격대, 👍 비율, 태그, 후기, 버튼이 여기에 놓입니다.",
     blocks: ["기본 정보와 전화", "가격대와 👍 비율", "태그와 후기", "버튼 줄"],
-  },
-
-  carousel: {
-    label: "주변 식당 카드",
-    position: (i: number, n: number) => `${n}곳 중 ${i}번째`,
   },
 
   states: {
@@ -141,7 +116,7 @@ export const mapLabCopy = {
 
   /** 디자인 랩 목록 페이지 */
   index: {
-    title: "지도와 바텀시트 시안 (T5.1)",
-    body: "마커 모양, 필터 칩 위치, 시트 높이 단계가 서로 다른 세 안입니다. 쿼리: ?state=, ?select=, ?snap=, ?filter=open, ?moved=1",
+    title: "지도와 바텀시트 시안 (T5.1, D-09 B안)",
+    body: "D-09에서 고른 B안입니다. 쿼리: ?state=, ?select=, ?snap=, ?filter=open, ?moved=1",
   },
 } as const;

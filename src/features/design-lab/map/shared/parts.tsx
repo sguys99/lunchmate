@@ -540,7 +540,7 @@ export function FilterChipRow({
   );
 }
 
-export function CategoryChips({
+function CategoryChips({
   value,
   categories,
   onChange,
