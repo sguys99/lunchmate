@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      blocklist: {
+        Row: {
+          created_at: string
+          place_id: string
+          place_url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          place_id: string
+          place_url?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          place_id?: string
+          place_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          place_id: string
+          place_url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          place_id: string
+          place_url?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          place_id?: string
+          place_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       offices: {
         Row: {
           created_at: string
@@ -140,6 +182,48 @@ export type Database = {
           terms_agreed_at?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      visits: {
+        Row: {
+          created_at: string
+          feedback_requested_at: string | null
+          id: string
+          meal: string
+          place_id: string
+          place_url: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_id: string
+          visited_on: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_requested_at?: string | null
+          id?: string
+          meal: string
+          place_id: string
+          place_url?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          visited_on?: string
+        }
+        Update: {
+          created_at?: string
+          feedback_requested_at?: string | null
+          id?: string
+          meal?: string
+          place_id?: string
+          place_url?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          visited_on?: string
         }
         Relationships: []
       }

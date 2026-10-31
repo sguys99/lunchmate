@@ -444,7 +444,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T5.12 (10/31 완료, `src/lib/kakao/local.ts` searchRestaurants 45곳 상한과 capped, rect 검색, `queries.ts` 세션 메모리 쿼리 키, 온보딩 이관) 카카오 로컬 래퍼: FD6 반경 검색, 15건 × 3페이지, 재시도 1회, 세션 메모리 캐시만
 - [x] T5.12a (10/31 완료, 세션 메모리 → 반경 1회 + 상한일 때만 사분면 rect 최대 4회 → 카카오맵 링크, 집계는 개수만. PostHog 전송은 PRD 10.2 이벤트 추가 결정 후) 장소 이름 해석 공통 모듈 `src/features/place/resolve-place-names.ts`: `place_id` 목록을 받아 (1) 세션 메모리(TanStack Query) → (2) 기준점(사무실 핀, 투표방 기준점, 현위치) 주변 FD6 거리순 매칭(45건 한계는 사분면 `rect` 추가 검색, 화면당 추가 호출 상한 4회) → (3) 미해결 시 "이름을 불러오지 못했습니다" + 카카오맵 링크(`place_url`) 순으로 반환. 결과는 저장하지 않음. 즐겨찾기, 기록, 피드백 요청, 투표방, 투표 결과가 공통으로 사용. 이름 미해결 비율을 좌표 없이 집계 + 단위 테스트 (T0.16-2, 2026-10-28)
 - [x] T5.13 (10/31 완료, src/features/place/price-estimate.ts 12종 점심/저녁 추정가, priceBadge estimate. 수치는 베타 데이터로 재조정) 카테고리별 추정 가격 상수와 `추정` 배지 로직
-- [ ] T5.14 마이그레이션: `visits`(status, feedback_requested_at, 출처), `favorites`, `blocklist` + RLS + 테스트. 카카오 값은 `place_id`(+ 선택 `place_url`)만. 사용자가 직접 쓰는 메모 컬럼은 카카오 답변(T10.2) 전까지 기능 플래그로 숨김 (T0.16)
+- [x] T5.14 (10/31 완료, 사용자 승인 후 db:push, RLS 54건 통과(t5-places 3역할 + 탈퇴 cascade), 메모 컬럼은 만들지 않고 T10.2 답변 후 새 마이그레이션, 탈퇴 범위 확장) 마이그레이션: `visits`(status, feedback_requested_at, 출처), `favorites`, `blocklist` + RLS + 테스트. 카카오 값은 `place_id`(+ 선택 `place_url`)만. 사용자가 직접 쓰는 메모 컬럼은 카카오 답변(T10.2) 전까지 기능 플래그로 숨김 (T0.16)
 
 #### 5.3 오늘(홈) 구현
 

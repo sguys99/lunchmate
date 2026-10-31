@@ -9,14 +9,18 @@
 // 3. auth.users 삭제가 on delete cascade로 아래 범위의 행을 모두 지운다.
 //
 // 삭제 범위 (PRD 11.4). 새 테이블을 만들 때마다 여기와 마이그레이션의 on delete cascade를 함께 확인한다
-// (tasks S9: T4.12 → T6.27 → T7.29).
+// (tasks S9: T4.12 → T5.14 → T6.27 → T7.29).
 export const ACCOUNT_DELETION_SCOPE = [
   // T4.4 (지금 있는 테이블, auth.users on delete cascade)
   "profiles",
   "offices",
   "preferences",
   "avoid_rules",
-  // T6.27에서 확장: visits, favorites, never_again, feedback, wait_reports, closure_reports, deal_reports와 확인 응답,
+  // T5.14 (auth.users on delete cascade, supabase/migrations/20261031120000_t5_14_visits_favorites_blocklist.sql)
+  "visits",
+  "favorites",
+  "blocklist",
+  // T6.27에서 확장: feedback, wait_reports, closure_reports, deal_reports와 확인 응답,
   //   review_reports(신고 기록), reviews(공개와 비공개 모두 삭제, 식당 집계에서도 빠짐)
   // T7.29에서 확장: poll_votes(진행 중 투표의 내 표 삭제), 확정된 투표는 익명 참여자로 남김(참여자 user_id를 null로),
   //   방장인 진행 중 투표방은 취소 처리

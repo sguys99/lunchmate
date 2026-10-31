@@ -49,6 +49,9 @@ describe("deleteAccount (AUTH-05)", () => {
         "offices",
         "preferences",
         "avoid_rules",
+        "visits",
+        "favorites",
+        "blocklist",
       ]),
     );
   });
