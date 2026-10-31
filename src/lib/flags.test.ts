@@ -40,12 +40,19 @@ describe("evaluateFlag", () => {
       ),
     ).toBe(true);
   });
-  it("appShell은 개발과 Preview에서 켜지고 Production에서는 꺼진다 (T2.6)", () => {
+  it("appShell은 개발, Preview, Production 모두 켜진다 (T2.6, 2026-10-31 해제)", () => {
     expect(evaluateFlag(FLAGS.appShell, ctx())).toBe(true);
     expect(evaluateFlag(FLAGS.appShell, ctx({ vercelEnv: "preview" }))).toBe(
       true,
     );
     expect(evaluateFlag(FLAGS.appShell, ctx({ vercelEnv: "production" }))).toBe(
+      true,
+    );
+    // 서버에서 판정해 내려 주므로 브라우저 값은 쓰지 않지만, productionOff가 없어 같은 값이다
+    expect(evaluateFlag(FLAGS.appShell, ctx({ inBrowser: true }))).toBe(true);
+  });
+  it("auth는 여전히 Production에서 꺼진다 (appShell 해제와 무관)", () => {
+    expect(evaluateFlag(FLAGS.auth, ctx({ vercelEnv: "production" }))).toBe(
       false,
     );
   });
@@ -79,5 +86,13 @@ describe("isEnabled", () => {
     vi.stubEnv("NEXT_PUBLIC_DESIGN_LAB", "");
     resetClientEnvCache();
     expect(isEnabled("designLab")).toBe(false);
+  });
+  it("프로덕션 조합(VERCEL_ENV=production): appShell 켜짐 + auth 꺼짐 (5단계 마무리)", () => {
+    // 이 조합에서 /poll, /me는 곧 열립니다 안내, 로그인 유도는 토스트(app/(app)/coming-soon.tsx, login-prompt/gate.tsx)
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://lunchmate.kr");
+    resetClientEnvCache();
+    expect(isEnabled("appShell")).toBe(true);
+    expect(isEnabled("auth")).toBe(false);
   });
 });

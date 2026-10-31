@@ -1,9 +1,8 @@
 // 나 탭 첫 화면 /me (T4.27, PRD SET-01~05, AUTH-05). 설정, 화면, 계정, 약관과 정책 네 묶음.
 // '나' 전용 시안은 6단계 "피드백, 나, 제보"에서 만든다. 지금은 기존 토큰과 컴포넌트만 쓴 뼈대다(parts.tsx).
-// - 로그인 필요 경로(proxy). flags.auth가 꺼진 환경(프로덕션)에서는 404. 세션과 설정은 요청 시점 값이라 Suspense 안에서 읽는다.
+// - 로그인 필요 경로(proxy). flags.auth가 꺼진 환경(프로덕션)에서는 "곧 열립니다" 안내(coming-soon.tsx). 세션과 설정은 요청 시점 값이라 Suspense 안에서 읽는다.
 // - 화면 설정은 이 기기 저장소 값이라 클라이언트 컴포넌트(DisplaySettings)가 그린다.
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PageColumn, PageHeader } from "@/components/app-shell";
 import { ErrorState } from "@/components/states";
@@ -27,6 +26,7 @@ import { SignOutRow } from "@/features/me/sign-out-row";
 import { categoryLabel } from "@/features/place/categories";
 import { isEnabled } from "@/lib/flags";
 import { formatShortWon } from "@/lib/format";
+import { ComingSoon } from "../coming-soon";
 
 export const metadata: Metadata = { title: meCopy.metaTitle };
 
@@ -118,7 +118,8 @@ async function Settings() {
 }
 
 export default function Page() {
-  if (!isEnabled("auth")) notFound();
+  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
+  if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <PageColumn>
       <PageHeader title={meCopy.title} />

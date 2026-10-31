@@ -30,6 +30,10 @@ import {
 } from "react";
 import { focusRing } from "@/components/ui/interaction";
 import { homeCopy } from "@/copy/home";
+import {
+  notifyLoginSoon,
+  useLoginOpen,
+} from "@/features/auth/login-prompt/gate";
 import { currentPathForNext } from "@/features/auth/login-prompt/triggers";
 import { locateOnce } from "@/features/onboarding/geolocation";
 import { isCategorySlug } from "@/features/place/categories";
@@ -146,8 +150,15 @@ export function TodayScreen({
   const [login, setLogin] = useState<{ open: boolean; next: string } | null>(
     null,
   );
-  const promptSave = () =>
+  // 로그인이 닫힌 환경(프로덕션, flags.auth)에서는 시트 대신 "곧 열립니다" 토스트(gate.tsx)
+  const loginOpen = useLoginOpen();
+  const promptSave = () => {
+    if (!loginOpen) {
+      notifyLoginSoon();
+      return;
+    }
     setLogin({ open: true, next: currentPathForNext(window.location) });
+  };
   const [announcement, setAnnouncement] = useState("");
   const [shuffle, setShuffle] = useState<Shuffle>("idle");
   const [swap, setSwap] = useState<Swap>(null);
@@ -595,7 +606,7 @@ export function TodayScreen({
       offices={offices}
       signedIn={data.signedIn}
       onChoose={chooseBase}
-      onSaveOffice={promptSave}
+      onSaveOffice={loginOpen ? promptSave : undefined}
       notice={noticeText(session.notice)}
     />
   );
@@ -621,7 +632,7 @@ export function TodayScreen({
         reason={needLocation}
         signedIn={data.signedIn}
         onRetry={() => void locate()}
-        onSaveOffice={promptSave}
+        onSaveOffice={loginOpen ? promptSave : undefined}
       />
     );
   } else if (!online && !places) {

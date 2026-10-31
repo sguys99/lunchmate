@@ -8,7 +8,7 @@
 //   없으면 profiles.terms_agreed_at을 한 번 읽어, 동의했으면 쿠키를 적고 통과, 아니면 /welcome/terms?next=<지금 경로>.
 //   비로그인 요청은 위에서 이미 끝나므로 DB를 부르지 않고, 로그인 사용자도 세션마다 처음 한 번만 부른다.
 //   읽기에 실패하면 통과시킨다(가용성 우선, 약관 화면과 쓰기 기능이 다시 확인).
-// - flags.auth가 꺼진 환경(프로덕션)에서는 아무것도 하지 않는다. 그때 (app) 화면은 appShell 플래그로 404다.
+// - flags.auth가 꺼진 환경(프로덕션)에서는 아무것도 하지 않는다. 그때 오늘과 지도는 둘러보기, 투표와 나는 "곧 열립니다" 안내다(app/(app)/coming-soon.tsx).
 //
 // 출처 (2026-10-30 확인): node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md
 // ("middleware" 파일 이름은 deprecated, proxy.ts + export function proxy), Supabase SSR 가이드 "Hook up proxy"

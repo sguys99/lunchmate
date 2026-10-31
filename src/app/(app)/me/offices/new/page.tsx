@@ -1,8 +1,8 @@
 // 사무실 추가 /me/offices/new (T4.23, SET-01). 화면은 features/me/office-new-screen.tsx(온보딩 1단계 지도와 같은 핀 규칙).
-// 로그인 필요(proxy), flags.auth가 꺼지면 404. 이미 5곳이면 목록으로 돌려보낸다.
+// 로그인 필요(proxy), flags.auth가 꺼지면 "곧 열립니다" 안내(coming-soon.tsx). 이미 5곳이면 목록으로 돌려보낸다.
 // 지도 SDK는 이 화면에 들어올 때만 동적으로 불러온다(OnboardingMap).
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { PageColumn, PageHeader } from "@/components/app-shell";
 import { ErrorState } from "@/components/states";
@@ -14,6 +14,7 @@ import { OnboardingSkeleton } from "@/features/onboarding/onboarding-screen";
 import { isEnabled } from "@/lib/flags";
 import { addOfficeAction } from "../../actions";
 import "@/features/onboarding/onboarding.css";
+import { ComingSoon } from "../../../coming-soon";
 
 const copy = meCopy.officeNew;
 const BACK = "/me/offices";
@@ -46,7 +47,8 @@ async function Route() {
 }
 
 export default function Page() {
-  if (!isEnabled("auth")) notFound();
+  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
+  if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <Suspense
       fallback={

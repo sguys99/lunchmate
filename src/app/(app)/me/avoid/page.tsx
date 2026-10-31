@@ -1,7 +1,6 @@
 // 못 먹는 음식 /me/avoid (T4.24, SET-03). 화면은 features/me/avoid-form.tsx(온보딩 3단계 칩 재사용).
-// 로그인 필요(proxy), flags.auth가 꺼지면 404. 본인 규칙만 읽는다(RLS, 남의 avoid_rules는 어떤 경로로도 읽지 않음).
+// 로그인 필요(proxy), flags.auth가 꺼지면 "곧 열립니다" 안내(coming-soon.tsx). 본인 규칙만 읽는다(RLS, 남의 avoid_rules는 어떤 경로로도 읽지 않음).
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PageColumn, PageHeader } from "@/components/app-shell";
 import { ErrorState } from "@/components/states";
@@ -11,6 +10,7 @@ import { loadAvoid, requireMeSession } from "@/features/me/load";
 import { SettingsLead, SettingsSkeleton } from "@/features/me/parts";
 import { isEnabled } from "@/lib/flags";
 import { saveAvoidAction } from "../actions";
+import { ComingSoon } from "../../coming-soon";
 
 const copy = meCopy.avoid;
 export const metadata: Metadata = { title: copy.metaTitle };
@@ -32,7 +32,8 @@ async function Route() {
 }
 
 export default function Page() {
-  if (!isEnabled("auth")) notFound();
+  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
+  if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <PageColumn>
       <PageHeader title={copy.title} backHref="/me" />

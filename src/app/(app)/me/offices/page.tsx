@@ -1,7 +1,6 @@
 // 사무실 /me/offices (T4.23, SET-01). 화면은 features/me/office-list.tsx, 추가는 /me/offices/new(지도).
-// 로그인 필요(proxy), flags.auth가 꺼지면 404. 기본 사무실 결정은 features/me/offices.ts 주석.
+// 로그인 필요(proxy), flags.auth가 꺼지면 "곧 열립니다" 안내(coming-soon.tsx). 기본 사무실 결정은 features/me/offices.ts 주석.
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PageColumn, PageHeader } from "@/components/app-shell";
 import { ErrorState } from "@/components/states";
@@ -15,6 +14,7 @@ import {
   renameOfficeAction,
   setDefaultOfficeAction,
 } from "../actions";
+import { ComingSoon } from "../../coming-soon";
 
 const copy = meCopy.offices;
 export const metadata: Metadata = { title: copy.metaTitle };
@@ -45,7 +45,8 @@ async function Route() {
 }
 
 export default function Page() {
-  if (!isEnabled("auth")) notFound();
+  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
+  if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <PageColumn>
       <PageHeader title={copy.title} backHref="/me" />

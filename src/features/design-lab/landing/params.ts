@@ -1,7 +1,7 @@
 // 랜딩 확인 화면 쿼리 (T3.4 시안, T4.28 실제 랜딩 확인용). 서버와 클라이언트 양쪽에서 쓰는 순수 함수.
 //   ?state=loading | offline   (empty, error는 랜딩에 해당하지 않아 정상으로 본다. 로그인 오류는 /login이 안내)
 //   ?inapp=kakao               카카오톡 인앱 브라우저 흉내 (AUTH-04)
-//   ?flags=off                 appShell, auth 플래그가 꺼진 운영 화면 흉내("출시 준비" 안내)
+//   ?flags=off                 appShell, auth 플래그가 둘 다 꺼진 화면 흉내("출시 준비" 안내, 2026-10-31 전 운영 화면. 지금 운영은 appShell만 켜짐)
 import {
   parseDesignState,
   type DesignStateSearchParams,

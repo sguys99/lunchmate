@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { focusRing } from "@/components/ui/interaction";
 import { mapCopy } from "@/copy/map";
-import { useLoginPrompt } from "@/features/auth/login-prompt";
+import { useLoginOpen, useLoginPrompt } from "@/features/auth/login-prompt";
 import {
   PlaceDetail,
   PlaceDetailActions,
@@ -136,6 +136,8 @@ export function MapScreen({
   const s = useMapScreen(data);
   const router = useRouter();
   const login = useLoginPrompt();
+  // 로그인이 닫힌 환경(flags.auth 꺼짐)에서는 회사 위치 저장 버튼을 두지 않는다(gate.tsx)
+  const loginOpen = useLoginOpen();
   const desktop = useDesktop();
   const reduced = useReducedMotion();
   const desktopTarget = useDesktopMapTarget();
@@ -177,7 +179,7 @@ export function MapScreen({
         reason={s.needReason}
         signedIn={data.signedIn}
         onRetry={() => void s.locateBase()}
-        onSaveOffice={() => login.prompt("save")}
+        onSaveOffice={loginOpen ? () => login.prompt("save") : undefined}
       />
     );
   else if (s.mode === "offline") full = <OfflineBlock />;
@@ -348,6 +350,8 @@ function SheetHeader({
   inline?: boolean;
   onToggleFilter: (key: Parameters<MapScreenState["toggleFilter"]>[0]) => void;
 }) {
+  // 로그인이 닫힌 환경에서는 쓸 수 없는 즐겨찾기 칩을 숨긴다
+  const loginOpen = useLoginOpen();
   const wrap = inline
     ? "flex flex-col gap-3 pb-3 desktop:gap-5"
     : "flex flex-col gap-3 px-(--lm-layout-gutter) pb-3 desktop:gap-5 desktop:px-10 desktop:pt-14 desktop:pb-4";
@@ -396,6 +400,7 @@ function SheetHeader({
           onCategoryOpen={s.setCategoryOpen}
           categories={s.categories}
           onCategory={s.setCategory}
+          hideFavorites={!loginOpen}
         />
       )}
     </div>

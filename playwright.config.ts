@@ -57,8 +57,10 @@ export default defineConfig({
   webServer: {
     command: `pnpm dev --port ${port}`,
     // 디자인 랩 플래그는 e2e 에서 명시적으로 제어한다(.env.local 값보다 우선). 기본 off.
+    // E2E_AUTH_OFF=1(pnpm test:e2e:auth-off)이면 프로덕션처럼 auth 플래그를 끈다(VERCEL_ENV=production, src/lib/flags.ts).
     env: {
       NEXT_PUBLIC_DESIGN_LAB: process.env.NEXT_PUBLIC_DESIGN_LAB ?? "false",
+      ...(process.env.E2E_AUTH_OFF === "1" ? { VERCEL_ENV: "production" } : {}),
     },
     url: baseURL,
     reuseExistingServer: !process.env.CI,

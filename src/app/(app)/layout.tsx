@@ -3,13 +3,14 @@
 // 자기 영역에 MotionProvider로 감싼다. 토스트는 첫 호출 때 로드(LazyToaster)한다.
 // QueryProvider(T2.19)는 가장 바깥: 데이터 캐시는 모션 설정과 무관하고, 토스트와 셸 어디서든 쿼리를 쓸 수 있게 한다.
 // 루트 layout은 랜딩과 약관도 감싸므로 건드리지 않는다. 랜딩에 모션이 필요해지면 그쪽 레이아웃에서 따로 감싼다.
-// 로그인 확인(AUTH)은 T4에서 이 레이아웃에 더한다.
+// 로그인 확인은 proxy(T4.8)가 한다. 로그인이 열려 있는지(flags.auth)는 LoginGateProvider로 클라이언트 화면에 내려 준다.
 // 데스크톱 우측 지도 칸은 @map 슬롯(T5.17)이 채운다. 오늘은 추천 핀 지도, 나머지 화면은 빈 지도 자리(@map/default, [...rest]).
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { AppShell, BottomTabBar, TabBarView } from "@/components/app-shell";
 import { LazyToaster } from "@/components/ui/lazy-toaster";
+import { LoginGateProvider } from "@/features/auth/login-prompt/gate";
 import { AnalyticsPageviews } from "@/lib/analytics/provider";
 import { isEnabled } from "@/lib/flags";
 import { QueryProvider } from "@/lib/query";
@@ -29,28 +30,31 @@ export default function AppLayout({
   /** @map 슬롯: 데스크톱 우측 지도 칸 */
   map?: ReactNode;
 }) {
-  // 미완성 화면은 프로덕션에서 404 (CLAUDE.md 11장, flags.appShell)
+  // 앱 화면 묶음 플래그(flags.appShell). 2026-10-31부터 프로덕션에서도 켜져 있고, 끄면 404다(CLAUDE.md 11장)
   if (!isEnabled("appShell")) notFound();
   return (
     <QueryProvider>
-      <UiPrefsProvider>
-        <AppShell
-          map={map}
-          tabBar={
-            // usePathname을 읽는 클라이언트 경계. 경로를 모르는 순간에는 활성 없는 같은 막대를 보여 준다.
-            <Suspense fallback={<TabBarView activeId={null} />}>
-              <BottomTabBar />
-            </Suspense>
-          }
-        >
-          {children}
-        </AppShell>
-        {/* 첫 toast() 호출 때 sonner를 받는다(T2.22). 화면 코드는 @/components/ui/lazy-toaster의 toast를 쓴다 */}
-        <LazyToaster />
-        <Suspense fallback={null}>
-          <AnalyticsPageviews />
-        </Suspense>
-      </UiPrefsProvider>
+      {/* 로그인이 열려 있는지(flags.auth, 서버 판정). 닫혀 있으면 로그인 유도가 "곧 열립니다" 토스트가 된다(gate.tsx) */}
+      <LoginGateProvider open={isEnabled("auth")}>
+        <UiPrefsProvider>
+          <AppShell
+            map={map}
+            tabBar={
+              // usePathname을 읽는 클라이언트 경계. 경로를 모르는 순간에는 활성 없는 같은 막대를 보여 준다.
+              <Suspense fallback={<TabBarView activeId={null} />}>
+                <BottomTabBar />
+              </Suspense>
+            }
+          >
+            {children}
+          </AppShell>
+          {/* 첫 toast() 호출 때 sonner를 받는다(T2.22). 화면 코드는 @/components/ui/lazy-toaster의 toast를 쓴다 */}
+          <LazyToaster />
+          <Suspense fallback={null}>
+            <AnalyticsPageviews />
+          </Suspense>
+        </UiPrefsProvider>
+      </LoginGateProvider>
     </QueryProvider>
   );
 }

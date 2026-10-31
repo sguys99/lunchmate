@@ -303,7 +303,10 @@ const TOGGLES: readonly { key: FilterToggleKey; label: string }[] = [
   { key: "favorites", label: copy.filters.favorites },
 ];
 
-/** 가로 스크롤 칩 줄: 카테고리(펼침) + 토글 4개. 카테고리를 누르면 아래에 카테고리 줄이 펼쳐진다 */
+/**
+ * 가로 스크롤 칩 줄: 카테고리(펼침) + 토글 4개. 카테고리를 누르면 아래에 카테고리 줄이 펼쳐진다.
+ * 로그인이 닫힌 환경(flags.auth 꺼짐)에서는 쓸 수 없는 즐겨찾기 칩을 숨긴다(hideFavorites).
+ */
 export function FilterChipRow({
   filters,
   onToggle,
@@ -311,6 +314,7 @@ export function FilterChipRow({
   onCategoryOpen,
   categories,
   onCategory,
+  hideFavorites = false,
   className,
 }: {
   filters: MapFilters;
@@ -319,8 +323,12 @@ export function FilterChipRow({
   onCategoryOpen: (open: boolean) => void;
   categories: readonly CategorySlug[];
   onCategory: (slug: CategorySlug | null) => void;
+  hideFavorites?: boolean;
   className?: string;
 }) {
+  const toggles = hideFavorites
+    ? TOGGLES.filter((t) => t.key !== "favorites")
+    : TOGGLES;
   const rowCls =
     "-mx-(--lm-layout-gutter) flex [scrollbar-width:none] gap-2 overflow-x-auto px-(--lm-layout-gutter) py-1 desktop:mx-0 desktop:flex-wrap desktop:overflow-visible desktop:px-0";
   return (
@@ -340,7 +348,7 @@ export function FilterChipRow({
             ? categoryLabel(filters.category)
             : copy.filters.category}
         </Chip>
-        {TOGGLES.map((t) => (
+        {toggles.map((t) => (
           <Chip
             key={t.key}
             pressed={filters[t.key]}
@@ -658,7 +666,10 @@ export function LoadFailedBlock({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-/** 사무실이 없고 현위치도 못 씀 (PRD 12장). 둘러보기는 로그인 유도, 로그인 사용자는 사무실 추가 */
+/**
+ * 사무실이 없고 현위치도 못 씀 (PRD 12장). 둘러보기는 로그인 유도, 로그인 사용자는 사무실 추가.
+ * 로그인이 닫힌 환경(flags.auth 꺼짐)에서는 onSaveOffice가 없어 "다시 시도"가 유일한 주 버튼이 된다.
+ */
 export function NeedLocationBlock({
   reason,
   signedIn,
@@ -668,14 +679,23 @@ export function NeedLocationBlock({
   reason: "denied" | "unavailable";
   signedIn: boolean;
   onRetry: () => void;
-  onSaveOffice: () => void;
+  onSaveOffice?: () => void;
 }) {
   const t = copy.states.needLocation;
+  const retryOnly = !signedIn && !onSaveOffice;
   return (
     <StateCard>
       <EmptyState
         title={t.title}
-        body={reason === "denied" ? t.denied : t.unavailable}
+        body={
+          retryOnly
+            ? reason === "denied"
+              ? t.deniedBrowse
+              : t.unavailableBrowse
+            : reason === "denied"
+              ? t.denied
+              : t.unavailable
+        }
         visual={<StateGlyph icon={MapPinOff} />}
         action={
           signedIn
@@ -684,17 +704,25 @@ export function NeedLocationBlock({
                 href: "/me/offices/new",
                 variant: "primary",
               }
-            : { label: t.saveOffice, onClick: onSaveOffice, variant: "primary" }
+            : onSaveOffice
+              ? {
+                  label: t.saveOffice,
+                  onClick: onSaveOffice,
+                  variant: "primary",
+                }
+              : { label: t.retry, onClick: onRetry, variant: "primary" }
         }
         headingLevel="h2"
       />
-      <button
-        type="button"
-        onClick={onRetry}
-        className={cn(secondaryText, "mt-4")}
-      >
-        {t.retry}
-      </button>
+      {retryOnly ? null : (
+        <button
+          type="button"
+          onClick={onRetry}
+          className={cn(secondaryText, "mt-4")}
+        >
+          {t.retry}
+        </button>
+      )}
     </StateCard>
   );
 }

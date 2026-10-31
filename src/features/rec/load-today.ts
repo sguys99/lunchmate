@@ -9,6 +9,7 @@ import "server-only";
 import { connection } from "next/server";
 import { PREF_DEFAULTS, type Prefs } from "@/features/onboarding/constants";
 import { readGuestHandoff } from "@/features/onboarding/guest-handoff";
+import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { AvoidRule } from "@/lib/reco/types";
 import type { OfficeOption } from "./base-location";
@@ -58,6 +59,8 @@ export async function loadToday(params: Params): Promise<TodayData> {
   // supabase-js와 new Date()가 요청 시점 값임을 먼저 밝힌다(cacheComponents)
   await connection();
   const nowIso = new Date().toISOString();
+  // 로그인이 닫힌 환경(flags.auth 꺼짐, 프로덕션)은 세션 쿠키가 남아 있어도 둘러보기로 본다(저장 경로가 모두 닫혀 있다)
+  if (!isEnabled("auth")) return guestData(params, nowIso);
   const supabase = await createServerSupabase();
   if (!supabase) return guestData(params, nowIso);
   const { data: claims } = await supabase.auth.getClaims();

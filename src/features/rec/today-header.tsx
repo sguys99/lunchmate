@@ -75,8 +75,8 @@ export type LocationMenuProps = {
   offices: readonly OfficeOption[];
   signedIn: boolean;
   onChoose: (choice: BaseChoice) => void;
-  /** 둘러보기: 로그인 유도 시트(저장) */
-  onSaveOffice: () => void;
+  /** 둘러보기: 로그인 유도 시트(저장). 로그인이 닫힌 환경(flags.auth 꺼짐)이면 없고, 저장 항목을 숨긴다 */
+  onSaveOffice?: () => void;
 };
 
 /** 기준 위치 칩 + 고르기 목록 (REC-02) */
@@ -254,7 +254,7 @@ export function LocationChip({
               ) : null}
             </button>
           </li>
-          {offices.length === 0 ? (
+          {offices.length === 0 && (signedIn || onSaveOffice) ? (
             <li className="mt-1 border-t border-border pt-1">
               {signedIn ? (
                 <Link
@@ -269,7 +269,7 @@ export function LocationChip({
                   type="button"
                   onClick={() => {
                     close(false);
-                    onSaveOffice();
+                    onSaveOffice?.();
                   }}
                   className={cn(itemClass, "text-muted-foreground")}
                 >

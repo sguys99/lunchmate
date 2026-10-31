@@ -1,8 +1,8 @@
 // /me/account 계정 관리 (T4.12, T4.27, AUTH-05). 이름(닉네임) 보기와 수정, 로그아웃, 회원 탈퇴.
 // 나 탭(/me)의 "이름", "계정 관리" 줄이 여기로 온다. 이름은 다른 사람에게 보이는 값이라 고지와 함께 둔다(T4.27).
-// 로그인 필요 경로(proxy). flags.auth가 꺼진 환경(프로덕션)에서는 404. 세션은 요청 시점 값이라 Suspense 안에서 읽는다.
+// 로그인 필요 경로(proxy). flags.auth가 꺼진 환경(프로덕션)에서는 "곧 열립니다" 안내(coming-soon.tsx). 세션은 요청 시점 값이라 Suspense 안에서 읽는다.
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { PageColumn, PageHeader } from "@/components/app-shell";
@@ -15,6 +15,7 @@ import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { saveNicknameAction } from "../actions";
 import "@/features/auth/auth.css";
+import { ComingSoon } from "../../coming-soon";
 
 export const metadata: Metadata = { title: authCopy.account.metaTitle };
 
@@ -77,7 +78,8 @@ function AccountSkeleton() {
 }
 
 export default function Page(props: { searchParams: Promise<SearchParams> }) {
-  if (!isEnabled("auth")) notFound();
+  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
+  if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <PageColumn>
       <PageHeader title={authCopy.account.title} backHref="/me" />

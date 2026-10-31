@@ -6,8 +6,4 @@ export const shellCopy = {
   mapPane: "지도 영역",
   /** 데스크톱 오른쪽 칸 랜드마크(aside) 이름 */
   mapRegion: "지도",
-  /** 탭 화면이 아직 만들어지기 전 자리 문구. 기능 플래그(appShell)로 프로덕션에서는 보이지 않는다 */
-  placeholder: {
-    body: "이 화면은 준비하고 있습니다.",
-  },
 } as const;

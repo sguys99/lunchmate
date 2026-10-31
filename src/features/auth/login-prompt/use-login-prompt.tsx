@@ -9,12 +9,14 @@
 //   홈(/today) 첫 로드 번들에 Drawer가 들어가지 않는다(D-08, g4-comparison 2절 A +33.7KB).
 // - 받는 동안은 바닥에 스켈레톤 시트, 받지 못하면(청크 실패, 오프라인) 로그인 전용 화면 링크로 대신한다.
 // - 로그인 후 돌아올 곳은 누른 순간의 지금 경로(next). 서버(/auth/sign-in)가 다시 검사한다.
+// - 로그인이 닫힌 환경(flags.auth 꺼짐, gate.tsx)에서는 시트를 받지 않고 "로그인은 곧 열립니다" 토스트만 띄운다.
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useState, type ReactNode } from "react";
 import { authCopy } from "@/copy/auth";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/ui/button-classes";
+import { notifyLoginSoon, useLoginOpen } from "./gate";
 import type { LoginPromptSheetProps } from "./login-prompt-sheet";
 import { currentPathForNext, type LoginTrigger } from "./triggers";
 
@@ -83,14 +85,22 @@ export function useLoginPrompt(): {
   sheet: ReactNode;
 } {
   const [state, setState] = useState<PromptState | null>(null);
+  const loginOpen = useLoginOpen();
 
-  const prompt = useCallback((trigger: LoginTrigger) => {
-    setState({
-      open: true,
-      trigger,
-      next: currentPathForNext(window.location),
-    });
-  }, []);
+  const prompt = useCallback(
+    (trigger: LoginTrigger) => {
+      if (!loginOpen) {
+        notifyLoginSoon();
+        return;
+      }
+      setState({
+        open: true,
+        trigger,
+        next: currentPathForNext(window.location),
+      });
+    },
+    [loginOpen],
+  );
   const close = useCallback(
     () => setState((s) => (s ? { ...s, open: false } : s)),
     [],

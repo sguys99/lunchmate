@@ -154,6 +154,7 @@ export function LoadFailedCard({ onRetry }: { onRetry: () => void }) {
 /**
  * 위치를 하나도 쓸 수 없음 (PRD 12장 "사무실 미설정 + 권한 거부"): 사무실이 없고 현위치도 못 씀.
  * 둘러보기는 로그인 유도 시트(회사 위치 저장), 로그인 사용자는 사무실 추가 화면(주소 검색, 핀)으로 보낸다.
+ * 로그인이 닫힌 환경(flags.auth 꺼짐)에서는 onSaveOffice가 없어 "다시 시도"가 유일한 주 버튼이 된다.
  */
 export function NeedLocationCard({
   reason,
@@ -164,14 +165,23 @@ export function NeedLocationCard({
   reason: "denied" | "unavailable";
   signedIn: boolean;
   onRetry: () => void;
-  onSaveOffice: () => void;
+  onSaveOffice?: () => void;
 }) {
   const t = copy.needLocation;
+  const retryOnly = !signedIn && !onSaveOffice;
   return (
     <StateCard>
       <EmptyState
         title={t.title}
-        body={reason === "denied" ? t.denied : t.unavailable}
+        body={
+          retryOnly
+            ? reason === "denied"
+              ? t.deniedBrowse
+              : t.unavailableBrowse
+            : reason === "denied"
+              ? t.denied
+              : t.unavailable
+        }
         visual={<StateGlyph icon={MapPinOff} />}
         action={
           signedIn
@@ -180,21 +190,25 @@ export function NeedLocationCard({
                 href: "/me/offices/new",
                 variant: "primary",
               }
-            : {
-                label: copy.location.saveOffice,
-                onClick: onSaveOffice,
-                variant: "primary",
-              }
+            : onSaveOffice
+              ? {
+                  label: copy.location.saveOffice,
+                  onClick: onSaveOffice,
+                  variant: "primary",
+                }
+              : { label: t.retry, onClick: onRetry, variant: "primary" }
         }
       />
-      <button
-        type="button"
-        onClick={onRetry}
-        className={cn(secondaryText, "mt-4")}
-      >
-        {t.retry}
-      </button>
-      {!signedIn ? (
+      {retryOnly ? null : (
+        <button
+          type="button"
+          onClick={onRetry}
+          className={cn(secondaryText, "mt-4")}
+        >
+          {t.retry}
+        </button>
+      )}
+      {!signedIn && !retryOnly ? (
         <p className="mt-4 type-caption break-keep text-muted-foreground">
           {copy.location.guestNote}
         </p>

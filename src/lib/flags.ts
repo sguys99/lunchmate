@@ -39,11 +39,10 @@ export const FLAGS = {
   },
   appShell: {
     description:
-      "로그인 후 앱 화면(오늘, 지도, 투표, 나) 묶음. 탭 화면이 자리 표시만 있는 동안 프로덕션에서 숨김.",
+      "앱 화면(오늘, 지도, 투표, 나) 묶음. 2026-10-31 프로덕션에서도 켬(사용자 결정, 5단계 마무리): 오늘과 지도는 비로그인 둘러보기(AUTH-07, T4.8)로 열린다. 나와 로그인 경로는 auth 플래그가 따로 막는다.",
     default: false,
     source: { type: "const", value: true },
-    owner: "T2.6 (해제: 오늘 탭 실제 화면 T5)",
-    productionOff: true,
+    owner: "T2.6 (해제: 2026-10-31 5단계 마무리, productionOff 제거)",
   },
   auth: {
     description:
