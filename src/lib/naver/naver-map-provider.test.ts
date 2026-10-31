@@ -13,6 +13,10 @@ function installFakeMaps() {
   const mapObj = {
     setCenter: vi.fn(),
     getCenter: () => ({ lat: () => 37.5, lng: () => 127 }),
+    getBounds: () => ({
+      getSW: () => ({ lat: () => 37.49, lng: () => 126.99 }),
+      getNE: () => ({ lat: () => 37.51, lng: () => 127.01 }),
+    }),
     setZoom: vi.fn(),
     panTo: vi.fn(),
     panBy: vi.fn(),
@@ -24,6 +28,7 @@ function installFakeMaps() {
     setPosition: vi.fn(),
     setMap: vi.fn(),
     getPosition: () => ({ lat: () => 37.51, lng: () => 127.01 }),
+    setZIndex: vi.fn(),
   };
   const circleObj = { setCenter: vi.fn(), setRadius: vi.fn(), setMap: vi.fn() };
   const handlers = new Map<string, (e?: unknown) => void>();
@@ -92,6 +97,8 @@ describe("네이버 MapProvider", () => {
       onClick,
     });
     expect(api.Marker).toHaveBeenCalledTimes(1);
+    marker.setZIndex(10);
+    expect(markerObj.setZIndex).toHaveBeenCalledWith(10);
     marker.remove();
     expect(markerObj.setMap).toHaveBeenCalledWith(null);
 
@@ -101,6 +108,11 @@ describe("네이버 MapProvider", () => {
       right: 8,
       bottom: 8,
       left: 8,
+    });
+
+    expect(map.getBounds()).toEqual({
+      sw: { lat: 37.49, lng: 126.99 },
+      ne: { lat: 37.51, lng: 127.01 },
     });
 
     const off = map.onIdle(() => {});

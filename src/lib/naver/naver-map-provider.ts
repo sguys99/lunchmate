@@ -101,6 +101,7 @@ function createNaverMap(
       const handle = {
         setPosition: (position: LatLng) =>
           marker.setPosition(toNaver(position)),
+        setZIndex: (zIndex: number) => marker.setZIndex(zIndex),
         remove: () => {
           for (const l of own) unlisten(l);
           marker.setMap(null);
@@ -120,6 +121,7 @@ function createNaverMap(
         strokeWeight: opts.strokeWeight ?? 1.5,
         fillColor: opts.fillColor,
         fillOpacity: opts.fillOpacity ?? 0.08,
+        strokeStyle: opts.strokeStyle === "dash" ? "shortdash" : "solid",
         clickable: false,
       });
       const handle = {
@@ -144,6 +146,10 @@ function createNaverMap(
         new maps.LatLngBounds(toNaver(bounds.sw), toNaver(bounds.ne)),
         { top: padding, right: padding, bottom: padding, left: padding },
       ),
+    getBounds: () => {
+      const b = map.getBounds();
+      return { sw: fromNaver(b.getSW()), ne: fromNaver(b.getNE()) };
+    },
     onIdle: (callback) => {
       const listener = listen(map, "idle", callback);
       return () => unlisten(listener);

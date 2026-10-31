@@ -34,6 +34,8 @@ export type MarkerOptions = {
 
 export interface MarkerHandle {
   setPosition(position: LatLng): void;
+  /** 겹칠 때 쌓임 순서. 고른 마커를 이웃보다 위로 올린다(T5.27) */
+  setZIndex(zIndex: number): void;
   remove(): void;
 }
 
@@ -49,6 +51,8 @@ export type CircleOptions = {
   strokeOpacity?: number;
   fillOpacity?: number;
   strokeWeight?: number;
+  /** 선 모양. 기본 solid. dash는 짧은 점선(도보 반경 원) */
+  strokeStyle?: "solid" | "dash";
 };
 
 export interface CircleHandle {
@@ -74,6 +78,8 @@ export interface MapInstance {
    * 사용자 조작에서만 불린다. 코드가 setCenter, panTo를 불러도 호출되지 않는다.
    */
   onClick(callback: (position: LatLng) => void): Unsubscribe;
+  /** 지금 보이는 영역(남서, 북동). 화면 px 거리 계산(클러스터, T5.27)에 쓴다 */
+  getBounds(): Bounds;
   /** 영역이 모두 보이도록 맞춘다. padding 은 네 방향 여백(px) */
   fitBounds(bounds: Bounds, padding?: number): void;
   /** 지도 이동, 확대가 멈출 때마다 호출된다 */

@@ -372,6 +372,9 @@ function createLabMap(element: HTMLElement, options: MapOptions): MapInstance {
           mk.m = toMeters(origin, p);
           placeMarker(mk);
         },
+        setZIndex(z) {
+          node.style.zIndex = String(z);
+        },
         remove() {
           markers.delete(mk);
           node.remove();
@@ -393,9 +396,9 @@ function createLabMap(element: HTMLElement, options: MapOptions): MapInstance {
             `stroke: ${opts.strokeColor}`,
             `stroke-opacity: ${opts.strokeOpacity ?? 1}`,
             `stroke-width: ${opts.strokeWeight ?? 1.5}`,
-            "stroke-dasharray: 5 6",
+            opts.strokeStyle === "solid" ? "" : "stroke-dasharray: 5 6",
             "vector-effect: non-scaling-stroke",
-          ].join("; "),
+          ].filter(Boolean).join("; "),
         );
       };
       apply();
@@ -417,6 +420,20 @@ function createLabMap(element: HTMLElement, options: MapOptions): MapInstance {
     onClick(cb) {
       clickCbs.add(cb);
       return () => clickCbs.delete(cb);
+    },
+    getBounds() {
+      const { width: w, height: h } = size();
+      const mpp = metersPerPx(zoom);
+      return {
+        sw: fromMeters(origin, {
+          x: center.x - (w / 2) * mpp,
+          y: center.y + (h / 2) * mpp,
+        }),
+        ne: fromMeters(origin, {
+          x: center.x + (w / 2) * mpp,
+          y: center.y - (h / 2) * mpp,
+        }),
+      };
     },
     fitBounds(bounds, padding = 0) {
       const sw = toMeters(origin, bounds.sw);

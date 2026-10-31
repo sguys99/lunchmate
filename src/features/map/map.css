@@ -1,0 +1,75 @@
+/*
+ * 지도 탭 CSS (T5.26~T5.32, DESIGN.md 5장 "지도" 모션). Motion 없이 CSS만. 시간과 곡선, 색은 토큰 변수만.
+ * - 시트: 놓으면 slow 300 enter(오버슈트 없음), 끄는 동안은 즉시.
+ * - 마커 고름: fast 180 standard로 면 색이 바뀌고 이름이 펼쳐진다(최대 폭 전환 base 260).
+ * - 지도 위 버튼, 상태 블록: 8px 아래에서 떠오름(base 260 enter). 한 순간에 움직이는 것은 하나.
+ * - 축소 모드(OS prefers-reduced-motion, 앱 설정 <html data-motion="reduce">)면 모두 끈다.
+ */
+
+/* 마커 자리: 0 x 0 요소의 원점이 좌표다. 안쪽 마커는 가운데 아래 끝(꼬리 끝)을 원점에 맞춘다 */
+.lm-map-marker-slot {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+.lm-map-marker-slot > * {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  translate: -50% 0;
+}
+
+.lm-map-sheet,
+.lm-map-sheet-footer {
+  transition: transform var(--lm-duration-slow) var(--lm-ease-enter);
+}
+.lm-map-sheet[data-dragging="true"],
+.lm-map-sheet[data-dragging="true"] .lm-map-sheet-footer {
+  transition: none;
+}
+
+.lm-map-pill {
+  transition:
+    background-color var(--lm-duration-fast) var(--lm-ease-standard),
+    color var(--lm-duration-fast) var(--lm-ease-standard),
+    border-color var(--lm-duration-fast) var(--lm-ease-standard),
+    padding var(--lm-duration-fast) var(--lm-ease-standard);
+}
+.lm-map-pill-name {
+  transition: max-width var(--lm-duration-base) var(--lm-ease-standard);
+}
+
+@keyframes lm-map-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.lm-map-rise {
+  animation: lm-map-rise var(--lm-duration-base) var(--lm-ease-enter) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lm-map-sheet,
+  .lm-map-sheet-footer,
+  .lm-map-pill,
+  .lm-map-pill-name {
+    transition: none !important;
+  }
+  .lm-map-rise {
+    animation: none !important;
+  }
+}
+[data-motion="reduce"] .lm-map-sheet,
+[data-motion="reduce"] .lm-map-sheet-footer,
+[data-motion="reduce"] .lm-map-pill,
+[data-motion="reduce"] .lm-map-pill-name {
+  transition: none !important;
+}
+[data-motion="reduce"] .lm-map-rise {
+  animation: none !important;
+}

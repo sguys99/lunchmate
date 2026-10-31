@@ -10,7 +10,8 @@ export interface NaverPoint {
   readonly y: number;
 }
 export interface NaverLatLngBounds {
-  readonly __brand?: "bounds";
+  getSW(): NaverLatLng;
+  getNE(): NaverLatLng;
 }
 export interface NaverListener {
   readonly __brand?: "listener";
@@ -18,6 +19,7 @@ export interface NaverListener {
 export interface NaverMap {
   setCenter(center: NaverLatLng): void;
   getCenter(): NaverLatLng;
+  getBounds(): NaverLatLngBounds;
   setZoom(zoom: number): void;
   panTo(center: NaverLatLng): void;
   panBy(offset: NaverPoint): void;
@@ -31,6 +33,7 @@ export interface NaverMap {
 export interface NaverMarker {
   setPosition(position: NaverLatLng): void;
   getPosition(): NaverLatLng;
+  setZIndex(zIndex: number): void;
   setMap(map: NaverMap | null): void;
 }
 export interface NaverCircle {
@@ -47,6 +50,8 @@ export interface NaverCircleOptions {
   strokeWeight: number;
   fillColor: string;
   fillOpacity: number;
+  /** 출처: https://navermaps.github.io/maps.js.ncp/docs/naver.maps.Circle.html (StrokeStyleType) */
+  strokeStyle?: "solid" | "shortdash";
   clickable: boolean;
 }
 /** 지도 click 이벤트 인자 중 쓰는 것 */
