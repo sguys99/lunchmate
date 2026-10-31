@@ -66,6 +66,13 @@ export interface AnalyticsEventMap {
     place_id: string;
     source: "rec" | "map" | "detail" | "party";
   };
+  /** 장소 이름 해석 집계(T5.12a). 개수만, place_id, 이름, 좌표는 넣지 않는다. */
+  place_names_resolved: {
+    screen: string;
+    total: number;
+    unresolved: number;
+    extra_calls: number;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;

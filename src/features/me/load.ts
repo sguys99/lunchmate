@@ -105,3 +105,20 @@ export async function loadAvoid({
     custom: data.filter((r) => r.kind === "custom").map((r) => r.value),
   };
 }
+
+export type OfficePin = OfficeSummary & { lat: number; lng: number };
+
+/**
+ * 사무실과 핀 좌표 (T6.13 나 탭 기록). 기본 사무실은 장소 이름 해석의 기준점(T5.12a)과 상세 도보 분, 길찾기 출발지다.
+ * 좌표는 사용자가 지도에 직접 놓은 핀이고 본인 화면에만 내려간다(CLAUDE.md 7장).
+ */
+export async function loadOfficePins({
+  supabase,
+  userId,
+}: MeSession): Promise<OfficePin[] | null> {
+  const { data, error } = await supabase
+    .from("offices")
+    .select("id, name, is_default, created_at, lat, lng")
+    .eq("user_id", userId);
+  return error ? null : data;
+}

@@ -44,7 +44,7 @@ export default function Page() {
   if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <PageColumn>
-      <PageHeader title={copy.title} backHref="/me" />
+      <PageHeader title={copy.title} backHref="/me/settings" />
       <SettingsLead>{copy.body}</SettingsLead>
       <Suspense
         fallback={<SettingsSkeleton label={meCopy.loading} sections={1} />}

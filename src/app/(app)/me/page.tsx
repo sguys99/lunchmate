@@ -1,134 +1,93 @@
-// 나 탭 첫 화면 /me (T4.27, PRD SET-01~05, AUTH-05). 설정, 화면, 계정, 약관과 정책 네 묶음.
-// '나' 전용 시안은 6단계 "피드백, 나, 제보"에서 만든다. 지금은 기존 토큰과 컴포넌트만 쓴 뼈대다(parts.tsx).
-// - 로그인 필요 경로(proxy). flags.auth가 꺼진 환경(프로덕션)에서는 "곧 열립니다" 안내(coming-soon.tsx). 세션과 설정은 요청 시점 값이라 Suspense 안에서 읽는다.
-// - 화면 설정은 이 기기 저장소 값이라 클라이언트 컴포넌트(DisplaySettings)가 그린다.
+// 나 탭 첫 화면 /me (T6.13, HIS-01~03, D-12 A 기록 일지 + C 이번 달 숫자). 화면은 features/me/history/me-records.tsx.
+// - 로그인 필요 경로(proxy). 서버에서는 본인 값(이름, 기본 사무실 핀, 예산)만 읽고, 기록과 후기는 브라우저가 TanStack Query로 받는다
+//   (더 보기, 답하기, 해제가 같은 캐시를 쓰고 쓰기 뒤 무효화된다). 카카오 장소 값은 서버를 거치지 않는다(CLAUDE.md 7장).
+// - flags.auth가 꺼진 환경(프로덕션)은 로그인 안내 + 흐린 예시 + 화면 설정(이 기기 저장)을 펼친 화면(D-12 안건 12).
+// - 설정은 /me/settings(머리줄 톱니, 기록 탭 맨 아래 줄), 화면 설정은 /me/display(D-12 안건 1, 5).
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PageColumn, PageHeader } from "@/components/app-shell";
-import { ErrorState } from "@/components/states";
+import { PageColumn } from "@/components/app-shell";
+import { historyCopy } from "@/copy/history";
 import { meCopy } from "@/copy/me";
-import { cravingStatus, knownCravings } from "@/features/me/craving";
-import { DisplaySettings } from "@/features/me/display-settings";
+import { MeAuthOff } from "@/features/me/history/auth-off";
+import { HistorySkeleton } from "@/features/me/history/history-panel";
+import { MeRecords } from "@/features/me/history/me-records";
+import { parseMeTab } from "@/features/me/history/model";
 import {
-  loadAvoid,
-  loadOffices,
+  loadOfficePins,
   loadPreferences,
   loadProfile,
   requireMeSession,
 } from "@/features/me/load";
 import { resolveDefaultOffice } from "@/features/me/offices";
-import {
-  SettingsLinkRow,
-  SettingsSection,
-  SettingsSkeleton,
-} from "@/features/me/parts";
-import { SignOutRow } from "@/features/me/sign-out-row";
-import { categoryLabel } from "@/features/place/categories";
+import { PREF_DEFAULTS } from "@/features/onboarding/constants";
 import { isEnabled } from "@/lib/flags";
-import { formatShortWon } from "@/lib/format";
-import { ComingSoon } from "../coming-soon";
 
 export const metadata: Metadata = { title: meCopy.metaTitle };
 
-const rows = meCopy.rows;
-const summary = meCopy.summary;
+type SearchParams = Record<string, string | string[] | undefined>;
 
-async function Settings() {
+async function Records({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const session = await requireMeSession("/me");
-  const [profile, offices, prefs, avoid] = await Promise.all([
+  const [params, profile, offices, prefs] = await Promise.all([
+    searchParams,
     loadProfile(session),
-    loadOffices(session),
+    loadOfficePins(session),
     loadPreferences(session),
-    loadAvoid(session),
   ]);
-  if (!profile || !offices || !prefs || !avoid) {
-    return (
-      <ErrorState
-        className="mt-10"
-        title={meCopy.states.loadError.title}
-        body={meCopy.states.loadError.body}
-        action={{ href: "/me" }}
-      />
-    );
-  }
-
-  const office = resolveDefaultOffice(offices);
-  const cravings = knownCravings(prefs.cravings);
-  const craving = cravingStatus(cravings, prefs.cravingUntil, new Date());
-  const avoidCount =
-    avoid.foods.length + avoid.allergies.length + avoid.custom.length;
-
+  const office = offices ? resolveDefaultOffice(offices) : null;
+  // 이름, 사무실, 예산을 읽지 못해도 기록은 보인다(이름 해석이 세션 메모리만 쓰고, 상세 예산은 기본값)
   return (
-    <div className="mt-8 flex flex-col gap-10">
-      <SettingsSection title={meCopy.sections.settings}>
-        <SettingsLinkRow
-          href="/me/offices"
-          label={rows.offices}
-          value={
-            office
-              ? summary.offices(office.name, offices.length)
-              : summary.officesNone
-          }
-        />
-        <SettingsLinkRow
-          href="/me/budget"
-          label={rows.budget}
-          value={summary.budget(
-            formatShortWon(prefs.lunch),
-            formatShortWon(prefs.dinner),
-            prefs.walk,
-          )}
-        />
-        <SettingsLinkRow
-          href="/me/avoid"
-          label={rows.avoid}
-          value={avoidCount > 0 ? summary.avoid(avoidCount) : summary.avoidNone}
-        />
-        <SettingsLinkRow
-          href="/me/craving"
-          label={rows.craving}
-          value={
-            craving.kind === "active"
-              ? cravings.map(categoryLabel).join(", ")
-              : craving.kind === "expired"
-                ? summary.cravingExpired
-                : summary.cravingNone
-          }
-        />
-      </SettingsSection>
-
-      <DisplaySettings />
-
-      <SettingsSection title={meCopy.sections.account}>
-        <SettingsLinkRow
-          href="/me/account"
-          label={rows.name}
-          value={profile.nickname ?? summary.nameNone}
-        />
-        <SettingsLinkRow href="/me/account" label={rows.account} />
-        <SignOutRow />
-      </SettingsSection>
-
-      <SettingsSection title={meCopy.sections.legal}>
-        <SettingsLinkRow href="/terms" label={rows.terms} external />
-        <SettingsLinkRow href="/privacy" label={rows.privacy} external />
-      </SettingsSection>
-    </div>
+    <MeRecords
+      nickname={profile?.nickname ?? null}
+      office={
+        office
+          ? {
+              name: office.name,
+              position: { lat: office.lat, lng: office.lng },
+            }
+          : null
+      }
+      budget={{
+        lunch: prefs?.lunch ?? PREF_DEFAULTS.lunch,
+        dinner: prefs?.dinner ?? PREF_DEFAULTS.dinner,
+      }}
+      nowIso={new Date().toISOString()}
+      initialTab={parseMeTab(params.tab)}
+    />
   );
 }
 
-export default function Page() {
-  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리). 루트만 화면 설정을 함께 연다(기기 저장)
-  if (!isEnabled("auth")) return <ComingSoon kind="me" displaySettings />;
+function RecordsFallback() {
+  return (
+    <>
+      <header className="flex flex-col gap-2">
+        <span aria-hidden className="h-4" />
+        <h1 className="type-title break-keep text-foreground">
+          {historyCopy.title}
+        </h1>
+      </header>
+      <div className="mt-6 h-12 border-b border-border" />
+      <div className="pt-6">
+        <HistorySkeleton />
+      </div>
+    </>
+  );
+}
+
+export default function Page({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  if (!isEnabled("auth")) return <MeAuthOff />;
   return (
     <PageColumn>
-      <PageHeader title={meCopy.title} />
-      <Suspense
-        fallback={
-          <SettingsSkeleton label={meCopy.loading} sections={2} rows={4} />
-        }
-      >
-        <Settings />
+      <Suspense fallback={<RecordsFallback />}>
+        <Records searchParams={searchParams} />
       </Suspense>
     </PageColumn>
   );

@@ -82,7 +82,7 @@ export default function Page(props: { searchParams: Promise<SearchParams> }) {
   if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <PageColumn>
-      <PageHeader title={authCopy.account.title} backHref="/me" />
+      <PageHeader title={authCopy.account.title} backHref="/me/settings" />
       <Suspense fallback={<AccountSkeleton />}>
         <Route {...props} />
       </Suspense>
