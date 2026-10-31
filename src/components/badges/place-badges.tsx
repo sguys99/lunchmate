@@ -11,7 +11,8 @@
 // - 스크린 리더: 보이는 글자와 아이콘은 aria-hidden, 대신 sr-only로 "추정 가격"처럼 무엇에 대한 배지인지 읽힌다.
 // - 툴팁: withTooltip이면 배지가 포커스를 받고(키보드), 설명 문장을 T2.5 Tooltip으로 보여준다.
 //   터치 기기에는 hover가 없으니 꼭 알아야 하는 고지(DEAL-02)는 상세 화면 본문에도 따로 둔다.
-//   주의(T5.17): 이 파일은 Tooltip을 정적으로 불러 홈 첫 로드에 약 46KB가 붙는다. 홈 카드에 쓰기 전에 툴팁 경로를 지연 로딩으로 나눈다.
+//   툴팁(Base UI Tooltip)은 place-badge-tooltip.tsx로 나눠 withTooltip일 때만 React.lazy로 받는다(T5.17).
+//   정적으로 부르면 배지를 쓰는 화면(홈 카드) 첫 로드에 약 46KB가 붙는다. 받는 동안은 같은 모양의 포커스 가능한 배지가 보인다.
 // - 카드당 최대 2개는 PlaceBadges가 pickBadges로 지킨다. 추정은 배지 줄 대신 가격 옆 EstimateMark(estimate-mark.tsx)로 붙는다(T3.2).
 import {
   BadgePercentIcon,
@@ -21,14 +22,9 @@ import {
   TriangleAlertIcon,
   UsersRoundIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { focusRing } from "@/components/ui/interaction";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { badgeCopy } from "@/copy/badges";
 import { cn } from "@/lib/utils";
 import {
@@ -37,6 +33,8 @@ import {
   type WaitingLevel,
   pickBadges,
 } from "./pick-badges";
+
+const BadgeTooltip = lazy(() => import("./place-badge-tooltip"));
 
 /** 쓰는 색은 둘뿐이다: 기피 경고 warning, 나머지 neutral */
 type Tone = Extract<NonNullable<BadgeProps["variant"]>, "warning" | "neutral">;
@@ -79,22 +77,29 @@ function DomainBadge({
     </Badge>
   );
   if (!withTooltip) return badge;
+  const focusable = cn("cursor-default", focusRing, className);
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Badge
-            variant={tone}
-            data-badge={kind}
-            tabIndex={0}
-            className={cn("cursor-default", focusRing, className)}
-          />
-        }
+    <Suspense
+      fallback={
+        <Badge
+          variant={tone}
+          data-badge={kind}
+          tabIndex={0}
+          className={focusable}
+        >
+          {content}
+        </Badge>
+      }
+    >
+      <BadgeTooltip
+        variant={tone}
+        kind={kind}
+        className={focusable}
+        description={description}
       >
         {content}
-      </TooltipTrigger>
-      <TooltipContent>{description}</TooltipContent>
-    </Tooltip>
+      </BadgeTooltip>
+    </Suspense>
   );
 }
 

@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { badgeCopy } from "@/copy/badges";
@@ -126,6 +132,13 @@ describe("툴팁", () => {
       <TooltipProvider delay={0}>
         <DealBadge withTooltip />
       </TooltipProvider>,
+    );
+    // 툴팁은 지연 로딩(T5.17). 받는 동안에도 포커스 가능한 같은 배지가 자리를 지킨다
+    expect(badgeOf("할인 정보 있음")).toHaveAttribute("tabindex", "0");
+    await waitFor(() =>
+      expect(
+        document.querySelector("[data-slot='tooltip-trigger']"),
+      ).not.toBeNull(),
     );
     const badge = badgeOf("할인 정보 있음");
     expect(badge).toHaveAttribute("tabindex", "0");
