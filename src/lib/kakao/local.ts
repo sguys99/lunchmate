@@ -53,6 +53,8 @@ export type KakaoRestaurant = {
   readonly distance: number | null;
   /** 카카오맵 상세 링크 */
   readonly placeUrl: string;
+  /** 대표 전화(상세 tel: 링크, PLACE-01). 카카오가 주지 않으면 없음 */
+  readonly phone?: string;
 };
 
 export type KakaoRestaurantsResult = {
@@ -145,6 +147,7 @@ export function fromRestaurantDoc(doc: KakaoPlaceDoc): KakaoRestaurant | null {
     position,
     distance: Number.isFinite(d) ? d : null,
     placeUrl: doc.place_url || kakaoPlaceUrl(doc.id),
+    ...(doc.phone ? { phone: doc.phone } : {}),
   };
 }
 

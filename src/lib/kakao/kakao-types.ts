@@ -30,6 +30,8 @@ export interface KakaoPlaceDoc {
   category_group_code?: string;
   /** 카카오맵 상세 링크. DB에 저장할 수 있는 카카오 값은 id와 이것뿐이다(T0.16) */
   place_url?: string;
+  /** 대표 전화. 없으면 빈 문자열. 상세 "전화 걸기"(PLACE-01)에만 쓰고 저장하지 않는다 */
+  phone?: string;
   x: string;
   y: string;
   /** location을 준 검색에서만 채워지는 거리(m, 문자열). 없으면 빈 문자열일 수 있다 */
