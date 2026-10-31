@@ -107,8 +107,12 @@ export function usePlaceDetailStats(
   raw: PlaceStats | null;
   reviews: PlaceReviewsResult | undefined;
   status: "pending" | "error" | "success";
+  /** 공개 후기 목록 상태(집계와 따로 온다) */
+  reviewsStatus: "pending" | "error" | "success";
+  retryReviews: () => void;
   loadMoreReviews: () => void;
   hasMoreReviews: boolean;
+  loadingMoreReviews: boolean;
 } {
   const enabled = options.enabled ?? true;
   const stats = useQuery({ ...placeStatsQuery([placeId]), enabled });
@@ -150,7 +154,14 @@ export function usePlaceDetailStats(
     raw,
     reviews: merged,
     status: stats.isError ? "error" : stats.isPending ? "pending" : "success",
+    reviewsStatus: reviews.isError
+      ? "error"
+      : reviews.isPending
+        ? "pending"
+        : "success",
+    retryReviews: () => void reviews.refetch(),
     loadMoreReviews: () => void reviews.fetchNextPage(),
     hasMoreReviews: reviews.hasNextPage,
+    loadingMoreReviews: reviews.isFetchingNextPage,
   };
 }

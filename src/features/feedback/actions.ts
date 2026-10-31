@@ -25,7 +25,8 @@ import {
   type WriteFromDetailRequest,
   type WriteFromDetailResult,
 } from "./feedback-requests";
-import type { MyVisit } from "./feedback-target";
+import { pickFeedbackTarget, type MyVisit } from "./feedback-target";
+import { addKstDays, kstDateKey } from "@/lib/time";
 import {
   toDailyLimits,
   toMyReview,
@@ -270,6 +271,40 @@ export async function myVisitsAction(
       }),
     };
   });
+}
+
+/** 홈 띠가 볼 방문 범위: 영업일 48시간이 긴 연휴를 넘어도 닿게 10일 (use-my-records FEEDBACK_LOOKBACK_DAYS와 같다) */
+const BAND_LOOKBACK_DAYS = 10;
+
+export type FeedbackBandResult =
+  | SignedOut
+  | {
+      signedIn: true;
+      visits: MyVisit[];
+      /** 오늘 띠가 물을 방문. 판정(영업일 48시간, 하루 1회)은 서버에서 한다 */
+      target: { visitId: string; isNewPrompt: boolean } | null;
+    };
+
+/**
+ * 홈 어제 피드백 띠 (T6.8). 최근 방문과 물을 방문을 함께 돌려준다.
+ * 영업일 판정(공휴일 표)을 서버에서 해서 홈 첫 로드 번들에 공휴일 표가 들어가지 않게 한다(bundle-log 2026-11-01).
+ */
+export async function feedbackBandAction(): Promise<FeedbackBandResult> {
+  const now = new Date();
+  const range = {
+    from: kstDateKey(addKstDays(now, -BAND_LOOKBACK_DAYS)),
+    to: kstDateKey(now),
+  };
+  const result = await myVisitsAction(range);
+  if (!result.signedIn) return result;
+  const target = pickFeedbackTarget(result.visits, now);
+  return {
+    signedIn: true,
+    visits: result.visits,
+    target: target
+      ? { visitId: target.visit.id, isNewPrompt: target.isNewPrompt }
+      : null,
+  };
 }
 
 const myReviewsSchema = z.strictObject({

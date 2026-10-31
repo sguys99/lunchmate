@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { EstimateMark } from "@/components/badges/estimate-mark";
+import { Skeleton } from "@/components/ui/skeleton";
 import { focusRing, hitArea48 } from "@/components/ui/interaction";
 import { badgeCopy } from "@/copy/badges";
 import { placeCopy } from "@/copy/place";
@@ -85,7 +86,8 @@ export function Fold({
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
         )}
       >
-        <div className="min-h-0 overflow-hidden">
+        {/* relative: 접힌 안의 sr-only(absolute)가 이 상자 밖 스크롤 영역을 늘리지 않게(g6 보고) */}
+        <div className="relative min-h-0 overflow-hidden">
           <div className="pt-1 pb-5">{children(open)}</div>
         </div>
       </div>
@@ -110,14 +112,62 @@ export function CompactNumbers({
   walkMinutes,
   price,
   thumbs,
+  pending = false,
   className,
 }: {
   walkMinutes: number | null;
   price: DetailPrice;
   thumbs: DetailThumbs;
+  /** 집계를 불러오는 중이면 가격과 만족 칸을 같은 자리 뼈대로(추정에서 제보로 바뀌며 출렁이지 않게) */
+  pending?: boolean;
   className?: string;
 }) {
   const band = priceBandParts(price.value);
+  if (pending) {
+    return (
+      <dl
+        aria-busy
+        className={cn(
+          "grid grid-cols-[0.8fr_1.3fr_0.9fr] divide-x divide-border",
+          className,
+        )}
+      >
+        <div className="flex min-w-0 flex-col gap-1.5 pr-4">
+          <dt className="type-caption text-muted-foreground">
+            {copy.numbers.walk}
+          </dt>
+          <dd className="flex min-h-[1.35rem] items-end gap-0.5 whitespace-nowrap">
+            {walkMinutes === null ? (
+              <span className="type-caption text-muted-foreground">
+                {copy.numbers.walkUnknown}
+              </span>
+            ) : (
+              <>
+                <span className="type-numeric-md">{walkMinutes}</span>
+                <span className="type-caption text-muted-foreground">
+                  {copy.numbers.walkUnit}
+                </span>
+              </>
+            )}
+          </dd>
+        </div>
+        {[copy.numbers.price, copy.numbers.thumbs].map((label, i) => (
+          <div
+            key={label}
+            className={cn(
+              "flex min-w-0 flex-col gap-1.5",
+              i === 0 ? "px-4 max-[23.75rem]:px-3" : "pl-4",
+            )}
+          >
+            <dt className="type-caption text-muted-foreground">{label}</dt>
+            <dd className="flex min-h-[1.35rem] items-center">
+              <Skeleton className={cn("h-4 rounded-badge", i === 0 ? "w-20" : "w-10")} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
   return (
     <dl
       className={cn(

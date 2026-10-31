@@ -53,6 +53,8 @@ export type TodaySession = {
    */
   held: { seed: number; slots: readonly (string | null)[] } | null;
   map: TodayMapView;
+  /** 오늘(홈)에서 길찾기를 누른 KST 날짜 키. 어제 피드백 띠를 한 줄로 접는다(T6.8, D-11 안건 2) */
+  directedOn: string | null;
   /**
    * 다시 뽑기 3연속 약한 부정(T6.11, src/lib/reco/reshuffle.ts). streaks는 카테고리별 연속 횟수,
    * disliked는 이번 세션 약한 부정 카테고리. 메모리 전용이다. 저장, 서버, 분석 이벤트로 보내지 않는다.
@@ -79,6 +81,7 @@ export const INITIAL_SESSION: TodaySession = {
   blocked: EMPTY,
   held: null,
   map: { base: null, pins: [], activeId: null },
+  directedOn: null,
   reroll: { streaks: {}, disliked: new Set() },
 };
 

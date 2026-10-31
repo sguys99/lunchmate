@@ -28,7 +28,6 @@ import {
   PlaceDetailBody,
   type PlaceDetailProps,
 } from "@/features/place/detail";
-import { EMPTY_PLACE_STATS } from "@/features/place/detail-model";
 import { useReducedMotion } from "@/features/rec/use-reduced-motion";
 import { naverPlaceSearchUrl } from "@/lib/naver/directions";
 import { cn } from "@/lib/utils";
@@ -169,7 +168,6 @@ function detailProps(s: MapScreenState, place: MapPlace): PlaceDetailProps {
       walkMinutes: place.walkMinutes,
       reason: null,
     },
-    stats: EMPTY_PLACE_STATS,
     meal: s.meal,
     budgetKRW: s.budgetKRW,
     source: "map",

@@ -140,9 +140,12 @@ export const authCopy = {
     } as Partial<Record<"age" | "service" | "privacy", string>>,
     view: "보기",
     viewLabel: (title: string) => `${title} 전문 보기, 새 창`,
-    /** PRD 11.2: 가입 화면에 한 줄 고지 */
+    /**
+     * PRD 11.2, T6.28: 가입 화면에 한 줄 고지. 후기 작성 시트와 같은 문장(D-11 안건 8, feedbackCopy.aggregateNote).
+     * 홈 첫 로드에 후기 문구 묶음이 끌려오지 않게 import 대신 같은 글을 둔다(같은지 테스트로 확인).
+     */
     reviewNotice:
-      "비공개로 남긴 후기도 가격, 👍, 태그는 이름 없이 식당 집계에 들어갑니다.",
+      "나만 보기를 골라도 가격, 만족 여부, 태그는 이름 없이 식당 집계에 들어갑니다.",
     /** 하려던 일을 잇는 동의 버튼 (D-08 C). 키는 features/auth/terms.ts termsAction */
     submit: {
       start: "동의하고 시작하기",

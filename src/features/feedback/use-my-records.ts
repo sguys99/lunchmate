@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { dbKeys } from "@/lib/query/db-keys";
-import { addKstDays, kstDateKey } from "@/lib/time";
+import { addKstDays, kstDateKey } from "@/lib/time/kst";
 import {
   myDailyLimitsAction,
   myPlacesAction,

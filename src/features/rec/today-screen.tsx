@@ -36,6 +36,7 @@ import {
 } from "@/features/auth/login-prompt/gate";
 import { currentPathForNext } from "@/features/auth/login-prompt/triggers";
 import { locateOnce } from "@/features/onboarding/geolocation";
+import { FeedbackBandSlot } from "@/features/feedback/band-slot";
 import { isCategorySlug } from "@/features/place/categories";
 import { searchRadiusFromWalkMinutes } from "@/lib/format/number";
 import {
@@ -46,7 +47,7 @@ import { DEFAULT_MAP_CENTER } from "@/lib/map/constants";
 import type { DirectionsOrigin } from "@/lib/naver/directions";
 import { useOnlineStatus } from "@/lib/network";
 import type { RecoHistory, RecoSettings } from "@/lib/reco/types";
-import { getMeal, type Meal } from "@/lib/time";
+import { getMeal, kstDateKey, type Meal } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import {
   afterLocate,
@@ -406,12 +407,20 @@ export function TodayScreen({
     // base는 렌더마다 새 객체다. 기준 위치가 같으면 같은 출발지
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [base.kind, base.kind === "office" ? base.office.name : null, center]);
-  const directions = useCardDirections({
+  const cardDirections = useCardDirections({
     meal,
     origin,
     signedIn: data.signedIn,
     online,
   });
+  // 오늘 길찾기를 누르면 답하지 않은 어제 피드백 띠를 한 줄로 접는다(T6.8, D-11 안건 2)
+  const directions = {
+    opening: cardDirections.opening,
+    open: (card: TodayCard) => {
+      patch({ directedOn: kstDateKey(new Date()) });
+      cardDirections.open(card);
+    },
+  };
   // 카드가 보이면 길찾기 흐름을 받아 둔다(누르는 순간 탭 안에서 동기로 앱, 새 탭을 열게)
   const hasCards = cards.length > 0;
   useEffect(() => {
@@ -647,7 +656,6 @@ export function TodayScreen({
       notice={noticeText(session.notice)}
     />
   );
-  // 어제 피드백 띠(FB-01)는 T6.8에서 머리 바로 아래에 둔다. 오프라인에서는 숨긴다.
 
   const locating =
     base.kind === "here" &&
@@ -832,6 +840,16 @@ export function TodayScreen({
       )}
     >
       {header}
+      {/* 어제 피드백 띠(T6.8, FB-01): 머리 바로 아래, 추천과 따로 불러온다. 비로그인, 오프라인이면 없음 */}
+      <FeedbackBandSlot
+        signedIn={data.signedIn}
+        online={online}
+        now={now}
+        anchor={center}
+        anchorPending={locating}
+        directedToday={session.directedOn === kstDateKey(now)}
+        className="mt-5 desktop:mt-4"
+      />
       <p aria-live="polite" className="sr-only">
         {announcement}
       </p>

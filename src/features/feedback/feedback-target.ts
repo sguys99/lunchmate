@@ -8,14 +8,11 @@
 //   (띠는 그날 그대로 남는다, D-11 안건 2). 새로 묻는 것(isNewPrompt)이 아니므로 물은 시각 기록, feedback_prompt_shown을 다시 보내지 않는다.
 //   오늘 물은 방문에 이미 답했으면 그날은 다른 방문을 묻지 않는다.
 // - 나 탭 늦은 답(canAnswerLate): 방문일(KST) 포함 14일 뒤까지. DB reviews_before_insert와 같은 경계.
-import {
-  dateKeyDiff,
-  FEEDBACK_WINDOW_MS,
-  isWithinBusinessWindow,
-  kstDateKey,
-  LATE_ANSWER_DAYS,
-  type Meal,
-} from "@/lib/time";
+// 바렐(@/lib/time) 대신 파일을 직접 가져온다: 홈 첫 로드에 들어가는 바렐 모듈에 공휴일 판정이 끌려 들어가지 않게(bundle-log 2026-11-01)
+import { FEEDBACK_WINDOW_MS, LATE_ANSWER_DAYS } from "@/lib/time/constants";
+import { dateKeyDiff, isWithinBusinessWindow } from "@/lib/time/holidays";
+import { kstDateKey } from "@/lib/time/kst";
+import type { Meal } from "@/lib/time/meal";
 
 export type VisitStatus = "candidate" | "visited" | "not_visited";
 export type VisitSource = "rec" | "poll" | "map" | "detail";

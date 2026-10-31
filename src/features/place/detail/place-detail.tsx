@@ -17,13 +17,28 @@ import {
   Vote,
   WifiOff,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import type { PlaceBadge } from "@/components/badges/pick-badges";
 import { PlaceBadges } from "@/components/badges/place-badges";
 import { ErrorState, LoadingRegion, SkeletonLine } from "@/components/states";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { feedbackCopy } from "@/copy/feedback";
 import { placeCopy } from "@/copy/place";
+import { useLoginPrompt } from "@/features/auth/login-prompt/use-login-prompt";
+import {
+  MyReviewBlock,
+  PublicReviews,
+  ResultLine,
+  WriteButton,
+  type PublicReviewsState,
+} from "@/features/feedback/detail-reviews";
+import type { FieldKey } from "@/features/feedback/review-form";
+import {
+  useReviewSheet,
+  type ReviewSheetConfig,
+} from "@/features/feedback/review-sheet";
+import { useMyReviews } from "@/features/feedback/use-my-records";
 import { reasonWithoutWalk } from "@/features/rec/reason";
 import { isEnabled } from "@/lib/flags";
 import {
@@ -36,6 +51,8 @@ import type { Meal } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/lazy-toaster";
 import { categoryLabel } from "../categories";
+import type { PlaceReview } from "../detail-model";
+import { usePlaceDetailStats } from "../use-place-stats";
 import { CATEGORY_INK } from "../category-ink";
 import {
   detailPrice,
@@ -72,8 +89,11 @@ export type WaitingReportLevel = "walkIn" | "short" | "long";
 
 export type PlaceDetailProps = {
   place: PlaceDetailPlace;
-  /** place_id 집계(6단계). 그 전에는 EMPTY_PLACE_STATS */
-  stats: PlaceDetailStats;
+  /**
+   * place_id 집계. 넘기지 않으면 본문이 직접 불러온다(T6.14: 집계, 공개 후기, 내 방문, 내 후기, 후기 쓰기).
+   * 넘기면(디자인 랩 목업) 그 값만 그리고 후기 쓰기와 내 후기는 두지 않는다.
+   */
+  stats?: PlaceDetailStats;
   meal: Meal;
   /** 이번 끼니 예산(원). 예산 판정과 가격 눈금의 예산 선 */
   budgetKRW: number;
@@ -89,8 +109,10 @@ export type PlaceDetailProps = {
   onReport?: (kind: ReportKind) => void;
   /** 웨이팅 한 탭 제보 (PLACE-07, 6단계) */
   onReportWaiting?: (level: WaitingReportLevel) => void;
-  /** 후기 모두 보기 (6단계) */
+  /** 후기 모두 보기 (목업 집계를 넘길 때만) */
   onMoreReviews?: () => void;
+  /** 다른 사람 후기 신고 (MOD-01, T6.16 신고 시트). 없으면 "곧 열립니다" 안내 */
+  onReportReview?: (review: PlaceReview) => void;
   onDirectionsLaunched?: (result: DirectionsResult) => void;
   className?: string;
   /** 하단 고정 줄 바깥 클래스(컨테이너가 sticky 위치, 면 색을 정한다) */
@@ -131,15 +153,20 @@ function badgesOf(stats: PlaceDetailStats): PlaceBadge[] {
 
 export function PlaceDetailBody({
   place,
-  stats,
+  stats: givenStats,
   meal,
   budgetKRW,
   headingLevel = "h2",
   onReportWaiting,
   onMoreReviews,
+  onReportReview,
   className,
 }: PlaceDetailProps) {
   const online = useOnlineStatus();
+  const live = givenStats === undefined;
+  const detail = usePlaceDetailStats(place.id, { enabled: live });
+  const stats = givenStats ?? detail.stats;
+  const pending = live && detail.status === "pending";
   const Heading = headingLevel;
   const named = place.name !== null;
   const price = detailPrice(stats, place.category, meal, budgetKRW);
@@ -149,6 +176,14 @@ export function PlaceDetailBody({
   const naverUrl = named
     ? naverPlaceSearchUrl(place.name ?? "", place.position ?? null)
     : null;
+  const reviews = useDetailReviews({
+    live,
+    place,
+    price,
+    online,
+    detail,
+    onReportReview,
+  });
 
   return (
     <div className={cn("flex flex-col pt-2 pb-6", className)}>
@@ -200,9 +235,13 @@ export function PlaceDetailBody({
         walkMinutes={named ? place.walkMinutes : null}
         price={price}
         thumbs={thumbs}
+        pending={pending}
         className="mt-5"
       />
       <PlaceBadges badges={badgesOf(stats)} className="mt-4" />
+
+      {/* 내 후기 (T6.10, D-11 안건 6): 내 방문 기록 아래, 근거 접힘 행 위 */}
+      {reviews.mine ? <div className="mt-6">{reviews.mine}</div> : null}
 
       {/* 접힘 행 */}
       <div className="mt-6 flex flex-col border-t border-border">
@@ -248,15 +287,17 @@ export function PlaceDetailBody({
         </Fold>
         <Fold
           title={copy.reviews.title}
-          summary={copy.reviews.titleCount(stats.reviewTotal)}
+          summary={reviews.summary ?? copy.reviews.titleCount(stats.reviewTotal)}
         >
-          {() => (
-            <ReviewsBlock
-              reviews={stats.reviews}
-              total={stats.reviewTotal}
-              onMore={onMoreReviews}
-            />
-          )}
+          {() =>
+            reviews.list ?? (
+              <ReviewsBlock
+                reviews={stats.reviews}
+                total={stats.reviewTotal}
+                onMore={onMoreReviews}
+              />
+            )
+          }
         </Fold>
         <Fold title={copy.now.title} summary={nowSummary(stats)}>
           {() => (
@@ -282,8 +323,173 @@ export function PlaceDetailBody({
           </Fold>
         ) : null}
       </div>
+      {reviews.sheets}
     </div>
   );
+}
+
+/* ---------- 후기 (T6.10, T6.14) ---------- */
+
+type Note = "saved" | "savedEdit" | "removed" | null;
+
+/**
+ * 상세의 내 후기, 다른 사람 후기, 후기 쓰기 시트를 묶는다. 목업 집계를 넘긴 경우(live false)는 아무것도 하지 않는다.
+ * - 내 후기: 이 식당의 내 후기 중 가장 최근 것(본인만 읽는 myReviewsAction). 있으면 "후기 쓰기"는 없다.
+ * - 쓰기와 고치기는 같은 시트(D-11). 비로그인은 로그인 유도 시트("review").
+ * - 결과 한 줄(남김, 고침, 지움)은 내 후기 자리에 두고 시트가 닫히면 그 줄로 초점을 옮긴다.
+ */
+function useDetailReviews({
+  live,
+  place,
+  price,
+  online,
+  detail,
+  onReportReview,
+}: {
+  live: boolean;
+  place: PlaceDetailPlace;
+  price: ReturnType<typeof detailPrice>;
+  online: boolean;
+  detail: ReturnType<typeof usePlaceDetailStats>;
+  onReportReview?: (review: PlaceReview) => void;
+}): {
+  mine: ReactNode;
+  list: ReactNode;
+  summary: string | null;
+  sheets: ReactNode;
+} {
+  const mineQuery = useMyReviews(place.id, live);
+  const sheet = useReviewSheet();
+  const login = useLoginPrompt();
+  const [note, setNote] = useState<Note>(null);
+  const noteRef = useRef<HTMLParagraphElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+
+  if (!live) return { mine: null, list: null, summary: null, sheets: null };
+
+  const firstPage = mineQuery.data?.pages[0];
+  const signedIn = firstPage ? firstPage.signedIn : null;
+  const myReview =
+    firstPage && firstPage.signedIn ? (firstPage.reviews[0] ?? null) : null;
+  const offline = !online;
+
+  const base: Omit<ReviewSheetConfig, "mode"> = {
+    placeId: place.id,
+    category: place.name ? place.category : null,
+    name: place.name,
+    price: { value: price.value, kind: price.estimate ? "estimate" : "report" },
+    from: "detail",
+    // 저장하면 결과 한 줄로, 그냥 닫으면 연 버튼으로 초점이 돌아간다
+    finalFocus: () => noteRef.current ?? openerRef.current,
+  };
+  const open = (opener: HTMLElement, config: ReviewSheetConfig) => {
+    openerRef.current = opener;
+    setNote(null);
+    sheet.open(config);
+  };
+
+  const write = (opener: HTMLElement) => {
+    if (signedIn === false) {
+      login.prompt("review");
+      return;
+    }
+    open(opener, {
+      ...base,
+      mode: { kind: "write", placeId: place.id, placeUrl: place.placeUrl },
+      onSaved: () => setNote("saved"),
+    });
+  };
+  const edit = (field: FieldKey, opener: HTMLElement) => {
+    if (!myReview) return;
+    open(opener, {
+      ...base,
+      mode: { kind: "edit", reviewId: myReview.id, review: myReview },
+      focus: field,
+      onSaved: () => setNote("savedEdit"),
+      onDeleted: () => setNote("removed"),
+    });
+  };
+
+  const noteText =
+    note === "saved"
+      ? feedbackCopy.detail.saved
+      : note === "savedEdit"
+        ? feedbackCopy.sheet.savedEdit
+        : note === "removed"
+          ? feedbackCopy.detail.removed
+          : null;
+
+  let mine: ReactNode = null;
+  if (myReview) {
+    mine = (
+      <div className="flex flex-col gap-1">
+        {noteText ? <ResultLine ref={noteRef}>{noteText}</ResultLine> : null}
+        <MyReviewBlock review={myReview} offline={offline} onEdit={edit} />
+      </div>
+    );
+  } else if (noteText) {
+    mine = <ResultLine ref={noteRef}>{noteText}</ResultLine>;
+  }
+
+  const result = detail.reviews;
+  let state: PublicReviewsState;
+  if (offline && !result) state = { kind: "offline" };
+  else if (detail.reviewsStatus === "error" && !result)
+    state = { kind: "error", onRetry: detail.retryReviews };
+  else if (!result) state = { kind: "loading" };
+  else if (result.status === "login_required")
+    state = {
+      kind: "login",
+      ratingCount: result.ratingCount,
+      onLogin: () => login.prompt("review"),
+    };
+  else
+    state = {
+      kind: "ok",
+      reviews: detail.stats.reviews ?? [],
+      hasMore: detail.hasMoreReviews,
+      loadingMore: detail.loadingMoreReviews,
+      onMore: detail.loadMoreReviews,
+    };
+
+  const canWrite = !myReview && signedIn !== null;
+  const list = (
+    <PublicReviews
+      state={state}
+      write={
+        canWrite ? (
+          <WriteButton
+            offline={offline}
+            onWrite={write}
+            onIntent={signedIn ? sheet.preload : undefined}
+          />
+        ) : null
+      }
+      onReport={(r) => {
+        if (onReportReview) onReportReview(r);
+        else void toast(feedbackCopy.detail.reportSoon);
+      }}
+    />
+  );
+  const summary =
+    result?.status === "login_required"
+      ? copy.reviews.titleCount(result.ratingCount)
+      : result?.status === "ok"
+        ? copy.reviews.titleCount(detail.stats.reviewTotal) +
+          (detail.hasMoreReviews ? "+" : "")
+        : null;
+
+  return {
+    mine,
+    list,
+    summary,
+    sheets: (
+      <>
+        {sheet.sheet}
+        {login.sheet}
+      </>
+    ),
+  };
 }
 
 /* ---------- 하단 고정 줄 ---------- */
