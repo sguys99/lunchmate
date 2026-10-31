@@ -1,7 +1,8 @@
 "use client";
 // 오늘(홈) 카드 (T5.17, T5.19, T5.25, G3 D1, DESIGN.md 5장 "오늘(홈) 화면").
 // - "오늘의 한 곳" 큰 카드 1장 + 대안 작은 카드 2장 + 하단 고정 행동 줄. 넘기기가 없다(스와이프 대체 버튼이 필요 없다).
-// - 큰 카드: 이름 30 → 이유 16 → 배지 → 숫자 18. 버튼은 "왜 추천했나요?"(펼치기), "상세" 글자 버튼뿐이고 행동은 하단 줄.
+// - 큰 카드: 이름 30 → 이유 16 → 배지 → 숫자 18. 버튼은 "왜 추천했나요?"(펼치기), "상세" 글자 버튼과 그 옆 더 보기
+//   아이콘(즐겨찾기, 다시 안 갈래요, 투표에 추가, T5.20)뿐이고 길찾기는 하단 줄.
 //   일러스트 152px(카드 폭의 약 44%)는 이 큰 카드 한정 예외(G3 안건 6). 이유 문장에서 도보 분은 뺐다(card-model).
 // - 대안 카드: 아이콘 28 + 식당명, 도보와 만족. 누르면 큰 카드와 자리를 바꾼다(today-screen이 교환 모션과 포커스 이동).
 // - 카드 순서 낭독: 큰 카드와 대안에 "3곳 중 1번째"를 스크린 리더 글자로 붙인다.
@@ -67,6 +68,8 @@ export function TodayHero({
   why,
   heroRef,
   onDetail,
+  onDetailIntent,
+  more,
 }: {
   card: TodayCard;
   spot?: Spot;
@@ -75,8 +78,12 @@ export function TodayHero({
   /** "왜 추천했나요?" 펼쳤을 때 문장들 */
   why: readonly string[];
   heroRef?: Ref<HTMLElement>;
-  /** 상세(T5.20에서 연결) */
+  /** 상세 바텀시트 열기(T5.20) */
   onDetail?: (card: TodayCard) => void;
+  /** "상세"에 손이나 포커스가 닿을 때 시트 미리 받기 */
+  onDetailIntent?: () => void;
+  /** "상세" 옆 더 보기(즐겨찾기, 다시 안 갈래요, T5.20) */
+  more?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const whyId = useId();
@@ -111,11 +118,7 @@ export function TodayHero({
             {card.name}
           </h2>
         </div>
-        <CardArt
-          slug={card.category}
-          size={152}
-          className={HERO_ART}
-        />
+        <CardArt slug={card.category} size={152} className={HERO_ART} />
       </div>
 
       <div data-reveal style={reveal(1)} className="mt-2 flex flex-col">
@@ -164,14 +167,20 @@ export function TodayHero({
         className="mt-3 flex min-h-6 items-start justify-between gap-3"
       >
         <CardBadges card={card} />
-        <button
-          type="button"
-          aria-label={copy.actions.detailOf(card.name)}
-          onClick={() => onDetail?.(card)}
-          className={cn(textButton, "ml-auto")}
-        >
-          {copy.actions.detail}
-        </button>
+        <div className="ml-auto flex shrink-0 items-center gap-4">
+          <button
+            type="button"
+            aria-label={copy.actions.detailOf(card.name)}
+            aria-haspopup="dialog"
+            onPointerEnter={onDetailIntent}
+            onFocus={onDetailIntent}
+            onClick={() => onDetail?.(card)}
+            className={textButton}
+          >
+            {copy.actions.detail}
+          </button>
+          {more}
+        </div>
       </div>
 
       <div data-reveal style={reveal(3)} className="mt-5">
@@ -279,6 +288,7 @@ export function TodayActionBar({
   pick,
   heroIndex,
   busy,
+  opening,
   onDirections,
   onReroll,
 }: {
@@ -287,6 +297,8 @@ export function TodayActionBar({
   heroIndex: number;
   /** 다시 뽑기 전환 중 */
   busy: boolean;
+  /** 길찾기를 여는 중(앱 확인 최대 1.5초) */
+  opening?: boolean;
   onDirections?: (card: TodayCard) => void;
   onReroll: () => void;
 }) {
@@ -297,10 +309,11 @@ export function TodayActionBar({
         <button
           type="button"
           aria-label={copy.actions.directionsTo(hero.name)}
+          aria-busy={opening || undefined}
           onClick={() => onDirections?.(hero)}
           className={cn(buttonClass("primary"), "min-w-0 flex-1")}
         >
-          {copy.actions.directions}
+          {opening ? copy.actions.opening : copy.actions.directions}
         </button>
         <button
           type="button"

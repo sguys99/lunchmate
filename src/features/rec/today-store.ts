@@ -44,6 +44,13 @@ export type TodaySession = {
   draw: DrawState;
   /** 큰 카드 순서(묶음 안 번호). 대안을 누르면 바뀐다 */
   order: readonly number[];
+  /** 이번 세션에 다시 안 갈래요를 누른 곳(T5.20). 서버 목록(data.blocked)과 합쳐 하드 필터에 넣는다 */
+  blocked: ReadonlySet<string>;
+  /**
+   * 다시 안 갈래요로 한 자리를 비운 묶음(T5.20). 같은 시드인 동안 나머지 곳은 자리를 지키고 null 자리만 새로 채운다.
+   * 다시 뽑기(redraw)하면 사라진다
+   */
+  held: { seed: number; slots: readonly (string | null)[] } | null;
   map: TodayMapView;
 };
 
@@ -59,6 +66,8 @@ export const INITIAL_SESSION: TodaySession = {
   rerolls: 0,
   draw: { seed: null, at: 0, round: 0, seen: EMPTY, fallback: EMPTY },
   order: [0, 1, 2],
+  blocked: EMPTY,
+  held: null,
   map: { base: null, pins: [], activeId: null },
 };
 
@@ -85,6 +94,7 @@ export const useTodaySession = create<TodaySession & Actions>()((set) => ({
       const seen = shown ? new Set([...s.draw.seen, ...shown]) : s.draw.seen;
       return {
         order: [0, 1, 2],
+        held: null,
         draw: {
           seed: randomSeed(),
           at: Date.now(),

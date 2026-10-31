@@ -13,6 +13,11 @@ export type SampleOptions = {
   seen?: ReadonlySet<string>;
   count?: number;
   topN?: number;
+  /**
+   * 이미 자리를 지키는 카드(다시 안 갈래요로 한 장만 바꿀 때, T5.20). 뽑지 않지만 다양성 제약 수에는 센다.
+   * count는 새로 뽑을 장 수다.
+   */
+  fixed?: readonly ScoredCandidate[];
 };
 
 export function sampleWeight(score: number): number {
@@ -38,6 +43,7 @@ export function samplePicks<T extends ScoredCandidate>(
     seen = new Set(),
     count = PICK_COUNT,
     topN = SAMPLE_TOP_N,
+    fixed = [],
   }: SampleOptions = {},
 ): T[] {
   let remaining = scored
@@ -45,7 +51,10 @@ export function samplePicks<T extends ScoredCandidate>(
     .sort(byScoreDesc);
   const picked: T[] = [];
   while (picked.length < count && remaining.length > 0) {
-    const pool = diversityEligible(remaining, picked).slice(0, topN);
+    const pool = diversityEligible(remaining, [...fixed, ...picked]).slice(
+      0,
+      topN,
+    );
     const idx = pickByScore(
       pool.map((p) => sampleWeight(p.score)),
       rng,

@@ -8,7 +8,11 @@
 //   오프라인(받은 묶음이 있으면 그대로, 없으면 안내), 위치 없음(로그인 유도 또는 사무실 추가), 저장 값 읽기 실패.
 // 모션: CSS만(today.css). 첫 화면 페이드 하나, 다시 뽑기 셔플, 대안 교환. 축소 모드면 바로 바꾼다.
 // 데이터 규칙: 카카오 값과 현위치 좌표는 메모리(TanStack Query, today-store)에만 둔다. 서버, 분석 이벤트로 보내지 않는다.
-// 카드 행동(길찾기, 상세)은 T5.20에서 연결한다. 지금은 콜백 자리만 있다.
+// 카드 행동(T5.20, REC-08): 길찾기는 하단 줄과 그냥 골라줘 결과(상세와 같은 흐름, 방문 후보 저장), "상세"는 바텀시트,
+//   즐겨찾기, 다시 안 갈래요, 투표에 추가(플래그)는 큰 카드 "상세" 옆 더 보기. 모두 누른 뒤에 받는 묶음이다(홈 첫 로드 예산).
+// 다시 안 갈래요: 그 카드만 빼고(세션 다시 안 갈 곳 + 하드 필터) 같은 자리를 다음 후보로 채운다(refillDeck). 되돌리기는 원래 묶음.
+// 분석 이벤트(T5.39): recommendation_shown(같은 묶음 한 번), recommendation_reshuffled, card_swiped(대안을 큰 카드로),
+//   just_pick_clicked. directions_clicked와 favorite_added는 상세와 같은 흐름이 보낸다.
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -32,6 +36,7 @@ import { isCategorySlug } from "@/features/place/categories";
 import { searchRadiusFromWalkMinutes } from "@/lib/format/number";
 import { restaurantsInRadiusQuery } from "@/lib/kakao/queries";
 import { DEFAULT_MAP_CENTER } from "@/lib/map/constants";
+import type { DirectionsOrigin } from "@/lib/naver/directions";
 import { useOnlineStatus } from "@/lib/network";
 import type { RecoHistory, RecoSettings } from "@/lib/reco/types";
 import { getMeal, type Meal } from "@/lib/time";
@@ -45,7 +50,10 @@ import {
 } from "./base-location";
 import { preloadArt } from "./card-bits";
 import type { TodayCard } from "./card-model";
+import { CardMore } from "./card-more";
 import {
+  cardSwiped,
+  firstShow,
   justPickClicked,
   recommendationReshuffled,
   recommendationShown,
@@ -64,6 +72,7 @@ import {
 import { noticeText, TodayHeader } from "./today-header";
 import { ShortNote } from "./today-states-light";
 import { RELAXED_BUDGET_KRW, useTodaySession } from "./today-store";
+import { preloadDirections, useCardDirections } from "./use-card-directions";
 import { useReducedMotion } from "./use-reduced-motion";
 import "./today.css";
 
@@ -95,15 +104,23 @@ const LoginPromptSheet = lazy(() =>
     default: m.LoginPromptSheet,
   })),
 );
+/** "상세" 바텀시트(T5.20). 처음 누를 때 받는다(시트 진입점, 상세 문구, 빈 집계가 홈 첫 로드 밖) */
+const loadDetail = () => import("./today-detail");
+const TodayDetail = lazy(loadDetail);
+const preloadDetail = () => {
+  void loadDetail().then(
+    (m) => m.preload(),
+    () => undefined,
+  );
+};
 type Swap = { phase: "out"; slot: number } | { phase: "in" } | null;
 
 export type TodayScreenProps = {
   data: TodayData;
   /** 친구랑 정하기, 회식 모드 진입점(REC-10, flags.pollEntry). 서버가 판정해 넘긴다 */
   showEntries: boolean;
-  /** 카드 행동 자리(T5.20에서 연결) */
-  onDirections?: (card: TodayCard) => void;
-  onDetail?: (card: TodayCard) => void;
+  /** 투표에 추가(7단계, flags.pollEntry). 없으면 더 보기에 보이지 않는다 */
+  onAddToPoll?: (card: TodayCard) => void;
 };
 
 /** 묶음 안 번호 순서. 묶음이 바뀌어 길이가 달라도 0..n-1의 순열이 되게 맞춘다 */
@@ -116,8 +133,7 @@ function normalizeOrder(order: readonly number[], n: number): number[] {
 export function TodayScreen({
   data,
   showEntries,
-  onDirections,
-  onDetail,
+  onAddToPoll,
 }: TodayScreenProps) {
   const router = useRouter();
   const session = useTodaySession();
@@ -243,23 +259,36 @@ export function TodayScreen({
     }),
     [meal, budgetKRW, walk, data.avoid, data.craving],
   );
+  const sessionBlocked = session.blocked;
   const history = useMemo<RecoHistory>(
-    // 방문, 피드백 기록은 6단계(콜드 스타트). 다시 안 갈 곳만 읽어 하드 필터에 넣는다
-    () => ({ visits: [], blocked: new Set(data.blocked) }),
-    [data.blocked],
+    // 방문, 피드백 기록은 6단계(콜드 스타트). 다시 안 갈 곳(서버 목록 + 이번 세션에 누른 곳)만 하드 필터에 넣는다
+    () => ({
+      visits: [],
+      blocked: new Set([...data.blocked, ...sessionBlocked]),
+    }),
+    [data.blocked, sessionBlocked],
   );
   const { seed, at, seen, fallback: fallbackSeen } = session.draw;
-  const deck = useMemo(
-    () =>
-      engine && candidates && seed !== null
-        ? engine.drawDeck(
-            { candidates, settings, history, seen, now: new Date(at) },
-            seed,
-            fallbackSeen,
-          )
-        : null,
-    [engine, candidates, settings, history, seen, at, seed, fallbackSeen],
-  );
+  // 다시 안 갈래요로 한 자리를 비운 묶음. 같은 시드인 동안만 쓴다(다시 뽑기, 끼니, 기준 위치를 바꾸면 새 묶음)
+  const held =
+    session.held && session.held.seed === seed ? session.held.slots : null;
+  const deck = useMemo(() => {
+    if (!engine || !candidates || seed === null) return null;
+    const input = { candidates, settings, history, seen, now: new Date(at) };
+    return held
+      ? engine.refillDeck(input, seed, held)
+      : engine.drawDeck(input, seed, fallbackSeen);
+  }, [
+    engine,
+    candidates,
+    settings,
+    history,
+    seen,
+    at,
+    seed,
+    fallbackSeen,
+    held,
+  ]);
   const drawnAt = useMemo(() => new Date(at), [at]);
   const cards = useMemo(
     () =>
@@ -280,19 +309,24 @@ export function TodayScreen({
   useEffect(() => {
     setMap({
       base: center ? { kind: base.kind, center, radiusM } : null,
-      pins: cards.map((c) => ({ id: c.id, name: c.name, position: c.position })),
+      pins: cards.map((c) => ({
+        id: c.id,
+        name: c.name,
+        position: c.position,
+      })),
       activeId,
     });
     // cards는 key가 같으면 같은 곳들이다
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setMap, center, base.kind, radiusM, key, activeId]);
 
-  /* ---------- 분석 이벤트 자리 (T5.39에서 track 연결) ---------- */
+  /* ---------- 분석 이벤트 (T5.39, PRD 10.2) ---------- */
 
-  const shownKey = useRef("");
+  const round = session.draw.round;
   useEffect(() => {
-    if (!deck || cards.length === 0 || shownKey.current === key) return;
-    shownKey.current = key;
+    if (!deck || cards.length === 0) return;
+    // 같은 묶음은 탭을 오가 다시 그려져도 한 번만
+    if (!firstShow(`${round}:${key}`)) return;
     todayEvent(
       recommendationShown({
         meal,
@@ -303,7 +337,87 @@ export function TodayScreen({
     );
     // 같은 묶음에서는 한 번만
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [round, key]);
+
+  /* ---------- 카드 행동 (T5.20, REC-08) ---------- */
+
+  const origin = useMemo<DirectionsOrigin | null>(() => {
+    if (base.kind === "office") {
+      return { kind: "office", name: base.office.name, position: base.center };
+    }
+    return base.center
+      ? {
+          kind: "current",
+          name: copy.location.options.here,
+          position: base.center,
+        }
+      : null;
+    // base는 렌더마다 새 객체다. 기준 위치가 같으면 같은 출발지
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [base.kind, base.kind === "office" ? base.office.name : null, center]);
+  const directions = useCardDirections({
+    meal,
+    origin,
+    signedIn: data.signedIn,
+    online,
+  });
+  // 카드가 보이면 길찾기 흐름을 받아 둔다(누르는 순간 탭 안에서 동기로 앱, 새 탭을 열게)
+  const hasCards = cards.length > 0;
+  useEffect(() => {
+    if (hasCards) void preloadDirections().catch(() => undefined);
+  }, [hasCards]);
+
+  const [detail, setDetail] = useState<{
+    open: boolean;
+    card: TodayCard;
+  } | null>(null);
+  const openDetail = (card: TodayCard) => setDetail({ open: true, card });
+
+  // 다시 안 갈래요: 뺀 곳의 원래 묶음(되돌리기용). 장소 id만 담긴 메모리 값
+  const cardsRef = useRef(cards);
+  useEffect(() => {
+    cardsRef.current = cards;
+  }, [cards]);
+  const beforeBlock = useRef(
+    new Map<string, { seed: number; slots: readonly string[] }>(),
+  );
+  // 두 함수는 스토어(getState)와 ref만 읽어, 카드가 바뀐 뒤 토스트의 되돌리기에서 불러도 맞게 동작한다
+  function blockCard(placeId: string) {
+    const s = useTodaySession.getState();
+    const ids = cardsRef.current.map((c) => c.id);
+    const blocked = new Set([...s.blocked, placeId]);
+    if (s.draw.seed !== null && ids.includes(placeId)) {
+      beforeBlock.current.set(placeId, { seed: s.draw.seed, slots: ids });
+      s.patch({
+        blocked,
+        held: {
+          seed: s.draw.seed,
+          slots: ids.map((id) => (id === placeId ? null : id)),
+        },
+      });
+    } else {
+      s.patch({ blocked });
+    }
+    setDetail(null);
+    setAnnouncement(copy.blockedReplaced);
+    // 누른 메뉴와 큰 카드가 바뀌므로 포커스를 새 큰 카드로
+    requestAnimationFrame(() =>
+      heroRef.current?.focus({ preventScroll: true }),
+    );
+  }
+  function restoreCard(placeId: string) {
+    const s = useTodaySession.getState();
+    const blocked = new Set(s.blocked);
+    blocked.delete(placeId);
+    const before = beforeBlock.current.get(placeId);
+    beforeBlock.current.delete(placeId);
+    s.patch(
+      before && before.seed === s.draw.seed
+        ? { blocked, held: { seed: before.seed, slots: before.slots } }
+        : { blocked },
+    );
+    setAnnouncement(copy.blockRestored);
+  }
 
   /* ---------- 셔플 (T5.18, REC-05) ---------- */
 
@@ -401,6 +515,8 @@ export function TodayScreen({
   function promote(slot: number) {
     if (pick.rolling || swap) return;
     const name = cards[order[slot] ?? -1]?.name ?? "";
+    // D1에는 넘기기가 없다. 대안을 큰 카드로 올리는 것이 "다음 카드 보기"에 해당한다(position은 묶음 안 순서)
+    todayEvent(cardSwiped(order[slot] ?? slot));
     if (reduced) {
       applySwap(slot);
       setAnnouncement(copy.single.swapped(name));
@@ -426,7 +542,9 @@ export function TodayScreen({
     applySwap(slot);
     setSwap({ phase: "in" });
     setAnnouncement(copy.single.swapped(name));
-    requestAnimationFrame(() => heroRef.current?.focus({ preventScroll: true }));
+    requestAnimationFrame(() =>
+      heroRef.current?.focus({ preventScroll: true }),
+    );
   }
 
   function onHeroAnimationEnd(e: AnimationEvent<HTMLDivElement>) {
@@ -521,7 +639,9 @@ export function TodayScreen({
     body = (
       <>
         <TodayPicksSkeleton
-          label={locating ? copy.location.locating : homeCopy.states.loading.label}
+          label={
+            locating ? copy.location.locating : homeCopy.states.loading.label
+          }
           className="mt-5 desktop:mt-4"
         />
         <ActionBarSkeleton />
@@ -570,19 +690,25 @@ export function TodayScreen({
               spot={spotOf(pick, heroIndex)}
               order={copy.single.order(1, cards.length)}
               why={engine?.whyLines(hero.pick, drawnAt) ?? []}
-              onDetail={onDetail}
+              onDetail={openDetail}
+              onDetailIntent={preloadDetail}
+              more={
+                <CardMore
+                  card={hero}
+                  online={online}
+                  signedIn={data.signedIn}
+                  onBlocked={blockCard}
+                  onRestored={restoreCard}
+                  onLogin={promptSave}
+                  onAddToPoll={onAddToPoll}
+                />
+              }
             />
           </div>
 
           {alts.length > 0 ? (
-            <section
-              aria-labelledby="today-alt"
-              className="mt-5 desktop:mt-4"
-            >
-              <h2
-                id="today-alt"
-                className="type-caption text-muted-foreground"
-              >
+            <section aria-labelledby="today-alt" className="mt-5 desktop:mt-4">
+              <h2 id="today-alt" className="type-caption text-muted-foreground">
                 {alts.length > 1
                   ? copy.single.alternatives
                   : copy.single.alternativesOne}
@@ -628,14 +754,15 @@ export function TodayScreen({
           pick={pick}
           heroIndex={heroIndex}
           busy={shuffle === "leaving" || pick.rolling}
-          onDirections={onDirections}
+          opening={directions.opening}
+          onDirections={directions.open}
           onReroll={reroll}
         />
         <JustPickLayer
           pick={pick}
           cards={cards}
           reduced={reduced}
-          onDirections={onDirections}
+          onDirections={directions.open}
         />
       </>
     );
@@ -656,6 +783,19 @@ export function TodayScreen({
         {deck?.recycled ? copy.recycled : ""}
       </p>
       <Suspense fallback={null}>{body}</Suspense>
+      {detail ? (
+        <Suspense fallback={null}>
+          <TodayDetail
+            open={detail.open}
+            onOpenChange={(open) => setDetail((v) => (v ? { ...v, open } : v))}
+            card={detail.card}
+            place={placesById.get(detail.card.id)}
+            meal={meal}
+            budgetKRW={budgetKRW}
+            origin={origin}
+          />
+        </Suspense>
+      ) : null}
       {login ? (
         <Suspense fallback={null}>
           <LoginPromptSheet
@@ -690,4 +830,3 @@ function Entries() {
     </nav>
   );
 }
-

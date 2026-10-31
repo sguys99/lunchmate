@@ -1,36 +1,24 @@
 "use client";
 // 식당 상세 행동 훅 (T5.35 PLACE-04, T5.36~T5.38 NAV-01~04). 길찾기, 즐겨찾기, 공유를 한곳에서 다룬다.
 //
-// 길찾기 순서 (사용자 탭 안에서 동기로)
-//   1. 로그인 상태면 방문 후보 저장 요청을 먼저 보낸다(NAV-04, 결과를 기다리지 않음. 실패해도 길찾기는 계속)
-//   2. 앱 시도 → 미설치면 웹, 데스크톱은 바로 웹(launch-directions.ts)
-//   3. directions_clicked(place_id, source, app_or_web). 장소명, 좌표는 보내지 않는다
-// 출발지 좌표(사무실 핀, 현위치)는 네이버 URL에만 들어가고 우리 서버로 가지 않는다(CLAUDE.md 7장).
+// 길찾기 한 번의 흐름(방문 후보 저장, 앱 또는 웹, directions_clicked)은 directions-flow.ts. 홈 카드도 같은 함수를 쓴다(T5.20).
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { toast } from "@/components/ui/lazy-toaster";
 import { placeCopy } from "@/copy/place";
 import { useLoginPrompt } from "@/features/auth/login-prompt";
 import { track } from "@/lib/analytics";
-import { siteUrl } from "@/lib/env/site";
-import { naverAppName, type DirectionsOrigin } from "@/lib/naver/directions";
+import type { DirectionsOrigin } from "@/lib/naver/directions";
 import type { LatLng } from "@/lib/map/types";
 import type { Meal } from "@/lib/time";
-import {
-  placeUserStateAction,
-  saveVisitAction,
-  setFavoriteAction,
-} from "../actions";
-import {
-  browserLaunchEnv,
-  launchDirections,
-  type DirectionsResult,
-} from "../launch-directions";
+import { placeUserStateAction, setFavoriteAction } from "../actions";
+import { startDirections, type DirectionsSource } from "../directions-flow";
+import type { DirectionsResult } from "../launch-directions";
 import type { PlaceUserState } from "../place-requests";
 
 const copy = placeCopy;
 
-export type DirectionsSource = "rec" | "map" | "poll";
+export type { DirectionsSource } from "../directions-flow";
 
 export const placeUserStateKey = (placeId: string) =>
   ["place-user-state", placeId] as const;
@@ -50,8 +38,10 @@ export function useFavorite(args: {
   placeId: string;
   placeUrl: string;
   online: boolean;
+  /** favorite_added의 출처. 상세 안이면 detail, 홈 카드 더 보기면 rec (PRD 10.2) */
+  source?: "rec" | "map" | "detail";
 }) {
-  const { placeId, placeUrl, online } = args;
+  const { placeId, placeUrl, online, source = "detail" } = args;
   const client = useQueryClient();
   const state = usePlaceUserState(placeId);
   const login = useLoginPrompt();
@@ -87,7 +77,7 @@ export function useFavorite(args: {
         if (result.on) {
           track({
             name: "favorite_added",
-            properties: { place_id: placeId, source: "detail" },
+            properties: { place_id: placeId, source },
           });
         }
         return;
@@ -112,7 +102,17 @@ export function useFavorite(args: {
     } finally {
       setPending(false);
     }
-  }, [client, login, on, online, pending, placeId, placeUrl, state.data]);
+  }, [
+    client,
+    login,
+    on,
+    online,
+    pending,
+    placeId,
+    placeUrl,
+    source,
+    state.data,
+  ]);
 
   return {
     on,
@@ -145,33 +145,19 @@ export function useDirections(args: {
 
   const open = useCallback(() => {
     if (!args.name || !args.position || opening) return;
-    if (args.online && args.signedIn !== false) {
-      void saveVisitAction({
-        placeId: args.placeId,
-        placeUrl: args.placeUrl,
-        meal: args.meal,
-        source: args.source,
-      }).catch(() => undefined);
-    }
     setOpening(true);
-    const appname = naverAppName(siteUrl());
-    void launchDirections(
-      {
-        destination: { name: args.name, position: args.position },
-        origin: args.origin,
-        appname,
-      },
-      browserLaunchEnv(),
-    ).then((result) => {
+    void startDirections({
+      placeId: args.placeId,
+      placeUrl: args.placeUrl,
+      name: args.name,
+      position: args.position,
+      origin: args.origin,
+      meal: args.meal,
+      source: args.source,
+      signedIn: args.signedIn,
+      online: args.online,
+    }).then((result) => {
       setOpening(false);
-      track({
-        name: "directions_clicked",
-        properties: {
-          place_id: args.placeId,
-          source: args.source,
-          app_or_web: result,
-        },
-      });
       args.onLaunched?.(result);
     });
   }, [args, opening]);

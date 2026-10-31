@@ -453,7 +453,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T5.17 (10/31 완료, D1 큰 카드 + 대안 2장 + 하단 행동 줄, 데스크톱 @map 슬롯 2단, Tooltip 지연 로딩, 엔진과 카카오 모듈 지연 로딩으로 /today 195.9KB) 카드 3장 (G3 선택안 D1: 오늘의 한 곳 큰 카드 + 대안 2장 + 하단 고정 행동 줄 + 어제 피드백 띠 자리), 데스크톱 좌 세로 + 우 지도 2단 (REC-04, REC-06, D-05). **먼저** 공용 배지(`place-badges.tsx`)의 Tooltip 정적 import를 지연 로딩으로 분리합니다. 시안 코드를 그대로 옮기면 `/today` 약 307KB, D-04 방식(Motion 상호작용 뒤)이면 약 202KB로 예산 경계입니다(`docs/design/g3-comparison.md` 2절)
 - [x] T5.18 (10/31 완료, deck.ts 시드 고정, 세션 seen은 메모리 Zustand, 셔플은 CSS) 다시 뽑기와 셔플 모션 (REC-05)
 - [x] T5.19 (10/31 완료, why.ts, 큰 카드 이유 줄 아래 글자 버튼) "왜 추천했나요?" 펼치기 (REC-07)
-- [ ] T5.20 카드 액션: 길찾기, 상세, 즐겨찾기, 다시 안 갈래요, 투표에 추가(7단계 전까지 플래그) (REC-08)
+- [x] T5.20 (10/31 완료, 길찾기는 directions-flow.ts 공통 흐름(상세와 홈), 상세는 today-detail 지연 로딩 시트, 더 보기 메뉴(즐겨찾기, 다시 안 갈래요), 다시 안 갈래요는 refillDeck으로 그 자리만 교체 + 되돌리기, 즐겨찾기에 있으면 빼고 이동, 투표는 pollEntry 플래그) 카드 액션: 길찾기, 상세, 즐겨찾기, 다시 안 갈래요, 투표에 추가(7단계 전까지 플래그) (REC-08)
 - [x] T5.21 (10/31 완료, 0곳 EmptyDeck과 도보 넓히기, 1~2곳 ShortNote) 후보 부족과 0곳 빈 상태, 완화 제안 버튼 (REC-09)
 - [x] T5.22 (10/31 완료, R1 순회, 직전 결과 제외, 데스크톱 좌 칸 패널 + 지도 핀 강조) 그냥 골라줘 룰렛과 결과 카드 (REC-12): R1 하이라이트 순회(화면 카드 위, `src/features/rec/roulette.ts`), 다시 고르기는 직전 결과 제외, 데스크톱 결과 패널은 좌 리스트 칸 안 + 지도 핀 강조 (D-05, DESIGN.md 5장)
 - [x] T5.23 (10/31 완료, pollEntry 플래그(false), /poll?start=friends|party 자리) 하단 진입점: 친구랑 정하기, 회식 모드 (REC-10, 플래그)
@@ -481,7 +481,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 5.6 마무리
 
-- [ ] T5.39 이벤트: `recommendation_shown`, `recommendation_reshuffled`, `card_swiped`, `directions_clicked`, `just_pick_clicked`, `favorite_added`
+- [x] T5.39 (10/31 완료, todayEvent → track() 전송, recommendation_shown은 같은 묶음 한 번, algo_version 포함, card_swiped는 대안을 큰 카드로 올림, place_names_resolved는 사용처 생길 때(T6.13, T7.15) 연결) 이벤트: `recommendation_shown`, `recommendation_reshuffled`, `card_swiped`, `directions_clicked`, `just_pick_clicked`, `favorite_added`
 - [ ] T5.40 E2E: 추천 → 길찾기
 - [ ] T5.41 AC-REC-4 성능 확인 (3G 스로틀에서 3초 스켈레톤, 5초 카드), 홈 번들 200KB 확인
 - [ ] T5.42 **G5 확인**: REC, MAP, PLACE, NAV P0 AC 통과, `[실기기]` iOS/Android 길찾기 확인

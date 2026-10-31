@@ -3,5 +3,5 @@
 // 첫 로드 번들에서 빼고 카카오 검색과 나란히 받는다(홈 JS 예산 200KB, CLAUDE.md 9장). 순수 함수만 다시 내보낸다.
 export { toCandidates } from "./candidates";
 export { toCards } from "./card-model";
-export { drawDeck, shortageOf } from "./deck";
+export { drawDeck, refillDeck, shortageOf } from "./deck";
 export { whyLines } from "./why";

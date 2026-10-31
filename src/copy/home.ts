@@ -105,6 +105,10 @@ export const homeCopy = {
       detail: "상세",
       directionsTo: (name: string) => `${name} 길찾기`,
       detailOf: (name: string) => `${name} 상세`,
+      /** 큰 카드 "상세" 옆 더 보기(즐겨찾기, 다시 안 갈래요, 투표에 추가, T5.20) */
+      moreOf: (name: string) => `${name} 다른 행동 더 보기`,
+      /** 길찾기를 여는 동안(앱 확인 최대 1.5초) */
+      opening: "여는 중",
       why: "왜 추천했나요?",
       party: "회식 모드",
       entriesLabel: "같이 정하기",
@@ -119,6 +123,9 @@ export const homeCopy = {
     },
 
     rerolled: "새 추천 세 곳을 불러왔습니다.",
+    /** 다시 안 갈래요로 큰 카드를 바꾼 뒤(T5.20). 토스트와 따로 스크린 리더에 알린다 */
+    blockedReplaced: "그 식당은 빼고 다른 곳을 골랐습니다.",
+    blockRestored: "되돌렸습니다. 다시 추천합니다.",
     /** 다시 뽑기를 거듭해 이번 세션 후보를 다 본 뒤 (REC-05) */
     recycled: "모두 한 번씩 보여 드렸습니다. 처음부터 다시 고릅니다.",
 
