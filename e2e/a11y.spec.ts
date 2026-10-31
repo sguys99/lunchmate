@@ -212,6 +212,27 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       }
     }
 
+    // T5.1 지도와 바텀시트 시안 (A 그림 핀과 3단 시트, B 도보 분 알약과 2단 시트, C 점 마커와 카드 넘기기)
+    for (const id of ["a", "b", "c"]) {
+      for (const query of [
+        "",
+        "?state=loading",
+        "?state=empty",
+        "?state=error",
+        "?state=offline",
+        "?select=mock-gukbap",
+        "?select=mock-gukbap&snap=full",
+        "?filter=open",
+        "?moved=1",
+      ]) {
+        test(`지도 ${id}${query}`, async ({ page }) => {
+          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+          await openLabRoute(page, `/design-lab/map/${id}${query}`);
+          await expectNoA11yViolations(page);
+        });
+      }
+    }
+
     test("PoC 목록", async ({ page }) => {
       test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
       const res = await page.goto("/design-lab/poc");

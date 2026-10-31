@@ -1,0 +1,112 @@
+/*
+ * 지도 시안 CSS (T5.1). Motion 없이 CSS만 쓴다. 시간과 곡선은 모두 토큰 변수, 색은 토큰 변수만(check-css-colors).
+ * - 목업 지도(lab-map-provider.ts): 끄는 동안은 즉시, panTo와 fitBounds는 slow 300 standard로 미끄러진다.
+ * - 시트: 놓으면 slow 300 enter(DESIGN.md 7장 sheet, 오버슈트 없음). 끄는 동안은 손가락을 바로 따라온다.
+ * - 마커 선택: fast 180 standard로 커지거나 펼쳐진다. 한 순간에 움직이는 것은 하나.
+ * - prefers-reduced-motion이면 모두 끈다(끝 상태로 바로 보임). 앱 설정 축소는 [data-reduced]로 같은 처리.
+ */
+
+/* ---------- 목업 지도 ---------- */
+/* 바탕 그림 색: 라이트는 길과 건물이 바탕(muted)보다 밝게, 다크는 조금 밝게(어두운 구멍처럼 보이지 않게) */
+.lab-map {
+  --lab-road: var(--card);
+  --lab-building: var(--background);
+}
+:root.dark .lab-map {
+  --lab-road: var(--accent);
+  --lab-building: var(--secondary);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) .lab-map {
+    --lab-road: var(--accent);
+    --lab-building: var(--secondary);
+  }
+}
+
+/* position은 지도 요소를 둔 쪽(absolute inset-0)이 정한다. 여기서 덮어쓰면 높이가 0이 된다 */
+.lab-map {
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  background: var(--muted);
+}
+.lab-map:active {
+  cursor: grabbing;
+}
+.lab-map-world,
+.lab-map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.lab-map-marker {
+  position: absolute;
+  cursor: pointer;
+}
+.lab-map[data-glide="true"] .lab-map-world,
+.lab-map[data-glide="true"] .lab-map-overlay {
+  transition: transform var(--lm-duration-slow) var(--lm-ease-standard);
+}
+.lab-map[data-glide="true"] .lab-map-marker {
+  transition:
+    left var(--lm-duration-slow) var(--lm-ease-standard),
+    top var(--lm-duration-slow) var(--lm-ease-standard);
+}
+
+/* ---------- 시트 ---------- */
+.ml-sheet {
+  transition: transform var(--lm-duration-slow) var(--lm-ease-enter);
+}
+.ml-sheet[data-dragging="true"] {
+  transition: none;
+}
+
+/* ---------- 마커 선택 ---------- */
+.ml-marker {
+  transition:
+    transform var(--lm-duration-fast) var(--lm-ease-standard),
+    background-color var(--lm-duration-fast) var(--lm-ease-standard),
+    color var(--lm-duration-fast) var(--lm-ease-standard),
+    border-color var(--lm-duration-fast) var(--lm-ease-standard),
+    max-width var(--lm-duration-base) var(--lm-ease-standard);
+}
+
+/* ---------- 상태 전환: 8px 아래에서 떠오름 ---------- */
+@keyframes ml-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ml-rise {
+  animation: ml-rise var(--lm-duration-base) var(--lm-ease-enter) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-map-world,
+  .lab-map-overlay,
+  .lab-map-marker,
+  .ml-sheet,
+  .ml-marker {
+    transition: none !important;
+  }
+  .ml-rise {
+    animation: none !important;
+  }
+}
+[data-reduced] .ml-sheet,
+[data-reduced] .ml-marker,
+[data-reduced] .lab-map-world,
+[data-reduced] .lab-map-overlay,
+[data-reduced] .lab-map-marker {
+  transition: none !important;
+}
+[data-reduced] .ml-rise {
+  animation: none !important;
+}

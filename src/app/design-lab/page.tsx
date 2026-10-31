@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { designLabCopy } from "@/copy/design-lab";
+import { mapLabCopy } from "@/copy/design-lab-map";
 import { onboardingLabCopy } from "@/copy/design-lab-onboarding";
 import { placeLabCopy } from "@/copy/design-lab-place";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
@@ -68,6 +69,16 @@ export default function DesignLabPage() {
         <Link href="/design-lab/onboarding/b" className={linkClass}>
           {copy.onboardingLink}
         </Link>
+      </Section>
+
+      <Section title={mapLabCopy.index.title} body={mapLabCopy.index.body}>
+        <div className="flex flex-wrap gap-4">
+          {(["a", "b", "c"] as const).map((id) => (
+            <Link key={id} href={`/design-lab/map/${id}`} className={linkClass}>
+              {mapLabCopy.names[id]}
+            </Link>
+          ))}
+        </div>
       </Section>
 
       <Section title={copy.authTitle} body={copy.authBody}>
