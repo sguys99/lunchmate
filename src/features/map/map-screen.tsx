@@ -1,8 +1,10 @@
 "use client";
 // 지도 탭 화면 (T5.26~T5.32, D-09 B + 고른 마커에 A의 그림, DESIGN.md 5장 "지도", PRD MAP-01~06).
 //
-// 모바일: 지도가 탭 바 위 전체를 채우고, 지도 위에는 기준 위치 칩과 현위치 버튼(그리고 옮긴 뒤 "이 지역에서 다시 찾기")만.
-//   필터 칩과 목록은 지도 칸 안 2단 시트(반쯤, 끝까지)에 있다. 마커를 고르면 반쯤 높이에 상세 요약, 끝까지면 상세 본문.
+// 모바일: 지도가 화면 바닥(하단 탭 아래)까지 채우고, 지도 위에는 기준 위치 칩과 현위치 버튼(그리고 옮긴 뒤 "이 지역에서 다시 찾기")만.
+//   필터 칩과 목록은 지도 칸 안 3단 시트(낮게, 반쯤, 끝까지)에 있다. 마커를 고르면 반쯤 높이에 상세 요약, 끝까지면 상세 본문.
+//   지도를 끌거나 확대, 축소하면 시트는 낮게 접히고 하단 탭도 아래로 숨는다(2026-10-31 실기기 피드백, D-09 메모).
+//   탭 숨김은 <html data-map-fold>와 map.css만 쓴다(셸 코드는 그대로, /today 번들 0). 탭에 키보드 초점이 오면 다시 펼친다.
 // 데스크톱(1024 이상): 좌 칸에 시트 내용(개수, 칩, 목록 또는 상세), 우 지도는 (app)/@map/map 슬롯 자리로 포털한다.
 // 지도 SDK 로딩 실패: 목록 보기로 자동 전환(T5.32). 카카오까지 실패하면 오류 블록.
 // 모션은 CSS만(map.css). 축소 모드면 지도 이동도 즉시.
@@ -38,7 +40,7 @@ import {
   type CanvasMarker,
   type MapProviderKind,
 } from "./map-canvas";
-import { HALF_RATIO, MapSheet } from "./map-sheet";
+import { MapSheet } from "./map-sheet";
 import {
   BaseChip,
   BaseMarker,
@@ -60,6 +62,7 @@ import {
 } from "./parts";
 import type { MapPlace } from "./places";
 import { useMapScreen, type MapScreenState } from "./use-map-screen";
+import { sheetCover, sheetLayout, tabsHidden } from "./view-state";
 import "./map.css";
 
 const copy = mapCopy;
@@ -67,6 +70,7 @@ const DESKTOP_QUERY = "(min-width: 64rem)";
 /** 지도 위 칩 줄이 가리는 높이(위 12 + 칩 44 + 여유 8) */
 const TOP_INSET_PX = 64;
 const KEYS_HINT_ID = "lm-map-keys";
+const TAB_BAR_SELECTOR = '[data-slot="bottom-tab-bar"]';
 
 function subscribeDesktop(onChange: () => void) {
   const mq = window.matchMedia(DESKTOP_QUERY);
@@ -93,6 +97,58 @@ function useElementHeight(ref: React.RefObject<HTMLElement | null>) {
     return () => ro.disconnect();
   }, [ref]);
   return h;
+}
+
+/** 하단 탭 높이(홈 인디케이터 칸 포함)와 그 안의 홈 인디케이터 칸. 시트와 지도 가림 계산에 쓴다 */
+function useTabBarSize(): { lift: number; safeBottom: number } {
+  const [size, setSize] = useState({ lift: 0, safeBottom: 0 });
+  useEffect(() => {
+    const nav = document.querySelector<HTMLElement>(TAB_BAR_SELECTOR);
+    if (!nav) return;
+    const measure = () => {
+      const lift = nav.offsetHeight;
+      const safeBottom =
+        Number.parseFloat(getComputedStyle(nav).paddingBottom) || 0;
+      setSize((s) =>
+        s.lift === lift && s.safeBottom === safeBottom
+          ? s
+          : { lift, safeBottom },
+      );
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, []);
+  return size;
+}
+
+/**
+ * 시트가 낮게 접히면 하단 탭을 숨긴다(map.css가 <html data-map-fold>를 보고 탭을 아래로 민다).
+ * 숨은 탭에 키보드 초점이 오면 onTabFocus(시트와 탭을 함께 펼친다). 화면을 떠나면 속성을 지운다.
+ */
+function useTabFold(hidden: boolean, onTabFocus: () => void) {
+  const latest = useRef(onTabFocus);
+  useEffect(() => {
+    latest.current = onTabFocus;
+  });
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!hidden) {
+      delete root.dataset.mapFold;
+      return;
+    }
+    root.dataset.mapFold = "";
+    const onFocusIn = (e: FocusEvent) => {
+      const t = e.target;
+      if (t instanceof Element && t.closest(TAB_BAR_SELECTOR)) latest.current();
+    };
+    document.addEventListener("focusin", onFocusIn);
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      delete root.dataset.mapFold;
+    };
+  }, [hidden]);
 }
 
 function baseName(s: MapScreenState): string {
@@ -143,7 +199,10 @@ export function MapScreen({
   const desktopTarget = useDesktopMapTarget();
   const stageRef = useRef<HTMLDivElement>(null);
   const stageH = useElementHeight(stageRef);
+  const tabBar = useTabBarSize();
   const detailRef = useRef<HTMLDivElement>(null);
+  const folding = s.mode === "map" && tabsHidden(s.snap, desktop);
+  useTabFold(folding, () => s.sheetEvent("tabFocus"));
 
   // 식당을 고르면 상세 제목으로 초점을 옮긴다(지도 조작의 대체 수단, DESIGN.md 5장 접근성)
   const selectedId = s.selected?.id ?? null;
@@ -244,14 +303,22 @@ export function MapScreen({
 
   /* ---------- 지도 + 시트 ---------- */
 
+  // 칸은 하단 탭 아래까지 이어진다. 아래 가림 = 지금 단계의 시트(와 탭) 높이
+  const layout = sheetLayout({
+    stage: stageH,
+    tabLift: tabBar.lift,
+    safeBottom: tabBar.safeBottom,
+  });
   const inset = desktop
     ? { top: 72, bottom: 0 }
-    : { top: TOP_INSET_PX, bottom: Math.round(stageH * HALF_RATIO) };
+    : { top: TOP_INSET_PX, bottom: sheetCover(layout, s.snap, stageH) };
+  const layoutKey = desktop ? "desktop" : `${stageH}:${tabBar.lift}`;
 
   const canvas = (
     <MapLayer
       s={s}
       inset={inset}
+      layoutKey={layoutKey}
       reduced={reduced}
       providerKind={providerKind}
       desktop={desktop}
@@ -262,7 +329,8 @@ export function MapScreen({
     <Frame announce={s.announce} loginSheet={login.sheet}>
       <div
         ref={stageRef}
-        className="relative h-[calc(100dvh-var(--lm-layout-tab-bar-height)-env(safe-area-inset-bottom,0px)-env(safe-area-inset-top,0px))] min-h-[30rem] overflow-hidden desktop:flex desktop:h-auto desktop:min-h-0 desktop:flex-1 desktop:flex-col desktop:overflow-visible"
+        // 모바일: 칸은 하단 탭 아래까지(아래 음수 여백으로 탭이 칸 아랫부분 위에 겹친다). isolate라 탭이 시트보다 위에 그려진다
+        className="relative isolate -mb-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] h-[calc(100dvh-env(safe-area-inset-top,0px))] min-h-[30rem] overflow-hidden desktop:isolation-auto desktop:mb-0 desktop:flex desktop:h-auto desktop:min-h-0 desktop:flex-1 desktop:flex-col desktop:overflow-visible"
       >
         {desktop ? (
           desktopTarget ? (
@@ -274,8 +342,12 @@ export function MapScreen({
         <MapSheet
           snap={s.snap}
           onSnapChange={s.setSnap}
+          onLowTap={() => s.sheetEvent("sheetTap")}
           desktop={desktop}
+          tabLift={tabBar.lift}
+          safeBottom={tabBar.safeBottom}
           header={header}
+          lowLine={<LowLine s={s} />}
           footer={
             s.selected ? (
               <PlaceDetailActions {...detailProps(s, s.selected)} />
@@ -407,6 +479,18 @@ function SheetHeader({
   );
 }
 
+/** 낮게 접힌 시트의 한 줄: 머리의 개수와 같은 말 */
+function LowLine({ s }: { s: MapScreenState }) {
+  if (s.loadingPlaces) return <>{copy.states.loading}</>;
+  return (
+    <>
+      {s.filterCount > 0
+        ? copy.countFiltered(s.filtered.length)
+        : copy.count(s.walk, s.places.length, s.capped)}
+    </>
+  );
+}
+
 function SheetBody({
   s,
   detailRef,
@@ -457,12 +541,14 @@ function SheetBody({
 function MapLayer({
   s,
   inset,
+  layoutKey,
   reduced,
   providerKind,
   desktop,
 }: {
   s: MapScreenState;
   inset: { top: number; bottom: number };
+  layoutKey: string;
   reduced: boolean;
   providerKind: MapProviderKind;
   desktop: boolean;
@@ -542,6 +628,7 @@ function MapLayer({
       focus={focus}
       moveTo={s.moveTo}
       inset={inset}
+      layoutKey={layoutKey}
       reducedMotion={reduced}
       onLoaded={() => s.dispatchMap("loaded")}
       onFailed={() => s.dispatchMap("failed")}
@@ -550,6 +637,7 @@ function MapLayer({
       onMapTap={() => {
         if (s.selected) s.select(null);
       }}
+      onGesture={desktop ? undefined : () => s.sheetEvent("mapGesture")}
       describedById={KEYS_HINT_ID}
       className="size-full"
     >

@@ -38,6 +38,7 @@ const NAVER_FAKE = `(function () {
   Map.prototype.setCenter = function (c) { this.c = c; };
   Map.prototype.getCenter = function () { return this.c; };
   Map.prototype.setZoom = function (z) { this.z = z; };
+  Map.prototype.getZoom = function () { return this.z; };
   Map.prototype.panTo = function (c) { this.c = c; };
   Map.prototype.panBy = function (p) { this.c = new LatLng(this.c.lat() - p.y * PX, this.c.lng() + p.x * PX); };
   Map.prototype.fitBounds = function () {};

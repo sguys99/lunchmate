@@ -80,7 +80,8 @@ export function researchVisible(input: {
   }
   const shift = straightDistanceM(input.mapCenter, input.searchCenter);
   return (
-    shift >= Math.max(RESEARCH_MIN_SHIFT_M, input.radiusM * RESEARCH_SHIFT_RATIO)
+    shift >=
+    Math.max(RESEARCH_MIN_SHIFT_M, input.radiusM * RESEARCH_SHIFT_RATIO)
   );
 }
 
@@ -93,4 +94,130 @@ export const WALK_EXPAND_STEP = 5;
 export function expandedWalk(walk: number): number | null {
   if (walk >= WALK_MAX_MINUTES) return null;
   return Math.min(WALK_MAX_MINUTES, walk + WALK_EXPAND_STEP);
+}
+
+/* ---------- 시트 3단과 지도 만지면 접힘 (2026-10-31 실기기 피드백 반영, D-09 메모) ---------- */
+
+/**
+ * 시트 높이 3단. low는 손잡이와 개수 한 줄(약 88px)만 남기고 하단 탭도 아래로 숨긴다(모바일만).
+ * 지도를 끌거나 확대, 축소하는 순간 low로 내려가고, 시트를 누르거나 위로 끌면 반쯤으로 돌아온다.
+ */
+export type SheetSnap = "low" | "half" | "full";
+export const SHEET_ORDER: readonly SheetSnap[] = ["low", "half", "full"];
+
+export type SheetEvent =
+  /** 사용자가 지도를 끌거나 확대, 축소했다 */
+  | "mapGesture"
+  /** 마커나 목록에서 식당을 골랐다 */
+  | "select"
+  /** 낮게 접힌 시트를 눌렀다 */
+  | "sheetTap"
+  /** 숨은 하단 탭에 키보드 초점이 왔다 */
+  | "tabFocus"
+  /** 손잡이 버튼 */
+  | "handle";
+
+export function nextSnap(
+  snap: SheetSnap,
+  event: SheetEvent,
+  desktop: boolean,
+): SheetSnap {
+  // 데스크톱은 좌 리스트 칸이라 높이 단계가 없다
+  if (desktop) return snap;
+  switch (event) {
+    case "mapGesture":
+      return "low";
+    case "select":
+      return "half";
+    case "sheetTap":
+    case "tabFocus":
+      return snap === "low" ? "half" : snap;
+    case "handle":
+      return snap === "half" ? "full" : "half";
+  }
+}
+
+/** 하단 탭을 숨기는가. 지도 탭 모바일에서 시트가 낮게 접혔을 때만 */
+export function tabsHidden(snap: SheetSnap, desktop: boolean): boolean {
+  return !desktop && snap === "low";
+}
+
+/** 낮게 단계에서 보이는 시트 높이(손잡이 28 + 한 줄 44 + 아래 16). 홈 인디케이터 칸은 더한다 */
+export const LOW_SHEET_PX = 88;
+/** 끝까지 열어도 위에 남기는 틈 */
+export const SHEET_TOP_GAP_PX = 8;
+/** 반쯤 높이: 탭 위 지도 칸의 48% (DESIGN.md 5장 "지도") */
+export const HALF_RATIO = 0.48;
+
+export type SheetLayout = {
+  /** 단계별 시트 윗변 y(칸 위 기준 px) */
+  readonly top: Readonly<Record<SheetSnap, number>>;
+  /** 단계별 시트가 보이는 바닥이 칸 아래에서 떨어진 거리(탭이 보이면 탭 높이, 숨으면 0) */
+  readonly floor: Readonly<Record<SheetSnap, number>>;
+};
+
+/**
+ * 시트 칸(stage)은 하단 탭 아래까지 이어진다(지도도 탭 아래까지 그려 두어 탭이 숨을 때 지도 크기가 바뀌지 않는다).
+ * tabLift: 하단 탭 높이(홈 인디케이터 칸 포함), safeBottom: 홈 인디케이터 칸.
+ */
+export function sheetLayout(input: {
+  stage: number;
+  tabLift: number;
+  safeBottom: number;
+}): SheetLayout {
+  const stage = Math.max(0, input.stage);
+  const tabLift = Math.max(0, Math.min(input.tabLift, stage));
+  const mapArea = Math.max(0, stage - tabLift);
+  const fullTop = Math.min(SHEET_TOP_GAP_PX, mapArea);
+  const halfH = Math.min(
+    Math.max(0, mapArea - SHEET_TOP_GAP_PX),
+    Math.round(mapArea * HALF_RATIO),
+  );
+  const halfTop = stage - tabLift - halfH;
+  const lowTop = Math.max(
+    halfTop,
+    stage - (LOW_SHEET_PX + Math.max(0, input.safeBottom)),
+  );
+  return {
+    top: { low: lowTop, half: halfTop, full: fullTop },
+    floor: { low: 0, half: tabLift, full: tabLift },
+  };
+}
+
+/** 지도 칸 아래가 시트(와 탭)에 가리는 높이 */
+export function sheetCover(
+  layout: SheetLayout,
+  snap: SheetSnap,
+  stage: number,
+) {
+  return Math.max(0, stage - layout.top[snap]);
+}
+
+const FLICK_PX_PER_MS = 0.5;
+
+/**
+ * 끌기를 놓았을 때 단계: 가장 가까운 단계. 빠르게 튕기면 끌기 시작한 단계에서 그 방향으로 한 단계(위로 튕기면 더 높게).
+ * v: px/ms, 아래로 양수.
+ */
+export function snapAfterDrag(input: {
+  layout: SheetLayout;
+  start: SheetSnap;
+  top: number;
+  v: number;
+}): SheetSnap {
+  const { layout, start, top, v } = input;
+  if (Math.abs(v) > FLICK_PX_PER_MS) {
+    const i = SHEET_ORDER.indexOf(start);
+    const j = Math.min(
+      SHEET_ORDER.length - 1,
+      Math.max(0, v < 0 ? i + 1 : i - 1),
+    );
+    return SHEET_ORDER[j] ?? start;
+  }
+  let best: SheetSnap = start;
+  for (const s of SHEET_ORDER) {
+    if (Math.abs(layout.top[s] - top) < Math.abs(layout.top[best] - top))
+      best = s;
+  }
+  return best;
 }

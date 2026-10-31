@@ -17,7 +17,10 @@ export type MarkerGroup =
   | {
       readonly kind: "cluster";
       readonly ids: readonly string[];
-      /** 묶음 표시 위치: 구성원 좌표 평균 */
+      /**
+       * 묶음 표시 위치: 씨앗(가장 가까운 구성원) 좌표. 씨앗끼리는 상자 밖이라 묶음 알약이 서로 겹치지 않는다
+       * (예전 평균 자리는 묶음들이 가운데로 끌려 겹쳤다, 2026-10-31 실기기 확인)
+       */
       readonly position: LatLng;
     };
 
@@ -70,14 +73,10 @@ export function groupMarkers(
       out.push({ kind: "single", id: seed.id });
       return;
     }
-    const ps = members.map((m) => items[m]!.position);
     out.push({
       kind: "cluster",
       ids: members.map((m) => items[m]!.id),
-      position: {
-        lat: ps.reduce((s, p) => s + p.lat, 0) / ps.length,
-        lng: ps.reduce((s, p) => s + p.lng, 0) / ps.length,
-      },
+      position: seed.position,
     });
   });
   return out;

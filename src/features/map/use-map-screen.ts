@@ -34,7 +34,7 @@ import type { Bounds, LatLng } from "@/lib/map/types";
 import { useOnlineStatus } from "@/lib/network";
 import { getMeal, type Meal } from "@/lib/time";
 import { boundsOf, groupMarkers } from "./cluster";
-import { circleBounds } from "./fit";
+import { circleBounds, fitRadiusM } from "./fit";
 import {
   EMPTY_FILTERS,
   activeFilterCount,
@@ -44,7 +44,6 @@ import {
   type MapFilters,
 } from "./filters";
 import type { MapView } from "./map-canvas";
-import type { SheetSnap } from "./map-sheet";
 import type { MapData } from "./load-map";
 import { hidePersonal, toMapPlaces } from "./places";
 import {
@@ -52,7 +51,10 @@ import {
   expandedWalk,
   mapLoadReducer,
   mapScreenMode,
+  nextSnap,
   researchVisible,
+  type SheetEvent,
+  type SheetSnap,
 } from "./view-state";
 
 const copy = mapCopy;
@@ -221,10 +223,14 @@ export function useMapScreen(data: MapData) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = filtered.find((p) => p.id === selectedId) ?? null;
   const [snap, setSnap] = useState<SheetSnap>("half");
+  /** 시트 단계 바꾸기(지도 만지면 접힘, 2026-10-31). 데스크톱은 화면이 부르지 않는다 */
+  function sheetEvent(event: SheetEvent) {
+    setSnap((s) => nextSnap(s, event, false));
+  }
 
   function select(id: string | null) {
     setSelectedId(id);
-    setSnap("half");
+    if (id) setSnap((s) => nextSnap(s, "select", false));
     const p = id ? filtered.find((x) => x.id === id) : null;
     if (p) setAnnounce(copy.selected(p.name));
   }
@@ -333,7 +339,11 @@ export function useMapScreen(data: MapData) {
 
   /* ---------- 맞춤 ---------- */
 
-  const autoFitKey = `auto:${keyOf(searchCenter)}:${radiusM}`;
+  // 상한(45곳)에 닿으면 받은 식당이 모인 범위에 맞춘다(fit.ts fitRadiusM). 목록이 오기 전에는 걸어서 갈 수 있는 원
+  const fitR = searchCenter
+    ? fitRadiusM(searchCenter, places, radiusM, result?.capped ?? false)
+    : radiusM;
+  const autoFitKey = `auto:${keyOf(searchCenter)}:${radiusM}:${fitR}`;
   const [clusterFitFor, setClusterFitFor] = useState(autoFitKey);
   // 기준점이나 반경이 바뀌면 묶음 맞춤은 버리고 원 맞춤으로
   if (clusterFitFor !== autoFitKey) {
@@ -345,7 +355,7 @@ export function useMapScreen(data: MapData) {
     : searchCenter
       ? {
           key: autoFitKey,
-          bounds: circleBounds(searchCenter, radiusM),
+          bounds: circleBounds(searchCenter, fitR),
           pad: FIT_PAD_PX,
         }
       : null;
@@ -396,6 +406,7 @@ export function useMapScreen(data: MapData) {
     select,
     snap,
     setSnap,
+    sheetEvent,
     mapLoad,
     dispatchMap,
     setView,

@@ -66,6 +66,7 @@ function createNaverMap(
     setCenter: (center) => map.setCenter(toNaver(center)),
     getCenter: () => fromNaver(map.getCenter()),
     setZoom: (zoom) => map.setZoom(zoom),
+    getZoom: () => map.getZoom(),
     panTo: (center) => map.panTo(toNaver(center)),
     panBy: ({ x, y }) => map.panBy(new maps.Point(x, y)),
     // 출처: https://navermaps.github.io/maps.js.ncp/docs/naver.maps.Map.html#setSize

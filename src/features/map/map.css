@@ -3,8 +3,38 @@
  * - 시트: 놓으면 slow 300 enter(오버슈트 없음), 끄는 동안은 즉시.
  * - 마커 고름: fast 180 standard로 면 색이 바뀌고 이름이 펼쳐진다(최대 폭 전환 base 260).
  * - 지도 위 버튼, 상태 블록: 8px 아래에서 떠오름(base 260 enter). 한 순간에 움직이는 것은 하나.
+ * - 지도 만지면 접힘(2026-10-31): 시트가 낮게 접히면 지도 화면이 <html data-map-fold>를 켜고, 하단 탭이 시트와 같은
+ *   slow 300 enter로 아래로 숨는다. 탭에 초점이 오면(focus-within) 바로 다시 보인다. 탭 코드는 건드리지 않는다.
+ * - 네이버 로고와 저작권 표기(지도 요소의 바닥 고정 자식)를 시트 윗변 위로 올린다(--lm-map-inset-bottom, map-canvas.tsx).
  * - 축소 모드(OS prefers-reduced-motion, 앱 설정 <html data-motion="reduce">)면 모두 끈다.
  */
+
+/* 하단 탭 접힘: 지도 탭 모바일에서만 속성이 켜진다(map-screen.tsx useTabFold) */
+[data-slot="bottom-tab-bar"] {
+  transition: translate var(--lm-duration-slow) var(--lm-ease-enter);
+}
+html[data-map-fold] {
+  /* 아래로 민 탭이 문서 스크롤을 만들지 않게 */
+  overflow: hidden;
+}
+html[data-map-fold] [data-slot="bottom-tab-bar"] {
+  translate: 0 100%;
+}
+html[data-map-fold] [data-slot="bottom-tab-bar"]:focus-within {
+  translate: none;
+}
+
+/* 지도를 끌 때 마커 글자가 선택되지 않게 */
+.lm-map-tiles {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 네이버 지도 바닥 고정 컨트롤(로고, 저작권). 네이버가 인라인 style로 bottom: 0px를 준 지도 요소의 직계 자식 */
+.lm-map-tiles > div[style*="bottom: 0px"] {
+  translate: 0 calc(-1 * var(--lm-map-inset-bottom, 0px));
+  transition: translate var(--lm-duration-slow) var(--lm-ease-enter);
+}
 
 /* 마커 자리: 0 x 0 요소의 원점이 좌표다. 안쪽 마커는 가운데 아래 끝(꼬리 끝)을 원점에 맞춘다 */
 .lm-map-marker-slot {
@@ -54,6 +84,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-slot="bottom-tab-bar"],
+  .lm-map-tiles > div[style*="bottom: 0px"],
   .lm-map-sheet,
   .lm-map-sheet-footer,
   .lm-map-pill,
@@ -64,6 +96,8 @@
     animation: none !important;
   }
 }
+[data-motion="reduce"] [data-slot="bottom-tab-bar"],
+[data-motion="reduce"] .lm-map-tiles > div[style*="bottom: 0px"],
 [data-motion="reduce"] .lm-map-sheet,
 [data-motion="reduce"] .lm-map-sheet-footer,
 [data-motion="reduce"] .lm-map-pill,

@@ -65,6 +65,8 @@ export interface MapInstance {
   setCenter(center: LatLng): void;
   getCenter(): LatLng;
   setZoom(zoom: number): void;
+  /** 지금 확대 단계(맞춤 계산, 지도 탭) */
+  getZoom(): number;
   /** 부드럽게 이동한다(공급자가 지원하면 애니메이션) */
   panTo(center: LatLng): void;
   /** 지도 요소 크기가 바뀌었을 때 알린다(네이버는 생성 시 크기에 고정된다). 중심은 유지한다 */

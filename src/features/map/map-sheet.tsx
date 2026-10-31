@@ -1,12 +1,14 @@
 "use client";
-// 지도 탭 바텀시트 (T5.29, MAP-04, D-09 안건 3, 4). 모바일은 지도 칸 안에 겹치는 비모달 시트, 데스크톱은 좌 리스트 칸.
+// 지도 탭 바텀시트 (T5.29, MAP-04, D-09 안건 3, 4, 2026-10-31 실기기 피드백으로 3단 + 접힘). 모바일은 지도 칸 안에 겹치는 비모달 시트, 데스크톱은 좌 리스트 칸.
 //
-// - 높이 2단: 반쯤(지도 칸의 48%) / 끝까지. 손잡이와 머리를 끌어 옮기고, 놓으면 가까운 단계로(빠르게 튕기면 한 단계 더).
-//   끄는 동안은 손가락을 바로 따르고, 놓은 뒤는 slow 300 enter(오버슈트 없음). 축소 모드는 즉시(map.css).
-// - 끌기 대체: 손잡이가 버튼이다. 누르면 반쯤 ↔ 끝까지. 바뀐 높이는 aria-live로 알린다.
-// - 반쯤에서는 본문이 스크롤하지 않는다(어디를 끌어도 시트가 움직임). 끝까지에서만 본문이 스크롤된다.
-// - footer(상세 하단 행동 줄)는 시트의 "보이는" 바닥에 붙는다. 시트는 칸 높이 전체로 그리고 아래로 밀어 두므로,
-//   footer도 같은 만큼 위로 올려 반쯤에서도 길찾기 버튼이 보이게 한다.
+// - 높이 3단: 낮게(손잡이 + 개수 한 줄, 하단 탭도 숨음) / 반쯤(탭 위 지도 칸의 48%) / 끝까지. 계산은 view-state.ts sheetLayout.
+//   시트가 놓인 칸은 하단 탭 아래까지 이어진다. 탭이 보이는 단계에서는 탭 위에 앉고(탭이 시트 아랫부분을 덮는다), 낮게에서는 화면 바닥에 앉는다.
+// - 손잡이와 머리를 끌어 옮기고, 놓으면 가까운 단계로(빠르게 튕기면 한 단계 더). 끄는 동안은 손가락을 바로 따르고,
+//   놓은 뒤는 slow 300 enter(오버슈트 없음). 축소 모드는 즉시(map.css).
+// - 끌기 대체: 손잡이가 버튼이다. 낮게 → 반쯤 → 끝까지 → 반쯤. 낮게에서는 개수 줄도 누르면 반쯤으로 올라온다. 바뀐 높이는 aria-live로 알린다.
+// - 낮게와 반쯤에서는 본문이 스크롤하지 않는다(어디를 끌어도 시트가 움직임). 끝까지에서만 본문이 스크롤된다.
+//   낮게에서는 화면 밖 본문에 초점이 가지 않게 inert로 둔다.
+// - footer(상세 하단 행동 줄)는 시트의 "보이는" 바닥에 붙는다. 낮게에서는 그리지 않는다.
 // - Base UI Drawer를 쓰지 않는다(모달이 아니고 탭 바 위에 앉으며 데스크톱에서 좌 칸이 된다). 번들 0.
 import {
   useEffect,
@@ -19,37 +21,46 @@ import {
 import { focusRing } from "@/components/ui/interaction";
 import { mapCopy } from "@/copy/map";
 import { cn } from "@/lib/utils";
+import {
+  SHEET_TOP_GAP_PX,
+  sheetLayout,
+  snapAfterDrag,
+  type SheetSnap,
+} from "./view-state";
+
+export type { SheetSnap } from "./view-state";
 
 const copy = mapCopy.sheet;
-const FLICK_PX_PER_MS = 0.5;
-const TOP_GAP_PX = 8;
 const DRAG_START_PX = 6;
-
-export type SheetSnap = "half" | "full";
-export const SHEET_SNAPS: readonly SheetSnap[] = ["half", "full"];
-/** 반쯤 높이: 지도 칸의 48% (DESIGN.md 5장 "지도") */
-export const HALF_RATIO = 0.48;
-
-export function sheetHeightPx(snap: SheetSnap, stage: number): number {
-  const sheet = Math.max(0, stage - TOP_GAP_PX);
-  return snap === "full" ? sheet : Math.min(sheet, Math.round(stage * HALF_RATIO));
-}
 
 export function MapSheet({
   snap,
   onSnapChange,
+  onLowTap,
   desktop,
+  tabLift,
+  safeBottom,
   header,
+  lowLine,
   children,
   footer,
   className,
   bodyClassName,
 }: {
   snap: SheetSnap;
+  /** 끌기나 손잡이로 고른 단계 */
   onSnapChange: (snap: SheetSnap) => void;
+  /** 낮게 접힌 시트의 개수 줄을 눌렀다 */
+  onLowTap: () => void;
   desktop: boolean;
+  /** 하단 탭 높이(홈 인디케이터 칸 포함) */
+  tabLift: number;
+  /** 홈 인디케이터 칸 */
+  safeBottom: number;
   /** 손잡이 아래 머리(끌기 영역). 개수와 칩, 또는 목록으로 */
   header?: ReactNode;
+  /** 낮게 단계의 한 줄("도보 10분 안 N곳") */
+  lowLine: ReactNode;
   children: ReactNode;
   /** 시트의 보이는 바닥에 붙는 줄(상세 행동 줄) */
   footer?: ReactNode;
@@ -58,12 +69,12 @@ export function MapSheet({
 }) {
   const ref = useRef<HTMLElement>(null);
   const [stage, setStage] = useState(0);
-  const [dragY, setDragY] = useState<number | null>(null);
+  const [dragTop, setDragTop] = useState<number | null>(null);
   const [announce, setAnnounce] = useState("");
   const drag = useRef<{
     id: number;
     startY: number;
-    startOffset: number;
+    startTop: number;
     lastY: number;
     lastT: number;
     v: number;
@@ -83,15 +94,20 @@ export function MapSheet({
     return () => ro.disconnect();
   }, []);
 
-  const sheetHeight = Math.max(0, stage - TOP_GAP_PX);
-  const offsetOf = (s: SheetSnap) => sheetHeight - sheetHeightPx(s, stage);
-  const offset = dragY ?? offsetOf(snap);
-  const atTop = snap === "full";
+  // 바깥(지도 끌기, 마커 고르기, 탭 초점)이 바꾼 단계도 알린다
+  const shownSnap = useRef(snap);
+  useEffect(() => {
+    if (desktop || shownSnap.current === snap) return;
+    shownSnap.current = snap;
+    setAnnounce(copy.snapAnnounce[snap]);
+  }, [snap, desktop]);
 
-  function setSnap(next: SheetSnap) {
-    onSnapChange(next);
-    setAnnounce(copy.snapAnnounce[next]);
-  }
+  const layout = sheetLayout({ stage, tabLift, safeBottom });
+  const sheetHeight = Math.max(0, stage - SHEET_TOP_GAP_PX);
+  const top = dragTop ?? layout.top[snap];
+  const offset = top - SHEET_TOP_GAP_PX;
+  const floor = layout.floor[snap];
+  const low = snap === "low" && !desktop;
 
   function onPointerDown(e: PointerEvent<HTMLElement>) {
     if (desktop || e.button !== 0) return;
@@ -99,7 +115,7 @@ export function MapSheet({
     drag.current = {
       id: e.pointerId,
       startY: e.clientY,
-      startOffset: offset,
+      startTop: top,
       lastY: e.clientY,
       lastT: e.timeStamp,
       v: 0,
@@ -119,22 +135,21 @@ export function MapSheet({
     d.v = (e.clientY - d.lastY) / dt;
     d.lastY = e.clientY;
     d.lastT = e.timeStamp;
-    const min = offsetOf("full");
-    const max = offsetOf("half");
-    setDragY(Math.min(max + 24, Math.max(min - 24, d.startOffset + dy)));
+    const min = layout.top.full;
+    const max = layout.top.low;
+    setDragTop(Math.min(max + 24, Math.max(min - 24, d.startTop + dy)));
   }
   function onPointerUp(e: PointerEvent<HTMLElement>) {
     const d = drag.current;
     drag.current = null;
     if (!d || d.id !== e.pointerId || !d.moved) return;
-    const pos = dragY ?? offset;
-    setDragY(null);
-    let best: SheetSnap =
-      Math.abs(offsetOf("full") - pos) < Math.abs(offsetOf("half") - pos)
-        ? "full"
-        : "half";
-    if (Math.abs(d.v) > FLICK_PX_PER_MS) best = d.v < 0 ? "full" : "half";
-    setSnap(best);
+    const pos = dragTop ?? top;
+    setDragTop(null);
+    const next = snapAfterDrag({ layout, start: snap, top: pos, v: d.v });
+    if (next === snap) return;
+    shownSnap.current = next;
+    setAnnounce(copy.snapAnnounce[next]);
+    onSnapChange(next);
   }
   function onClickCapture(e: MouseEvent) {
     // 끌기로 끝난 누르기는 안쪽 버튼 클릭으로 이어지지 않게
@@ -153,10 +168,17 @@ export function MapSheet({
     },
     onPointerCancel: () => {
       drag.current = null;
-      setDragY(null);
+      setDragTop(null);
     },
     onClickCapture,
   };
+
+  function onHandle() {
+    const next: SheetSnap = snap === "half" ? "full" : "half";
+    shownSnap.current = next;
+    setAnnounce(copy.snapAnnounce[next]);
+    onSnapChange(next);
+  }
 
   const scrollable = desktop || snap === "full";
 
@@ -165,9 +187,9 @@ export function MapSheet({
       ref={ref}
       aria-label={copy.label}
       data-snap={snap}
-      data-dragging={dragY !== null}
+      data-dragging={dragTop !== null}
       className={cn(
-        // 모바일: 지도 칸 바닥에 붙은 시트. 높이는 칸 전체, 보이는 만큼만 아래에서 올라온다
+        // 모바일: 칸 바닥에 붙은 시트. 높이는 칸 전체, 보이는 만큼만 아래에서 올라온다
         "lm-map-sheet absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-sheet bg-popover text-popover-foreground shadow-sheet",
         // 데스크톱: 좌 리스트 칸(문서 스크롤)
         "desktop:static desktop:z-auto desktop:flex-1 desktop:rounded-none desktop:bg-background desktop:text-foreground desktop:shadow-none",
@@ -186,9 +208,9 @@ export function MapSheet({
       >
         <button
           type="button"
-          onClick={() => setSnap(atTop ? "half" : "full")}
-          aria-label={atTop ? copy.lower : copy.raise}
-          aria-expanded={atTop}
+          onClick={onHandle}
+          aria-label={snap === "full" ? copy.lower : copy.raise}
+          aria-expanded={snap === "full"}
           className={cn(
             "mx-auto flex h-7 w-16 items-center justify-center rounded-full desktop:hidden",
             focusRing,
@@ -196,9 +218,24 @@ export function MapSheet({
         >
           <span aria-hidden className="h-1 w-9 rounded-full bg-border" />
         </button>
-        {header}
+        {low ? (
+          <button
+            type="button"
+            onClick={onLowTap}
+            className={cn(
+              "flex h-11 w-full items-center px-(--lm-layout-gutter) text-left type-label",
+              focusRing,
+              "focus-visible:-outline-offset-4",
+            )}
+          >
+            {lowLine}
+          </button>
+        ) : (
+          header
+        )}
       </div>
       <div
+        inert={low}
         className={cn(
           "min-h-0 flex-1 overscroll-contain",
           scrollable ? "overflow-y-auto" : "overflow-hidden",
@@ -208,17 +245,21 @@ export function MapSheet({
         {...(scrollable ? {} : dragHandlers)}
       >
         {children}
-        {/* 끝까지 열림에서 마지막 내용이 행동 줄에 가리지 않게 */}
-        {footer && !desktop ? <div aria-hidden className="h-20" /> : null}
+        {/* 끝까지 열림에서 마지막 내용이 행동 줄과 하단 탭에 가리지 않게 */}
+        {!desktop ? (
+          <div aria-hidden style={{ height: floor + (footer ? 80 : 0) }} />
+        ) : null}
       </div>
-      {footer ? (
+      {footer && !low ? (
         <div
           className={cn(
             "lm-map-sheet-footer absolute inset-x-0 bottom-0 z-[5] border-t border-border bg-popover px-(--lm-layout-gutter) py-3",
             "desktop:sticky desktop:bottom-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] desktop:bg-background desktop:px-10",
           )}
           style={
-            desktop ? undefined : { transform: `translateY(${-offset}px)` }
+            desktop
+              ? undefined
+              : { transform: `translateY(${-(offset + floor)}px)` }
           }
         >
           {footer}

@@ -331,6 +331,9 @@ function createLabMap(element: HTMLElement, options: MapOptions): MapInstance {
       render();
       for (const mk of markers) placeMarker(mk);
     },
+    getZoom() {
+      return zoom;
+    },
     panTo(p) {
       glide(() => {
         center = toMeters(origin, p);

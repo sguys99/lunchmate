@@ -16,6 +16,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -30,13 +31,15 @@ import type {
   MarkerHandle,
 } from "@/lib/map/types";
 import { cn } from "@/lib/utils";
-import { centerForFocus, fitWithInset, type Inset } from "./fit";
+import { centerForFocus, planFit, type Inset } from "./fit";
 
 const copy = mapCopy;
 const KEY_STEP_PX = 80;
 const START_ZOOM = 16;
 /** 코드가 옮긴 뒤 영역을 다시 올리는 시점(네이버 미끄러짐 + 여유) */
 const SETTLE_MS = 800;
+/** 이만큼(px) 끌면 지도 조작으로 본다(누르기와 구분) */
+const GESTURE_SLOP_PX = 8;
 
 export type MapProviderKind = "naver" | "lab";
 
@@ -73,14 +76,18 @@ export type MapCanvasProps = {
   focus: { key: string; position: LatLng } | null;
   /** 지도 가운데를 이 점으로 옮긴다(현위치 버튼). key가 바뀔 때마다 */
   moveTo: { key: string; position: LatLng } | null;
-  /** 지도 위아래가 겹침(칩 줄, 시트)에 가리는 높이(px) */
+  /** 지도 위아래가 겹침(칩 줄, 시트, 하단 탭)에 가리는 높이(px). 네이버 로고와 저작권 표기를 시트 위로 올린다 */
   inset: Inset;
+  /** 칸 배치(크기, 탭)가 바뀌면 바뀌는 값. 바뀌면 지금 맞춤을 다시 한다. 시트 높이만 바뀔 때는 다시 맞추지 않는다 */
+  layoutKey: string;
   reducedMotion: boolean;
   onLoaded: () => void;
   onFailed: () => void;
   onUserMoved: (center: LatLng) => void;
   onView: (view: MapView) => void;
   onMapTap?: () => void;
+  /** 사용자가 지도를 끌거나 확대, 축소하기 시작했다(누르기, 방향키 제외). 시트 접힘 */
+  onGesture?: () => void;
   describedById?: string;
   className?: string;
   /** 지도 위 겹치는 것(칩, 버튼) */
@@ -113,12 +120,14 @@ export function MapCanvas({
   focus,
   moveTo,
   inset,
+  layoutKey,
   reducedMotion,
   onLoaded,
   onFailed,
   onUserMoved,
   onView,
   onMapTap,
+  onGesture,
   describedById,
   className,
   children,
@@ -133,6 +142,7 @@ export function MapCanvas({
     onUserMoved,
     onView,
     onMapTap,
+    onGesture,
     inset,
     reducedMotion,
     markers,
@@ -145,6 +155,7 @@ export function MapCanvas({
       onUserMoved,
       onView,
       onMapTap,
+      onGesture,
       inset,
       reducedMotion,
       markers,
@@ -236,6 +247,55 @@ export function MapCanvas({
         for (const type of ["pointerdown", "wheel", "touchstart"] as const) {
           element.addEventListener(type, touch, { passive: true });
           unsubs.push(() => element.removeEventListener(type, touch));
+        }
+        // 지도 조작 시작(끌기 8px 이상, 두 손가락, 휠)을 한 번 알린다. 누르기와 방향키는 아니다
+        let start: { x: number; y: number } | null = null;
+        let fired = false;
+        const gesture = () => {
+          if (fired) return;
+          fired = true;
+          latest.current.onGesture?.();
+        };
+        const listeners: [string, (e: Event) => void][] = [
+          [
+            "pointerdown",
+            (e) => {
+              const p = e as globalThis.PointerEvent;
+              start = { x: p.clientX, y: p.clientY };
+              fired = false;
+            },
+          ],
+          [
+            "pointermove",
+            (e) => {
+              const p = e as globalThis.PointerEvent;
+              if (!start || fired) return;
+              if (
+                Math.hypot(p.clientX - start.x, p.clientY - start.y) >=
+                GESTURE_SLOP_PX
+              )
+                gesture();
+            },
+          ],
+          [
+            "touchmove",
+            (e) => {
+              if ((e as TouchEvent).touches.length > 1) gesture();
+            },
+          ],
+          [
+            "wheel",
+            () => {
+              fired = false;
+              gesture();
+            },
+          ],
+          ["pointerup", () => (start = null)],
+          ["pointercancel", () => (start = null)],
+        ];
+        for (const [type, fn] of listeners) {
+          element.addEventListener(type, fn, { passive: true });
+          unsubs.push(() => element.removeEventListener(type, fn));
         }
         setMap(m);
         latest.current.onLoaded();
@@ -342,12 +402,19 @@ export function MapCanvas({
     const f = fitRef.current;
     if (!map || !el || !f) return;
     const { width, height } = el.getBoundingClientRect();
+    const plan = planFit({
+      box: f.bounds,
+      size: { width, height },
+      pad: f.pad,
+      inset: latest.current.inset,
+      current: { zoom: map.getZoom(), bounds: map.getBounds() },
+      integerZoom: providerKind === "naver",
+    });
+    if (!plan) return;
     afterCodeMove();
-    map.fitBounds(
-      fitWithInset(f.bounds, { width, height }, f.pad, latest.current.inset),
-      f.pad,
-    );
-  }, [map, fitKey, inset.top, inset.bottom, afterCodeMove]);
+    map.setZoom(plan.zoom);
+    map.setCenter(plan.center);
+  }, [map, fitKey, layoutKey, providerKind, afterCodeMove]);
 
   // 고른 식당으로 미끄러지기: 보이는 칸 가운데에
   const focusKey = focus?.key ?? null;
@@ -368,7 +435,8 @@ export function MapCanvas({
     afterCodeMove();
     if (latest.current.reducedMotion) map.setCenter(target);
     else map.panTo(target);
-  }, [map, focusKey, inset.top, inset.bottom, afterCodeMove]);
+    // 시트 높이(inset)만 바뀔 때는 다시 옮기지 않는다(지도를 끌어 접힐 때 고른 식당으로 되돌아가지 않게)
+  }, [map, focusKey, afterCodeMove]);
 
   // 현위치 버튼: 지도 가운데만 옮긴다(기준점은 그대로, 저장하지 않음). 사용자가 원한 이동이라 조용히 두지 않는다
   const moveKey = moveTo?.key ?? null;
@@ -400,7 +468,14 @@ export function MapCanvas({
   }
 
   return (
-    <div className={cn("relative isolate overflow-hidden bg-muted", className)}>
+    <div
+      className={cn("relative isolate overflow-hidden bg-muted", className)}
+      style={
+        {
+          "--lm-map-inset-bottom": `${Math.max(0, inset.bottom)}px`,
+        } as CSSProperties
+      }
+    >
       <div
         ref={containerRef}
         role="application"

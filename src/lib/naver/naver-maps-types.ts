@@ -21,6 +21,7 @@ export interface NaverMap {
   getCenter(): NaverLatLng;
   getBounds(): NaverLatLngBounds;
   setZoom(zoom: number): void;
+  getZoom(): number;
   panTo(center: NaverLatLng): void;
   panBy(offset: NaverPoint): void;
   setSize(size: { width: number; height: number }): void;

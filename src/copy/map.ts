@@ -97,6 +97,7 @@ export const mapCopy = {
   sheet: {
     label: "주변 식당",
     snapAnnounce: {
+      low: "시트를 내렸습니다. 지도를 넓게 봅니다.",
       half: "시트를 반쯤 열었습니다.",
       full: "시트를 끝까지 열었습니다.",
     },

@@ -41,6 +41,26 @@ describe("클러스터 묶기 (MAP-02)", () => {
     );
   });
 
+  it("묶음은 씨앗 자리에 둔다: 이웃 묶음 알약과 상자만큼 떨어져 겹치지 않는다", () => {
+    const groups = groupMarkers(
+      [
+        { id: "a", position: at(100, 100) },
+        { id: "b", position: at(140, 100) },
+        { id: "c", position: at(155, 100) },
+        { id: "d", position: at(195, 100) },
+      ],
+      view,
+    );
+    const clusters = groups.filter((g) => g.kind === "cluster");
+    expect(clusters).toHaveLength(2);
+    const [p, q] = clusters.map((g) =>
+      g.kind === "cluster"
+        ? toScreenPx(g.position, view.bounds, view.size)
+        : null,
+    );
+    expect(Math.abs((p?.x ?? 0) - (q?.x ?? 0))).toBeGreaterThanOrEqual(52);
+  });
+
   it("가로로 52px 넘게 떨어지면 묶지 않는다", () => {
     const groups = groupMarkers(
       [

@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  HALF_RATIO,
   INITIAL_MAP_LOAD,
+  LOW_SHEET_PX,
+  SHEET_ORDER,
   expandedWalk,
   mapLoadReducer,
   mapScreenMode,
+  nextSnap,
   researchVisible,
+  sheetCover,
+  sheetLayout,
+  snapAfterDrag,
+  tabsHidden,
 } from "./view-state";
 
 const ok = {
@@ -120,5 +128,80 @@ describe("넓히기", () => {
     expect(expandedWalk(10)).toBe(15);
     expect(expandedWalk(18)).toBe(20);
     expect(expandedWalk(20)).toBeNull();
+  });
+});
+
+describe("시트 3단과 지도 만지면 접힘 (2026-10-31)", () => {
+  it("지도를 만지면 어느 단계에서든 낮게, 데스크톱은 그대로", () => {
+    for (const s of SHEET_ORDER)
+      expect(nextSnap(s, "mapGesture", false)).toBe("low");
+    expect(nextSnap("half", "mapGesture", true)).toBe("half");
+  });
+
+  it("시트를 누르거나 숨은 탭에 초점이 오면 낮게에서 반쯤으로, 다른 단계는 그대로", () => {
+    expect(nextSnap("low", "sheetTap", false)).toBe("half");
+    expect(nextSnap("low", "tabFocus", false)).toBe("half");
+    expect(nextSnap("full", "tabFocus", false)).toBe("full");
+    expect(nextSnap("half", "sheetTap", false)).toBe("half");
+  });
+
+  it("마커를 고르면 반쯤, 손잡이는 낮게 → 반쯤 → 끝까지 → 반쯤", () => {
+    expect(nextSnap("low", "select", false)).toBe("half");
+    expect(nextSnap("full", "select", false)).toBe("half");
+    expect(nextSnap("low", "handle", false)).toBe("half");
+    expect(nextSnap("half", "handle", false)).toBe("full");
+    expect(nextSnap("full", "handle", false)).toBe("half");
+  });
+
+  it("하단 탭은 모바일 낮게에서만 숨는다", () => {
+    expect(tabsHidden("low", false)).toBe(true);
+    expect(tabsHidden("half", false)).toBe(false);
+    expect(tabsHidden("full", false)).toBe(false);
+    expect(tabsHidden("low", true)).toBe(false);
+  });
+
+  // 390x664 아이폰(브라우저 바 제외), 하단 탭 64 + 홈 인디케이터 34. 칸은 탭 아래까지 664
+  const layout = sheetLayout({ stage: 664, tabLift: 98, safeBottom: 34 });
+
+  it("반쯤은 탭 위 지도 칸의 48%, 탭 위에 앉는다", () => {
+    expect(layout.top.half).toBe(664 - 98 - Math.round(566 * HALF_RATIO));
+    expect(layout.floor.half).toBe(98);
+    expect(sheetCover(layout, "half", 664)).toBe(
+      98 + Math.round(566 * HALF_RATIO),
+    );
+  });
+
+  it("낮게는 88px + 홈 인디케이터, 탭이 숨어 화면 바닥에 앉는다", () => {
+    expect(layout.top.low).toBe(664 - (LOW_SHEET_PX + 34));
+    expect(layout.floor.low).toBe(0);
+    expect(sheetCover(layout, "low", 664)).toBe(122);
+  });
+
+  it("끝까지는 위 8px 틈", () => {
+    expect(layout.top.full).toBe(8);
+  });
+
+  it("단계 순서가 뒤집히지 않는다(낮은 칸에서도 낮게 ≥ 반쯤 윗변)", () => {
+    const small = sheetLayout({ stage: 200, tabLift: 98, safeBottom: 34 });
+    expect(small.top.low).toBeGreaterThanOrEqual(small.top.half);
+    expect(small.top.half).toBeGreaterThanOrEqual(small.top.full);
+  });
+
+  it("끌기를 놓으면 가까운 단계, 빠르게 튕기면 시작 단계에서 한 단계", () => {
+    expect(
+      snapAfterDrag({ layout, start: "half", top: layout.top.low - 10, v: 0 }),
+    ).toBe("low");
+    expect(snapAfterDrag({ layout, start: "half", top: 20, v: 0 })).toBe(
+      "full",
+    );
+    expect(
+      snapAfterDrag({ layout, start: "low", top: layout.top.low - 30, v: -1 }),
+    ).toBe("half");
+    expect(
+      snapAfterDrag({ layout, start: "half", top: layout.top.half + 30, v: 1 }),
+    ).toBe("low");
+    expect(snapAfterDrag({ layout, start: "full", top: 30, v: -1 })).toBe(
+      "full",
+    );
   });
 });
