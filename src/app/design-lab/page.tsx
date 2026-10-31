@@ -2,7 +2,10 @@ import Link from "next/link";
 import { designLabCopy } from "@/copy/design-lab";
 import { mapLabCopy } from "@/copy/design-lab-map";
 import { onboardingLabCopy } from "@/copy/design-lab-onboarding";
+import { feedbackLabCopy } from "@/copy/design-lab-feedback";
+import { meLabCopy } from "@/copy/design-lab-me";
 import { placeLabCopy } from "@/copy/design-lab-place";
+import { reportLabCopy } from "@/copy/design-lab-report";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
@@ -47,6 +50,28 @@ export default function DesignLabPage() {
           {copy.homeLink}
         </Link>
       </Section>
+
+      {(
+        [
+          ["feedback", feedbackLabCopy],
+          ["me", meLabCopy],
+          ["report", reportLabCopy],
+        ] as const
+      ).map(([route, lab]) => (
+        <Section key={route} title={lab.index.title} body={lab.index.body}>
+          <div className="flex flex-wrap gap-4">
+            {(["a", "b", "c"] as const).map((id) => (
+              <Link
+                key={id}
+                href={`/design-lab/${route}/${id}`}
+                className={linkClass}
+              >
+                {lab.names[id]}
+              </Link>
+            ))}
+          </div>
+        </Section>
+      ))}
 
       <Section title={placeLabCopy.index.title} body={placeLabCopy.index.body}>
         <div className="flex flex-wrap gap-4">

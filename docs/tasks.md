@@ -494,7 +494,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 - [x] T6.1 (10/31 완료, A 띠 펼침, B 한 장 시트, C 한 번에 하나, `/design-lab/feedback/<a|b|c>`, `docs/design/g6-comparison-feedback.md`, 캡처 90장, axe 216건) 피드백 카드(한 탭 응답과 선택 입력) 시안 3안 이상
 - [x] T6.2 (10/31 완료, A 기록 일지(세 탭, 주 단위), B 달력(칸에 카테고리 그림), C 이번 달 돌아보기(숫자 3칸 + 미리보기 3개), `/design-lab/me/<a|b|c>`, `docs/design/g6-comparison-me.md`, 캡처 53장, axe 132건) '나' 탭과 기록(타임라인/캘린더) 시안 3안 이상
-- [ ] T6.3 할인 제보, 웨이팅 제보 입력 UI 시안 3안 이상
+- [x] T6.3 (10/31 완료, A 한 장 시트, B 제자리 펼침, C 한 질문씩, 할인 등록과 확인, 웨이팅, 정보 제보, 후기 신고 포함, `/design-lab/report/<a|b|c>`, `docs/design/g6-comparison-report.md`, 캡처 93장, axe 264건) 할인 제보, 웨이팅 제보 입력 UI 시안 3안 이상
 - [ ] ⛔ T6.4 선택 게이트, 기록
 
 #### 6.1 데이터
