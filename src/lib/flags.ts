@@ -67,10 +67,10 @@ export const FLAGS = {
   },
   userPlaceMemo: {
     description:
-      "사용자가 직접 쓰는 장소 메모 저장. 카카오 답변 전까지 숨김 (T0.16, 해제 판단 T10.2).",
+      "사용자가 직접 쓰는 장소 메모 저장. 카카오 답변 전까지 숨김 (T0.16). 메모 컬럼은 T5.14에서 만들지 않았고 T10.2 답변 뒤 새 마이그레이션으로 추가한다.",
     default: false,
     source: { type: "const", value: false },
-    owner: "T5.14",
+    owner: "T10.2",
   },
 } as const satisfies Record<string, FlagDefinition>;
 

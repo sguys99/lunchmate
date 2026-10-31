@@ -152,7 +152,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 | 라이브러리 | 용도 | 주 적용 화면 | 로딩 방식 | 비고 |
 | --- | --- | --- | --- | --- |
 | Motion (`motion/react`) | 카드 스와이프(drag), 레이아웃 전환, 셔플, 스프링 | 홈, 투표방, 시트 | `LazyMotion` + `domAnimation`, drag 필요한 곳만 `domMax` | Framer Motion의 후속 패키지. `m` 컴포넌트(`motion/react-m`) + `LazyMotion strict`. 홈은 `domAnimation` 동기, `domMax`는 비동기 로딩 (T0.27) |
-| Base UI Drawer (`@base-ui/react/drawer`, shadcn base 스타일 `drawer`) | 스냅 포인트 바텀시트 | 지도 상세, 피드백 | 지도 탭 진입 시 지연 로딩 | shadcn을 base 계열(`base-vega`)로 초기화했으므로 그대로 씁니다. Vaul은 미유지(README 명시)로 제외. 예비안: Motion drag 직접 구현 (T0.27, 2026-10-28) |
+| Base UI Drawer (`@base-ui/react/drawer`, shadcn base 스타일 `drawer`) | 스냅 포인트 바텀시트 | 지도 상세, 피드백 | 지도 탭 진입 시 지연 로딩 | shadcn을 base 계열(`base-vega`)로 초기화했으므로 그대로 씁니다. Vaul은 미유지(README 명시)로 제외. 예비안: Motion drag 직접 구현 (T0.27, 2026-10-28). 지도 시트는 직접 구현(포인터 + CSS), 모달 시트만 Drawer (D-09) |
 | Sonner | 토스트 | 전역 | 기본 포함 | shadcn 연동 |
 | NumberFlow (`@number-flow/react`) | 숫자 롤링 | 득표 수, 마감 카운트다운, 👍 비율, 가격 | 해당 컴포넌트에서만 | 숫자가 주인공인 디자인과 잘 맞음 |
 | canvas-confetti | 결정 순간 축하 | 투표 확정, 그냥 골라줘 결과 | 동적 import | reduced motion이면 생략 |
@@ -426,7 +426,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 - [x] T5.1 (10/31 완료, A 그림 핀 3단 시트, B 도보 분 알약 2단 시트, C 점 마커 카드 넘기기, `/design-lab/map/<a|b|c>`, `docs/design/g5-comparison-map.md`, 캡처 46장) 지도 + 바텀시트 시안 3안 이상 (마커 모양, 필터 칩 위치, 시트 높이 단계)
 - [x] T5.2 (10/31 완료, A 숫자 대시보드, B 이야기형, C 결정 집중형, `/design-lab/place/<a|b|c>`, `docs/design/g5-comparison-place.md`, 캡처 50장) 식당 상세 시안 3안 이상 (가격대 표현, 👍 비율 시각화, 후기 목록, 액션 배치)
-- [ ] ⛔ T5.3 선택 게이트, 기록
+- [x] ⛔ T5.3 (10/31 완료, design-decisions D-09 지도 B + 고른 마커만 A 그림, D-10 상세 C + A 가격 점 분포와 예산 선 + B 이유 한 줄, 안건 20건 기본안, T5.14 마이그레이션 승인. DESIGN.md 5장 "지도", "식당 상세", PRD v0.2.3. 남긴 확인 화면 `/design-lab/map/b`, `/design-lab/place/c`) 선택 게이트, 기록
 
 #### 5.1 추천 엔진 (`src/lib/reco`, 순수 함수)
 
