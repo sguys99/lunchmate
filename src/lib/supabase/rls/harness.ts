@@ -346,3 +346,36 @@ export async function createTestUserSession(
     throw e;
   }
 }
+
+/** PostgREST 함수 호출(POST /rpc/<name>). 권한은 rest()와 같다: publishable 키 + 세션(없으면 비로그인) */
+export async function rpc<T = unknown>(
+  env: RlsEnv,
+  name: string,
+  args: Record<string, unknown>,
+  token?: string,
+): Promise<RestResult<T>> {
+  return rest<T>(env, `rpc/${name}`, { method: "POST", token, body: args });
+}
+
+/**
+ * 준비 전용: secret 키로 행을 고친다(방문일, 제보 시각, 종료일을 과거로 돌리기). RLS와 열 권한을 건너뛰므로
+ * 권한 단언에는 쓰지 않는다. filter는 PostgREST 쿼리 문자열(예: `id=eq.<uuid>`). 고친 행 수를 돌려준다.
+ */
+export async function adminPatch(
+  env: RlsEnv,
+  table: string,
+  filter: string,
+  body: Record<string, unknown>,
+): Promise<number> {
+  const res = await fetch(`${env.url}/rest/v1/${table}?${filter}`, {
+    method: "PATCH",
+    headers: { ...adminHeaders(env), Prefer: "return=representation" },
+    body: JSON.stringify(body),
+  });
+  const r = await parse<unknown[]>(res);
+  if (r.error)
+    throw new Error(
+      `[rls] ${table} 준비 수정 실패 (${r.status} ${r.error.message ?? ""})`,
+    );
+  return r.data?.length ?? 0;
+}

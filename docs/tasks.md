@@ -499,9 +499,9 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 6.1 데이터
 
-- [ ] T6.5 마이그레이션: `reviews`, `review_reports`, `place_reports`, `place_deals`, `place_deal_checks`, `wait_reports` + RLS
-- [ ] T6.6 집계 뷰 또는 보안 함수: 식당별 가격 중앙값, 👍 비율, 태그 빈도 (비공개 후기 익명 포함, 텍스트 제외)
-- [ ] T6.7 RLS 테스트: 비공개 후기 텍스트가 어떤 응답에도 없음 (AC-FB-2)
+- [x] T6.5 (11/01 완료, 사용자 승인 후 db:push, 테이블 6개 + private.daily_usage, 쓰기 함수 register_deal, report_wait, my_daily_limits, visits.source에 detail 추가, 한도 카운터는 지워도 줄지 않음) 마이그레이션: `reviews`, `review_reports`, `place_reports`, `place_deals`, `place_deal_checks`, `wait_reports` + RLS
+- [x] T6.6 (11/01 완료, place_stats(가격 점 목록, 중앙값, 👍/👎, 태그 상위 5, 폐업 3건, 30분 안 웨이팅, 할인 수), place_reviews(로그인만, 사용자 결정), place_deals_list. 집계는 사람당 그 식당 최신 값 하나(사용자 결정), 숨긴 후기 제외) 집계 뷰 또는 보안 함수: 식당별 가격 중앙값, 👍 비율, 태그 빈도 (비공개 후기 익명 포함, 텍스트 제외)
+- [x] T6.7 (11/01 완료, `src/lib/supabase/rls/t6-feedback.rls.test.ts`, 클라우드 개발 DB RLS 전체 97건 통과, AC-FB-2, AC-DEAL-1, AC-DEAL-3, 병합과 교체, 웨이팅 30분과 2분 되돌리기, 14일 경계, 한도, 탈퇴 cascade) RLS 테스트: 비공개 후기 텍스트가 어떤 응답에도 없음 (AC-FB-2)
 
 #### 6.2 피드백과 학습
 
