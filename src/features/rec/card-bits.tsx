@@ -6,10 +6,7 @@ import { EstimateMark } from "@/components/badges/estimate-mark";
 import { SkeletonLine } from "@/components/states/loading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { homeCopy } from "@/copy/home";
-import {
-  categoryLabel,
-  type CategorySlug,
-} from "@/features/place/categories";
+import { categoryLabel, type CategorySlug } from "@/features/place/categories";
 import { lazy, Suspense } from "react";
 import type { CategoryIllustrationProps } from "@/features/place/illustrations";
 import { cn } from "@/lib/utils";

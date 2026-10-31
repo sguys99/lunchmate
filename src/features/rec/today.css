@@ -37,8 +37,7 @@
 
 /* 첫 화면 등장 */
 .lm-today-deck[data-phase="first"] {
-  animation: lm-today-fade-in var(--lm-duration-slow) var(--lm-ease-enter)
-    both;
+  animation: lm-today-fade-in var(--lm-duration-slow) var(--lm-ease-enter) both;
 }
 /* 다시 뽑기: 퇴장 */
 .lm-today-deck[data-phase="leaving"] {
@@ -47,8 +46,7 @@
 }
 /* 다시 뽑기: 블록 순차 등장 */
 .lm-today-deck[data-phase="entering"] [data-reveal] {
-  animation: lm-today-fade-in var(--lm-duration-slow) var(--lm-ease-enter)
-    both;
+  animation: lm-today-fade-in var(--lm-duration-slow) var(--lm-ease-enter) both;
   animation-delay: calc(var(--reveal, 0) * var(--lm-stagger));
 }
 /* 교환: 큰 카드 자리 */
@@ -61,8 +59,7 @@
 }
 /* "왜 추천했나요?" 펼침 */
 .lm-today-why {
-  animation: lm-today-fade-in var(--lm-duration-base) var(--lm-ease-enter)
-    both;
+  animation: lm-today-fade-in var(--lm-duration-base) var(--lm-ease-enter) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -149,8 +146,7 @@
   border-radius: 9999px;
   background: var(--muted-foreground);
   box-shadow: 0 0 0 4px var(--background);
-  transition: background-color var(--lm-duration-base)
-    var(--lm-ease-standard);
+  transition: background-color var(--lm-duration-base) var(--lm-ease-standard);
 }
 .lm-today-pin[data-active="true"] .lm-today-pin-label {
   border-color: var(--primary);

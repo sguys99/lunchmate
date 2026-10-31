@@ -29,20 +29,27 @@ describe("CategoryIllustration", () => {
     }
   });
 
-  it.each(CATEGORY_SLUGS)("%s: 하드코딩 색 없이 토큰과 currentColor만 쓴다", (slug) => {
-    const out = html(<CategoryIllustration slug={slug} />);
-    expect(out).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|oklch\(|oklab\(/i);
-    const paints = [
-      ...out.matchAll(/\b(?:fill|stroke|color)(?:=|:)"?\s*([^";]+)/g),
-    ].map((m) => m[1]?.trim());
-    for (const p of paints) {
-      expect(p).toMatch(
-        new RegExp(`^(none|currentColor|var\\(--cat-${slug}-(ink|surface)\\))$`),
+  it.each(CATEGORY_SLUGS)(
+    "%s: 하드코딩 색 없이 토큰과 currentColor만 쓴다",
+    (slug) => {
+      const out = html(<CategoryIllustration slug={slug} />);
+      expect(out).not.toMatch(
+        /#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|oklch\(|oklab\(/i,
       );
-    }
-    expect(out).toContain(`var(--cat-${slug}-ink)`);
-    expect(out).toContain(`var(--cat-${slug}-surface)`);
-  });
+      const paints = [
+        ...out.matchAll(/\b(?:fill|stroke|color)(?:=|:)"?\s*([^";]+)/g),
+      ].map((m) => m[1]?.trim());
+      for (const p of paints) {
+        expect(p).toMatch(
+          new RegExp(
+            `^(none|currentColor|var\\(--cat-${slug}-(ink|surface)\\))$`,
+          ),
+        );
+      }
+      expect(out).toContain(`var(--cat-${slug}-ink)`);
+      expect(out).toContain(`var(--cat-${slug}-surface)`);
+    },
+  );
 
   it("기본은 장식(aria-hidden), decorative=false면 role=img와 카테고리 라벨", () => {
     const deco = html(<CategoryIllustration slug="gukbap" />);

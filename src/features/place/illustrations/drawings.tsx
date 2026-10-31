@@ -3,13 +3,7 @@
 // 수저와 포크는 오른쪽 위로 기울인다(/ 방향). 톤 면은 음식 한 군데. 원 2개와 점을 나란히 두지 않는다(얼굴로 읽힘).
 // detail=false(icon 변형)에서는 결, 김, 깨 같은 잔선만 빠지고 실루엣은 그대로다.
 import type { CategorySlug } from "@/features/place/categories";
-import {
-  bowlBody,
-  type DrawOptions,
-  foot,
-  frontArc,
-  Tone,
-} from "./frame";
+import { bowlBody, type DrawOptions, foot, frontArc, Tone } from "./frame";
 
 type Drawing = (o: DrawOptions) => React.ReactNode;
 
@@ -25,7 +19,9 @@ const hansik: Drawing = ({ detail }) => (
     <path d={frontArc(70, 71.5, 14, 2.6)} />
     <Tone d="M58.5 71.5C59 64.5 64 60.5 70 60.5S81 64.5 81.5 71.5Z" />
     <path d="M58.5 71.5C59 64.5 64 60.5 70 60.5S81 64.5 81.5 71.5" />
-    {detail && <path d="M63.5 67c2-2.2 4.5-3 7-2.6M68 70c2.5-2.6 6-3.4 9-2.6" />}
+    {detail && (
+      <path d="M63.5 67c2-2.2 4.5-3 7-2.6M68 70c2.5-2.6 6-3.4 9-2.6" />
+    )}
     <path d="M60 51L80 19M64.5 52.5L84.5 20.5" />
   </>
 );
@@ -53,9 +49,7 @@ const sushi = (x: number, detail: boolean) => (
       d={`M${x - 2} 55.5C${x} 48 ${x + 6.5} 45.5 ${x + 13} 45.5S${x + 26} 48 ${x + 28} 55.5C${x + 24} 54 ${x + 19} 53.4 ${x + 13} 53.4S${x + 2} 54 ${x - 2} 55.5Z`}
     />
     {detail && (
-      <path
-        d={`M${x + 6} 49.5l2 3.5M${x + 12} 47.5l2 5M${x + 18} 48l2 4.5`}
-      />
+      <path d={`M${x + 6} 49.5l2 3.5M${x + 12} 47.5l2 5M${x + 18} 48l2 4.5`} />
     )}
   </>
 );
@@ -91,9 +85,30 @@ const bunsik: Drawing = ({ detail }) => (
     <path d={bowlBody(34, 62, 22, 74)} />
     <path d={foot(34, 7, 74)} />
     <Tone d="M17 62.5c3-2.6 9.5-3.8 17-3.8s14 1.2 17 3.8c-3 2.2-9.5 3.2-17 3.2s-14-1-17-3.2Z" />
-    <rect x="18" y="53" width="14" height="5.5" rx="2.75" transform="rotate(-12 25 56)" />
-    <rect x="30" y="50" width="14" height="5.5" rx="2.75" transform="rotate(10 37 53)" />
-    <rect x="39" y="55" width="12" height="5.5" rx="2.75" transform="rotate(-6 45 58)" />
+    <rect
+      x="18"
+      y="53"
+      width="14"
+      height="5.5"
+      rx="2.75"
+      transform="rotate(-12 25 56)"
+    />
+    <rect
+      x="30"
+      y="50"
+      width="14"
+      height="5.5"
+      rx="2.75"
+      transform="rotate(10 37 53)"
+    />
+    <rect
+      x="39"
+      y="55"
+      width="12"
+      height="5.5"
+      rx="2.75"
+      transform="rotate(-6 45 58)"
+    />
     {detail && <path d="M22 64l1.5.3M45 63.5l1.5-.4" />}
     <rect x="59" y="62" width="28" height="16" rx="8" />
     <path d="M66 62.5v15M73 62.5v15M80 62.5v15" />
@@ -112,7 +127,13 @@ const gukbap: Drawing = ({ detail }) => (
       <path d="M32 37c-2.5-3 2.5-5 0-8.5M42 35c-2.5-3 2.5-5 0-8.5M52 37c-2.5-3 2.5-5 0-8.5" />
     )}
     <path d="M58 46.5L78 19.5" />
-    <ellipse cx="55.5" cy="47.5" rx="4.2" ry="1.8" transform="rotate(-8 55.5 47.5)" />
+    <ellipse
+      cx="55.5"
+      cy="47.5"
+      rx="4.2"
+      ry="1.8"
+      transform="rotate(-8 55.5 47.5)"
+    />
   </>
 );
 
@@ -190,9 +211,7 @@ const cafe: Drawing = ({ detail }) => (
     <path d="M49 52c5.5 0 7.5 2.2 7.5 5s-2.5 5-7.5 5" />
     <ellipse cx="34" cy="73.5" rx="21" ry="4" />
     <path d="M13 73.5c0 2.6 9.4 4.5 21 4.5s21-1.9 21-4.5" />
-    {detail && (
-      <path d="M30 40c-2.5-3 2.5-5 0-8.5M38 40c-2.5-3 2.5-5 0-8.5" />
-    )}
+    {detail && <path d="M30 40c-2.5-3 2.5-5 0-8.5M38 40c-2.5-3 2.5-5 0-8.5" />}
     <path d="M59 77.5c0-16 28-16 28 0-3.5-1.8-7.5-1-14-1s-10.5-.8-14 1Z" />
     <path d="M65.5 67l2.6 9.5M73 64.5v12M80.5 67l-2.6 9.5" />
   </>
@@ -209,9 +228,30 @@ const pub: Drawing = ({ detail }) => (
     <ellipse cx="72" cy="74" rx="14" ry="3.5" />
     <path d="M58 74c0 2.2 6.3 4 14 4s14-1.8 14-4" />
     <path d="M59 70.5L88 56" />
-    <rect x="62" y="63.5" width="7" height="7" rx="2" transform="rotate(-26 65.5 67)" />
-    <rect x="70" y="59.5" width="7" height="7" rx="2" transform="rotate(-26 73.5 63)" />
-    <rect x="78" y="55.5" width="7" height="7" rx="2" transform="rotate(-26 81.5 59)" />
+    <rect
+      x="62"
+      y="63.5"
+      width="7"
+      height="7"
+      rx="2"
+      transform="rotate(-26 65.5 67)"
+    />
+    <rect
+      x="70"
+      y="59.5"
+      width="7"
+      height="7"
+      rx="2"
+      transform="rotate(-26 73.5 63)"
+    />
+    <rect
+      x="78"
+      y="55.5"
+      width="7"
+      height="7"
+      rx="2"
+      transform="rotate(-26 81.5 59)"
+    />
   </>
 );
 

@@ -42,11 +42,7 @@ export function ShortNote({
     >
       <p className="type-body-sm break-keep text-muted-foreground">{line}</p>
       {overBudget > 0 ? (
-        <button
-          type="button"
-          onClick={onRelaxBudget}
-          className={secondaryText}
-        >
+        <button type="button" onClick={onRelaxBudget} className={secondaryText}>
           {copy.shortage.relaxBudget}
         </button>
       ) : widenTo !== null ? (

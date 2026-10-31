@@ -7,10 +7,7 @@
 // 화면으로 넘기는 값은 사용자 자신의 값이다. 카카오 장소 값은 여기 없다(브라우저 세션 메모리에서만 받는다).
 import "server-only";
 import { connection } from "next/server";
-import {
-  PREF_DEFAULTS,
-  type Prefs,
-} from "@/features/onboarding/constants";
+import { PREF_DEFAULTS, type Prefs } from "@/features/onboarding/constants";
 import { readGuestHandoff } from "@/features/onboarding/guest-handoff";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { AvoidRule } from "@/lib/reco/types";

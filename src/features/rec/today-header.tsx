@@ -7,13 +7,7 @@
 // 올리브 면 버튼은 쓰지 않는다. 화면의 주 버튼은 하단 행동 줄의 "길찾기" 하나다(CLAUDE.md 6.3).
 import { Check, ChevronDown, Info, LocateFixed, MapPin } from "lucide-react";
 import Link from "next/link";
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { homeCopy } from "@/copy/home";
 import { getKstParts, type Meal } from "@/lib/time";
@@ -202,7 +196,7 @@ export function LocationChip({
           id={listId}
           aria-label={copy.location.menuLabel}
           onKeyDown={onKeyDown}
-          className="absolute top-full left-0 z-20 mt-2 flex w-64 max-w-[calc(100vw-3rem)] flex-col gap-0.5 rounded-lg border border-border bg-popover p-1.5 dark:border-input text-popover-foreground shadow-lg motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-fast)]"
+          className="absolute top-full left-0 z-20 mt-2 flex w-64 max-w-[calc(100vw-3rem)] flex-col gap-0.5 rounded-lg border border-border bg-popover p-1.5 text-popover-foreground shadow-lg motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-fast)] dark:border-input"
         >
           {offices.map((o) => {
             const current = base.kind === "office" && base.office.id === o.id;

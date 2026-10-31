@@ -37,7 +37,7 @@ export function StateCard({
   return (
     <div
       className={cn(
-        "mt-auto rounded-card border border-border bg-card px-7 pt-6 pb-8 desktop:mt-12 @max-[23.75rem]/screen:px-5",
+        "mt-auto rounded-card border border-border bg-card px-7 pt-6 pb-8 @max-[23.75rem]/screen:px-5 desktop:mt-12",
         className,
       )}
     >
