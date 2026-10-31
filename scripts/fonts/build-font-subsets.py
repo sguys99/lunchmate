@@ -4,7 +4,11 @@
   그대로 복사한다(글자 모양, 조각 경계 모두 공식 그대로).
 - 마루 부리: 기존 KS X 1001 서브셋(Light, Regular)을 Pretendard와 같은 unicode-range 경계로 나눈다.
   경계에 들지 않는 글자(기호, 자모 등)는 마지막 조각 하나로 모은다. 글리프는 바꾸지 않고 고르기만 한다.
-- 결과 CSS: src/app/fonts/fonts.css (@font-face + :root 서체 변수)
+- 결과(2026-10-31 첫 방문 글꼴 지연 적용 뒤):
+  - src/app/fonts/fonts.css: :root 서체 변수 + 크기 보정 대체 글꼴만(루트 layout이 불러오는 렌더링 차단 CSS, 약 1KB)
+  - public/fonts/<WEB_FONTS_VERSION>/faces.css + pretendard/, maruburi/ 조각: 웹 글꼴 @font-face 목록.
+    링크는 src/lib/fonts/web-fonts.ts가 붙인다. 글꼴을 바꾸면 VERSION과 web-fonts.ts의 WEB_FONTS_VERSION을 함께 올린다
+    (경로가 1년 immutable 캐시라 같은 버전 경로의 내용을 바꾸면 안 된다).
 
 실행(프로젝트 의존성 아님, Python fonttools + brotli 필요):
   python3 -m venv /tmp/ft && /tmp/ft/bin/pip install fonttools brotli
@@ -19,7 +23,9 @@ from fontTools import subset
 from fontTools.ttLib import TTFont
 
 ROOT = Path(__file__).resolve().parents[2]
-FONTS = ROOT / "src/app/fonts"
+FONTS = ROOT / "src/app/fonts"  # 마루 부리 KS X 1001 원본과 fonts.css
+VERSION = "v1"  # src/lib/fonts/web-fonts.ts WEB_FONTS_VERSION과 같아야 한다
+OUT = ROOT / "public/fonts" / VERSION  # 웹 글꼴 조각과 faces.css
 PKG = Path(sys.argv[1]) if len(sys.argv) > 1 else None
 
 
@@ -62,7 +68,10 @@ def main():
         re.S,
     )
     # 1) Pretendard 조각 복사
-    pdir = FONTS / "pretendard"
+    OUT.mkdir(parents=True, exist_ok=True)
+    for lic in ("PRETENDARD-OFL-LICENSE.txt", "MARUBURI-OFL-LICENSE.txt"):
+        shutil.copy(FONTS / lic, OUT / lic)
+    pdir = OUT / "pretendard"
     if pdir.exists():
         shutil.rmtree(pdir)
     pdir.mkdir()
@@ -70,7 +79,7 @@ def main():
         shutil.copy(src_dir / "woff2-dynamic-subset" / fname, pdir / fname)
 
     # 2) 마루 부리 조각
-    mdir = FONTS / "maruburi"
+    mdir = OUT / "maruburi"
     if mdir.exists():
         shutil.rmtree(mdir)
     mdir.mkdir()
@@ -109,11 +118,11 @@ def main():
             font.save(out)
             faces.append((name, weight, out.name, to_range_text(cps)))
 
-    # 3) CSS
-    lines = [
+    # 3) CSS: 변수와 대체 글꼴(fonts.css), 웹 글꼴 목록(faces.css)
+    base = [
         "/* 생성물: scripts/fonts/build-font-subsets.py (T5.41). 직접 고치지 말고 스크립트를 다시 돌린다. */",
-        "/* Pretendard (OFL-1.1, PRETENDARD-OFL-LICENSE.txt), 마루 부리 (OFL-1.1, MARUBURI-OFL-LICENSE.txt) */",
-        "/* unicode-range로 나눈 동적 서브셋: 화면에 나온 글자가 든 조각만 받는다. preload 없음, display swap */",
+        "/* 서체 변수와 크기 보정 대체 글꼴만 둔다(렌더링을 막는 CSS를 작게). 웹 글꼴 @font-face 목록은 public/fonts/v1/faces.css, */",
+        "/* 적용 시점은 src/lib/fonts/web-fonts.ts(첫 방문은 화면이 뜬 뒤, 재방문은 첫 페인트 전) */",
         "",
         ":root {",
         '  --font-pretendard: "Pretendard Variable", "Pretendard Fallback", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;',
@@ -123,6 +132,13 @@ def main():
         "/* 교체 흔들림 줄이기: 이전 next/font adjustFontFallback 값과 같다 */",
         '@font-face { font-family: "Pretendard Fallback"; src: local("Arial"); ascent-override: 93.76%; descent-override: 23.75%; line-gap-override: 0%; size-adjust: 101.55%; }',
         '@font-face { font-family: "MaruBuri Fallback"; src: local("Times New Roman"); ascent-override: 69.74%; descent-override: 17.44%; line-gap-override: 30.08%; size-adjust: 114.71%; }',
+    ]
+    (FONTS / "fonts.css").write_text("\n".join(base) + "\n")
+
+    lines = [
+        "/* 생성물: scripts/fonts/build-font-subsets.py (T5.41). 직접 고치지 말고 스크립트를 다시 돌린다. */",
+        "/* Pretendard (OFL-1.1, PRETENDARD-OFL-LICENSE.txt), 마루 부리 (OFL-1.1, MARUBURI-OFL-LICENSE.txt) */",
+        "/* unicode-range로 나눈 동적 서브셋 @font-face 목록. 링크는 src/lib/fonts/web-fonts.ts가 붙인다(첫 방문은 늦게, 재방문은 첫 페인트 전) */",
         "",
     ]
     for fname, _, rng in blocks:
@@ -130,13 +146,12 @@ def main():
             '@font-face { font-family: "Pretendard Variable"; font-style: normal; font-display: swap; font-weight: 45 920; '
             f'src: url("./pretendard/{fname}") format("woff2-variations"); unicode-range: {rng.strip()}; }}'
         )
-    lines.append("")
     for name, weight, fname, rng in faces:
         lines.append(
             f'@font-face {{ font-family: "MaruBuri"; font-style: normal; font-display: swap; font-weight: {weight}; '
             f'src: url("./maruburi/{fname}") format("woff2"); unicode-range: {rng}; }}'
         )
-    (FONTS / "fonts.css").write_text("\n".join(lines) + "\n")
+    (OUT / "faces.css").write_text("\n".join(lines) + "\n")
     print(f"pretendard {len(blocks)} 조각, maruburi {len(groups)} 조각 x {len(weights)} 굵기")
 
 

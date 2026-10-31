@@ -7,6 +7,7 @@ import "./fonts/fonts.css";
 import { ErrorScreen } from "@/components/states/error-screen";
 import { StandaloneFrame } from "@/components/states/screens";
 import { siteCopy } from "@/copy/common";
+import { WEB_FONTS_HREF } from "@/lib/fonts/web-fonts";
 
 export default function GlobalError({
   error,
@@ -23,6 +24,8 @@ export default function GlobalError({
     >
       <body className="flex min-h-full flex-col">
         <title>{siteCopy.name}</title>
+        {/* 루트 layout의 글꼴 스크립트가 없으므로 웹 글꼴 목록을 바로 붙인다(React가 head로 올림). 오류 화면이라 늦어도 된다 */}
+        <link rel="stylesheet" href={WEB_FONTS_HREF} precedence="default" />
         <StandaloneFrame>
           <ErrorScreen error={error} onRetry={retry} homeHref="/" />
         </StandaloneFrame>

@@ -1,5 +1,6 @@
 // 컴포넌트 갤러리(/design-lab/components, T2.10)를 결정적으로 여는 헬퍼. 시각 회귀(T2.16)와 axe(T2.17)가 함께 쓴다.
 import { expect, type Page } from "@playwright/test";
+import { markWebFontsSeen } from "./fonts";
 
 export type GalleryTheme = "light" | "dark";
 
@@ -31,6 +32,7 @@ export const designLabOn = process.env.NEXT_PUBLIC_DESIGN_LAB === "true";
  */
 export async function openGallery(page: Page, theme: GalleryTheme) {
   await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+  await markWebFontsSeen(page);
   const res = await page.goto(
     `/design-lab/components?theme=${theme}&motion=reduce&static=1`,
   );

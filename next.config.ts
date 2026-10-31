@@ -13,6 +13,21 @@ const nextConfig: NextConfig = {
       "./docs/design/candidates/b.DESIGN.md",
     ],
   },
+  // 웹 글꼴(목록 CSS와 woff2 조각)은 버전 경로라 내용이 바뀌지 않는다. 글꼴을 바꾸면 WEB_FONTS_VERSION과 폴더를 올린다
+  // (src/lib/fonts/web-fonts.ts, scripts/fonts/build-font-subsets.py).
+  async headers() {
+    return [
+      {
+        source: "/fonts/:version/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {

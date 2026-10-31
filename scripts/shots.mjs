@@ -33,7 +33,21 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
+import { readFileSync } from "node:fs";
 import { chromium } from "@playwright/test";
+
+/** src/lib/fonts/web-fonts.ts의 "글꼴 받음" 표시 키와 버전(TS 파일이라 값만 읽는다) */
+const WEB_FONTS = (() => {
+  const src = readFileSync(
+    new URL("../src/lib/fonts/web-fonts.ts", import.meta.url),
+    "utf8",
+  );
+  const pick = (name) => src.match(new RegExp(`${name} = "([^"]+)"`))?.[1];
+  return {
+    key: pick("WEB_FONTS_STORAGE_KEY") ?? "lm-fonts",
+    version: pick("WEB_FONTS_VERSION") ?? "v1",
+  };
+})();
 
 const STATES = ["loading", "empty", "error", "offline"];
 const VIEWPORTS = [
@@ -188,6 +202,15 @@ async function capture(browser, opts, outDir) {
         locale: "ko-KR",
         timezoneId: "Asia/Seoul",
       });
+      // 웹 글꼴은 첫 방문이면 화면이 뜬 뒤에 붙는다(src/lib/fonts/web-fonts.ts). 캡처는 최종 서체로 찍도록 재방문 표시를 미리 남긴다
+      await context.addInitScript(
+        ([k, v]) => {
+          try {
+            window.localStorage.setItem(k, v);
+          } catch {}
+        },
+        [WEB_FONTS.key, WEB_FONTS.version],
+      );
       const page = await context.newPage();
       for (const route of opts.routes) {
         for (const state of states) {

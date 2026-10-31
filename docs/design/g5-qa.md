@@ -151,6 +151,44 @@ PLAYWRIGHT_BASE_URL=http://localhost:3100 pnpm test:e2e:recommend   # RUN_DB_E2E
   2. 1과 함께 첫 화면 조각만 미리 받는 대신 Pretendard 정적 굵기(400, 500) 서브셋으로 바꾸는 안은 글자 모양(가변 축)이 달라지므로 제외.
   3. 카카오 실제 응답이 가짜 값(SDK 500ms, 페이지 300~800ms)보다 빠른지 실기기 3G에서 재기(T4.14와 함께, 사용자 결정 4).
 
+### 2.6 첫 방문 글꼴 지연 적용 후 재측정 (2026-10-31, 사용자 결정: 2.5 다음 수단 1)
+
+적용한 것
+
+| 내용 | 파일 |
+| --- | --- |
+| 웹 글꼴 `@font-face` 목록(262개, raw 122,048 B, `next start` gzip 전송 27.3 KB, 빌드 CSS일 때는 21.2 KB)을 루트 layout의 렌더링 차단 CSS에서 빼서 `public/fonts/v1/faces.css`로 옮김. 조각 woff2 262개도 `public/fonts/v1/`로. 버전 경로라 1년 immutable 캐시(`next.config.ts` headers) | `public/fonts/v1/`, `next.config.ts`, `scripts/fonts/build-font-subsets.py` |
+| 루트 layout이 불러오는 `src/app/fonts/fonts.css`는 서체 변수 + 크기 보정 대체 글꼴 2개만(raw 1,063 B, 빌드 CSS gzip 0.3 KB). 변수의 첫 이름("Pretendard Variable", "MaruBuri")은 목록이 붙기 전에는 없는 글꼴이라 보정된 대체 글꼴로 그린다 | `src/app/fonts/fonts.css` |
+| 첫 페인트 전 인라인 스크립트(테마 스크립트 다음): "글꼴 받음" 표시(localStorage `lm-fonts` = `v1`, try/catch)가 있으면 `<link rel=stylesheet blocking=render>`를 바로 붙인다(재방문). 없으면 `load` 뒤 화면의 로딩 영역(`[data-slot=loading-region]`, 홈 카드 스켈레톤 등)이 모두 사라질 때까지(최대 8초) 기다렸다가 유휴 시간에 링크를 붙이고, 목록과 글꼴을 다 받으면 표시를 남긴다. 앱 전체 공통(랜딩은 로딩 영역이 없어 `load` 직후) | `src/lib/fonts/web-fonts.ts`(+ 테스트 8개), `src/app/layout.tsx`, `src/app/global-error.tsx`(오류 화면은 링크를 바로 붙임) |
+| 캡처, 시각 회귀, axe 헬퍼는 재방문 표시를 미리 남겨 최종 서체로 찍는다 | `scripts/shots.mjs`, `e2e/helpers/fonts.ts`, `e2e/helpers/gallery.ts`, `e2e/a11y.spec.ts` |
+| 측정 스펙에 CLS(layout-shift 합, 글꼴 교체 뒤까지)와 글꼴 목록 요청 시각 열 추가, 재방문 측정은 "받음" 표시가 생긴 뒤 시작 | `e2e/perf-today.spec.ts` |
+
+결과 (2.1과 같은 방법과 프로필, 조건마다 3회 중앙값, `pnpm build` + `next start`, mobile 390 / desktop 1280)
+
+| 조건 | 지표 | 2.5 (전) | 2.6 (후) mobile | 2.6 (후) desktop | 판정 |
+| --- | --- | --- | --- | --- | --- |
+| Regular 3G 첫 방문 | 스켈레톤 (기준 3초) | 0.81초 | **0.71초** | **0.70초** | 통과 |
+| | 카드 (기준 5초) | 7.02초 | **4.64초** | **4.64초** | **통과** (3회 모두 4.60~4.66초) |
+| | FCP | 0.85초 | 0.75초 | 0.75초 | |
+| | 카드까지 받은 글꼴 | 13개, 281,796 B | **0개, 0 B** (목록 요청 4.68초, 카드 뒤) | 같음 | |
+| | LCP | 0.85초 (h1) | 5.48초 (카드 h2, 아래 메모) | 5.49초 (카드 h2) | 아래 메모 |
+| | CLS (글꼴 교체 뒤까지) | 측정 안 함 | **0.0001** | 0.0000 | 통과 |
+| Slow 3G 첫 방문 | 스켈레톤 / 카드 / LCP | 5.02 / 21.6 / 5.06초 | 4.64 / 16.17 / 4.68초 | 4.63 / 16.20 / 4.68초 | 판정 조건 아님 |
+| Fast 4G 첫 방문 | 카드 | 2.85초 | 2.49초 | 2.50초 | |
+| | LCP (기준 2.5초) | 0.45초 (mobile h1), 3.12초 (desktop 카드 h2) | **2.75초** (카드 h2) | 2.76초 (카드 h2) | **측정값 초과**, 아래 메모 |
+| | CLS | | 0.0001 | 0.0000 | 통과 |
+| Regular 3G 재방문 | 스켈레톤 / 카드 | 기록 없음(2.2는 0.19) / 1.29초 | **0.16 / 1.29초** | 0.17 / 1.31초 | 통과 (지금과 같은 체감) |
+| | LCP | 0.50초 | 0.52초 (h1) | 0.60초 (일러스트 img) | 통과 |
+
+- **AC-REC-4(Regular 3G 첫 방문, 스켈레톤 3초, 카드 5초)는 통과한다.** 2.5의 "글꼴 전부 막음" 4.98초보다 조금 빠른 것은 렌더링 차단 글꼴 CSS(21.2 KB gzip)까지 빠졌기 때문이다.
+- **LCP 메모(남은 원인)**: 첫 방문에서 카드 식당명(h2, title 30px)이 대체 서체로 먼저 보이고, 카드 뒤 글꼴이 오면 웹 글꼴로 다시 그려진다. Chrome은 이 다시 그리기를 새 LCP 후보로 보고하고, 식당명 글자 상자(이번 가짜 데이터 "테스트식당N" 약 4,800~5,400 px²)가 머리 제목 h1("오늘의 추천" 약 4,500~4,700 px²)보다 커서 LCP가 "글꼴 교체 시각"이 된다. 카드는 등장 효과(투명도) 중에 처음 그려져 그때는 후보가 되지 않는다. 같은 빌드, Fast 4G에서 글꼴 목록만 막으면 LCP는 h1 **0.42~0.43초**(LCP 항목은 h1 하나), 막지 않으면 h1 0.43초 → h2 2.75초 두 항목이다(임시 스펙 2회씩). 즉 화면이 늦게 뜬 것이 아니라 글꼴 교체가 기록된 값이다. 2.5의 desktop 3.12초도 같은 현상이었다.
+  - 이 값을 2.5초 안으로 넣으려면 (가) 빠른 회선(`navigator.connection.downlink` 5 Mbps 이상 등)에서는 카드를 기다리지 않고 `load` 직후 붙여 카드 전에 글꼴이 오게 하거나, (나) LCP 판정을 실기기 필드 값(PostHog 웹 바이탈)으로 보거나를 정해야 한다. 이번에는 바꾸지 않았다(큰 추가 변경 금지, 사용자 결정 필요). (가)는 Regular 3G(750 kbps)를 늦게 받는 쪽에 그대로 두므로 AC-REC-4에는 영향이 없다.
+- CLS: 대체 글꼴 보정(Arial 101.55%, Times New Roman 114.71%)을 그대로 두었고, 홈과 지도에서 글꼴 교체가 레이아웃을 거의 움직이지 않아(0.0001 이하) 한글 대체 글꼴용 보정은 더하지 않았다. 식당명 폭은 교체 전후 약 2~3% 차이(390에서 164 → 160 px).
+- **랜딩 `/` 첫인상 (Regular 3G 첫 방문, 임시 스펙 3회)**: FCP 0.67초, `load` 2.71초 → 글꼴 목록 2.77초 → 마루 부리 조각 완료 **8.57초**, 전체 글꼴 9.11초(랜딩은 글자 종류가 많아 Pretendard 10조각 259 KB + 마루 부리 12조각 145 KB). 전에는 글꼴이 첫 로드 JS와 함께 0.7초쯤 요청되어 세리프가 더 일찍(추정 6~7초) 바뀌었다. 첫 페인트의 제목은 대체 세리프(macOS와 iOS AppleMyungjo, Windows Batang)로 보이고 캡처 비교(1280 라이트, 대체 서체 → 최종)에서 줄바꿈과 위치가 같아 인상은 크게 다르지 않다. **Android는 한글 세리프 시스템 글꼴이 없는 기기가 많아 글꼴이 올 때까지 제목이 고딕으로 보일 수 있다**(실기기 확인 항목). 4G에서는 글꼴 완료가 약 1초 안이다. 재방문은 지금과 같다.
+- 서체 최종 적용 확인(Playwright, `pnpm start` 3200): `/`, `/today`, `/map` x 390, 1280 x 라이트, 다크 x 첫 방문, 재방문 24개 조합 모두 본문 `Pretendard Variable`, 제목 `MaruBuri`(지도 탭 제목은 설계대로 Pretendard)가 로드 완료 상태, 링크 1개, 콘솔 오류와 하이드레이션 경고 0. 첫 방문은 링크가 처음에 없고(`/today`, `/map`), 재방문은 첫 스크립트 시점에 `blocking=render` 링크가 있음. `/today` → `/map` 클라이언트 이동 뒤에도 링크 1개 유지.
+- 검사(2.6 변경 뒤, 같은 빌드 `pnpm start -p 3200`): `pnpm lint`, `pnpm typecheck`, `pnpm test`(127 파일 1342건, DB 필요 3 파일 건너뜀), `pnpm lint:copy`(금지 문자 0) 통과. `NEXT_PUBLIC_DESIGN_LAB=true` + 지도 키를 넘긴 `pnpm test:e2e`(mobile, desktop) 266 통과, 38 건너뜀. `pnpm test:e2e:recommend` 6 통과. 시각 회귀(`visual-mobile`, `visual-desktop`) 4 통과(헬퍼가 재방문 표시를 남겨 기준 이미지 그대로). 같은 폴더의 다른 dev 서버(3150)는 건드리지 않았다.
+- 접근성: 글꼴 교체는 서체 모양만 바꾸고 크기, 굵기, 색 토큰은 같아 대비와 터치 영역이 그대로다. `prefers-reduced-motion`, 앱 모션 설정과 무관하다.
+
 ## 3. 홈 번들 (T5.41)
 
 `pnpm build`(postbuild `bundle-report`, 파일 gzip level 9). 기록은 `docs/design/bundle-log.md` 2026-10-31 행.
@@ -163,6 +201,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3100 pnpm test:e2e:recommend   # RUN_DB_E2E
 
 - 개선 후(2.5): JS는 거의 그대로(next/font 클래스 제거 -0.2~0.3KB, 카카오 미리 받기 함수 +0.1KB 미만). 대신 글꼴 `@font-face` CSS가 렌더링 차단 CSS 한 파일로 붙는다(raw 111,951 B, gzip 21.2 KB, Pretendard 공식 unicode-range 목록이 대부분). 스켈레톤은 오히려 0.16초 빨라졌다(Pretendard preload 제거).
 
+- 첫 방문 글꼴 지연 적용 후(2.6, 2026-10-31): `/today` 198.2 KB, `/` 177.6 KB(인라인 스크립트는 HTML 안이라 JS 청크 변화 거의 없음, `global-error`의 상수 import +0.1 KB). 렌더링 차단 글꼴 CSS 21.2 KB gzip은 첫 로드에서 빠지고 루트 CSS에는 대체 글꼴 2개(0.3 KB gzip)만 남는다.
 - `/today` 여유가 1.7KB뿐이다. 6단계 홈 추가 요소(어제 피드백 띠 T6.8)는 첫 로드에 넣기 전에 지연 로딩부터 검토한다.
 
 ---
@@ -216,7 +255,7 @@ MAP, PLACE, NAV에는 AC-* 문장이 없어 P0 요구사항 자체를 판정했�
 | AC-REC-1 | 기피 카테고리는 카드에 안 나옴 | 자동 | `filter.test.ts`, `avoid-match.test.ts` |
 | AC-REC-2 | 다시 뽑기 5회 같은 곳 없음 | 자동 | `deck.test.ts`, `e2e/recommend.spec.ts`(18곳 모두 다름) |
 | AC-REC-3 | 상위 3장이 모두 같은 카테고리 아님 | 자동 | `diversity.test.ts`, `sample.test.ts` |
-| AC-REC-4 | Regular 3G 첫 방문 스켈레톤 3초, 카드 5초 | **미충족** | 스켈레톤 0.81초 통과, **카드 7.02초 실패**(2.5절). 남은 원인은 글꼴 대역폭, 다음 수단은 2.5절 |
+| AC-REC-4 | Regular 3G 첫 방문 스켈레톤 3초, 카드 5초 | **통과** (2026-10-31 2.6절) | 2.5절 카드 7.02초 실패 → 첫 방문 글꼴 지연 적용 뒤 스켈레톤 0.71초, **카드 4.64초**(mobile, desktop 같음). 4G LCP 측정값은 글꼴 교체로 2.75초(2.6절 메모) |
 | AC-REC-5 | 어제 👎한 곳은 다음 날 점수가 낮아짐 | 자동 | `score.test.ts` |
 | MAP-01 | 네이버 지도 전체 화면, 기준 마커와 반경 원 | 자동 + 캡처 | `naver-map-provider.test.ts`, `map-loader.test.ts`, `fit.test.ts`, 캡처 `g5-map-*`. 실제 타일은 실기기(가짜 SDK라 캡처에 타일 없음) |
 | MAP-02 | 도보 분 알약, 고른 마커만 그림, 클러스터 | 자동 + 캡처 | `cluster.test.ts`, `places.test.ts`, 캡처 `g5-map-selected-1280-*`(고른 알약에 그림과 이름) |
@@ -232,7 +271,7 @@ MAP, PLACE, NAV에는 AC-* 문장이 없어 P0 요구사항 자체를 판정했�
 | NAV-03 | 데스크톱은 웹으로 바로 | 자동 | `launch-directions.test.ts`, `e2e/recommend.spec.ts` desktop |
 | NAV-04 | 길찾기 클릭 시 방문 후보 저장 | 자동 | `place-requests.test.ts`, `e2e/recommend.spec.ts`(visits source rec, RLS 세션 조회), `t5-places.rls.test.ts` |
 
-요약: 28행 중 **통과 22**(자동 또는 자동 + 캡처, 이 가운데 NAV-01, NAV-02, MAP-04는 실기기 확인 남음), **부분 4**(REC-08, REC-10 투표 플래그, PLACE-03 데이터 6단계, PLACE-04 네이버 URL 확인 필요), **미충족 1**(AC-REC-4), **5단계 범위 밖 1**(PLACE-05).
+요약: 28행 중 **통과 22**(자동 또는 자동 + 캡처, 이 가운데 NAV-01, NAV-02, MAP-04는 실기기 확인 남음), **부분 4**(REC-08, REC-10 투표 플래그, PLACE-03 데이터 6단계, PLACE-04 네이버 URL 확인 필요), **미충족 1**(AC-REC-4, 2.6절에서 통과로 바뀜), **5단계 범위 밖 1**(PLACE-05).
 
 ## 6. 캡처와 360px
 
@@ -264,12 +303,13 @@ T5.41 개선은 아직 푸시 전이라 프로덕션은 이전 코드다. 읽기
 | `/login`, `/me` | 404 (`auth` 플래그 `productionOff`, T4.14 뒤 해제) |
 | `/robots.txt` | 200 |
 
+- 2026-10-31 사용자 결정 2로 `appShell`의 `productionOff`를 뺐다(아래 원래 메모는 당시 기록). 푸시 뒤 `/today`, `/map` 200을 다시 확인한다.
 - **`/today`, `/map`이 프로덕션에서 200이 되려면 `appShell` 플래그를 풀어야 한다.** 플래그 소유 작업 메모가 "해제: 오늘 탭 실제 화면 T5"라 5단계 마무리에서 풀 대상이지만, 로그인(`auth`)은 아직 꺼져 있어 비로그인 둘러보기만 열리게 된다. 공개 범위 결정이라 이번에는 바꾸지 않았다(메인 판단 필요).
 
 ## 8. 남은 일
 
-- AC-REC-4 카드 5초: 2.5절 다음 수단 1(글꼴을 카드 뒤로 미루기) 결정 필요.
-- `appShell` 프로덕션 해제 여부(7절).
+- ~~AC-REC-4 카드 5초~~: 2.6절 첫 방문 글꼴 지연 적용으로 통과(4.64초). 남은 것: 4G LCP 측정값이 글꼴 교체로 2.75초(2.6절 메모의 (가), (나) 결정), Android 랜딩 첫 방문 제목 대체 서체 실기기 확인.
+- ~~`appShell` 프로덕션 해제 여부(7절)~~: 2026-10-31 해제(사용자 결정 2, `src/lib/flags.ts`). 푸시 뒤 프로덕션 `/today`, `/map` 200 확인 필요.
 - 투표 진입점(REC-08, REC-10, PLACE-04)은 T7.35, 후기와 제보 데이터(PLACE-03, PLACE-05)는 6단계.
 
 ## 9. 실기기 체크리스트 (T4.14와 함께, 7단계 투표 링크 뒤 또는 9단계 베타 전)

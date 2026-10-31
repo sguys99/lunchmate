@@ -15,6 +15,8 @@
 // - 시각은 navigation 시작(performance.timeOrigin) 기준 ms. 첫 스크립트(addInitScript)의 MutationObserver가
 //   스켈레톤([data-slot=loading-region])과 카드(.lm-today-deck article h2)가 DOM에 처음 생긴 때를 적고, 다음 프레임(rAF)을
 //   "보인 때"로 본다. LCP는 PerformanceObserver(largest-contentful-paint)의 마지막 항목.
+// - 웹 글꼴(2026-10-31, src/lib/fonts/web-fonts.ts): 첫 방문은 화면이 뜬 뒤 글꼴 목록을 붙인다. 카드 뒤 1.5초에 LCP를 읽고,
+//   이어서 글꼴 교체가 끝날 때까지 기다려 CLS(layout-shift 합, 입력 직후 제외)와 글꼴 목록 요청 시각(fontCssStart)을 적는다.
 import { writeFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import {
@@ -50,6 +52,8 @@ type Marks = {
   cardsPaint: number | null;
   lcp: number | null;
   lcpElement: string | null;
+  /** layout-shift 값 합(hadRecentInput 제외). 측정 창 전체 */
+  cls: number;
 };
 
 declare global {
@@ -67,6 +71,7 @@ const INIT = () => {
     cardsPaint: null,
     lcp: null,
     lcpElement: null,
+    cls: 0,
   };
   window.__lmPerf = m;
   const check = () => {
@@ -104,12 +109,55 @@ const INIT = () => {
       ? `${el.tagName.toLowerCase()}${el.className && typeof el.className === "string" ? "." + el.className.split(" ").slice(0, 2).join(".") : ""}`
       : null;
   }).observe({ type: "largest-contentful-paint", buffered: true });
+  new PerformanceObserver((list) => {
+    for (const e of list.getEntries() as (PerformanceEntry & {
+      value: number;
+      hadRecentInput: boolean;
+    })[]) {
+      if (!e.hadRecentInput) m.cls += e.value;
+    }
+  }).observe({ type: "layout-shift", buffered: true });
 };
 
+/** 글꼴 목록(faces.css) 요청 시각과 끝난 시각. 없으면 null */
+const FONT_CSS_TIMING = () => {
+  const e = performance
+    .getEntriesByType("resource")
+    .find((r) => r.name.includes("/fonts/") && r.name.endsWith(".css")) as
+    PerformanceResourceTiming | undefined;
+  return {
+    fontCssStart: e ? e.startTime : null,
+    fontCssEnd: e ? e.responseEnd : null,
+  };
+};
+
+/** 웹 글꼴 목록이 붙고 글꼴 교체까지 끝나기를 기다린다(첫 방문은 카드 뒤에 붙는다) */
+async function waitWebFonts(page: Page) {
+  await page.waitForFunction(
+    () => {
+      const l = document.getElementById(
+        "lm-font-faces",
+      ) as HTMLLinkElement | null;
+      return Boolean(l?.sheet);
+    },
+    undefined,
+    { timeout: 60_000 },
+  );
+  await page.evaluate(async () => {
+    await new Promise((r) => requestAnimationFrame(r));
+    await document.fonts.ready;
+  });
+  await page.waitForTimeout(500);
+}
+
 type Measured = Marks & {
-  /** 카드가 보인 뒤까지 받은 글꼴 파일 수와 바이트(woff2 본문, 압축 그대로) */
+  /** 카드가 보인 뒤 1.5초까지 받은 글꼴 파일 수와 바이트(woff2 본문, 압축 그대로) */
   fontFiles: number;
   fontBytes: number;
+  fontCssStart: number | null;
+  fontCssEnd: number | null;
+  /** 글꼴 교체까지 끝난 뒤의 CLS 합 */
+  clsAfterFonts: number;
 };
 
 async function measure(page: Page, profile: Profile): Promise<Measured> {
@@ -145,8 +193,11 @@ async function measure(page: Page, profile: Profile): Promise<Measured> {
       fontBytes: fonts.reduce((n, e) => n + e.encodedBodySize, 0),
     };
   });
+  await waitWebFonts(page);
+  const after = await page.evaluate(FONT_CSS_TIMING);
+  const clsAfterFonts = await page.evaluate(() => window.__lmPerf!.cls);
   await cdp.detach();
-  return marks;
+  return { ...marks, ...after, clsAfterFonts };
 }
 
 const results: Record<string, unknown>[] = [];
@@ -198,7 +249,15 @@ test.describe("AC-REC-4 성능 (/today, 프로덕션 빌드)", () => {
       await expect(page.locator(".lm-today-deck article h2")).toBeVisible({
         timeout: 60_000,
       });
-      await page.waitForTimeout(3000);
+      // 첫 방문 글꼴 적용과 "받음" 표시(src/lib/fonts/web-fonts.ts)까지 기다린다
+      await page.waitForFunction(
+        () => localStorage.getItem("lm-fonts"),
+        undefined,
+        {
+          timeout: 30_000,
+        },
+      );
+      await page.waitForTimeout(1000);
       const cdp = await page.context().newCDPSession(page);
       await cdp.send("Network.enable");
       const p = PROFILES[0]!;
@@ -215,7 +274,10 @@ test.describe("AC-REC-4 성능 (/today, 프로덕션 빌드)", () => {
         timeout: 60_000,
       });
       await page.waitForTimeout(1500);
-      const m = await page.evaluate(() => window.__lmPerf!);
+      const m = {
+        ...(await page.evaluate(() => window.__lmPerf!)),
+        ...(await page.evaluate(FONT_CSS_TIMING)),
+      };
       const row = {
         project: test.info().project.name,
         profile: "Regular 3G 재방문",

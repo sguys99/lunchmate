@@ -2,10 +2,12 @@
 // 실행: pnpm test:e2e:a11y (디자인 랩 켜고 mobile, desktop 두 뷰포트). pnpm test:e2e에서는 갤러리와 PoC를 건너뛴다.
 import { expect, test, type Page } from "@playwright/test";
 import { expectNoA11yViolations } from "./helpers/axe";
+import { markWebFontsSeen } from "./helpers/fonts";
 import { designLabOn, openGallery, type GalleryTheme } from "./helpers/gallery";
 
 /** 시안 단독 화면을 열고 하이드레이션, 글꼴, 지연 일러스트까지 기다린다 */
 async function openLabRoute(page: Page, path: string) {
+  await markWebFontsSeen(page);
   const res = await page.goto(path);
   expect(res?.status()).toBe(200);
   await page.waitForLoadState("networkidle");
@@ -48,7 +50,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       expect(missing).toEqual([]);
     });
 
-    // 앱 탭 화면 (appShell 플래그는 개발 환경에서 켜져 있다)
+    // 앱 탭 화면 (appShell 플래그는 모든 환경에서 켜져 있다, 2026-10-31)
     // 비로그인 둘러보기 탭 (AUTH-07). 투표와 나는 로그인 필요라 /login으로 간다(T4.8, features/auth/routes.ts)
     for (const path of ["/today", "/map"]) {
       test(`앱 탭 ${path}`, async ({ page }) => {
@@ -110,7 +112,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       ).toBeAttached();
       await expectNoA11yViolations(page);
     });
-    // 실제 랜딩 / (T4.28). 디자인 랩 없이도 돈다. 개발 환경은 appShell, auth 플래그가 켜져 체험과 로그인이 보인다.
+    // 실제 랜딩 / (T4.28). 디자인 랩 없이도 돈다. 개발 환경은 appShell, auth 플래그가 켜져 체험과 로그인이 보인다(프로덕션은 appShell만 켜져 체험만).
     // 네이버 로그인 버튼은 네이버 가이드 색(초록 면 + 흰 글자, 대비 약 2.3:1)을 그대로 쓴다.
     // 브랜드 예외로 기록(G3 안건 7, DESIGN.md 5장 소셜 로그인 버튼)하고 대비 검사에서만 뺀다.
     test("랜딩 /", async ({ page }) => {
@@ -133,7 +135,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
         exclude: ['[data-provider="naver"]'],
       });
     });
-    // 랜딩 확인 화면(같은 컴포넌트, 상태 흉내). ?flags=off는 운영(플래그 꺼짐) 화면
+    // 랜딩 확인 화면(같은 컴포넌트, 상태 흉내). ?flags=off는 두 플래그가 꺼진 "출시 준비" 화면
     for (const query of [
       "?state=loading",
       "?state=offline",

@@ -380,7 +380,10 @@ layout:
 
 - **제목**: 마루 부리(MaruBuri) Light 300, Regular 400. **본문, 숫자**: Pretendard Variable.
 - 세리프는 `display`, `title`, `heading`(식당명)에만 씁니다. 버튼, 칩, 숫자, 본문은 모두 Pretendard입니다. 숫자를 세리프로 쓰지 않는 이유는 마루 부리의 숫자가 고정폭이 아니고, 28px에서도 획이 가늘어 "숫자 3개가 분명히 읽혀야 한다"는 조건과 충돌하기 때문입니다.
-- 로딩(T1.19, T5.41에서 변경): 루트 layout이 `src/app/fonts/fonts.css`를 불러옵니다. Pretendard와 마루 부리 모두 **unicode-range로 나눈 동적 서브셋**이라 화면에 나온 글자가 든 조각만 받습니다. Pretendard는 공식 배포(1.3.9)의 dynamic-subset woff2 92조각 그대로(한글 11,172자 전체), 마루 부리는 Light 300, Regular 400 KS X 1001 서브셋을 같은 경계로 나눈 85조각씩(식당명이 동적이라 글자 범위는 KS X 1001 전체 유지, 글리프는 그대로). 두 서체 모두 `display: swap`, preload 없음. `--font-pretendard`, `--font-maruburi` 변수는 `fonts.css`의 `:root`에 있고 프런트매터 `font.*.cssVar`가 이 변수를 가리킵니다. 교체 흔들림을 줄이는 대체 글꼴 보정(Arial 101.55%, Times New Roman 114.71%)도 같은 파일에 있습니다. 대체 스택은 `AppleMyungjo, Noto Serif KR, Batang, serif`. 생성 스크립트 `scripts/fonts/build-font-subsets.py`, 근거는 docs/design/bundle-log.md.
+- 로딩(T1.19, T5.41에서 변경, 2026-10-31 첫 방문 지연 적용): Pretendard와 마루 부리 모두 **unicode-range로 나눈 동적 서브셋**이라 화면에 나온 글자가 든 조각만 받습니다. Pretendard는 공식 배포(1.3.9)의 dynamic-subset woff2 92조각 그대로(한글 11,172자 전체), 마루 부리는 Light 300, Regular 400 KS X 1001 서브셋을 같은 경계로 나눈 85조각씩(식당명이 동적이라 글자 범위는 KS X 1001 전체 유지, 글리프는 그대로). 두 서체 모두 `display: swap`, preload 없음.
+  - 파일: 루트 layout이 불러오는 `src/app/fonts/fonts.css`에는 `--font-pretendard`, `--font-maruburi` 변수(프런트매터 `font.*.cssVar`가 가리킴)와 교체 흔들림을 줄이는 대체 글꼴 보정(Arial 101.55%, Times New Roman 114.71%)만 둡니다. 웹 글꼴 `@font-face` 목록과 조각은 `public/fonts/v1/`(`faces.css`, 1년 immutable 캐시, 글꼴을 바꾸면 버전 폴더와 `WEB_FONTS_VERSION`을 함께 올림)에 있습니다. 대체 스택은 산세리프 `Apple SD Gothic Neo, Malgun Gothic, system-ui`, 세리프 `AppleMyungjo, Noto Serif KR, Batang, serif`.
+  - 적용 시점(`src/lib/fonts/web-fonts.ts`, 첫 페인트 전 인라인 스크립트): **첫 방문**은 크기 보정된 대체 글꼴로 첫 화면을 그리고, `load` 뒤 화면의 로딩 영역(홈 카드 스켈레톤 등)이 끝나면(최대 8초) 유휴 시간에 목록을 붙여 웹 글꼴로 바꿉니다. 다 받으면 "글꼴 받음" 표시(localStorage, 화면 편의 값)를 남깁니다. **재방문**은 표시를 보고 첫 페인트 전에 목록을 렌더링 차단으로 붙여 처음부터 웹 글꼴로 그립니다. 앱 전체 공통이고 모션 설정, 테마와 무관합니다. 첫 방문에서 대체 서체 → 웹 글꼴 교체가 한 번 보이며 CLS는 0.0001 이하입니다. 캡처와 시각 회귀는 재방문 표시를 미리 남겨 최종 서체로 찍습니다(`scripts/shots.mjs`, `e2e/helpers/fonts.ts`).
+  - 생성 스크립트 `scripts/fonts/build-font-subsets.py`, 근거는 docs/design/bundle-log.md, docs/design/g5-qa.md 2.5~2.6절.
 
 ### 한글 세리프 웹폰트 비교와 용량 측정
 
