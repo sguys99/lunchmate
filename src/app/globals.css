@@ -81,7 +81,7 @@
 }
 
 @theme inline {
-  /* 서체: --lm-font-* 는 next/font 변수를 가리킨다(DESIGN.md font.*.cssVar, 루트 layout.tsx와 app/fonts) */
+  /* 서체: --lm-font-* 는 app/fonts/fonts.css의 --font-pretendard, --font-maruburi를 가리킨다(DESIGN.md font.*.cssVar) */
   --font-sans: var(--lm-font-sans);
   --font-heading: var(--lm-font-heading);
   --font-numeric: var(--lm-font-numeric);

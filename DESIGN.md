@@ -380,7 +380,7 @@ layout:
 
 - **제목**: 마루 부리(MaruBuri) Light 300, Regular 400. **본문, 숫자**: Pretendard Variable.
 - 세리프는 `display`, `title`, `heading`(식당명)에만 씁니다. 버튼, 칩, 숫자, 본문은 모두 Pretendard입니다. 숫자를 세리프로 쓰지 않는 이유는 마루 부리의 숫자가 고정폭이 아니고, 28px에서도 획이 가늘어 "숫자 3개가 분명히 읽혀야 한다"는 조건과 충돌하기 때문입니다.
-- 로딩(T1.19): 루트 layout이 `src/app/fonts/index.ts`(next/font/local)로 Light 300, Regular 400 두 파일을 등록하고 `--font-maruburi`를 `<html>`에 붙입니다. 프런트매터 `font.heading.cssVar`가 이 변수를 가리킵니다. `display: swap`, `preload: false`, `adjustFontFallback: "Times New Roman"`(라틴 글자 크기 보정). 대체 스택은 `AppleMyungjo, Noto Serif KR, Batang, serif`. 굵기별 파일은 그 굵기 글자가 화면에 있을 때만 받습니다. 근거는 docs/design/bundle-log.md.
+- 로딩(T1.19, T5.41에서 변경): 루트 layout이 `src/app/fonts/fonts.css`를 불러옵니다. Pretendard와 마루 부리 모두 **unicode-range로 나눈 동적 서브셋**이라 화면에 나온 글자가 든 조각만 받습니다. Pretendard는 공식 배포(1.3.9)의 dynamic-subset woff2 92조각 그대로(한글 11,172자 전체), 마루 부리는 Light 300, Regular 400 KS X 1001 서브셋을 같은 경계로 나눈 85조각씩(식당명이 동적이라 글자 범위는 KS X 1001 전체 유지, 글리프는 그대로). 두 서체 모두 `display: swap`, preload 없음. `--font-pretendard`, `--font-maruburi` 변수는 `fonts.css`의 `:root`에 있고 프런트매터 `font.*.cssVar`가 이 변수를 가리킵니다. 교체 흔들림을 줄이는 대체 글꼴 보정(Arial 101.55%, Times New Roman 114.71%)도 같은 파일에 있습니다. 대체 스택은 `AppleMyungjo, Noto Serif KR, Batang, serif`. 생성 스크립트 `scripts/fonts/build-font-subsets.py`, 근거는 docs/design/bundle-log.md.
 
 ### 한글 세리프 웹폰트 비교와 용량 측정
 
@@ -482,7 +482,7 @@ layout:
   2. 이유: 8 아래, **body 16 `foreground`**, 최대 2줄. 이유 문장에서 "도보 약 N분"은 뺍니다(아래 숫자 칸과 중복, `src/features/rec/reason.ts`).
   3. 배지 줄: 12 아래, 최소 높이 24, 왼쪽 배지 최대 2개 + 오른쪽 "상세" 밑줄 글자 버튼(caption, 터치 44).
   4. 숫자 3칸: 20 아래, 칸 폭 `0.8fr 1.3fr 0.9fr`, 칸 사이 1px 세로선, 칸 안쪽 16(360px 12). 라벨 caption 13(가격 칸은 라벨 옆 "추정") 위, 숫자 **numeric-md 18** + 단위 caption 13 아래, 사이 6. 숫자가 작은 이유: 이름과 이유가 결정의 중심이고 세 곳의 도보 차이는 2~4분이라 숫자는 확인용입니다(`g3-card-rules.md` 1절).
-  - 읽는 순서: 이름 30 → 이유 16 → 배지 → 숫자 18. 큰 카드에는 버튼이 없습니다(행동은 하단 줄).
+  - 읽는 순서: 이름 30 → 이유 16 → 배지 → 숫자 18. 포인트 컬러 버튼은 하단 행동 줄의 길찾기 하나뿐이고, 큰 카드에는 "상세" 글자 버튼과 보조 ⋯(더 보기) 아이콘 버튼 하나만 둡니다(5단계 구현 중 확정 2026-10-31, D-05).
 - **대안 카드 2장**: 큰 카드 20 아래(데스크톱 16) "또는 이 두 곳" caption, 8 아래 2열 격자(사이 8). 카드 하나는 최소 높이 72, 라운드 24, 1px `border`, 면 `card`, 안쪽 좌우 12 위아래 10, 줄 사이 4. 1줄 일러스트 28(icon) + 식당명 label 15/500(한 줄 말줄임), 2줄 도보 numeric-md 18 + "분" | 1px x 12 세로선 | 👍 아이콘 14 + 만족 numeric-md 18 + "%"(후기 3건 미만이면 "후기 모으는 중" caption). 가격은 큰 카드로 올려 봅니다. 누르면 큰 카드와 자리를 바꾸고(지도 핀 강조도 따라감) "오늘의 한 곳을 바꿨습니다. ○○입니다."를 안내합니다. 접근성 이름은 보이는 글자 + "크게 보기".
 - **하단 고정 행동 줄**: 하단 탭 바로 위에 붙고(`sticky`, 탭 높이 64 + safe-area), 위 1px `border`, 면 `background`, 위아래 12. 모바일은 화면 끝까지(선이 탭 바 선과 나란히), 데스크톱은 리스트 내용 폭. 내용이 길면 스크롤해도 엄지 자리에 남고 지나가는 카드를 가립니다. 구성(사이 8): **길찾기** primary 높이 48, 남은 폭 전체(화면의 유일한 올리브 면 버튼, 이름 "○○ 길찾기") + **그냥 골라줘** 테두리 버튼 높이 48, 최소 폭 128(주사위 아이콘 16, 연출 중에는 같은 자리 "바로 보기") + **다시 뽑기** 아이콘 버튼 48 원(이름 "다시 뽑기").
 - **상태**: 로딩은 같은 자리 같은 높이의 스켈레톤(큰 카드, 대안 2장, 행동 줄)으로 로딩 뒤 출렁이지 않습니다. 빈 상태, 오류, 오프라인은 머리(와 띠) 아래 카드 면 안내(빈 상태만 primary 버튼). 오프라인은 띠를 숨깁니다.

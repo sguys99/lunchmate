@@ -3,7 +3,7 @@
 // 폰트를 직접 넣는다. metadata를 쓸 수 없어 React <title>로 탭 제목을 단다.
 // 다크 모드는 tokens.css의 prefers-color-scheme 규칙이 그대로 따른다(루트 html에 .light/.dark를 붙이지 않음).
 import "./globals.css";
-import { maruBuri, pretendard } from "./fonts";
+import "./fonts/fonts.css";
 import { ErrorScreen } from "@/components/states/error-screen";
 import { StandaloneFrame } from "@/components/states/screens";
 import { siteCopy } from "@/copy/common";
@@ -19,7 +19,7 @@ export default function GlobalError({
     <html
       lang="ko"
       // cn(tailwind-merge)을 쓰지 않는다: 이 파일은 모든 라우트 첫 로드에 들어간다 (T2.22)
-      className={`h-full antialiased ${pretendard.variable} ${maruBuri.variable}`}
+      className="h-full antialiased"
     >
       <body className="flex min-h-full flex-col">
         <title>{siteCopy.name}</title>

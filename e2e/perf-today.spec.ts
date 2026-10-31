@@ -106,7 +106,13 @@ const INIT = () => {
   }).observe({ type: "largest-contentful-paint", buffered: true });
 };
 
-async function measure(page: Page, profile: Profile): Promise<Marks> {
+type Measured = Marks & {
+  /** 카드가 보인 뒤까지 받은 글꼴 파일 수와 바이트(woff2 본문, 압축 그대로) */
+  fontFiles: number;
+  fontBytes: number;
+};
+
+async function measure(page: Page, profile: Profile): Promise<Measured> {
   await page.context().route(/posthog|sentry|ingest/, (r) => r.abort());
   await mockRecommendSdks(page, {
     sdkDelayMs: 500,
@@ -129,7 +135,16 @@ async function measure(page: Page, profile: Profile): Promise<Marks> {
   });
   // LCP 후보가 카드 뒤에 바뀔 수 있어 잠깐 더 둔다
   await page.waitForTimeout(1500);
-  const marks = await page.evaluate(() => window.__lmPerf!);
+  const marks = await page.evaluate(() => {
+    const fonts = performance
+      .getEntriesByType("resource")
+      .filter((e) => e.name.includes(".woff2")) as PerformanceResourceTiming[];
+    return {
+      ...window.__lmPerf!,
+      fontFiles: fonts.length,
+      fontBytes: fonts.reduce((n, e) => n + e.encodedBodySize, 0),
+    };
+  });
   await cdp.detach();
   return marks;
 }

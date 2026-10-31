@@ -34,7 +34,10 @@ import { currentPathForNext } from "@/features/auth/login-prompt/triggers";
 import { locateOnce } from "@/features/onboarding/geolocation";
 import { isCategorySlug } from "@/features/place/categories";
 import { searchRadiusFromWalkMinutes } from "@/lib/format/number";
-import { restaurantsInRadiusQuery } from "@/lib/kakao/queries";
+import {
+  prefetchKakaoSearch,
+  restaurantsInRadiusQuery,
+} from "@/lib/kakao/queries";
 import { DEFAULT_MAP_CENTER } from "@/lib/map/constants";
 import type { DirectionsOrigin } from "@/lib/naver/directions";
 import { useOnlineStatus } from "@/lib/network";
@@ -191,6 +194,11 @@ export function TodayScreen({
     const next = afterLocate(here, data.offices);
     patch({ here, choice: next.choice, notice: next.notice, order: [0, 1, 2] });
   }, [patch, data.offices]);
+
+  // 카카오 검색 모듈과 SDK를 측위와 나란히 미리 받는다(T5.41, AC-REC-4). 검색 자체는 기준점이 정해진 뒤 쿼리가 한다
+  useEffect(() => {
+    prefetchKakaoSearch();
+  }, []);
 
   // 처음 현위치가 기준이면(사무실 없음) 한 번 찾는다
   const needsFirstLocate = base.kind === "here" && base.state.status === "idle";

@@ -8,6 +8,7 @@ import type {
 import {
   fromAddressDoc,
   fromPlaceDoc,
+  followingPages,
   fromRestaurantDoc,
   kakaoPlaceUrl,
   mergeLocationResults,
@@ -38,6 +39,8 @@ function installFakeKakao(opts: {
   category?: KakaoPlaceDoc[];
   /** categorySearch가 처음 n번 ERROR를 돌려준다 */
   failTimes?: number;
+  /** 페이지별 응답 지연(ms). 없으면 바로 응답 */
+  pageDelay?: Record<number, number>;
 }) {
   let failures = opts.failTimes ?? 0;
   const categorySearch = vi.fn();
@@ -75,20 +78,20 @@ function installFakeKakao(opts: {
               return;
             }
             const all = opts.category ?? [];
-            let page = 1;
-            const send = () => {
-              const slice = all.slice((page - 1) * 15, page * 15);
+            const page = (o as { page?: number } | undefined)?.page ?? 1;
+            const slice = all.slice((page - 1) * 15, page * 15);
+            const reply = () =>
               cb(slice, slice.length ? "OK" : "ZERO_RESULT", {
                 totalCount: all.length,
                 current: page,
                 hasNextPage: page * 15 < all.length,
                 nextPage: () => {
-                  page += 1;
-                  send();
+                  throw new Error("nextPage는 쓰지 않는다(T5.41 병렬 요청)");
                 },
               });
-            };
-            send();
+            const delay = opts.pageDelay?.[page];
+            if (delay === undefined) reply();
+            else setTimeout(reply, delay);
           },
         };
       },
@@ -242,5 +245,75 @@ describe("카카오 로컬 래퍼", () => {
         size: 15,
       }),
     );
+  });
+  it("1페이지 뒤 2, 3페이지는 나란히 요청하고, 늦게 와도 페이지 순서를 지킨다 (T5.41)", async () => {
+    vi.useFakeTimers();
+    try {
+      const { categorySearch } = installFakeKakao({
+        category: Array.from({ length: 45 }, (_, i) => doc(i)),
+        pageDelay: { 1: 100, 2: 300, 3: 100 },
+      });
+      const pending = searchRestaurants({ lat: 37.5, lng: 127 }, 515);
+      await vi.advanceTimersByTimeAsync(100);
+      // 1페이지가 오자마자 2, 3페이지를 함께 보낸다
+      expect(categorySearch).toHaveBeenCalledTimes(3);
+      expect(categorySearch.mock.calls.map(([, o]) => o.page)).toEqual([
+        1, 2, 3,
+      ]);
+      await vi.advanceTimersByTimeAsync(300);
+      const r = await pending;
+      expect(r.capped).toBe(true);
+      expect(r.places.map((p) => p.id)).toEqual(
+        Array.from({ length: 45 }, (_, i) => String(i)),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("더 받을 페이지는 1페이지 개수로 정한다, 최대 3페이지 (T5.41)", () => {
+    expect(followingPages({ totalCount: 10, hasNextPage: false })).toEqual([]);
+    expect(followingPages({ totalCount: 20, hasNextPage: true })).toEqual([2]);
+    expect(followingPages({ totalCount: 45, hasNextPage: true })).toEqual([
+      2, 3,
+    ]);
+    expect(followingPages({ totalCount: 300, hasNextPage: true })).toEqual([
+      2, 3,
+    ]);
+  });
+
+  it("뒤 페이지 하나가 실패하면 전체를 1회 다시 받는다 (T5.41)", async () => {
+    let calls = 0;
+    const fake = installFakeKakao({
+      category: Array.from({ length: 30 }, (_, i) => doc(i)),
+    });
+    const services = (window.kakao?.maps as KakaoMapsApi).services!;
+    const Places = services.Places;
+    services.Places = function () {
+      const inner = new Places();
+      return {
+        ...inner,
+        categorySearch: (
+          code: string,
+          cb: (r: KakaoPlaceDoc[], s: string, p: KakaoPagination) => void,
+          o: { page?: number },
+        ) => {
+          calls += 1;
+          // 첫 시도의 2페이지만 실패
+          if (calls === 2)
+            return cb([], "ERROR", {
+              totalCount: 0,
+              current: 2,
+              hasNextPage: false,
+              nextPage: () => {},
+            });
+          return inner.categorySearch(code, cb, o);
+        },
+      };
+    } as unknown as typeof Places;
+    const r = await searchRestaurants({ lat: 37.5, lng: 127 }, 515);
+    expect(r.places).toHaveLength(30);
+    expect(calls).toBe(4);
+    expect(fake.categorySearch).toHaveBeenCalledTimes(3);
   });
 });

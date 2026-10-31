@@ -12,6 +12,14 @@ import type { Bounds, LatLng } from "@/lib/map/types";
 
 const local = () => import("./local");
 
+/** 검색 모듈과 카카오 SDK를 미리 받는다(T5.41 홈 첫 방문). 검색 결과는 만들지 않는다 */
+export function prefetchKakaoSearch(): void {
+  void local().then(
+    (m) => m.warmUpKakaoSdk(),
+    () => {},
+  );
+}
+
 /** local.ts toKakaoRect와 같은 값(키 계산만 하려고 검색 모듈을 끌어오지 않게 여기 둔다) */
 function rectKey({ sw, ne }: Bounds): string {
   return [sw.lng, sw.lat, ne.lng, ne.lat].map((n) => n.toFixed(6)).join(",");
@@ -34,12 +42,7 @@ export const kakaoKeys = {
       Math.round(radius),
     ] as const,
   rect: (bounds: Bounds, sortFrom: LatLng) =>
-    [
-      ...KAKAO_PLACES_KEY,
-      "rect",
-      rectKey(bounds),
-      ...coord(sortFrom),
-    ] as const,
+    [...KAKAO_PLACES_KEY, "rect", rectKey(bounds), ...coord(sortFrom)] as const,
   /** 온보딩 개수 세기(이름 없음). 이름 해석 대상이 아니라 places 접두 밖에 둔다 */
   nearbyCount: (center: LatLng, radius: number) =>
     ["kakao", "nearby-fd6", ...coord(center), Math.round(radius)] as const,

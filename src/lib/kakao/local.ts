@@ -8,7 +8,6 @@
 import type { Bounds, LatLng } from "@/lib/map/types";
 import type {
   KakaoAddressDoc,
-  KakaoPagination,
   KakaoPlaceDoc,
   KakaoStatus,
 } from "./kakao-types";
@@ -216,6 +215,14 @@ export async function searchLocation(
   );
 }
 
+/**
+ * 검색 전에 SDK 스크립트를 미리 넣는다(T5.41). 홈이 측위와 같은 때 불러 검색 왕복 하나를 앞당긴다.
+ * 실패는 무시한다: 실제 검색이 다시 불러 재시도와 오류 안내를 맡는다.
+ */
+export function warmUpKakaoSdk(): void {
+  loadKakaoSdk().catch(() => {});
+}
+
 /** 반경 검색(기준점 + 반경) 또는 사각 영역 검색(rect). 둘 다 기준점에서 가까운 순 */
 type CategoryArea =
   | { kind: "radius"; center: LatLng; radius: number }
@@ -227,41 +234,40 @@ export function toKakaoRect(bounds: Bounds): string {
   return [sw.lng, sw.lat, ne.lng, ne.lat].map((n) => n.toFixed(6)).join(",");
 }
 
-function categoryPages(
-  area: CategoryArea,
-): Promise<{ docs: KakaoPlaceDoc[]; total: number }> {
+type CategoryPage = {
+  docs: KakaoPlaceDoc[];
+  totalCount: number;
+  hasNextPage: boolean;
+};
+
+/** categorySearch 한 페이지. ZERO_RESULT는 빈 페이지, 그 밖의 오류는 던진다 */
+function categoryPage(area: CategoryArea, page: number): Promise<CategoryPage> {
   const api = getKakaoMapsApi();
   const services = api.services!;
   const places = new services.Places();
+  const base = {
+    sort: services.SortBy.DISTANCE,
+    size: KAKAO_PAGE_SIZE,
+    page,
+  };
   return new Promise((resolve, reject) => {
-    const docs: KakaoPlaceDoc[] = [];
-    const callback = (
-      result: KakaoPlaceDoc[],
-      status: KakaoStatus,
-      pagination: KakaoPagination,
-    ) => {
-      if (status === "ZERO_RESULT") {
-        resolve({ docs, total: docs.length });
-        return;
-      }
-      if (status !== "OK") {
-        reject(new KakaoSearchError());
-        return;
-      }
-      docs.push(...result);
-      if (pagination.hasNextPage && pagination.current < KAKAO_MAX_PAGES) {
-        pagination.nextPage();
-        return;
-      }
-      resolve({ docs, total: pagination.totalCount });
-    };
-    const base = {
-      sort: services.SortBy.DISTANCE,
-      size: KAKAO_PAGE_SIZE,
-    };
     places.categorySearch(
       FOOD_CATEGORY,
-      callback,
+      (result, status, pagination) => {
+        if (status === "ZERO_RESULT") {
+          resolve({ docs: [], totalCount: 0, hasNextPage: false });
+          return;
+        }
+        if (status !== "OK") {
+          reject(new KakaoSearchError());
+          return;
+        }
+        resolve({
+          docs: result,
+          totalCount: pagination.totalCount,
+          hasNextPage: pagination.hasNextPage,
+        });
+      },
       area.kind === "radius"
         ? {
             ...base,
@@ -278,6 +284,34 @@ function categoryPages(
   });
 }
 
+/** 1페이지의 개수(pagination = REST meta의 pageable_count, is_end)로 더 받을 페이지 번호를 정한다. 최대 3페이지 */
+export function followingPages(first: {
+  totalCount: number;
+  hasNextPage: boolean;
+}): number[] {
+  if (!first.hasNextPage) return [];
+  const last = Math.min(
+    KAKAO_MAX_PAGES,
+    Math.max(2, Math.ceil(first.totalCount / KAKAO_PAGE_SIZE)),
+  );
+  return Array.from({ length: last - 1 }, (_, i) => i + 2);
+}
+
+/**
+ * 가까운 순 최대 3페이지(T5.41). 1페이지를 받은 뒤 2, 3페이지는 나란히 요청한다(차례로 받으면 페이지마다 왕복이 붙는다).
+ * 결과는 페이지 순서대로 잇는다. 한 페이지라도 실패하면 전체가 실패(바깥 withRetry가 1회 다시 한다).
+ */
+async function categoryPages(
+  area: CategoryArea,
+): Promise<{ docs: KakaoPlaceDoc[]; total: number }> {
+  const first = await categoryPage(area, 1);
+  const rest = await Promise.all(
+    followingPages(first).map((p) => categoryPage(area, p)),
+  );
+  const docs = [first, ...rest].flatMap((p) => p.docs);
+  return { docs, total: rest.length ? first.totalCount : docs.length };
+}
+
 function clampRadius(radius: number): number {
   return Math.min(KAKAO_MAX_RADIUS, Math.max(0, Math.round(radius)));
 }
@@ -287,7 +321,10 @@ async function searchArea(
 ): Promise<{ docs: KakaoPlaceDoc[]; capped: boolean }> {
   await loadKakaoSdk();
   const { docs, total } = await withRetry(() => categoryPages(area));
-  return { docs, capped: total >= KAKAO_RESULT_CAP };
+  return {
+    docs: docs.slice(0, KAKAO_RESULT_CAP),
+    capped: total >= KAKAO_RESULT_CAP,
+  };
 }
 
 function toRestaurants(docs: readonly KakaoPlaceDoc[]): KakaoRestaurant[] {
@@ -340,8 +377,11 @@ export async function nearbyRestaurants(
   radius: number,
 ): Promise<{ places: NearbyRestaurant[]; capped: boolean }> {
   const { docs, capped } = await searchArea({ kind: "radius", center, radius });
-  const places = docs
-    .map(fromNearbyDoc)
-    .filter((p): p is NearbyRestaurant => p !== null);
+  const seen = new Set<string>();
+  const places = docs.map(fromNearbyDoc).filter((p): p is NearbyRestaurant => {
+    if (p === null || seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
   return { places, capped };
 }

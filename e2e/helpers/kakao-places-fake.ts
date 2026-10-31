@@ -66,14 +66,15 @@ function fakeScript(count: number, delay: readonly [number, number]): string {
     }
     return out;
   }
-  function paged(all, cb) {
+  // page 옵션을 따른다(T5.41: 래퍼가 2, 3페이지를 나란히 page 옵션으로 요청)
+  function paged(all, cb, start) {
     var size = 15, pages = Math.max(1, Math.ceil(all.length / size));
     function send(p) {
       var pg = { totalCount: all.length, current: p, hasNextPage: p < pages, nextPage: function () { send(p + 1); } };
       var slice = all.slice((p - 1) * size, p * size);
       setTimeout(function () { cb(slice, slice.length ? "OK" : "ZERO_RESULT", pg); }, wait());
     }
-    send(1);
+    send(start || 1);
   }
   var services = {
     Status: { OK: "OK", ZERO_RESULT: "ZERO_RESULT", ERROR: "ERROR" },
@@ -85,7 +86,7 @@ function fakeScript(count: number, delay: readonly [number, number]): string {
           var c = o && o.location ? o.location : new LatLng(37.5665, 126.978);
           var all = docsAround(c.getLat(), c.getLng());
           if (o && o.radius) all = all.filter(function (d) { return Number(d.distance) <= o.radius; });
-          paged(all, cb);
+          paged(all, cb, o && o.page);
         }
       };
     },
