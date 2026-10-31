@@ -18,6 +18,8 @@ const NAVER_FAKE = `(function () {
   LatLng.prototype.lng = function () { return this._lng; };
   function Point(x, y) { this.x = x; this.y = y; }
   function LatLngBounds(sw, ne) { this.sw = sw; this.ne = ne; }
+  LatLngBounds.prototype.getSW = function () { return this.sw; };
+  LatLngBounds.prototype.getNE = function () { return this.ne; };
   var registry = [];
   function on(target, name, handler) { var l = { t: target, n: name, h: handler }; registry.push(l); return l; }
   function off(l) { var i = registry.indexOf(l); if (i >= 0) registry.splice(i, 1); }
@@ -39,6 +41,11 @@ const NAVER_FAKE = `(function () {
   Map.prototype.panTo = function (c) { this.c = c; };
   Map.prototype.panBy = function (p) { this.c = new LatLng(this.c.lat() - p.y * PX, this.c.lng() + p.x * PX); };
   Map.prototype.fitBounds = function () {};
+  // 지도 탭(T5.26~T5.30)이 쓰는 영역: 요소 크기 x 1px 좌표 간격
+  Map.prototype.getBounds = function () {
+    var r = this.el.getBoundingClientRect(), hw = (r.width / 2) * PX, hh = (r.height / 2) * PX;
+    return new LatLngBounds(new LatLng(this.c.lat() - hh, this.c.lng() - hw), new LatLng(this.c.lat() + hh, this.c.lng() + hw));
+  };
   Map.prototype.setSize = function () {};
   Map.prototype.destroy = function () { this.el.innerHTML = ""; };
   function Marker(o) {
@@ -51,6 +58,7 @@ const NAVER_FAKE = `(function () {
     this.d = d; o.map.el.appendChild(d);
   }
   Marker.prototype.setPosition = function (p) { this.p = p; };
+  Marker.prototype.setZIndex = function (z) { this.d.style.zIndex = String(z); };
   Marker.prototype.getPosition = function () { return this.p; };
   Marker.prototype.setMap = function (m) { if (!m) this.d.remove(); };
   function Circle(o) { this.o = o; }

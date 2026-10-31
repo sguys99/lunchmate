@@ -32,6 +32,16 @@ export type TestUser = {
 export const TEST_PREFIX = "test_";
 
 /**
+ * 테스트 실행 구분자. 파일들이 나란히 돌아 같은 밀리초에 시작하면 시각만으로는 겹쳐
+ * 이메일 중복(users_email_partial_key)으로 실패하므로 난수 2자를 붙인다(T5.42).
+ */
+export function newRunId(): string {
+  return (
+    Date.now().toString(36).slice(-6) + Math.random().toString(36).slice(2, 4)
+  );
+}
+
+/**
  * RLS 테스트 실행 조건. 하나라도 빠지면 null을 돌려 테스트를 건너뛴다.
  * - RUN_RLS_TESTS=1 (pnpm test:rls가 켬). 평소 pnpm test와 pre-push는 클라우드 DB를 건드리지 않는다.
  * - NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY(publishable), SUPABASE_SERVICE_ROLE_KEY(secret)

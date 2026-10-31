@@ -17,6 +17,7 @@ import {
   createTestUser,
   deleteAuthUser,
   loadRlsEnv,
+  newRunId,
   rest,
   schemaReady,
   type RlsEnv,
@@ -58,7 +59,7 @@ describe.skipIf(!ready)(
   () => {
     // skipIf가 false일 때만 본문이 실행되므로 env는 여기서 항상 있다
     const e = env as RlsEnv;
-    const runId = Date.now().toString(36).slice(-6);
+    const runId = newRunId();
     let a: TestUser;
     let b: TestUser;
     const created: string[] = [];

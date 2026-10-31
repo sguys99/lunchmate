@@ -14,6 +14,7 @@ import {
   createTestUserWithEmail,
   deleteAuthUser,
   loadRlsEnv,
+  newRunId,
   rest,
   schemaReady,
   type RlsEnv,
@@ -29,7 +30,7 @@ describe.skipIf(!ready)(
   { timeout: 60_000 },
   () => {
     const e = env as RlsEnv;
-    const runId = Date.now().toString(36).slice(-6);
+    const runId = newRunId();
     const created: string[] = [];
 
     afterAll(async () => {
