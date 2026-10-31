@@ -78,6 +78,7 @@ import {
 } from "./today-cards";
 import { noticeText, TodayHeader } from "./today-header";
 import { ShortNote } from "./today-states-light";
+import { placeStatsQuery } from "./stats-query";
 import { RELAXED_BUDGET_KRW, useTodaySession } from "./today-store";
 import { preloadDirections, useCardDirections } from "./use-card-directions";
 import { useReducedMotion } from "./use-reduced-motion";
@@ -255,10 +256,25 @@ export function TodayScreen({
     () => new Map((places ?? []).map((p) => [p.id, p])),
     [places],
   );
+  // 우리 DB 집계(👍, 가격 제보, 폐업, 웨이팅, 할인 표시, T6.11). 후보 집합마다 한 번. 실패하거나 오프라인이면
+  // 중립값(콜드 스타트)으로 카드를 낸다. 받는 동안만 스켈레톤을 유지해 카드가 눈앞에서 바뀌지 않게 한다.
+  const placeIds = useMemo(() => (places ?? []).map((p) => p.id), [places]);
+  const statsQuery = useQuery({
+    ...placeStatsQuery(placeIds),
+    enabled: placeIds.length > 0 && online,
+  });
+  const statsRows = statsQuery.data;
+  const statsSettled =
+    placeIds.length === 0 ||
+    statsQuery.isSuccess ||
+    statsQuery.isError ||
+    !online;
   const candidates = useMemo(
     () =>
-      engine && places && center ? engine.toCandidates(places, center) : null,
-    [engine, places, center],
+      engine && places && center && statsSettled
+        ? engine.toCandidates(places, center, engine.statsLookup(statsRows))
+        : null,
+    [engine, places, center, statsSettled, statsRows],
   );
   const budgetKRW = session.budgetRelaxed
     ? RELAXED_BUDGET_KRW
@@ -279,13 +295,29 @@ export function TodayScreen({
     [meal, budgetKRW, walk, data.avoid, data.craving],
   );
   const sessionBlocked = session.blocked;
+  const sessionDisliked = session.reroll.disliked;
   const history = useMemo<RecoHistory>(
-    // 방문, 피드백 기록은 6단계(콜드 스타트). 다시 안 갈 곳(서버 목록 + 이번 세션에 누른 곳)만 하드 필터에 넣는다
+    // 방문과 내 평가(선호 P, 반복 R, T6.11). 카테고리는 이번 후보의 카카오 값에서만 찾는다(저장하지 않는 값).
+    // 다시 안 갈 곳은 서버 목록 + 이번 세션에 누른 곳. 다시 뽑기 3연속 약한 부정은 세션 메모리 값.
+    // 투표 승리(pollWins)는 7단계가 채운다.
     () => ({
-      visits: [],
+      visits: engine
+        ? engine.toVisits(data.history, (id) => {
+            const p = placesById.get(id);
+            return p ? engine.kakaoCategorySlug(p.categoryName) : null;
+          })
+        : [],
       blocked: new Set([...data.blocked, ...sessionBlocked]),
+      sessionDisliked,
     }),
-    [data.blocked, sessionBlocked],
+    [
+      engine,
+      data.history,
+      placesById,
+      data.blocked,
+      sessionBlocked,
+      sessionDisliked,
+    ],
   );
   const { seed, at, seen, fallback: fallbackSeen } = session.draw;
   // 다시 안 갈래요로 한 자리를 비운 묶음. 같은 시드인 동안만 쓴다(다시 뽑기, 끼니, 기준 위치를 바꾸면 새 묶음)
@@ -478,9 +510,14 @@ export function TodayScreen({
 
   function reroll() {
     const count = session.rerolls + 1;
+    const shownCategories = cards.map((c) => c.category);
     shuffleThen(() => {
+      const prev = useTodaySession.getState().reroll;
       redraw(cards.map((c) => c.id));
-      patch({ rerolls: count });
+      patch({
+        rerolls: count,
+        reroll: engine ? engine.noteReroll(prev, shownCategories) : prev,
+      });
       todayEvent(recommendationReshuffled(count));
     }, copy.rerolled);
   }

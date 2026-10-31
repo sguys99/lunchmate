@@ -7,6 +7,7 @@
 // - 서버 렌더에서는 쓰기가 일어나지 않는다(이벤트와 효과에서만 바꾼다). 그래서 서버는 언제나 초기값을 본다.
 import { create } from "zustand";
 import type { LatLng } from "@/lib/map/types";
+import type { CategorySlug } from "@/features/place/categories";
 import type { Meal } from "@/lib/time";
 import type { BaseChoice, BaseNotice, HereState } from "./base-location";
 
@@ -52,6 +53,15 @@ export type TodaySession = {
    */
   held: { seed: number; slots: readonly (string | null)[] } | null;
   map: TodayMapView;
+  /**
+   * 다시 뽑기 3연속 약한 부정(T6.11, src/lib/reco/reshuffle.ts). streaks는 카테고리별 연속 횟수,
+   * disliked는 이번 세션 약한 부정 카테고리. 메모리 전용이다. 저장, 서버, 분석 이벤트로 보내지 않는다.
+   * 다시 뽑기가 아닌 새 묶음(redraw()를 shown 없이 부름)은 연속을 끊는다.
+   */
+  reroll: {
+    streaks: Readonly<Partial<Record<CategorySlug, number>>>;
+    disliked: ReadonlySet<CategorySlug>;
+  };
 };
 
 const EMPTY: ReadonlySet<string> = new Set();
@@ -69,6 +79,7 @@ export const INITIAL_SESSION: TodaySession = {
   blocked: EMPTY,
   held: null,
   map: { base: null, pins: [], activeId: null },
+  reroll: { streaks: {}, disliked: new Set() },
 };
 
 type Actions = {
@@ -95,6 +106,8 @@ export const useTodaySession = create<TodaySession & Actions>()((set) => ({
       return {
         order: [0, 1, 2],
         held: null,
+        // 다시 뽑기(shown 있음)가 아닌 새 묶음은 다시 뽑기 연속을 끊는다. 약한 부정은 세션 동안 둔다
+        reroll: shown ? s.reroll : { streaks: {}, disliked: s.reroll.disliked },
         draw: {
           seed: randomSeed(),
           at: Date.now(),

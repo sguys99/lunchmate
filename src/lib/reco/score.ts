@@ -21,7 +21,9 @@ import {
   NEUTRAL,
   PLACE_PREF_SCALE,
   PLACE_REPEAT_PENALTY,
+  POLL_WIN_SIGNAL,
   REPEAT_WINDOW_DAYS,
+  RESHUFFLE_CATEGORY_PENALTY,
   REPUTATION_PRIOR_COUNT,
   WEIGHTS,
 } from "./constants";
@@ -123,12 +125,21 @@ export function scoreCandidate(
       if (v.rating === "up") categoryLiked = true;
     }
   }
+  // 투표 승리: 👍보다 약한 긍정(T6.11). 이유 문장의 근거(lastUpAt, categoryLiked)로는 쓰지 않는다
+  for (const w of history.pollWins ?? []) {
+    const signal = POLL_WIN_SIGNAL * decay(w.at, now);
+    if (w.placeId === c.id) placeSignal += signal;
+    else if (w.category === c.category) categorySignal += signal;
+  }
   const craving = ctx.cravings.has(c.category);
+  // 다시 뽑기 3연속 동안 화면에 있던 카테고리: 이번 세션 약한 부정(T6.11, reshuffle.ts)
+  const reshuffled = history.sessionDisliked?.has(c.category) ?? false;
   const P = clamp01(
     NEUTRAL +
       PLACE_PREF_SCALE * Math.tanh(placeSignal) +
       CATEGORY_PREF_SCALE * Math.tanh(categorySignal) +
-      (craving ? CRAVING_BOOST : 0),
+      (craving ? CRAVING_BOOST : 0) -
+      (reshuffled ? RESHUFFLE_CATEGORY_PENALTY : 0),
   );
 
   // B: 예산 안이면 1, 넘으면 넘은 비율만큼 깎음. 추정가는 중립 쪽으로 반만 반영

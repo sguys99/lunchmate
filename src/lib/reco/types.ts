@@ -67,10 +67,24 @@ export type Rating = "up" | "down";
  */
 export type Visit = {
   placeId: string;
-  category: CategorySlug;
+  /**
+   * 그 식당의 카테고리. 카카오 값이라 저장하지 않으므로 이번 후보(세션 메모리)에 있는 곳만 안다.
+   * 모르면 null: 이 식당 자신의 신호(P, R)에는 쓰고, 카테고리 신호에는 쓰지 않는다.
+   */
+  category: CategorySlug | null;
   at: Date;
   status: "candidate" | "visited" | "skipped";
   rating: Rating | null;
+};
+
+/**
+ * 투표 승리 한 건(T6.11, 7단계 POLL이 채운다). 내가 참여한 투표에서 이 식당이 확정됐다.
+ * 👍보다 약한 긍정 신호다(내가 고른 곳이 아닐 수도 있다). category는 Visit과 같은 규칙.
+ */
+export type PollWin = {
+  placeId: string;
+  category: CategorySlug | null;
+  at: Date;
 };
 
 /** 사용자의 기록 신호 */
@@ -78,6 +92,13 @@ export type RecoHistory = {
   visits: readonly Visit[];
   /** 다시 안 갈래요 (blocklist의 place_id) */
   blocked: ReadonlySet<string>;
+  /** 투표 승리(약한 긍정). 7단계 전에는 비어 있다 */
+  pollWins?: readonly PollWin[];
+  /**
+   * 이번 세션에 다시 뽑기 3연속 동안 화면에 있던 카테고리(약한 부정, T6.11).
+   * 세션 메모리 값이다. 저장, 분석 이벤트로 보내지 않는다(reshuffle.ts).
+   */
+  sessionDisliked?: ReadonlySet<CategorySlug>;
 };
 
 /** 엔진 입력 전체 */

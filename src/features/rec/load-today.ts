@@ -1,7 +1,8 @@
 // 오늘(홈) 서버 데이터 (T5.15~T5.17). 서버 컴포넌트 전용, 사용자 세션(RLS 본인 정책)으로 읽는다.
 //
-// - 로그인: 사무실(핀 좌표), 예산과 도보 분, 못 먹는 음식, 요즘 땡겨요, 다시 안 갈 곳(blocklist place_id)을 읽는다.
-//   피드백과 방문 기록(visits, 후기)은 6단계라 아직 넘기지 않는다(콜드 스타트).
+// - 로그인: 사무실(핀 좌표), 예산과 도보 분, 못 먹는 음식, 요즘 땡겨요, 다시 안 갈 곳(blocklist place_id),
+//   최근 90일 방문 기록과 내 평가(visits + reviews.rating, T6.11)를 읽는다. 방문 기록 읽기가 실패하면
+//   오류 화면 대신 빈 기록(콜드 스타트)으로 추천한다.
 // - 비로그인 둘러보기: 저장된 값이 없다. URL의 이어받기 값(T4.20: lunch, dinner, walk, avoid 칩)만 다시 검사해 쓴다.
 // - 읽기에 실패하면 loadFailed(화면이 오류 안내와 다시 시도).
 // 화면으로 넘기는 값은 사용자 자신의 값이다. 카카오 장소 값은 여기 없다(브라우저 세션 메모리에서만 받는다).
@@ -12,7 +13,10 @@ import { readGuestHandoff } from "@/features/onboarding/guest-handoff";
 import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
 import type { AvoidRule } from "@/lib/reco/types";
+import { FEEDBACK_LOOKBACK_DAYS } from "@/lib/reco/constants";
+import { addKstDays, kstDateKey } from "@/lib/time";
 import type { OfficeOption } from "./base-location";
+import { ratingOf, visitStatusOf, type HistoryRow } from "./history";
 
 export type TodayData = {
   signedIn: boolean;
@@ -21,6 +25,8 @@ export type TodayData = {
   avoid: AvoidRule[];
   craving: { categories: string[]; until: string | null };
   blocked: string[];
+  /** 최근 방문 기록과 내 평가(선호 P, 반복 R). 비로그인이면 빈 배열 */
+  history: HistoryRow[];
   /** 서버가 본 지금 시각(ISO). 첫 화면 날짜와 끼니를 서버 HTML과 맞춘다 */
   nowIso: string;
   loadFailed: boolean;
@@ -50,9 +56,33 @@ function guestData(params: Params, nowIso: string): TodayData {
     ],
     craving: { categories: [], until: null },
     blocked: [],
+    history: [],
     nowIso,
     loadFailed: false,
   };
+}
+
+type VisitRow = {
+  place_id: string;
+  visited_on: string;
+  status: string;
+  reviews: { rating: string } | { rating: string }[] | null;
+};
+
+function historyRows(rows: readonly VisitRow[]): HistoryRow[] {
+  return rows.flatMap((r) => {
+    const status = visitStatusOf(r.status);
+    if (status === null) return [];
+    const review = Array.isArray(r.reviews) ? r.reviews[0] : r.reviews;
+    return [
+      {
+        placeId: r.place_id,
+        visitedOn: r.visited_on,
+        status,
+        rating: ratingOf(review?.rating),
+      },
+    ];
+  });
 }
 
 export async function loadToday(params: Params): Promise<TodayData> {
@@ -67,7 +97,10 @@ export async function loadToday(params: Params): Promise<TodayData> {
   const userId = claims?.claims?.sub;
   if (!userId) return guestData(params, nowIso);
 
-  const [offices, prefs, avoid, blocked] = await Promise.all([
+  const since = kstDateKey(
+    addKstDays(new Date(nowIso), -FEEDBACK_LOOKBACK_DAYS),
+  );
+  const [offices, prefs, avoid, blocked, visits] = await Promise.all([
     supabase
       .from("offices")
       .select("id, name, is_default, lat, lng, created_at")
@@ -82,6 +115,13 @@ export async function loadToday(params: Params): Promise<TodayData> {
       .maybeSingle(),
     supabase.from("avoid_rules").select("kind, value").eq("user_id", userId),
     supabase.from("blocklist").select("place_id").eq("user_id", userId),
+    supabase
+      .from("visits")
+      .select("place_id, visited_on, status, reviews(rating)")
+      .eq("user_id", userId)
+      .gte("visited_on", since)
+      .order("visited_on", { ascending: false })
+      .limit(300),
   ]);
 
   const failed =
@@ -115,6 +155,7 @@ export async function loadToday(params: Params): Promise<TodayData> {
       until: prefs.data?.craving_until ?? null,
     },
     blocked: (blocked.data ?? []).map((b) => b.place_id),
+    history: visits.error ? [] : historyRows(visits.data ?? []),
     nowIso,
     loadFailed: failed,
   };

@@ -5,3 +5,7 @@ export { toCandidates } from "./candidates";
 export { toCards } from "./card-model";
 export { drawDeck, refillDeck, shortageOf } from "./deck";
 export { whyLines } from "./why";
+export { statsLookup } from "./place-stats";
+export { toVisits } from "./history";
+export { kakaoCategorySlug } from "./kakao-category";
+export { noteReroll } from "@/lib/reco/reshuffle";
