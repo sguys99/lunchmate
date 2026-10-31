@@ -3,6 +3,7 @@
 // 출처 (2026-10-30 확인): https://apis.map.kakao.com/web/documentation/#services_Places
 //   (Context7 /websites/apis_map_kakao_web) keywordSearch, categorySearch(location 필수, radius 0~20000,
 //   size 1~15, page 1~45, sort DISTANCE), 콜백 (result, status, pagination), Geocoder.addressSearch
+// 2026-10-31 확인(T5.12): categorySearch options의 rect(String, "좌x,좌y,우x,우y", bounds가 있으면 무시)
 
 export interface KakaoLatLng {
   getLat(): number;
@@ -24,9 +25,14 @@ export interface KakaoPlaceDoc {
   place_name: string;
   address_name: string;
   road_address_name: string;
+  /** "음식점 > 한식 > 국밥" 형태. 카테고리 매핑은 화면 메모리에서만 한다(저장 금지) */
+  category_name?: string;
+  category_group_code?: string;
+  /** 카카오맵 상세 링크. DB에 저장할 수 있는 카카오 값은 id와 이것뿐이다(T0.16) */
+  place_url?: string;
   x: string;
   y: string;
-  /** location을 준 검색에서만 채워지는 거리(m, 문자열) */
+  /** location을 준 검색에서만 채워지는 거리(m, 문자열). 없으면 빈 문자열일 수 있다 */
   distance?: string;
 }
 
@@ -47,6 +53,8 @@ export type KakaoPlacesCallback = (
 export type KakaoPlacesOptions = {
   location?: KakaoLatLng;
   radius?: number;
+  /** 사각 영역 "좌x,좌y,우x,우y"(남서 경도, 남서 위도, 북동 경도, 북동 위도). T5.12a 사분면 추가 검색 */
+  rect?: string;
   size?: number;
   page?: number;
   sort?: string;

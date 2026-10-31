@@ -2,11 +2,8 @@
 // 카카오 검색 쿼리 (T4.16, T4.17). 결과는 TanStack Query 세션 메모리에만 둔다(CLAUDE.md 7장, T0.16).
 // 래퍼(src/lib/kakao/local.ts)가 1회 재시도하므로 여기서는 재시도하지 않는다.
 import { useQuery } from "@tanstack/react-query";
-import {
-  nearbyRestaurants,
-  searchLocation,
-  type NearbyRestaurant,
-} from "@/lib/kakao/local";
+import { searchLocation } from "@/lib/kakao/local";
+import { nearbyCountQuery } from "@/lib/kakao/queries";
 import { NEARBY_FETCH_RADIUS } from "./nearby";
 import type { UserPinnedLatLng } from "./pin";
 
@@ -28,16 +25,9 @@ export function useNearbyRestaurants(
   pin: UserPinnedLatLng | null,
   enabled: boolean,
 ) {
-  return useQuery<{ places: NearbyRestaurant[]; capped: boolean }>({
-    queryKey: [
-      "kakao",
-      "nearby-fd6",
-      pin ? pin.lat.toFixed(5) : null,
-      pin ? pin.lng.toFixed(5) : null,
-    ],
-    queryFn: () => nearbyRestaurants(pin!, NEARBY_FETCH_RADIUS),
+  // 쿼리 키와 옵션은 공통 래퍼(src/lib/kakao/queries.ts, T5.12)가 정한다. 핀이 없으면 쓰이지 않는 자리 값으로 만든다
+  return useQuery({
+    ...nearbyCountQuery(pin ?? { lat: 0, lng: 0 }, NEARBY_FETCH_RADIUS),
     enabled: enabled && pin !== null,
-    staleTime: 10 * 60 * 1000,
-    retry: false,
   });
 }

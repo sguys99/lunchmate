@@ -8,9 +8,14 @@ import type {
 import {
   fromAddressDoc,
   fromPlaceDoc,
+  fromRestaurantDoc,
+  kakaoPlaceUrl,
   mergeLocationResults,
   nearbyRestaurants,
   searchLocation,
+  searchRestaurants,
+  searchRestaurantsInRect,
+  toKakaoRect,
 } from "./local";
 import { resetKakaoSdkForTest } from "./sdk-loader";
 
@@ -31,7 +36,10 @@ function installFakeKakao(opts: {
   keyword?: KakaoPlaceDoc[] | "error";
   address?: { address_name: string; x: string; y: string }[];
   category?: KakaoPlaceDoc[];
+  /** categorySearch가 처음 n번 ERROR를 돌려준다 */
+  failTimes?: number;
 }) {
+  let failures = opts.failTimes ?? 0;
   const categorySearch = vi.fn();
   const api = {
     load: (cb: () => void) => cb(),
@@ -56,6 +64,16 @@ function installFakeKakao(opts: {
             o: unknown,
           ) => {
             categorySearch(code, o);
+            if (failures > 0) {
+              failures -= 1;
+              cb([], "ERROR", {
+                totalCount: 0,
+                current: 1,
+                hasNextPage: false,
+                nextPage: () => {},
+              });
+              return;
+            }
             const all = opts.category ?? [];
             let page = 1;
             const send = () => {
@@ -152,5 +170,77 @@ describe("카카오 로컬 래퍼", () => {
     const r = await nearbyRestaurants({ lat: 37.5, lng: 127 }, 1030);
     expect(r).toMatchObject({ capped: false });
     expect(r.places).toHaveLength(2);
+  });
+
+  it("FD6 결과를 이름, 카테고리, 거리, 카카오맵 링크로 바꾼다 (T5.12)", () => {
+    expect(
+      fromRestaurantDoc(
+        doc(7, {
+          category_name: "음식점 > 한식 > 국밥",
+          place_url: "http://place.map.kakao.com/7",
+        }),
+      ),
+    ).toEqual({
+      id: "7",
+      name: "식당7",
+      categoryName: "음식점 > 한식 > 국밥",
+      address: "소담로 1",
+      position: { lat: 37.507, lng: 127.007 },
+      distance: 140,
+      placeUrl: "http://place.map.kakao.com/7",
+    });
+    // 링크가 없으면 id로 만들고, 거리가 없으면 null
+    const r = fromRestaurantDoc(doc(8, { distance: "" }));
+    expect(r?.placeUrl).toBe(kakaoPlaceUrl("8"));
+    expect(r?.distance).toBeNull();
+    expect(fromRestaurantDoc(doc(9, { place_name: "" }))).toBeNull();
+  });
+
+  it("FD6 반경 전체 정보 검색: 45곳 상한, 중복 id 제거 (T5.12)", async () => {
+    installFakeKakao({
+      category: [...Array.from({ length: 50 }, (_, i) => doc(i))].map((d, i) =>
+        i === 1 ? { ...d, id: "0" } : d,
+      ),
+    });
+    const r = await searchRestaurants({ lat: 37.5, lng: 127 }, 515);
+    expect(r.capped).toBe(true);
+    expect(r.places).toHaveLength(44);
+    expect(r.places[0]).toMatchObject({ id: "0", name: "식당0" });
+  });
+
+  it("실패하면 1회 재시도하고, 두 번 실패하면 던진다 (T5.12)", async () => {
+    const once = installFakeKakao({ category: [doc(1)], failTimes: 1 });
+    await expect(
+      searchRestaurants({ lat: 37.5, lng: 127 }, 515),
+    ).resolves.toMatchObject({ capped: false });
+    expect(once.categorySearch).toHaveBeenCalledTimes(2);
+
+    resetKakaoSdkForTest();
+    const twice = installFakeKakao({ category: [doc(1)], failTimes: 2 });
+    await expect(
+      searchRestaurants({ lat: 37.5, lng: 127 }, 515),
+    ).rejects.toThrow();
+    expect(twice.categorySearch).toHaveBeenCalledTimes(2);
+  });
+
+  it("사각 영역 검색은 rect 문자열과 기준점 거리순으로 부른다 (T5.12a)", async () => {
+    const { categorySearch } = installFakeKakao({ category: [doc(1)] });
+    const bounds = {
+      sw: { lat: 37.5, lng: 127 },
+      ne: { lat: 37.51, lng: 127.01 },
+    };
+    expect(toKakaoRect(bounds)).toBe(
+      "127.000000,37.500000,127.010000,37.510000",
+    );
+    const r = await searchRestaurantsInRect(bounds, { lat: 37.5, lng: 127 });
+    expect(r.places).toHaveLength(1);
+    expect(categorySearch).toHaveBeenCalledWith(
+      "FD6",
+      expect.objectContaining({
+        rect: "127.000000,37.500000,127.010000,37.510000",
+        sort: "distance",
+        size: 15,
+      }),
+    );
   });
 });
