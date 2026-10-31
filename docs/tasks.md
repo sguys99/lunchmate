@@ -472,12 +472,12 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 5.5 식당 상세와 길찾기
 
-- [ ] T5.33 상세 기본 정보, 전화 걸기 (PLACE-01)
-- [ ] T5.34 가격대(제보 중앙값 또는 추정), 👍 비율, 태그, 후기 영역 자리 (PLACE-02, PLACE-03, 데이터는 6단계)
-- [ ] T5.35 버튼: 길찾기, 네이버 플레이스에서 보기, 즐겨찾기, 투표에 추가, 공유 (PLACE-04)
-- [ ] T5.36 `nmap://route/walk` 호출, `appname`은 `NEXT_PUBLIC_SITE_URL`에서 생성 (NAV-01)
-- [ ] T5.37 앱 미설치 감지 후 네이버 지도 웹, 데스크톱은 바로 웹 (NAV-02, NAV-03)
-- [ ] T5.38 길찾기 클릭 시 방문 후보 저장 (NAV-04)
+- [x] T5.33 (10/31 완료, `@/features/place/detail` PlaceDetail 본문과 홈용 usePlaceDetailSheet(Drawer 지연 로딩), 카카오 phone은 세션 메모리 값만) 상세 기본 정보, 전화 걸기 (PLACE-01)
+- [x] T5.34 (10/31 완료, detail-model 가격 사분위(5건 이상)/최소~최대, 👍 3건 미만 숨김 10칸 미터, 6단계 전 EMPTY_PLACE_STATS) 가격대(제보 중앙값 또는 추정), 👍 비율, 태그, 후기 영역 자리 (PLACE-02, PLACE-03, 데이터는 6단계)
+- [x] T5.35 (10/31 완료, 더 보기 Base UI Menu, 즐겨찾기 낙관적 반영과 다시 안 갈 곳 충돌 시 안내, 공유는 place_url Web Share/복사, 투표 플래그. 네이버 웹 URL은 공식 문서 없음 [확인 필요]) 버튼: 길찾기, 네이버 플레이스에서 보기, 즐겨찾기, 투표에 추가, 공유 (PLACE-04)
+- [x] T5.36 (10/31 완료, `src/lib/naver/directions.ts` nmapWalkUrl, appname은 siteUrl에서) `nmap://route/walk` 호출, `appname`은 `NEXT_PUBLIC_SITE_URL`에서 생성 (NAV-01)
+- [x] T5.37 (10/31 완료, 1500ms 안에 visibilitychange/pagehide 없으면 웹, 데스크톱 바로 웹, 현위치 출발은 앱과 웹 URL 모두 좌표 미포함) 앱 미설치 감지 후 네이버 지도 웹, 데스크톱은 바로 웹 (NAV-02, NAV-03)
+- [x] T5.38 (10/31 완료, saveVisitAction zod strictObject, 중복 성공 처리, 하루 20건 limit, 비로그인은 저장 없이 길찾기만) 길찾기 클릭 시 방문 후보 저장 (NAV-04)
 
 #### 5.6 마무리
 
