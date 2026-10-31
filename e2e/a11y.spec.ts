@@ -191,6 +191,27 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       }
     }
 
+    // T5.2 식당 상세 시안 3안. T5.3 선택 뒤 남긴 안만 둔다
+    for (const id of ["a", "b", "c"]) {
+      for (const query of [
+        "",
+        "?state=loading",
+        "?state=empty",
+        "?state=error",
+        "?state=error&fail=name",
+        "?state=offline",
+        "?data=sparse",
+        id === "b" ? "?from=map" : "?from=home",
+        ...(id === "c" ? ["?snap=full"] : []),
+      ]) {
+        test(`식당 상세 ${id}${query}`, async ({ page }) => {
+          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+          await openLabRoute(page, `/design-lab/place/${id}${query}`);
+          await expectNoA11yViolations(page);
+        });
+      }
+    }
+
     test("PoC 목록", async ({ page }) => {
       test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
       const res = await page.goto("/design-lab/poc");
