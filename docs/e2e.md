@@ -6,6 +6,8 @@ Playwright 설정은 `playwright.config.ts`. 모두 dev 서버(`pnpm dev`)로 �
 | --- | --- | --- |
 | `pnpm test:e2e` | 기능 E2E와 axe 검사. 디자인 랩이 꺼져 있으면 갤러리, PoC 검사는 건너뛴다 | mobile 390px, desktop 1280px |
 | `pnpm test:e2e:a11y` | axe 검사만, 디자인 랩을 켜고 (T2.17) | mobile, desktop |
+| `pnpm test:e2e:recommend` | 추천 → 길찾기(T5.40). 비로그인 2건은 늘 돌고, 로그인 사용자(방문 후보 저장)는 `.env.local`의 Supabase 값이 있을 때만. 카카오는 `e2e/helpers/kakao-places-fake.ts` 가짜 | mobile, desktop |
+| `RUN_PERF=1 ... e2e/perf-today.spec.ts` | 홈 성능 AC-REC-4(T5.41). 프로덕션 빌드(`pnpm build && pnpm start -p 3200`)에 `PLAYWRIGHT_BASE_URL`로 붙인다. 결과는 `docs/design/g5-qa.md` | mobile, desktop |
 | `pnpm test:e2e:visual` | 컴포넌트 갤러리 섹션별 스냅샷 (T2.16) | visual-mobile, visual-desktop |
 
 ## 이미 떠 있는 dev 서버 쓰기

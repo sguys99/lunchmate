@@ -482,7 +482,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 #### 5.6 마무리
 
 - [x] T5.39 (10/31 완료, todayEvent → track() 전송, recommendation_shown은 같은 묶음 한 번, algo_version 포함, card_swiped는 대안을 큰 카드로 올림, place_names_resolved는 사용처 생길 때(T6.13, T7.15) 연결) 이벤트: `recommendation_shown`, `recommendation_reshuffled`, `card_swiped`, `directions_clicked`, `just_pick_clicked`, `favorite_added`
-- [ ] T5.40 E2E: 추천 → 길찾기
+- [x] T5.40 (10/31 완료, `e2e/recommend.spec.ts` mobile 3/3, desktop 3/3, 비로그인 길찾기 URL에 현위치 좌표 없음, 로그인 visits source rec 생성(RLS 세션 조회), AC-REC-2 18곳 모두 다름. 공용 가짜 카카오 `e2e/helpers/kakao-places-fake.ts`) E2E: 추천 → 길찾기
 - [ ] T5.41 AC-REC-4 성능 확인 (3G 스로틀에서 3초 스켈레톤, 5초 카드), 홈 번들 200KB 확인
 - [ ] T5.42 **G5 확인**: REC, MAP, PLACE, NAV P0 AC 통과, `[실기기]` iOS/Android 길찾기 확인
 

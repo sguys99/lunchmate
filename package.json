@@ -22,6 +22,7 @@
     "test:e2e": "playwright test --project=mobile --project=desktop",
     "test:e2e:onboarding": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop e2e/onboarding.spec.ts",
     "test:e2e:me": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop e2e/me.spec.ts",
+    "test:e2e:recommend": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop e2e/recommend.spec.ts",
     "test:e2e:visual": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=visual-mobile --project=visual-desktop",
     "test:e2e:a11y": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=mobile --project=desktop e2e/a11y.spec.ts",
     "shots": "node scripts/shots.mjs",
