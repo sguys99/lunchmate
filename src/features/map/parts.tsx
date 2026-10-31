@@ -9,6 +9,7 @@ import {
   RotateCw,
   Undo2,
 } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   EmptyState,
@@ -388,6 +389,43 @@ export function FilterChipRow({
 /* ---------- 목록 ---------- */
 
 /** 한 줄 숫자: 도보 N분 | 9천 원대 추정 | 👍 87%. 문자 구분자 없이 얇은 세로선 (CLAUDE.md 9장) */
+/**
+ * 시트 머리의 "N곳 숨김"(기피 음식, 다시 안 갈 곳, 2026-10-31 결정). 작은 글자, 터치 영역은 44px.
+ * 로그인했으면 나 탭 설정으로 가는 링크, 둘러보기면 글자만(설정할 곳이 없다).
+ */
+export function HiddenNote({
+  count,
+  href,
+}: {
+  count: number;
+  href: string | null;
+}) {
+  if (count === 0) return null;
+  const cls = "shrink-0 type-caption text-muted-foreground";
+  if (href === null) {
+    return (
+      <span className={cls}>
+        <span aria-hidden>{copy.hidden.short(count)}</span>
+        <span className="sr-only">{copy.hidden.guestLabel(count)}</span>
+      </span>
+    );
+  }
+  return (
+    <Link
+      href={href}
+      aria-label={copy.hidden.linkLabel(count)}
+      className={cn(
+        cls,
+        "rounded-sm underline decoration-border underline-offset-4 hover:text-foreground",
+        hitArea44,
+        focusRing,
+      )}
+    >
+      {copy.hidden.short(count)}
+    </Link>
+  );
+}
+
 export function NumbersInline({ place }: { place: MapPlace }) {
   const price = priceBandParts(place.priceKRW);
   const total = place.thumbs.up + place.thumbs.down;
@@ -485,7 +523,11 @@ export function PlaceList({
 
 /* ---------- 상태 ---------- */
 
-export function ListLoading({ label = copy.states.loading }: { label?: string }) {
+export function ListLoading({
+  label = copy.states.loading,
+}: {
+  label?: string;
+}) {
   return (
     <LoadingRegion label={label} className="flex flex-col gap-3">
       <ListSkeleton bare rows={4} />
@@ -527,7 +569,11 @@ export function EmptyBlock({
         title={e.filteredTitle}
         body={e.filteredBody}
         visual={<CategoryIllustration slug="hansik" size={72} />}
-        action={{ label: e.filteredAction, onClick: onReset, variant: "primary" }}
+        action={{
+          label: e.filteredAction,
+          onClick: onReset,
+          variant: "primary",
+        }}
         headingLevel="h2"
       />
     );
@@ -633,12 +679,20 @@ export function NeedLocationBlock({
         visual={<StateGlyph icon={MapPinOff} />}
         action={
           signedIn
-            ? { label: t.addOffice, href: "/me/offices/new", variant: "primary" }
+            ? {
+                label: t.addOffice,
+                href: "/me/offices/new",
+                variant: "primary",
+              }
             : { label: t.saveOffice, onClick: onSaveOffice, variant: "primary" }
         }
         headingLevel="h2"
       />
-      <button type="button" onClick={onRetry} className={cn(secondaryText, "mt-4")}>
+      <button
+        type="button"
+        onClick={onRetry}
+        className={cn(secondaryText, "mt-4")}
+      >
         {t.retry}
       </button>
     </StateCard>
@@ -666,4 +720,3 @@ export function MapFailedNote({ onRetry }: { onRetry: () => void }) {
     </div>
   );
 }
-

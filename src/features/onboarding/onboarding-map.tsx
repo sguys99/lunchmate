@@ -320,7 +320,7 @@ export function OnboardingMap({
           className="size-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
         >
           {/* 네이버 SDK가 지도 요소에 position: relative를 덮어쓰므로 크기로 채운다 */}
-          <div ref={containerRef} className="size-full" />
+          <div ref={containerRef} className="lm-map-tiles size-full" />
         </div>
         {status === "loading" ? (
           <div

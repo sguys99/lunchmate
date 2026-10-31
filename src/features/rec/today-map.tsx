@@ -174,7 +174,7 @@ function LiveMap({ view }: { view: TodayMapView }) {
     // 지도 요소는 SDK가 크기를 인라인으로 박는다. 칸 크기에 영향을 주지 않게 absolute 틀 안에 둔다(2fr 3fr 격자가 늘어나지 않게)
     <div className="relative min-h-64 flex-1 overflow-hidden border-l border-border bg-muted">
       <div className="absolute inset-0">
-        <div ref={containerRef} className="size-full" />
+        <div ref={containerRef} className="lm-map-tiles size-full" />
       </div>
     </div>
   );

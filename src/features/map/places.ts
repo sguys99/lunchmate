@@ -5,11 +5,16 @@
 // - 도보 분은 검색 기준점(회사 핀, 현위치, 다시 찾기의 지도 가운데)에서 다시 잰다. 기준점 좌표도 메모리에만 있다.
 // - 가격, 👍는 place_id에 붙는 우리 집계(6단계)다. 그 전에는 카테고리 추정가와 빈 👍(콜드 스타트)다.
 import { straightDistanceM } from "@/features/rec/candidates";
-import { kakaoCategorySlug } from "@/features/rec/kakao-category";
+import {
+  kakaoCategorySlug,
+  kakaoCategoryText,
+} from "@/features/rec/kakao-category";
 import type { CategorySlug } from "@/features/place/categories";
 import { resolvePrice } from "@/features/place/price-estimate";
 import { walkMinutesFromMeters } from "@/lib/format";
 import type { KakaoRestaurant } from "@/lib/kakao/local";
+import { personalFilterReason } from "@/lib/reco/filter";
+import type { AvoidRule } from "@/lib/reco/types";
 import type { LatLng } from "@/lib/map/types";
 import type { Meal } from "@/lib/time";
 
@@ -98,4 +103,39 @@ export function toMapPlaces(
     .sort(
       (a, b) => a.distanceM - b.distanceM || a.name.localeCompare(b.name, "ko"),
     );
+}
+
+export type HiddenPlaces = {
+  visible: KakaoRestaurant[];
+  /** 기피 음식이나 다시 안 갈 곳이라 숨긴 수(각 식당은 처음 걸린 규칙 하나에만 센다) */
+  hidden: { avoid: number; blocked: number };
+};
+
+/**
+ * 지도에서도 기피 음식과 다시 안 갈 곳을 숨긴다(2026-10-31 사용자 결정). 추천 하드 필터와 같은 판정(personalFilterReason)이다.
+ * 지도는 탐색이라 폐업 제보, 예산 초과는 숨기지 않는다. 비로그인 둘러보기는 blocked가 비어 있고 avoid는 쿼리 칩(T4.20)뿐이다.
+ */
+export function hidePersonal(
+  places: readonly KakaoRestaurant[],
+  rules: { avoid: readonly AvoidRule[]; blocked: ReadonlySet<string> },
+): HiddenPlaces {
+  const hidden = { avoid: 0, blocked: 0 };
+  if (rules.avoid.length === 0 && rules.blocked.size === 0)
+    return { visible: [...places], hidden };
+  const visible: KakaoRestaurant[] = [];
+  for (const p of places) {
+    const reason = personalFilterReason(
+      {
+        id: p.id,
+        name: p.name,
+        category: kakaoCategorySlug(p.categoryName),
+        categoryText: kakaoCategoryText(p.categoryName),
+      },
+      rules.avoid,
+      rules.blocked,
+    );
+    if (reason === null) visible.push(p);
+    else hidden[reason] += 1;
+  }
+  return { visible, hidden };
 }

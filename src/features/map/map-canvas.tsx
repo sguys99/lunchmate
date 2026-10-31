@@ -89,9 +89,7 @@ export type MapCanvasProps = {
 
 async function loadProvider(kind: MapProviderKind): Promise<MapProvider> {
   if (kind === "lab") {
-    const m = await import(
-      "@/features/design-lab/map/shared/lab-map-provider"
-    );
+    const m = await import("@/features/design-lab/map/shared/lab-map-provider");
     return m.createLabMapProvider();
   }
   const m = await import("@/lib/naver/naver-map-provider");
@@ -179,7 +177,8 @@ export function MapCanvas({
   }, [reportView]);
   useEffect(
     () => () => {
-      if (settleTimer.current !== null) window.clearTimeout(settleTimer.current);
+      if (settleTimer.current !== null)
+        window.clearTimeout(settleTimer.current);
     },
     [],
   );
@@ -412,7 +411,7 @@ export function MapCanvas({
         onKeyDown={onKeyDown}
         // 네이버 지도가 요소에 position: relative를 넣으므로 크기는 inset이 아니라 size-full로 잡는다
         className={cn(
-          "absolute inset-0 size-full",
+          "lm-map-tiles absolute inset-0 size-full",
           focusRing,
           "focus-visible:outline-offset-[-3px]",
         )}

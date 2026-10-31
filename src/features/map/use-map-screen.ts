@@ -46,7 +46,7 @@ import {
 import type { MapView } from "./map-canvas";
 import type { SheetSnap } from "./map-sheet";
 import type { MapData } from "./load-map";
-import { toMapPlaces } from "./places";
+import { hidePersonal, toMapPlaces } from "./places";
 import {
   INITIAL_MAP_LOAD,
   expandedWalk,
@@ -146,16 +146,53 @@ export function useMapScreen(data: MapData) {
     [client],
   );
 
-  const places = useMemo(() => {
-    if (!result || !searchCenter) return null;
+  /* ---------- 기피 음식, 다시 안 갈 곳 숨기기 (2026-10-31 사용자 결정, 추천 하드 필터와 같은 판정) ---------- */
+
+  const initialBlocked = useMemo(() => new Set(data.blocked), [data.blocked]);
+
+  const { places, hidden } = useMemo(() => {
+    if (!result || !searchCenter)
+      return { places: null, hidden: { avoid: 0, blocked: 0 } };
+    const userState = (id: string) =>
+      client.getQueryData<PlaceUserState>(placeUserStateKey(id));
+    // 상세에서 바꾼 값(캐시)이 있으면 그 값, 없으면 서버가 준 첫 값
+    const blocked = new Set(
+      result.places
+        .filter((p) => {
+          const s = userState(p.id);
+          return s?.signedIn ? s.blocked : initialBlocked.has(p.id);
+        })
+        .map((p) => p.id),
+    );
+    const split = hidePersonal(result.places, { avoid: data.avoid, blocked });
     const isFavorite = (id: string) => {
-      const s = client.getQueryData<PlaceUserState>(placeUserStateKey(id));
+      const s = userState(id);
       return s?.signedIn ? s.favorite : initialFavorites.has(id);
     };
-    return toMapPlaces(result.places, searchCenter, { meal, isFavorite });
-    // favVersion: 즐겨찾기 캐시가 바뀌면 다시 계산
+    return {
+      places: toMapPlaces(split.visible, searchCenter, { meal, isFavorite }),
+      hidden: split.hidden,
+    };
+    // favVersion: 즐겨찾기, 다시 안 갈 곳 캐시가 바뀌면 다시 계산
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result, searchCenter?.lat, searchCenter?.lng, meal, client, initialFavorites, favVersion]);
+  }, [
+    result,
+    searchCenter?.lat,
+    searchCenter?.lng,
+    meal,
+    client,
+    initialFavorites,
+    initialBlocked,
+    data.avoid,
+    favVersion,
+  ]);
+  const hiddenCount = hidden.avoid + hidden.blocked;
+  // 나 탭에서 고칠 곳. 기피 음식으로 숨긴 것이 있으면 기피 음식 설정, 다시 안 갈 곳 목록(T6.13) 전에는 나 탭 첫 화면
+  const hiddenHref: string | null = !data.signedIn
+    ? null
+    : hidden.avoid > 0
+      ? "/me/avoid"
+      : "/me";
 
   /* ---------- 필터 (MAP-03) ---------- */
 
@@ -344,6 +381,8 @@ export function useMapScreen(data: MapData) {
     meal,
     budgetKRW,
     places: places ?? [],
+    hiddenCount,
+    hiddenHref,
     filtered,
     filters,
     filterCount,

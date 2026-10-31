@@ -14,14 +14,31 @@ export const CLOSED_REPORT_THRESHOLD = 3;
 
 export type FilterReason = keyof FilterCounts;
 
+/** 사용자 본인 기준으로 늘 빼는 규칙(기피 음식, 다시 안 갈 곳). 추천과 지도 탭이 함께 쓴다 */
+export type PersonalFilterReason = Extract<FilterReason, "avoid" | "blocked">;
+
+/**
+ * 기피 음식 → 다시 안 갈 곳만 본다. 통과하면 null.
+ * 지도 탭(탐색)은 이것만 적용하고 폐업, 예산 초과는 적용하지 않는다(2026-10-31 사용자 결정).
+ */
+export function personalFilterReason(
+  c: Pick<Candidate, "id" | "name" | "categoryText" | "category">,
+  avoid: RecoSettings["avoid"],
+  blocked: RecoHistory["blocked"],
+): PersonalFilterReason | null {
+  if (matchesAvoid(c, avoid)) return "avoid";
+  if (blocked.has(c.id)) return "blocked";
+  return null;
+}
+
 /** 걸린 첫 규칙. 통과하면 null */
 export function hardFilterReason(
   c: Candidate,
   settings: Pick<RecoSettings, "avoid" | "budgetKRW">,
   history: Pick<RecoHistory, "blocked">,
 ): FilterReason | null {
-  if (matchesAvoid(c, settings.avoid)) return "avoid";
-  if (history.blocked.has(c.id)) return "blocked";
+  const personal = personalFilterReason(c, settings.avoid, history.blocked);
+  if (personal !== null) return personal;
   if (c.closedReports >= CLOSED_REPORT_THRESHOLD) return "closed";
   // 예산 초과는 실제 제보 가격이 있을 때만. 카테고리 추정가로는 빼지 않는다(점수 B에서만 반영)
   if (

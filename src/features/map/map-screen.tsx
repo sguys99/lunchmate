@@ -46,6 +46,7 @@ import {
   EmptyBlock,
   FilterChipRow,
   HeaderSkeleton,
+  HiddenNote,
   KakaoErrorBlock,
   ListLoading,
   LoadFailedBlock,
@@ -200,9 +201,7 @@ export function MapScreen({
 
   /* ---------- 시트 머리와 본문 ---------- */
 
-  const header = (
-    <SheetHeader s={s} onToggleFilter={onToggleFilter} />
-  );
+  const header = <SheetHeader s={s} onToggleFilter={onToggleFilter} />;
   const body = <SheetBody s={s} detailRef={detailRef} />;
 
   /* ---------- 지도 실패: 목록 보기 (T5.32) ---------- */
@@ -248,7 +247,13 @@ export function MapScreen({
     : { top: TOP_INSET_PX, bottom: Math.round(stageH * HALF_RATIO) };
 
   const canvas = (
-    <MapLayer s={s} inset={inset} reduced={reduced} providerKind={providerKind} desktop={desktop} />
+    <MapLayer
+      s={s}
+      inset={inset}
+      reduced={reduced}
+      providerKind={providerKind}
+      desktop={desktop}
+    />
   );
 
   return (
@@ -258,7 +263,9 @@ export function MapScreen({
         className="relative h-[calc(100dvh-var(--lm-layout-tab-bar-height)-env(safe-area-inset-bottom,0px)-env(safe-area-inset-top,0px))] min-h-[30rem] overflow-hidden desktop:flex desktop:h-auto desktop:min-h-0 desktop:flex-1 desktop:flex-col desktop:overflow-visible"
       >
         {desktop ? (
-          desktopTarget ? createPortal(canvas, desktopTarget) : null
+          desktopTarget ? (
+            createPortal(canvas, desktopTarget)
+          ) : null
         ) : (
           <div className="absolute inset-0">{canvas}</div>
         )}
@@ -298,7 +305,8 @@ function Frame({
     <div
       className={cn(
         "flex min-w-0 flex-1 flex-col",
-        list && "mx-auto w-full max-w-(--lm-layout-max-width) desktop:max-w-none",
+        list &&
+          "mx-auto w-full max-w-(--lm-layout-max-width) desktop:max-w-none",
       )}
     >
       <h1 className="sr-only">{copy.screenTitle}</h1>
@@ -366,8 +374,11 @@ function SheetHeader({
             ? copy.countFiltered(s.filtered.length)
             : copy.count(s.walk, s.places.length, s.capped)}
         </h2>
-        <span className="shrink-0 type-caption text-muted-foreground">
-          {copy.sortHint}
+        <span className="ml-auto flex shrink-0 items-baseline gap-3">
+          <HiddenNote count={s.hiddenCount} href={s.hiddenHref} />
+          <span className="type-caption text-muted-foreground">
+            {copy.sortHint}
+          </span>
         </span>
       </div>
       {!s.online ? (
@@ -500,7 +511,10 @@ function MapLayer({
         position: g.position,
         zIndex: 20,
         node: (
-          <ClusterPill count={g.ids.length} onOpen={() => s.openCluster(g.ids)} />
+          <ClusterPill
+            count={g.ids.length}
+            onOpen={() => s.openCluster(g.ids)}
+          />
         ),
       });
     }
@@ -514,7 +528,9 @@ function MapLayer({
     <MapCanvas
       key={s.mapLoad.attempt}
       providerKind={providerKind}
-      initialCenter={s.searchCenter ?? base.center ?? { lat: 37.5665, lng: 126.978 }}
+      initialCenter={
+        s.searchCenter ?? base.center ?? { lat: 37.5665, lng: 126.978 }
+      }
       circles={circles}
       markers={s.loadingPlaces ? markers.slice(0, 1) : markers}
       fit={s.fit}

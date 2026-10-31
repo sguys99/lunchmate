@@ -353,3 +353,24 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: var(--lm-numeric-features);
 }
+
+/*
+ * 다크 모드 지도 타일 (2026-10-31 사용자 결정, DESIGN.md 5장 "지도"). 네이버 지도 v3에는 다크 스타일이 없어
+ * 래스터 타일 이미지에만 밝기 필터를 걸어 눈부심을 줄인다. 지도를 띄우는 요소에 lm-map-tiles를 붙인다
+ * (지도 탭 map-canvas, 홈 데스크톱 today-map, 온보딩 onboarding-map).
+ * - 대상은 타일 <img>(주소에 /styles/<스타일>/가 든 네이버 래스터 타일)뿐이다. 마커(알약), 원(SVG), 시트, 칩,
+ *   네이버 로고(static.naver.net/maps/mantle)와 저작권 글자는 필터 밖이라 그대로 보인다.
+ * - 다크 판정은 dark: 변형과 같다: 시스템 설정(prefers-color-scheme)과 앱 화면 설정(<html class="dark|light">, lm-ui-prefs).
+ * - 타일이 오기 전 보이는 네이버 기본 배경(밝은 회색, 인라인 스타일)도 다크에서는 muted 토큰으로 덮는다.
+ */
+.lm-map-tiles {
+  --lm-map-tile-brightness: 0.85;
+  @variant dark {
+    background-color: var(--muted) !important;
+  }
+}
+.lm-map-tiles img[src*="/styles/"] {
+  @variant dark {
+    filter: brightness(var(--lm-map-tile-brightness));
+  }
+}

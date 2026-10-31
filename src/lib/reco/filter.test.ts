@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { applyHardFilters, hardFilterReason } from "./filter";
+import {
+  applyHardFilters,
+  hardFilterReason,
+  personalFilterReason,
+} from "./filter";
 import {
   BASE_SETTINGS,
   EMPTY_HISTORY,
@@ -131,5 +135,19 @@ describe("AC-REC-1 (필터 단계): 기피로 지정한 식당은 통과 목록�
     expect(r.kept.map((c) => c.id)).not.toEqual(expect.arrayContaining(["x1"]));
     for (const c of r.kept) expect(c.id.startsWith("x")).toBe(false);
     expect(r.filtered.avoid).toBe(3);
+  });
+});
+
+describe("본인 기준 필터 (지도 탭 공용, 2026-10-31)", () => {
+  it("기피 → 다시 안 갈 곳만 보고 폐업, 예산은 보지 않는다", () => {
+    const c = makeCandidate("x", {
+      categoryText: "한식 > 회",
+      closedReports: 5,
+      priceReport: { medianKRW: 50_000, count: 3 },
+    });
+    const avoid = [{ kind: "food" as const, value: "회" }];
+    expect(personalFilterReason(c, avoid, new Set(["x"]))).toBe("avoid");
+    expect(personalFilterReason(c, [], new Set(["x"]))).toBe("blocked");
+    expect(personalFilterReason(c, [], new Set())).toBeNull();
   });
 });

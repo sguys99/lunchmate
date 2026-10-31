@@ -47,6 +47,13 @@ export const mapCopy = {
   count: (minutes: number, n: number, capped: boolean) =>
     capped ? `도보 ${minutes}분 안 ${n}곳 이상` : `도보 ${minutes}분 안 ${n}곳`,
   countFiltered: (n: number) => `조건에 맞는 ${n}곳`,
+  /** 기피 음식, 다시 안 갈 곳이라 지도에서 뺀 수(2026-10-31 결정). 누르면 나 탭 설정 */
+  hidden: {
+    short: (n: number) => `${n}곳 숨김`,
+    linkLabel: (n: number) =>
+      `기피 음식과 다시 안 갈 곳 ${n}곳을 숨겼습니다. 나 탭 설정에서 바꿀 수 있습니다.`,
+    guestLabel: (n: number) => `기피 음식 ${n}곳을 숨겼습니다.`,
+  },
   sortHint: "가까운 순",
 
   /** 필터 (MAP-03) */
@@ -131,7 +138,8 @@ export const mapCopy = {
     },
     needLocation: {
       title: "기준 위치를 알 수 없습니다",
-      denied: "위치 권한을 허용하면 현위치 주변을 보여 드립니다. 회사 위치를 저장해 둘까요?",
+      denied:
+        "위치 권한을 허용하면 현위치 주변을 보여 드립니다. 회사 위치를 저장해 둘까요?",
       unavailable: "현위치를 찾지 못했습니다. 회사 위치를 저장해 둘까요?",
       retry: "현위치 다시 찾기",
       addOffice: "회사 위치 추가",
