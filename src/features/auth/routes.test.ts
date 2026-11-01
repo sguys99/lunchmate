@@ -16,6 +16,7 @@ describe("isProtectedPath (T4.8)", () => {
     "/poll/",
     "/poll/new",
     "/poll/new/x",
+    "/poll/party",
     "/welcome/terms",
     "/admin",
     "/admin/places",

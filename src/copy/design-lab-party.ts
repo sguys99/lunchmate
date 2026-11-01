@@ -4,10 +4,9 @@
 import { formatPriceBand, formatShortWon } from "@/lib/format";
 
 export const partyLabCopy = {
+  /** G7(D-16)에서 C를 골랐다. A, B 화면은 지웠다 */
   names: {
-    a: "시안 A 조건 한 장",
-    b: "시안 B 한 질문씩, 나란히 비교",
-    c: "시안 C 결과 먼저",
+    c: "회식 모드 시안 C 결과 먼저 (선택안)",
   },
   index: {
     title: "회식 모드 시안 (T7.3)",

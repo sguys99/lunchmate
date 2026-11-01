@@ -25,16 +25,15 @@ const QUERIES = [
   "?state=offline",
   "?view=results&state=offline",
 ];
-const EXTRA: Record<"a" | "b" | "c", string[]> = {
-  a: [],
-  b: ["?q=2", "?q=3", "?q=4", "?q=4&state=offline"],
+// G7(D-16)에서 C만 남겼다(A, B 화면 삭제)
+const EXTRA: Record<"c", string[]> = {
   c: ["?edit=people", "?edit=budget", "?edit=room", "?active=2"],
 };
 
 for (const theme of ["light", "dark"] as GalleryTheme[]) {
   test.describe(`회식 모드 시안, 테마 ${theme}`, () => {
     test.use({ colorScheme: theme, reducedMotion: "reduce" });
-    for (const v of ["a", "b", "c"] as const) {
+    for (const v of ["c"] as const) {
       for (const q of [...QUERIES, ...EXTRA[v]]) {
         test(`party/${v}${q}`, async ({ page }) => {
           test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");

@@ -26,8 +26,8 @@ export const HOME_PATH = "/today";
 const PROTECTED_ROOTS = ["/me", "/welcome", "/admin"] as const;
 /** 정확히 이 경로만 로그인 필요 (하위는 개별 규칙) */
 const PROTECTED_EXACT = ["/poll"] as const;
-/** 하위 경로까지 로그인 필요한 투표 경로 */
-const PROTECTED_POLL_CHILDREN = ["/poll/new"] as const;
+/** 하위 경로까지 로그인 필요한 투표 경로. 회식 모드(/poll/party, D-16)는 사무실 핀과 내 기록을 읽는다 */
+const PROTECTED_POLL_CHILDREN = ["/poll/new", "/poll/party"] as const;
 
 function underRoot(pathname: string, root: string): boolean {
   return pathname === root || pathname.startsWith(`${root}/`);

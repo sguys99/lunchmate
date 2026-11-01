@@ -34,7 +34,6 @@ import {
   type Evidence,
   type EvidenceStatus,
   type PartyCandidate,
-  type PartyConditions,
 } from "./mock";
 
 /** 기본 border-transparent와 variant 테두리색이 겹쳐 cn으로 정리한다 */
@@ -737,15 +736,6 @@ export function ColdNote({ className }: { className?: string }) {
   );
 }
 
-/** 오프라인일 때 조건 입력 화면의 한 줄 */
-export function OfflineFormLine() {
-  return (
-    <p role="status" className="mb-3 type-body-sm text-muted-foreground">
-      {copy.states.offlineFormLine}
-    </p>
-  );
-}
-
 /** 스크린 리더 알림 자리 */
 export function LiveNote({ message }: { message: string }) {
   return (
@@ -753,14 +743,4 @@ export function LiveNote({ message }: { message: string }) {
       {message}
     </p>
   );
-}
-
-/** 조건 요약 문장 조각 */
-export function conditionTokens(cond: PartyConditions): string[] {
-  return [
-    copy.summary.headcount(cond.headcount),
-    copy.summary.budget(cond.budget),
-    cond.room ? copy.summary.room : copy.summary.roomOff,
-    cond.alcohol ? copy.summary.alcohol : copy.summary.alcoholOff,
-  ];
 }

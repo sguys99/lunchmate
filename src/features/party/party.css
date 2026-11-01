@@ -1,0 +1,65 @@
+/* 회식 모드 지도 핀 (T7.27, DESIGN.md 5장 "회식 모드" 지도 띠).
+ * 회사 기준점은 마름모, 후보는 번호 원 28. 고른 핀만 올리브 면 + 이름 알약(데스크톱). 색은 토큰만 쓴다. */
+.lm-party-base {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--foreground);
+  background: var(--background);
+  transform: rotate(45deg) scale(0.72);
+  box-shadow: 0 0 0 3px var(--background);
+}
+
+.lm-party-pin {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.lm-party-pin-num {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in oklch, var(--foreground) 40%, transparent);
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  box-shadow: 0 0 0 3px var(--background);
+  transition:
+    background-color var(--lm-duration-fast) var(--lm-ease-standard),
+    color var(--lm-duration-fast) var(--lm-ease-standard),
+    border-color var(--lm-duration-fast) var(--lm-ease-standard);
+}
+.lm-party-pin[data-active="true"] {
+  z-index: 1;
+}
+.lm-party-pin[data-active="true"] .lm-party-pin-num {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.lm-party-pin-label {
+  max-width: 10rem;
+  overflow: hidden;
+  padding: 2px 10px;
+  border: 1px solid var(--primary);
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-party-pin-num {
+    transition: none !important;
+  }
+}
