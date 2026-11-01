@@ -23,6 +23,9 @@ export const designLabCopy = {
     pocBody:
       "스와이프 스택, 바텀시트 스냅, 셔플, 결정 축하, 숫자 롤링, 랜딩 효과를 따로 시험합니다. 각 화면에서 모션 줄이기를 켤 수 있습니다.",
     pocLink: "PoC 목록",
+    g7Title: "7단계 투표와 회식 시안 (T7.1~T7.4)",
+    g7Body:
+      "투표방, 투표 만들기, 회식 모드, 공유 이미지를 세 안씩 비교합니다. 게이트(T7.5)에서 고른 안만 남깁니다.",
     homeTitle: "오늘(홈) (G3 선택안 D1)",
     homeBody:
       "오늘의 한 곳 큰 카드, 대안 두 곳, 머리 아래 어제 피드백 한 줄 띠입니다. 상태는 ?state=loading, empty, error, offline, 확인용으로 ?deck=overflow, ?feedback=none, ?seed=7을 붙입니다.",

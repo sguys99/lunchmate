@@ -6,6 +6,10 @@ import { feedbackLabCopy } from "@/copy/design-lab-feedback";
 import { meLabCopy } from "@/copy/design-lab-me";
 import { placeLabCopy } from "@/copy/design-lab-place";
 import { reportLabCopy } from "@/copy/design-lab-report";
+import { pollLabCopy } from "@/copy/design-lab-poll";
+import { pollCreateLabCopy } from "@/copy/design-lab-poll-create";
+import { partyLabCopy } from "@/copy/design-lab-party";
+import { shareLabCopy } from "@/copy/design-lab-share";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
@@ -49,6 +53,30 @@ export default function DesignLabPage() {
         <Link href="/design-lab/home/d1" className={linkClass}>
           {copy.homeLink}
         </Link>
+      </Section>
+
+      {/* 7단계 시안(T7.1~T7.4): 게이트 T7.5 뒤 고른 안만 남긴다 */}
+      <Section title={copy.g7Title} body={copy.g7Body}>
+        {(
+          [
+            ["poll", pollLabCopy.names],
+            ["poll-create", pollCreateLabCopy.names],
+            ["party", partyLabCopy.names],
+            ["share", shareLabCopy.names],
+          ] as const
+        ).map(([route, names]) => (
+          <div key={route} className="flex flex-wrap gap-4">
+            {(["a", "b", "c"] as const).map((id) => (
+              <Link
+                key={id}
+                href={`/design-lab/${route}/${id}`}
+                className={linkClass}
+              >
+                {names[id]}
+              </Link>
+            ))}
+          </div>
+        ))}
       </Section>
 
       {/* 6단계 시안(T6.4): 고른 안만 남기고 나머지는 지웠다(캡처와 비교 문서만 남김, D-11~D-13) */}
