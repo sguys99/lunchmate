@@ -15,13 +15,13 @@ import { placeUserStateAction, setFavoriteAction } from "../actions";
 import { startDirections, type DirectionsSource } from "../directions-flow";
 import type { DirectionsResult } from "../launch-directions";
 import type { PlaceUserState } from "../place-requests";
+import { placeUserStateKey } from "./user-state-key";
 
 const copy = placeCopy;
 
 export type { DirectionsSource } from "../directions-flow";
 
-export const placeUserStateKey = (placeId: string) =>
-  ["place-user-state", placeId] as const;
+export { placeUserStateKey };
 
 /** 상세를 열 때 즐겨찾기 상태. 서버 액션이라 세션 쿠키로 판정한다 */
 export function usePlaceUserState(placeId: string, enabled = true) {

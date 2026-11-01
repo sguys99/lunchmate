@@ -16,7 +16,7 @@ import {
 } from "react";
 import { mapCopy } from "@/copy/map";
 import { locateOnce } from "@/features/onboarding/geolocation";
-import { placeUserStateKey } from "@/features/place/detail";
+import { placeUserStateKey } from "@/features/place/detail/user-state-key";
 import type { PlaceUserState } from "@/features/place/place-requests";
 import type { CategorySlug } from "@/features/place/categories";
 import {

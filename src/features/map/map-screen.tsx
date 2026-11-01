@@ -22,12 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { focusRing } from "@/components/ui/interaction";
 import { mapCopy } from "@/copy/map";
 import { useLoginOpen, useLoginPrompt } from "@/features/auth/login-prompt";
-import {
-  PlaceDetail,
-  PlaceDetailActions,
-  PlaceDetailBody,
-  type PlaceDetailProps,
-} from "@/features/place/detail";
+import type { PlaceDetailProps } from "@/features/place/detail/place-detail";
 import { useReducedMotion } from "@/features/rec/use-reduced-motion";
 import { naverPlaceSearchUrl } from "@/lib/naver/directions";
 import { cn } from "@/lib/utils";
@@ -40,6 +35,12 @@ import {
   type MapProviderKind,
 } from "./map-canvas";
 import { MAP_SHEET_ID, MapSheet } from "./map-sheet";
+import {
+  MapPlaceDetail,
+  MapPlaceDetailActions,
+  MapPlaceDetailBody,
+  preloadPlaceDetail,
+} from "./place-detail-lazy";
 import {
   BaseChip,
   BaseMarker,
@@ -227,14 +228,32 @@ export function MapScreen({
   useTabFold(folding, () => s.sheetEvent("tabFocus"));
 
   // 식당을 고르면 상세 제목으로 초점을 옮긴다(지도 조작의 대체 수단, DESIGN.md 5장 접근성)
+  // 상세 본문은 지연 로딩이라(place-detail-lazy.tsx) 아직 받는 중이면 제목이 생길 때 옮긴다
   const selectedId = s.selected?.id ?? null;
   useEffect(() => {
     if (!selectedId) return;
-    const h = detailRef.current?.querySelector<HTMLElement>("h2");
-    if (!h) return;
-    h.tabIndex = -1;
-    h.focus({ preventScroll: true });
+    const root = detailRef.current;
+    if (!root) return;
+    const focusTitle = () => {
+      const h = root.querySelector<HTMLElement>("h2");
+      if (!h) return false;
+      h.tabIndex = -1;
+      h.focus({ preventScroll: true });
+      return true;
+    };
+    if (focusTitle()) return;
+    const mo = new MutationObserver(() => {
+      if (focusTitle()) mo.disconnect();
+    });
+    mo.observe(root, { childList: true, subtree: true });
+    return () => mo.disconnect();
   }, [selectedId]);
+
+  // 식당 목록이 뜨면 상세 본문을 유휴 시점에 미리 받는다(첫 로드에서 뺀 몫, T8.10)
+  const placesReady = !s.loadingPlaces && s.places.length > 0;
+  useEffect(() => {
+    if (placesReady) preloadPlaceDetail();
+  }, [placesReady]);
 
   function onToggleFilter(key: Parameters<MapScreenState["toggleFilter"]>[0]) {
     // 즐겨찾기는 로그인한 사용자만(둘러보기는 로그인 유도)
@@ -297,7 +316,7 @@ export function MapScreen({
           {s.selected ? (
             <div ref={detailRef} className="flex flex-col gap-2">
               <BackButton onClick={() => s.select(null)} />
-              <PlaceDetail
+              <MapPlaceDetail
                 {...detailProps(s, s.selected, pollEntry)}
                 footerClassName="bottom-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] bg-background"
               />
@@ -388,7 +407,9 @@ export function MapScreen({
           lowLine={<LowLine s={s} />}
           footer={
             s.selected ? (
-              <PlaceDetailActions {...detailProps(s, s.selected, pollEntry)} />
+              <MapPlaceDetailActions
+                {...detailProps(s, s.selected, pollEntry)}
+              />
             ) : null
           }
           bodyClassName="px-(--lm-layout-gutter) desktop:px-10"
@@ -547,7 +568,7 @@ function SheetBody({
   if (s.selected) {
     return (
       <div ref={detailRef} key={s.selected.id} className="lm-map-rise">
-        <PlaceDetailBody {...detailProps(s, s.selected, pollEntry)} />
+        <MapPlaceDetailBody {...detailProps(s, s.selected, pollEntry)} />
       </div>
     );
   }
