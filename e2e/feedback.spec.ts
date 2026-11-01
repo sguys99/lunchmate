@@ -7,7 +7,7 @@
 //   방문일(visited_on)은 서버가 오늘로 정하므로 준비 단계에서만 secret 키로 어제로 옮긴다(RLS 테스트 adminPatch와 같은 방식).
 //   화면과 단언은 사용자 세션(RLS 적용)으로 한다(CLAUDE.md 7.1).
 // - 카카오 SDK는 가짜(음식점 45곳)라 띠의 이름은 세션 메모리에서 찾는다(T5.12a 1단계).
-// - "피드백 제출 후 다음 추천 변화"(T6.30)는 이 파일 범위 밖이다.
+// - "피드백 제출 후 다음 추천 변화"(T6.30)는 e2e/feedback-reco.spec.ts가 맡는다.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";

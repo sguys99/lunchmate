@@ -30,7 +30,8 @@ async function shot(page: Page, name: string) {
   await settle(page);
   const project = test.info().project.name;
   await page.screenshot({
-    path: `${shotsDir}/${name}__${project}.png`,
+    // 6단계 캡처 이름(feedback-live, report-live와 같은 꼴): me-live__<화면>__<프로젝트>.png
+    path: `${shotsDir}/me-live__${name.replace(/^me-/, "")}__${project}.png`,
     fullPage: true,
   });
 }
