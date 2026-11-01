@@ -908,6 +908,7 @@ export function TodayScreen({
             meal={meal}
             budgetKRW={budgetKRW}
             origin={origin}
+            pollEntry={showEntries}
           />
         </Suspense>
       ) : null}

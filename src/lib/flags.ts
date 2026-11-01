@@ -49,14 +49,17 @@ export const FLAGS = {
       "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 초안 /terms와 /privacy, 계정 /me/account, proxy의 경로 보호와 약관 확인. 약관 최종 전문과 실기기 확인(T4.14) 전까지 프로덕션에서 숨김.",
     default: false,
     source: { type: "const", value: true },
-    owner: "T4.6 (해제: T4.11, T4.12 완료 후)",
+    owner:
+      "T4.6 (해제: T4.11, T4.12 완료 후. 해제할 때 pollEntry의 productionOff도 함께 지운다, T7.35)",
     productionOff: true,
   },
   pollEntry: {
-    description: "홈과 상세의 투표 관련 진입점 (친구랑 정하기, 회식 모드 등).",
+    description:
+      "홈과 상세의 투표 관련 진입점과 투표 화면 (친구랑 정하기, 회식 모드, 투표에 추가, 투표 탭, 투표방). 2026-11-01 T7.35에서 개발과 Preview는 켬. 투표는 로그인이 필요하므로 프로덕션은 auth와 함께 연다(사용자 결정): auth의 productionOff를 지울 때 이 플래그의 productionOff도 함께 지운다. 서버에서 판정해 props로 내려준다(브라우저 판정은 늘 꺼짐).",
     default: false,
-    source: { type: "const", value: false },
-    owner: "T5.20, T5.23 (해제 T7.35)",
+    source: { type: "const", value: true },
+    owner: "T5.20, T5.23 (해제 T7.35, 프로덕션은 auth 해제와 함께)",
+    productionOff: true,
   },
   betaFeedback: {
     description: "나 탭의 베타 전용 피드백 버튼.",

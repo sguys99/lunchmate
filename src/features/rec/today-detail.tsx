@@ -27,6 +27,8 @@ export type TodayDetailProps = {
   meal: Meal;
   budgetKRW: number;
   origin: DirectionsOrigin | null;
+  /** 투표 진입점 플래그(서버 판정, T7.35). 꺼지면 "투표에 추가"를 두지 않는다 */
+  pollEntry?: boolean;
 };
 
 export function detailContent(
@@ -54,21 +56,23 @@ export function detailContent(
     // 상세에서 길찾기를 눌러도 어제 피드백 띠를 접는다(T6.8, D-11 안건 2)
     onDirectionsLaunched: () =>
       useTodaySession.getState().patch({ directedOn: kstDateKey(new Date()) }),
-    // 투표에 추가(T7.12, D-15 안건 9). 메뉴 노출은 flags.pollEntry가 정한다(place-detail.tsx)
-    onAddToPoll: () =>
-      void import("@/features/poll/create/add-to-poll").then((m) =>
-        m.addPlaceToPoll(
-          {
-            placeId: card.id,
-            placeUrl: card.placeUrl,
-            name: card.name,
-            category: card.category,
-            position: card.position,
-          },
-          "detail",
-          p.meal,
-        ),
-      ),
+    // 투표에 추가(T7.12, D-15 안건 9). 서버가 판정한 pollEntry가 꺼지면 넘기지 않아 메뉴에 없다
+    onAddToPoll: !p.pollEntry
+      ? undefined
+      : () =>
+          void import("@/features/poll/create/add-to-poll").then((m) =>
+            m.addPlaceToPoll(
+              {
+                placeId: card.id,
+                placeUrl: card.placeUrl,
+                name: card.name,
+                category: card.category,
+                position: card.position,
+              },
+              "detail",
+              p.meal,
+            ),
+          ),
   };
 }
 

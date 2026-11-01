@@ -23,7 +23,6 @@ import {
   placeUserStateKey,
   useFavorite,
 } from "@/features/place/detail/use-place-actions";
-import { isEnabled } from "@/lib/flags";
 import type { TodayCard } from "./card-model";
 
 const copy = recCopy.cardActions;
@@ -154,7 +153,8 @@ export default function CardMenu({
       },
     },
   ];
-  if (onAddToPoll && isEnabled("pollEntry")) {
+  // 노출은 부르는 쪽이 정한다: 서버가 판정한 pollEntry가 켜질 때만 onAddToPoll을 넘긴다(T7.35, 브라우저 판정은 productionOff로 늘 꺼짐)
+  if (onAddToPoll) {
     actions.push({
       key: "poll",
       label: copy.addToPoll,

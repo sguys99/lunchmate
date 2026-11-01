@@ -45,7 +45,6 @@ import { placeKindToDb } from "@/features/report/flow";
 import { nowSummaryText } from "@/features/report/flow";
 import { useReportSheet } from "@/features/report/report-sheet";
 import { reportCopy } from "@/copy/report";
-import { isEnabled } from "@/lib/flags";
 import {
   NAVER_MAP_WEB,
   naverPlaceSearchUrl,
@@ -626,7 +625,8 @@ export function PlaceDetailActions({
       external: true,
     });
   }
-  if (onAddToPoll && isEnabled("pollEntry")) {
+  // 노출은 부르는 쪽이 정한다: 서버가 판정한 pollEntry가 켜질 때만 onAddToPoll을 넘긴다(T7.35)
+  if (onAddToPoll) {
     actions.push({
       key: "poll",
       label: copy.actions.addToPoll,

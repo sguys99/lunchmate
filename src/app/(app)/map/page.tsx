@@ -24,11 +24,16 @@ async function MapTab({
   const params = await searchParams;
   const data = await loadMap(params);
   const lab = isEnabled("designLab") && params.map === "lab";
+  const pollEntry = isEnabled("pollEntry");
   return (
     <>
-      <MapScreen data={data} providerKind={lab ? "lab" : "naver"} />
+      <MapScreen
+        data={data}
+        providerKind={lab ? "lab" : "naver"}
+        pollEntry={pollEntry}
+      />
       {/* 상세 "투표에 추가"(T7.12). 진입점 플래그가 켜질 때만 둔다(T7.35) */}
-      {isEnabled("pollEntry") ? <PollCreateHostSlot /> : null}
+      {pollEntry ? <PollCreateHostSlot /> : null}
     </>
   );
 }

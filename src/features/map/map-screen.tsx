@@ -28,7 +28,6 @@ import {
   PlaceDetailBody,
   type PlaceDetailProps,
 } from "@/features/place/detail";
-import { addPlaceToPoll } from "@/features/poll/create/add-to-poll";
 import { useReducedMotion } from "@/features/rec/use-reduced-motion";
 import { naverPlaceSearchUrl } from "@/lib/naver/directions";
 import { cn } from "@/lib/utils";
@@ -155,7 +154,11 @@ function baseName(s: MapScreenState): string {
   return s.base.kind === "office" ? s.base.office.name : copy.base.here;
 }
 
-function detailProps(s: MapScreenState, place: MapPlace): PlaceDetailProps {
+function detailProps(
+  s: MapScreenState,
+  place: MapPlace,
+  pollEntry: boolean,
+): PlaceDetailProps {
   const b = s.base;
   return {
     place: {
@@ -178,28 +181,35 @@ function detailProps(s: MapScreenState, place: MapPlace): PlaceDetailProps {
         : { kind: "current", name: copy.base.here, position: b.center }
       : null,
     headingLevel: "h2",
-    // 투표에 추가(T7.12, D-15 안건 9). 메뉴 노출은 flags.pollEntry가 정한다(place-detail.tsx)
-    onAddToPoll: () =>
-      addPlaceToPoll(
-        {
-          placeId: place.id,
-          placeUrl: place.placeUrl,
-          name: place.name,
-          category: place.category,
-          position: place.position,
-        },
-        "map",
-        s.meal,
-      ),
+    // 투표에 추가(T7.12, D-15 안건 9). 서버가 판정한 pollEntry가 꺼지면 넘기지 않아 메뉴에 없다
+    onAddToPoll: !pollEntry
+      ? undefined
+      : () =>
+          void import("@/features/poll/create/add-to-poll").then((m) =>
+            m.addPlaceToPoll(
+              {
+                placeId: place.id,
+                placeUrl: place.placeUrl,
+                name: place.name,
+                category: place.category,
+                position: place.position,
+              },
+              "map",
+              s.meal,
+            ),
+          ),
   };
 }
 
 export function MapScreen({
   data,
   providerKind,
+  pollEntry = false,
 }: {
   data: MapData;
   providerKind: MapProviderKind;
+  /** 투표 진입점 플래그(서버 판정, T7.35) */
+  pollEntry?: boolean;
 }) {
   const s = useMapScreen(data);
   const router = useRouter();
@@ -275,7 +285,7 @@ export function MapScreen({
   /* ---------- 시트 머리와 본문 ---------- */
 
   const header = <SheetHeader s={s} onToggleFilter={onToggleFilter} />;
-  const body = <SheetBody s={s} detailRef={detailRef} />;
+  const body = <SheetBody s={s} detailRef={detailRef} pollEntry={pollEntry} />;
 
   /* ---------- 지도 실패: 목록 보기 (T5.32) ---------- */
 
@@ -288,7 +298,7 @@ export function MapScreen({
             <div ref={detailRef} className="flex flex-col gap-2">
               <BackButton onClick={() => s.select(null)} />
               <PlaceDetail
-                {...detailProps(s, s.selected)}
+                {...detailProps(s, s.selected, pollEntry)}
                 footerClassName="bottom-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] bg-background"
               />
             </div>
@@ -362,7 +372,7 @@ export function MapScreen({
           lowLine={<LowLine s={s} />}
           footer={
             s.selected ? (
-              <PlaceDetailActions {...detailProps(s, s.selected)} />
+              <PlaceDetailActions {...detailProps(s, s.selected, pollEntry)} />
             ) : null
           }
           bodyClassName="px-(--lm-layout-gutter) desktop:px-10"
@@ -506,9 +516,11 @@ function LowLine({ s }: { s: MapScreenState }) {
 function SheetBody({
   s,
   detailRef,
+  pollEntry,
 }: {
   s: MapScreenState;
   detailRef: React.RefObject<HTMLDivElement | null>;
+  pollEntry: boolean;
 }) {
   if (s.loadingPlaces)
     return (
@@ -519,7 +531,7 @@ function SheetBody({
   if (s.selected) {
     return (
       <div ref={detailRef} key={s.selected.id} className="lm-map-rise">
-        <PlaceDetailBody {...detailProps(s, s.selected)} />
+        <PlaceDetailBody {...detailProps(s, s.selected, pollEntry)} />
       </div>
     );
   }

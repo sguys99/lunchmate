@@ -66,7 +66,7 @@ export function PollTab() {
         action={{ onClick: () => void q.refetch() }}
       />
     );
-  } else if (q.isPending) {
+  } else if (q.isPending || !now) {
     body = <ListSkeleton rows={4} label={copy.loading} />;
   } else if (q.isError || !q.data) {
     body = (
@@ -121,12 +121,20 @@ export function PollTab() {
   );
 }
 
-/** 30초마다 지금 시각(남은 시간 줄) */
-function useNow(): Date {
-  const [now, setNow] = useState(() => new Date());
+/**
+ * 30초마다 지금 시각(남은 시간 줄). 첫 렌더는 null: 서버 프리렌더(cacheComponents)에서 new Date()를 쓰지 않고
+ * 마운트 뒤에 채운다(목록도 브라우저 조회라 그 전에는 뼈대만 보인다).
+ */
+function useNow(): Date | null {
+  const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
-    const t = window.setInterval(() => setNow(new Date()), 30_000);
-    return () => window.clearInterval(t);
+    const tick = () => setNow(new Date());
+    const first = window.setTimeout(tick, 0);
+    const t = window.setInterval(tick, 30_000);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(t);
+    };
   }, []);
   return now;
 }

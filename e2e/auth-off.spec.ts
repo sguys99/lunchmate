@@ -102,6 +102,36 @@ test.describe("둘러보기 행동", () => {
     await expect(page).toHaveURL(/\/today/);
   });
 
+  // 투표는 로그인이 필요해 프로덕션은 auth와 함께 연다(T7.35, flags.pollEntry productionOff)
+  test("오늘: 투표 진입점(친구랑 정하기, 회식 모드, 투표에 추가)이 없다", async ({
+    page,
+  }) => {
+    await page.goto("/today");
+    const hero = page.locator(".lm-today-deck article h2");
+    await expect(hero).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole("button", { name: "친구랑 정하기" }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "회식 모드" })).toHaveCount(0);
+    const name = (await hero.innerText()).trim();
+    await page
+      .getByRole("button", { name: `${name} 다른 행동 더 보기` })
+      .click();
+    await expect(
+      page.getByRole("menuitem", { name: "즐겨찾기에 담기" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("menuitem", { name: "투표에 추가" }),
+    ).toHaveCount(0);
+  });
+
+  test("투표방과 회식 경로는 404", async ({ page }) => {
+    for (const path of ["/poll/party", "/poll/ABCDEFGHJK23"]) {
+      const res = await page.goto(path);
+      expect(res?.status()).toBe(404);
+    }
+  });
+
   test("지도: 즐겨찾기 칩이 없다", async ({ page }) => {
     await page.goto("/map");
     const filters = page.getByRole("group", { name: "식당 거르기" });
