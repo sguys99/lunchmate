@@ -50,7 +50,6 @@ type DomainBadgeProps = CommonProps & {
   tone: Tone;
   label: string;
   srLabel: string;
-  description: string;
   icon?: LucideIcon;
 };
 
@@ -59,7 +58,6 @@ function DomainBadge({
   tone,
   label,
   srLabel,
-  description,
   icon: Icon,
   withTooltip = false,
   className,
@@ -91,12 +89,7 @@ function DomainBadge({
         </Badge>
       }
     >
-      <BadgeTooltip
-        variant={tone}
-        kind={kind}
-        className={focusable}
-        description={description}
-      >
+      <BadgeTooltip variant={tone} kind={kind} className={focusable}>
         {content}
       </BadgeTooltip>
     </Suspense>
@@ -111,7 +104,6 @@ export function EstimateBadge(props: CommonProps) {
       tone="neutral"
       label={badgeCopy.labels.estimate}
       srLabel={badgeCopy.ariaLabels.estimate}
-      description={badgeCopy.descriptions.estimate}
       {...props}
     />
   );
@@ -125,7 +117,6 @@ export function ReportBadge(props: CommonProps) {
       tone="neutral"
       label={badgeCopy.labels.report}
       srLabel={badgeCopy.ariaLabels.report}
-      description={badgeCopy.descriptions.report}
       {...props}
     />
   );
@@ -140,7 +131,6 @@ export function DealBadge(props: CommonProps) {
       icon={BadgePercentIcon}
       label={badgeCopy.labels.deal}
       srLabel={badgeCopy.ariaLabels.deal}
-      description={badgeCopy.descriptions.deal}
       {...props}
     />
   );
@@ -174,7 +164,6 @@ export function WaitingBadge({
       icon={WAITING_ICON[level]}
       label={text}
       srLabel={badgeCopy.ariaLabels.waiting(text)}
-      description={badgeCopy.descriptions.waiting}
       {...props}
     />
   );
@@ -189,7 +178,6 @@ export function AvoidWarningBadge(props: CommonProps) {
       icon={TriangleAlertIcon}
       label={badgeCopy.labels.avoidWarning}
       srLabel={badgeCopy.ariaLabels.avoidWarning}
-      description={badgeCopy.descriptions.avoidWarning}
       {...props}
     />
   );

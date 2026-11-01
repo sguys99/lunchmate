@@ -4,6 +4,8 @@
 // 홈 카드처럼 툴팁 없는 배지는 이 파일을 받지 않는다. 받는 동안은 같은 모양의 포커스 가능한 배지가 자리를 지킨다.
 import type { ReactNode } from "react";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { badgeDescriptions } from "@/copy/badge-descriptions";
+import type { PlaceBadgeKind } from "./pick-badges";
 import {
   Tooltip,
   TooltipContent,
@@ -12,10 +14,9 @@ import {
 
 export type BadgeTooltipProps = {
   variant: BadgeProps["variant"];
-  kind: string;
+  kind: PlaceBadgeKind;
   /** 포커스 링과 커서까지 합친 최종 className */
   className: string;
-  description: string;
   children: ReactNode;
 };
 
@@ -23,7 +24,6 @@ export default function BadgeTooltip({
   variant,
   kind,
   className,
-  description,
   children,
 }: BadgeTooltipProps) {
   return (
@@ -40,7 +40,7 @@ export default function BadgeTooltip({
       >
         {children}
       </TooltipTrigger>
-      <TooltipContent>{description}</TooltipContent>
+      <TooltipContent>{badgeDescriptions[kind]}</TooltipContent>
     </Tooltip>
   );
 }

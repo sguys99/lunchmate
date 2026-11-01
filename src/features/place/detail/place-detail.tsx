@@ -14,10 +14,11 @@ import {
   Phone,
   Share2,
   Star,
+  Tag,
   Vote,
   WifiOff,
 } from "lucide-react";
-import { useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useRef, useState, type ReactNode } from "react";
 import type { PlaceBadge } from "@/components/badges/pick-badges";
 import { PlaceBadges } from "@/components/badges/place-badges";
 import { ErrorState, LoadingRegion, SkeletonLine } from "@/components/states";
@@ -40,6 +41,10 @@ import {
 } from "@/features/feedback/review-sheet";
 import { useMyReviews } from "@/features/feedback/use-my-records";
 import { reasonWithoutWalk } from "@/features/rec/reason";
+import { placeKindToDb } from "@/features/report/flow";
+import { nowSummaryText } from "@/features/report/flow";
+import { useReportSheet } from "@/features/report/report-sheet";
+import { reportCopy } from "@/copy/report";
 import { isEnabled } from "@/lib/flags";
 import {
   NAVER_MAP_WEB,
@@ -52,7 +57,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/lazy-toaster";
 import { categoryLabel } from "../categories";
 import type { PlaceReview } from "../detail-model";
-import { usePlaceDetailStats } from "../use-place-stats";
+import { usePlaceDeals, usePlaceDetailStats } from "../use-place-stats";
 import { CATEGORY_INK } from "../category-ink";
 import {
   detailPrice,
@@ -83,6 +88,11 @@ import {
 } from "./use-place-actions";
 
 const copy = placeCopy;
+
+// "지금" 행 안 웨이팅, 할인 목록(T6.20~T6.24). 행을 처음 그릴 때 받는다(지도 첫 로드 밖)
+const NowPanel = lazy(() =>
+  import("@/features/report/now-panel").then((m) => ({ default: m.NowPanel })),
+);
 
 export type ReportKind = "closed" | "price" | "wrong";
 export type WaitingReportLevel = "walkIn" | "short" | "long";
@@ -176,13 +186,28 @@ export function PlaceDetailBody({
   const naverUrl = named
     ? naverPlaceSearchUrl(place.name ?? "", place.position ?? null)
     : null;
+  // 제보와 신고 질문 시트(T6.15~T6.24). 목업 집계(live false)면 쓰지 않는다
+  const report = useReportSheet();
+  const deals = usePlaceDeals(place.id, live);
+  const reportReview =
+    onReportReview ??
+    (live
+      ? (r: PlaceReview) =>
+          report.open({
+            kind: "flag",
+            target: "review",
+            placeId: place.id,
+            targetId: r.id,
+            quote: r.text,
+          })
+      : undefined);
   const reviews = useDetailReviews({
     live,
     place,
     price,
     online,
     detail,
-    onReportReview,
+    onReportReview: reportReview,
   });
 
   return (
@@ -287,7 +312,9 @@ export function PlaceDetailBody({
         </Fold>
         <Fold
           title={copy.reviews.title}
-          summary={reviews.summary ?? copy.reviews.titleCount(stats.reviewTotal)}
+          summary={
+            reviews.summary ?? copy.reviews.titleCount(stats.reviewTotal)
+          }
         >
           {() =>
             reviews.list ?? (
@@ -299,14 +326,55 @@ export function PlaceDetailBody({
             )
           }
         </Fold>
-        <Fold title={copy.now.title} summary={nowSummary(stats)}>
-          {() => (
-            <NowBlock
-              stats={stats}
-              onReportWaiting={onReportWaiting}
-              disabled={!online}
-            />
-          )}
+        <Fold
+          title={copy.now.title}
+          summary={
+            live
+              ? nowSummaryText(stats.waiting, deals.data?.length ?? 0)
+              : nowSummary(stats)
+          }
+        >
+          {(open) =>
+            live && !onReportWaiting ? (
+              <Suspense fallback={<NowPanelSkeleton />}>
+                <NowPanel
+                  placeId={place.id}
+                  waiting={stats.waiting}
+                  online={online}
+                  active={open}
+                  onOpenDeal={(opener) =>
+                    report.open(
+                      {
+                        kind: "deal",
+                        placeId: place.id,
+                        placeUrl: place.placeUrl,
+                      },
+                      opener,
+                    )
+                  }
+                  onReportDeal={(deal, opener) =>
+                    report.open(
+                      {
+                        kind: "flag",
+                        target: "deal",
+                        placeId: place.id,
+                        targetId: deal.id,
+                        quote: deal.content,
+                      },
+                      opener,
+                    )
+                  }
+                  onSignedOut={report.promptLogin}
+                />
+              </Suspense>
+            ) : (
+              <NowBlock
+                stats={stats}
+                onReportWaiting={onReportWaiting}
+                disabled={!online}
+              />
+            )
+          }
         </Fold>
         {named && naverUrl ? (
           <Fold
@@ -324,6 +392,7 @@ export function PlaceDetailBody({
         ) : null}
       </div>
       {reviews.sheets}
+      {live ? report.sheet : null}
     </div>
   );
 }
@@ -424,7 +493,12 @@ function useDetailReviews({
     mine = (
       <div className="flex flex-col gap-1">
         {noteText ? <ResultLine ref={noteRef}>{noteText}</ResultLine> : null}
-        <MyReviewBlock review={myReview} offline={offline} onEdit={edit} />
+        <MyReviewBlock
+          review={myReview}
+          offline={offline}
+          onEdit={edit}
+          onWriteToday={write}
+        />
       </div>
     );
   } else if (noteText) {
@@ -498,6 +572,7 @@ const iconButton = cn(buttonClass("secondary", "icon"), "rounded-button");
 
 export function PlaceDetailActions({
   place,
+  stats: givenStats,
   meal,
   source,
   origin,
@@ -506,6 +581,8 @@ export function PlaceDetailActions({
   onDirectionsLaunched,
 }: PlaceDetailProps) {
   const online = useOnlineStatus();
+  const live = givenStats === undefined;
+  const reportSheet = useReportSheet();
   const named = place.name !== null;
   const fav = useFavorite({
     placeId: place.id,
@@ -560,9 +637,32 @@ export function PlaceDetailActions({
   }
   const report = (kind: ReportKind) => () => {
     if (onReport) onReport(kind);
+    else if (live)
+      reportSheet.open({
+        kind: "place",
+        placeId: place.id,
+        placeUrl: place.placeUrl,
+        report: placeKindToDb(kind),
+      });
     else void toast(copy.toasts.reportSoon);
   };
-  const reports: MoreMenuAction[] = [
+  const reports: MoreMenuAction[] = [];
+  // 할인 정보 알리기는 제보 묶음 맨 위(D-13 진입점)
+  if (live && !onReport) {
+    reports.push({
+      key: "deal",
+      label: reportCopy.deal.entry,
+      icon: Tag,
+      onSelect: () =>
+        reportSheet.open({
+          kind: "deal",
+          placeId: place.id,
+          placeUrl: place.placeUrl,
+        }),
+      disabled: !online,
+    });
+  }
+  reports.push(
     {
       key: "closed",
       label: copy.actions.reportClosed,
@@ -584,7 +684,7 @@ export function PlaceDetailActions({
       onSelect: report("wrong"),
       disabled: !online,
     },
-  ];
+  );
 
   let primary: ReactNode;
   if (directions.available && place.name) {
@@ -642,11 +742,29 @@ export function PlaceDetailActions({
         {fav.message}
       </span>
       {fav.loginSheet}
+      {live ? reportSheet.sheet : null}
     </div>
   );
 }
 
 /* ---------- 상태 ---------- */
+
+/** "지금" 행 내용을 받는 동안(웨이팅 문장 + 버튼 3개 자리) */
+function NowPanelSkeleton() {
+  return (
+    <LoadingRegion
+      label={copy.states.loading}
+      className="flex flex-col gap-2.5"
+    >
+      <SkeletonLine type="body" className="w-48" />
+      <div className="flex gap-2">
+        <Skeleton className="h-10 w-24 rounded-chip" />
+        <Skeleton className="h-10 w-28 rounded-chip" />
+        <Skeleton className="h-10 w-24 rounded-chip" />
+      </div>
+    </LoadingRegion>
+  );
+}
 
 export function OfflineNote({ className }: { className?: string }) {
   return (

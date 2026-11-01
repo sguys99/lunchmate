@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { badgeCopy } from "@/copy/badges";
+import { badgeDescriptions } from "@/copy/badge-descriptions";
 import { EstimateMark } from "./estimate-mark";
 import {
   AvoidWarningBadge,
@@ -99,12 +99,15 @@ describe("WaitingBadge", () => {
     ["walkIn", "바로 입장", "border-input"],
     ["short", "조금 기다려요", "border-input"],
     ["long", "줄 길어요", "border-input"],
-  ] as const)("%s: PRD 3단계 이름과 아이콘, 중립 색", (level, label, border) => {
-    const { container } = render(<WaitingBadge level={level} />);
-    const badge = badgeOf(`웨이팅 ${label}`);
-    expect(badge.className).toContain(border);
-    expect(container.querySelector("svg")).not.toBeNull();
-  });
+  ] as const)(
+    "%s: PRD 3단계 이름과 아이콘, 중립 색",
+    (level, label, border) => {
+      const { container } = render(<WaitingBadge level={level} />);
+      const badge = badgeOf(`웨이팅 ${label}`);
+      expect(badge.className).toContain(border);
+      expect(container.querySelector("svg")).not.toBeNull();
+    },
+  );
 
   it("단계마다 아이콘이 달라 색만으로 구분하지 않는다", () => {
     const icons = (["walkIn", "short", "long"] as const).map((level) => {
@@ -144,9 +147,7 @@ describe("툴팁", () => {
     expect(badge).toHaveAttribute("tabindex", "0");
     fireEvent.mouseEnter(badge);
     fireEvent.pointerMove(badge);
-    expect(
-      await screen.findByText(badgeCopy.descriptions.deal),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(badgeDescriptions.deal)).toBeInTheDocument();
   });
 
   it("기본은 툴팁 없이 포커스도 받지 않는다", () => {
