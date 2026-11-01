@@ -1,6 +1,7 @@
 // 브라우저 계측 진입점. 홈 초기 번들에는 이 파일의 몇 줄만 들어가고,
-// Sentry SDK는 첫 렌더가 끝난 뒤(브라우저가 한가할 때) 동적 import로 불러온다(tasks 2.4절 사용 규칙).
-// 트레이드오프: SDK가 로드되기 전(보통 1~2초 이내)에 난 오류는 수집되지 않는다.
+// Sentry SDK는 첫 화면이 뜬 뒤(load 뒤 3초, 이어서 브라우저가 한가할 때) 동적 import로 불러온다(tasks 2.4절 사용 규칙).
+// load 직후에 받으면 느린 망에서 첫 화면(LCP)과 대역폭을 나눠 쓴다(T8.10, docs/design/g8-lighthouse.md).
+// 트레이드오프: SDK가 로드되기 전(load 뒤 약 3~4초)에 난 오류는 수집되지 않는다.
 import type { RouterTransitionType } from "next";
 
 type CaptureTransition = (url: string, type: RouterTransitionType) => void;
@@ -19,6 +20,9 @@ function loadSentry() {
     });
 }
 
+/** load 뒤 SDK를 받기 전에 기다리는 시간(ms). PostHog(src/lib/analytics/index.ts)와 같은 값 */
+const START_DELAY_MS = 3000;
+
 function whenIdle(task: () => void) {
   if (typeof window === "undefined") return;
   const run = () => {
@@ -28,8 +32,9 @@ function whenIdle(task: () => void) {
       setTimeout(task, 2000);
     }
   };
-  if (document.readyState === "complete") run();
-  else window.addEventListener("load", run, { once: true });
+  const later = () => setTimeout(run, START_DELAY_MS);
+  if (document.readyState === "complete") later();
+  else window.addEventListener("load", later, { once: true });
 }
 
 whenIdle(loadSentry);

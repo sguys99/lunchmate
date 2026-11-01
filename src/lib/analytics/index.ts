@@ -9,9 +9,13 @@ function publicValue(value: string | undefined): string | undefined {
   return v ? v : undefined;
 }
 
+/** load 뒤 SDK를 받기 전에 기다리는 시간(ms). Sentry(src/instrumentation-client.ts)와 같은 값 */
+const START_DELAY_MS = 3000;
+
 /**
- * 첫 렌더 이후 브라우저가 한가할 때 PostHog를 초기화한다. 서버에서 호출하면 아무 일도 하지 않는다.
- * 첫 상호작용(pointerdown, keydown) 중 먼저 오는 쪽이나 4초 타임아웃에서 시작한다.
+ * 첫 화면이 뜬 뒤 PostHog를 초기화한다. 서버에서 호출하면 아무 일도 하지 않는다.
+ * 첫 상호작용(pointerdown, keydown)이나 load 뒤 3초 + 유휴 시점(최대 4초 더) 중 먼저 오는 쪽에서 시작한다.
+ * load 직후에 받으면 SDK 청크(약 104KB gzip)가 느린 망에서 첫 화면(LCP)과 대역폭을 나눠 쓴다(T8.10, docs/design/g8-lighthouse.md).
  */
 export function scheduleAnalytics(): void {
   if (typeof window === "undefined") return;
@@ -33,11 +37,16 @@ export function scheduleAnalytics(): void {
   };
   window.addEventListener("pointerdown", start, { once: true, passive: true });
   window.addEventListener("keydown", start, { once: true });
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(start, { timeout: 4000 });
-  } else {
-    setTimeout(start, 4000);
-  }
+  const idle = () => {
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(start, { timeout: 4000 });
+    } else {
+      start();
+    }
+  };
+  const later = () => setTimeout(idle, START_DELAY_MS);
+  if (document.readyState === "complete") later();
+  else window.addEventListener("load", later, { once: true });
 }
 
 export { initPostHog } from "./posthog";
