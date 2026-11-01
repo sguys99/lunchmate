@@ -167,7 +167,7 @@ export function TodayHero({
         className="mt-3 flex min-h-6 items-start justify-between gap-3"
       >
         <CardBadges card={card} />
-        <div className="ml-auto flex shrink-0 items-center gap-4">
+        <div className="ml-auto flex shrink-0 items-center gap-5">
           <button
             type="button"
             aria-label={copy.actions.detailOf(card.name)}
@@ -229,6 +229,7 @@ export function AltTile({
         <span className="truncate type-label">{card.name}</span>
       </span>
       <span className="flex min-w-0 items-baseline gap-2.5 whitespace-nowrap">
+        <span className="sr-only">{copy.numbers.walk}</span>
         <NumberValue cell={card.walk} />
         <span aria-hidden className="h-3 w-px self-center bg-border" />
         {card.thumbs.value === null ? (

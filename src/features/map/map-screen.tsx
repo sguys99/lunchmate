@@ -39,7 +39,7 @@ import {
   type CanvasMarker,
   type MapProviderKind,
 } from "./map-canvas";
-import { MapSheet } from "./map-sheet";
+import { MAP_SHEET_ID, MapSheet } from "./map-sheet";
 import {
   BaseChip,
   BaseMarker,
@@ -349,6 +349,22 @@ export function MapScreen({
 
   return (
     <Frame announce={s.announce} loginSheet={login.sheet}>
+      {desktop ? null : (
+        // 모바일은 지도(마커 최대 45개)가 시트보다 먼저 와서 Tab으로 목록까지 멀다. 초점이 올 때만 보이는 건너뛰기(T8.9)
+        <button
+          type="button"
+          onClick={() => {
+            s.sheetEvent("sheetTap");
+            document.getElementById(MAP_SHEET_ID)?.focus();
+          }}
+          className={cn(
+            "sr-only type-label focus-visible:not-sr-only focus-visible:fixed focus-visible:top-3 focus-visible:left-(--lm-layout-gutter) focus-visible:z-50 focus-visible:inline-flex focus-visible:h-11 focus-visible:items-center focus-visible:rounded-button focus-visible:border focus-visible:border-border focus-visible:bg-card focus-visible:px-4",
+            focusRing,
+          )}
+        >
+          {copy.skipToList}
+        </button>
+      )}
       <div
         ref={stageRef}
         // 모바일: 칸은 하단 탭 아래까지(아래 음수 여백으로 탭이 칸 아랫부분 위에 겹친다). isolate라 탭이 시트보다 위에 그려진다

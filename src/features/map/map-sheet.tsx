@@ -18,7 +18,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { focusRing } from "@/components/ui/interaction";
+import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { rowPress } from "@/components/ui/row-press";
 import { mapCopy } from "@/copy/map";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,8 @@ export type { SheetSnap } from "./view-state";
 
 const copy = mapCopy.sheet;
 const DRAG_START_PX = 6;
+
+export const MAP_SHEET_ID = "lm-map-sheet";
 
 export function MapSheet({
   snap,
@@ -186,12 +188,15 @@ export function MapSheet({
   return (
     <section
       ref={ref}
+      // 모바일 "목록으로 건너뛰기"(map-screen.tsx)가 초점을 옮기는 곳(T8.9)
+      id={MAP_SHEET_ID}
+      tabIndex={-1}
       aria-label={copy.label}
       data-snap={snap}
       data-dragging={dragTop !== null}
       className={cn(
         // 모바일: 칸 바닥에 붙은 시트. 높이는 칸 전체, 보이는 만큼만 아래에서 올라온다
-        "lm-map-sheet absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-sheet bg-popover text-popover-foreground shadow-sheet",
+        "lm-map-sheet absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-sheet bg-popover text-popover-foreground shadow-sheet outline-none",
         // 데스크톱: 좌 리스트 칸(문서 스크롤)
         "desktop:static desktop:z-auto desktop:flex-1 desktop:rounded-none desktop:bg-background desktop:text-foreground desktop:shadow-none",
         stage === 0 && !desktop && "invisible",
@@ -213,7 +218,9 @@ export function MapSheet({
           aria-label={snap === "full" ? copy.lower : copy.raise}
           aria-expanded={snap === "full"}
           className={cn(
+            // 보이는 손잡이 칸은 28 높이, 누르는 칸은 44(T8.9)
             "mx-auto flex h-7 w-16 items-center justify-center rounded-full desktop:hidden",
+            hitArea44,
             focusRing,
           )}
         >
