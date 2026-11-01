@@ -489,6 +489,16 @@ export type Database = {
       }
     }
     Functions: {
+      account_residue: {
+        Args: { p_user_id: string }
+        Returns: {
+          column_name: string
+          on_delete: string
+          remaining: number
+          table_name: string
+          table_schema: string
+        }[]
+      }
       my_daily_limits: {
         Args: never
         Returns: {

@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+
+// 금칙어 판정(src/lib/moderation)은 server-only라서 테스트에서는 빈 모듈로 바꾼다
+vi.mock("server-only", () => ({}));
 import {
   completeSignIn,
   type CompleteSignInDeps,
@@ -238,5 +241,82 @@ describe("온보딩 연결 고리 (T4.16)", () => {
     const r = await completeSignIn(base, deps({ hasOffice }));
     expect(hasOffice).not.toHaveBeenCalled();
     expect(r.location).toContain("/welcome/terms");
+  });
+});
+
+describe("첫 로그인 닉네임 금칙어 대체 (T6.17 후속, MOD-04)", () => {
+  const kakao = (nickname: string | null) => ({
+    provider: "custom:kakao",
+    profile: { nickname, avatar_url: null, terms_agreed_at: null },
+  });
+  const screen = async () => {
+    const { containsBannedContent } = await import("@/lib/moderation");
+    const { neutralNickname } = await import("./neutral-nickname");
+    return {
+      isBannedNickname: containsBannedContent,
+      neutralNickname: () => neutralNickname(() => 0.5),
+    };
+  };
+
+  it("카카오, 구글 첫 닉네임에 금칙어가 있으면 중립 닉네임으로 바꾼다", async () => {
+    for (const provider of ["custom:kakao", "google"]) {
+      const d = deps({
+        ...kakao("시발 점심"),
+        provider,
+        ...(await screen()),
+      });
+      const r = await completeSignIn(base, d);
+      expect(d.updateProfile).toHaveBeenCalledWith(USER, {
+        nickname: "점심손님 5500",
+      });
+      expect(r.outcome).toMatchObject({ nicknameScreen: "replaced" });
+      expect(r.location).toContain("/welcome/terms");
+    }
+  });
+
+  it("연락처, 링크가 든 닉네임도 바꾼다", async () => {
+    const d = deps({ ...kakao("오픈채팅 open.kakao.com/o/x"), ...(await screen()) });
+    await completeSignIn(base, d);
+    expect(d.updateProfile).toHaveBeenCalledWith(USER, {
+      nickname: "점심손님 5500",
+    });
+  });
+
+  it("깨끗한 닉네임과 빈 닉네임은 건드리지 않는다", async () => {
+    for (const nickname of ["점심요정", null]) {
+      const d = deps({ ...kakao(nickname), ...(await screen()) });
+      const r = await completeSignIn(base, d);
+      expect(d.updateProfile).not.toHaveBeenCalled();
+      expect(r.outcome).toMatchObject({ nicknameScreen: "none" });
+    }
+  });
+
+  it("저장에 실패하거나 판정이 throw해도 로그인은 계속된다", async () => {
+    const failSave = deps({
+      ...kakao("시발 점심"),
+      ...(await screen()),
+      updateProfile: vi.fn(async () => false),
+    });
+    const r1 = await completeSignIn(base, failSave);
+    expect(r1.outcome).toMatchObject({
+      type: "signed-in",
+      nicknameScreen: "failed",
+    });
+    const throws = deps({
+      ...kakao("아무거나"),
+      isBannedNickname: () => {
+        throw new Error("x");
+      },
+      neutralNickname: () => "점심손님 1000",
+    });
+    const r2 = await completeSignIn(base, throws);
+    expect(r2.outcome).toMatchObject({ nicknameScreen: "none" });
+    expect(throws.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it("판정 함수를 주입하지 않으면 검사하지 않는다(기존 동작)", async () => {
+    const d = deps(kakao("시발 점심"));
+    await completeSignIn(base, d);
+    expect(d.updateProfile).not.toHaveBeenCalled();
   });
 });

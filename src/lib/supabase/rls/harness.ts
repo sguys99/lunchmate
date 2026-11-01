@@ -379,3 +379,20 @@ export async function adminPatch(
     );
   return r.data?.length ?? 0;
 }
+
+/**
+ * 점검 전용: secret 키로 service_role 전용 함수를 부른다(예: account_residue, T6.27).
+ * RLS를 건너뛰므로 권한 단언에는 쓰지 않는다. 함수가 아직 없으면(마이그레이션 전) error.code가 PGRST202다.
+ */
+export async function adminRpc<T = unknown>(
+  env: RlsEnv,
+  name: string,
+  args: Record<string, unknown>,
+): Promise<RestResult<T>> {
+  const res = await fetch(`${env.url}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: adminHeaders(env),
+    body: JSON.stringify(args),
+  });
+  return parse<T>(res);
+}

@@ -197,7 +197,13 @@ export const authCopy = {
     goLogin: "로그인 화면으로",
   },
 
-  /** 로그아웃과 회원 탈퇴 (T4.12, AUTH-05, PRD 11.4) */
+  /**
+   * 첫 로그인 닉네임(카카오, 구글 프로필 이름)에 금칙어가 있을 때 대신 넣는 중립 닉네임의 앞부분 (T6.17 후속, MOD-04).
+   * 뒤에 숫자 4자리를 붙인다(예: 점심손님 4821). 사용자는 나 탭 계정에서 바꾼다. 20자 제한(profiles_nickname_len) 안.
+   */
+  neutralNicknamePrefix: "점심손님",
+
+  /** 로그아웃과 회원 탈퇴 (T4.12, AUTH-05, PRD 11.4, T6.27) */
   account: {
     metaTitle: "계정",
     title: "계정",
@@ -206,7 +212,7 @@ export const authCopy = {
     signOutBody: "이 기기에서만 로그아웃합니다. 설정과 기록은 그대로 남습니다.",
     deleteSection: "회원 탈퇴",
     deleteBody:
-      "프로필, 사무실, 예산과 거리 설정, 못 먹는 음식이 바로 삭제됩니다.",
+      "프로필, 사무실, 설정, 방문 기록, 후기, 제보와 신고 기록이 바로 삭제됩니다. 후기는 식당 집계에서도 빠집니다.",
     deleteOpen: "탈퇴하기",
     deleteTitle: "정말 탈퇴할까요?",
     deleteConfirmBody:

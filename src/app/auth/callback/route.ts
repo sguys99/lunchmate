@@ -3,6 +3,7 @@
 //
 // 지키는 것
 // - provider_token은 네이버 프로필 1회 조회에만 쓰고 저장, 로깅하지 않는다(CLAUDE.md 13장, T0.14).
+// - 저장된 닉네임에 금칙어가 있으면 중립 닉네임으로 바꾼다(T6.17 후속, MOD-04, complete-sign-in.ts 3a).
 // - next는 쿠키에서 꺼내 다시 검사하고 쿠키를 지운다(AUTH-03, 오픈 리다이렉트 방지).
 // - 리다이렉트는 항상 우리 출처의 절대 URL로 만든다.
 // - 세션 교환에 성공하면 login_completed를 서버에서 보낸다(T4.29, features/auth/login-analytics.ts).
@@ -18,6 +19,7 @@ import {
   sendLoginEvent,
 } from "@/features/auth/login-analytics";
 import { fetchNaverProfile } from "@/features/auth/naver-profile";
+import { neutralNickname } from "@/features/auth/neutral-nickname";
 import { NEXT_COOKIE, nextCookieOptions } from "@/features/auth/next-cookie";
 import { authOrigin } from "@/features/auth/origin";
 import { fromSupabaseProvider } from "@/features/auth/providers";
@@ -30,6 +32,7 @@ import {
 } from "@/lib/analytics/server-capture";
 import { clientEnv } from "@/lib/env/client";
 import { isEnabled } from "@/lib/flags";
+import { containsBannedContent } from "@/lib/moderation";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -75,6 +78,9 @@ export async function GET(request: NextRequest) {
         return !error;
       },
       fetchNaverProfile: (token) => fetchNaverProfile(token),
+      // 카카오, 구글 첫 닉네임(가입 트리거가 채움)도 금칙어 필터를 거친다(T6.17 후속, MOD-04)
+      isBannedNickname: (nickname) => containsBannedContent(nickname),
+      neutralNickname: () => neutralNickname(),
       async hasOffice(userId) {
         const { count, error } = await supabase!
           .from("offices")

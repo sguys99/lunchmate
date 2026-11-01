@@ -4,6 +4,8 @@
 // 2. code를 세션으로 교환(PKCE, code verifier는 /auth/sign-in이 쿠키에 둔 것) 실패 → /login?error=failed
 // 3. 네이버(custom:naver)이고 닉네임이 비어 있으면 provider_token으로 프로필 API를 한 번 불러 닉네임, 사진만 채운다.
 //    실패는 무시(온보딩에서 닉네임 입력). 토큰은 이 함수 밖으로 나가지 않고 로그도 남기지 않는다.
+// 3a. 저장된 닉네임에 금칙어가 있으면(카카오, 구글 첫 닉네임은 가입 트리거가 제공자 이름으로 바로 채워 필터를 거치지 않는다,
+//    T6.17 후속, MOD-04) 중립 닉네임("점심손님 1234")으로 바꾼다. 바꾸지 못해도 로그인은 그대로 진행한다.
 // 4. 약관 동의 전(terms_agreed_at null)이면 약관 화면으로(약관 뒤 온보딩 연결은 terms.ts).
 // 5. 동의했지만 사무실이 없으면(온보딩을 마치지 않음, T4.16) 온보딩으로 next를 이어 보낸다. 확인에 실패하면 next로.
 import { afterTermsLocation } from "./terms";
@@ -34,6 +36,10 @@ export type CompleteSignInDeps = {
   readProfile: (userId: string) => Promise<ProfileRow | null>;
   updateProfile: (userId: string, patch: ProfilePatch) => Promise<boolean>;
   fetchNaverProfile: (accessToken: string) => Promise<ProfilePatch | null>;
+  /** 금칙어 판정(라우트가 src/lib/moderation의 containsBannedContent를 넘긴다). 없으면 검사하지 않는다 */
+  isBannedNickname?: (nickname: string) => boolean;
+  /** 금칙어 닉네임 대신 넣을 중립 닉네임(neutral-nickname.ts) */
+  neutralNickname?: () => string;
   /** 사무실이 1곳 이상 있는가(온보딩 연결 고리). 없으면 확인하지 않고 next로 */
   hasOffice?: (userId: string) => Promise<boolean>;
 };
@@ -55,6 +61,8 @@ export type CompleteSignInResult = {
         type: "signed-in";
         provider: string | null;
         naverSync: "skipped" | "filled" | "failed";
+        /** 금칙어 닉네임 대체: none 검사 통과(또는 닉네임 없음), replaced 바꿈, failed 바꾸지 못함 */
+        nicknameScreen: "none" | "replaced" | "failed";
         needsTerms: boolean;
       };
 };
@@ -118,6 +126,24 @@ export async function completeSignIn(
     }
   }
 
+  let nicknameScreen: "none" | "replaced" | "failed" = "none";
+  if (profile?.nickname && deps.isBannedNickname && deps.neutralNickname) {
+    let banned = false;
+    try {
+      banned = deps.isBannedNickname(profile.nickname);
+    } catch {
+      banned = false;
+    }
+    if (banned) {
+      const nickname = deps.neutralNickname();
+      const saved = await deps
+        .updateProfile(userId, { nickname })
+        .catch(() => false);
+      nicknameScreen = saved ? "replaced" : "failed";
+      if (saved) profile = { ...profile, nickname };
+    }
+  }
+
   // 프로필을 못 읽었으면 약관 화면이 다시 확인한다(그쪽이 로그인 필요 경로라 안전).
   const needsTerms = !profile?.terms_agreed_at;
   let location = needsTerms ? termsUrl(next) : next;
@@ -127,6 +153,12 @@ export async function completeSignIn(
   }
   return {
     location,
-    outcome: { type: "signed-in", provider, naverSync, needsTerms },
+    outcome: {
+      type: "signed-in",
+      provider,
+      naverSync,
+      nicknameScreen,
+      needsTerms,
+    },
   };
 }

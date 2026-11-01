@@ -20,8 +20,18 @@ export const ACCOUNT_DELETION_SCOPE = [
   "visits",
   "favorites",
   "blocklist",
-  // T6.27에서 확장: feedback, wait_reports, closure_reports, deal_reports와 확인 응답,
-  //   review_reports(신고 기록), reviews(공개와 비공개 모두 삭제, 식당 집계에서도 빠짐)
+  // T6.27 (auth.users on delete cascade, supabase/migrations/20261101120000_t6_5_reviews_reports_deals_waits.sql)
+  //   집계(place_stats 등)는 그때그때 계산하므로 지운 후기, 제보는 바로 집계에서 빠진다.
+  //   탈퇴자의 할인, 후기에 달린 남의 확인 응답과 신고는 deal_id, review_id cascade로 함께 지워진다.
+  //   탈퇴자의 신고가 지워져 남의 글 신고 수가 3 아래로 내려가도 이미 적용된 숨김은 유지한다(관리자만 복원,
+  //   20261101130000 마이그레이션 머리말). 확인은 account_residue(service_role 전용) + t6-delete-account RLS 테스트.
+  "reviews", // 공개, 비공개 모두
+  "review_reports", // 내가 한 후기, 할인 신고
+  "place_reports", // 폐업, 가격, 정보 제보
+  "place_deals", // 내가 올린 할인 제보
+  "place_deal_checks", // 아직 해요, 끝났어요 응답
+  "wait_reports",
+  "private.daily_usage", // 일일 한도 카운터
   // T7.29에서 확장: poll_votes(진행 중 투표의 내 표 삭제), 확정된 투표는 익명 참여자로 남김(참여자 user_id를 null로),
   //   방장인 진행 중 투표방은 취소 처리
 ] as const;

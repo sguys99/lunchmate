@@ -52,6 +52,13 @@ describe("deleteAccount (AUTH-05)", () => {
         "visits",
         "favorites",
         "blocklist",
+        "reviews",
+        "review_reports",
+        "place_reports",
+        "place_deals",
+        "place_deal_checks",
+        "wait_reports",
+        "private.daily_usage",
       ]),
     );
   });
