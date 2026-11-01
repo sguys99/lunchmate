@@ -14,6 +14,30 @@ describe("sentryBaseOptions", () => {
     expect(options.beforeSendSpan).toBeTypeOf("function");
     expect("beforeSendTransaction" in options).toBe(false);
   });
+
+  it("알려진 소음만 좁게 거른다: ResizeObserver 경고, 확장 프로그램 스크립트 (T8.16)", () => {
+    const ignored = (msg: string) =>
+      options.ignoreErrors.some((re) => re.test(msg));
+    expect(ignored("ResizeObserver loop limit exceeded")).toBe(true);
+    expect(
+      ignored(
+        "ResizeObserver loop completed with undelivered notifications.",
+      ),
+    ).toBe(true);
+    // 앱 오류는 거르지 않는다
+    expect(ignored("TypeError: Cannot read properties of undefined")).toBe(
+      false,
+    );
+    expect(ignored("ChunkLoadError: Loading chunk 12 failed")).toBe(false);
+
+    const denied = (url: string) => options.denyUrls.some((re) => re.test(url));
+    expect(denied("chrome-extension://abcdef/content.js")).toBe(true);
+    expect(denied("moz-extension://1234/inject.js")).toBe(true);
+    expect(denied("safari-web-extension://x/script.js")).toBe(true);
+    expect(denied("https://lunchmate.vercel.app/_next/static/chunks/a.js")).toBe(
+      false,
+    );
+  });
 });
 
 describe("beforeSend", () => {
