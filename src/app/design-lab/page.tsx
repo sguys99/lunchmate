@@ -10,6 +10,8 @@ import { pollLabCopy } from "@/copy/design-lab-poll";
 import { pollCreateLabCopy } from "@/copy/design-lab-poll-create";
 import { partyLabCopy } from "@/copy/design-lab-party";
 import { shareLabCopy } from "@/copy/design-lab-share";
+import { appIconLabCopy } from "@/copy/design-lab-app-icon";
+import { adminLabCopy } from "@/copy/design-lab-admin";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
@@ -53,6 +55,36 @@ export default function DesignLabPage() {
         <Link href="/design-lab/home/d1" className={linkClass}>
           {copy.homeLink}
         </Link>
+      </Section>
+
+      {/* 8단계 시안(T8.1): 게이트 뒤 고른 안만 남긴다 */}
+      <Section title={copy.g8Title} body={copy.g8Body}>
+        <div className="flex flex-wrap gap-4">
+          {Object.entries(appIconLabCopy.names).map(([id, name]) => (
+            <Link
+              key={id}
+              href={`/design-lab/app-icon/${id}`}
+              className={linkClass}
+            >
+              {name}
+            </Link>
+          ))}
+        </div>
+      </Section>
+
+      {/* 8단계 관리자 시안(T8.5a): 게이트 뒤 고른 안만 남긴다 */}
+      <Section title={adminLabCopy.index.title} body={adminLabCopy.index.body}>
+        <div className="flex flex-wrap gap-4">
+          {Object.entries(adminLabCopy.names).map(([id, name]) => (
+            <Link
+              key={id}
+              href={`/design-lab/admin/${id}`}
+              className={linkClass}
+            >
+              {name}
+            </Link>
+          ))}
+        </div>
       </Section>
 
       {/* 7단계 시안(T7.1~T7.4): 게이트 T7.5 뒤 고른 안만 남긴다(D-14~D-17) */}
