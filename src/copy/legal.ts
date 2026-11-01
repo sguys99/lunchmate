@@ -49,7 +49,7 @@ export const legalCopy = {
   sectionsLabel: "조항",
   contactLabel: "문의 이메일",
   contactPending:
-    "문의 주소를 준비하고 있습니다. 정식 서비스 시작 전에 이곳에 올립니다.",
+    "주소를 준비하고 있습니다. 정식 서비스 시작 전에 이곳에 올립니다.",
 
   service: {
     metaTitle: "이용약관",
