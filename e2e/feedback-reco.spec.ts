@@ -249,10 +249,11 @@ test.describe("피드백 → 다음 추천 (T6.30)", () => {
       const after = await freshDeck(page);
       expect(after[0]).toBe(fakeName(SALAD));
       const hero = page.locator(".lm-today-deck article");
-      await expect(hero).toContainText("최근 👍한 샐러드");
+      // 👍 뒤에 숨김 글자 "좋아요"가 붙는다(T8.9 F6, EmojiText). 보이는 글자는 그대로
+      await expect(hero).toContainText("최근 👍좋아요한 샐러드");
       // 왜 추천했나요? 펼치기에도 같은 근거
       await hero.getByRole("button", { name: "왜 추천했나요?" }).click();
-      await expect(hero).toContainText("최근 이 집에 👍를 남겼습니다.");
+      await expect(hero).toContainText("최근 이 집에 👍좋아요를 남겼습니다.");
     } finally {
       await s.cleanup();
     }

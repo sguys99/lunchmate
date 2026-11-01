@@ -8,6 +8,7 @@
 // 이름 해석 실패(T5.12a): 이름, 좌표가 없어 주 버튼이 "카카오맵에서 보기", 전화와 네이버 링크는 뺀다.
 //
 // 데이터 규칙: 이름, 주소, 전화, 좌표는 props로 받은 세션 메모리 값이다. 이 컴포넌트는 저장하지 않는다(CLAUDE.md 7장).
+import { EmojiText } from "@/components/a11y/emoji-text";
 import {
   ExternalLink,
   Flag,
@@ -246,12 +247,17 @@ export function PlaceDetailBody({
 
       {reason ? (
         <p className="mt-4 type-body-sm break-keep text-muted-foreground">
-          {reason}
+          <EmojiText text={reason} />
         </p>
       ) : null}
       {stats.myVisit ? (
         <p className="mt-1.5 type-caption break-keep text-muted-foreground">
-          {copy.detail.myVisit(stats.myVisit.dateLabel, stats.myVisit.rating)}
+          <EmojiText
+            text={copy.detail.myVisit(
+              stats.myVisit.dateLabel,
+              stats.myVisit.rating,
+            )}
+          />
         </p>
       ) : null}
 

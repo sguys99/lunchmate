@@ -1,6 +1,7 @@
 // 랜딩 데모 카드 (T3.4 시안, T4.28 실제 랜딩으로 옮김, G3 D-06). 세 장을 한 화면에 두는 압축형:
 // 왼쪽 선화 56, 오른쪽 식당명, 숫자 3개, 이유 두 줄까지. Motion 의존이 없다(서버, 클라이언트 어디서든 렌더).
 // design-lab 온보딩 완료와 로그인 시안도 이 카드를 쓴다(MockPlace가 DemoPlace 모양을 만족).
+import { EmojiText } from "@/components/a11y/emoji-text";
 import { SkeletonLine } from "@/components/states";
 import { Skeleton } from "@/components/ui/skeleton";
 import { landingCopy } from "@/copy/landing";
@@ -81,7 +82,7 @@ export function DemoCard({ place }: { place: DemoPlace }) {
         </dl>
         {/* 이유는 잘리지 않게 두 줄까지(360px에서 긴 이유가 말줄임되던 문제, T3.5) */}
         <p className="line-clamp-2 type-body-sm break-keep text-muted-foreground">
-          {reasonWithoutWalk(place.reason)}
+          <EmojiText text={reasonWithoutWalk(place.reason)} />
         </p>
       </div>
     </article>

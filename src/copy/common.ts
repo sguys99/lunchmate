@@ -120,3 +120,11 @@ export const commonCopy = {
     minutes: (n: number) => `${n}분`,
   },
 } as const;
+
+/**
+ * 화면 문구에 박힌 이모지를 스크린리더가 읽을 말 (T8.9 F6, 사용자 결정 2026-11-02).
+ * 보이는 글자는 그대로 두고 이모지는 aria-hidden, 대신 이 말을 숨김 글자로 읽힌다(src/components/a11y/emoji-text.tsx).
+ */
+export const emojiSpeech = {
+  "👍": "좋아요",
+} as const;

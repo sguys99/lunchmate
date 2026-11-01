@@ -2,6 +2,7 @@
 // 지도 탭 조각 (T5.26~T5.32, D-09 B + 고른 마커에 A의 그림, DESIGN.md 5장 "지도").
 // 마커(도보 분 알약, 묶음), 기준 위치 핀, 지도 위 버튼, 필터 칩, 목록 행, 상태 블록.
 // 장소 이름은 카카오 세션 메모리 값이라 React 텍스트로만 넣는다(innerHTML 금지).
+import { EmojiText } from "@/components/a11y/emoji-text";
 import {
   Building2,
   LocateFixed,
@@ -375,12 +376,12 @@ export function FilterChipRow({
             aria-describedby={t.key === "top" ? "lm-map-top-hint" : undefined}
             className="shrink-0"
           >
-            {t.label}
+            <EmojiText text={t.label} />
           </Chip>
         ))}
       </div>
       <p id="lm-map-top-hint" className="sr-only">
-        {copy.filters.topHint}
+        <EmojiText text={copy.filters.topHint} />
       </p>
       {categoryOpen ? (
         <div
@@ -478,7 +479,7 @@ export function NumbersInline({ place }: { place: MapPlace }) {
         <>
           <span aria-hidden className="h-3 w-px bg-border" />
           <span>
-            {copy.numbers.thumbs} {pct}
+            <EmojiText text={copy.numbers.thumbs} /> {pct}
             {copy.numbers.thumbsUnit}
           </span>
         </>

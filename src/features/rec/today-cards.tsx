@@ -7,6 +7,7 @@
 // - 대안 카드: 아이콘 28 + 식당명, 도보와 만족. 누르면 큰 카드와 자리를 바꾼다(today-screen이 교환 모션과 포커스 이동).
 // - 카드 순서 낭독: 큰 카드와 대안에 "3곳 중 1번째"를 스크린 리더 글자로 붙인다.
 // 모션은 today.css(Motion 없음, D-04). data-reveal 순번: 윗줄 0, 이유 1, 배지 2, 숫자 3, 대안 3, 4(T8.8 사용자 결정 P2).
+import { EmojiText } from "@/components/a11y/emoji-text";
 import { ChevronDown, Dices, RotateCcw, ThumbsUp } from "lucide-react";
 import {
   useId,
@@ -123,7 +124,7 @@ export function TodayHero({
 
       <div data-reveal style={reveal(1)} className="mt-2 flex flex-col">
         <p className="line-clamp-2 type-body text-pretty text-foreground">
-          {card.reason}
+          <EmojiText text={card.reason} />
         </p>
         <button
           type="button"
@@ -152,7 +153,7 @@ export function TodayHero({
                 key={line}
                 className="type-body-sm text-pretty break-keep text-muted-foreground"
               >
-                {line}
+                <EmojiText text={line} />
               </li>
             ))}
           </ul>

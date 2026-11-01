@@ -2,6 +2,7 @@
 // 식당 상세 본문 조각 (T5.33, T5.34, D-10 C 결정 집중형 + A 가격 점 분포와 예산 선 + B 이유 한 줄).
 // 접힘 행(Fold), 숫자 3칸, 가격 눈금, 10칸 미터, 태그, 후기, 지금, 정보. 컨테이너(시트, 지도 시트)와 무관하다.
 // 모션: 접힘 높이 base(grid-rows), 미터와 점은 행을 펼칠 때 CSS 전환. 축소 모드면 motion-reduce로 즉시.
+import { EmojiText } from "@/components/a11y/emoji-text";
 import {
   ChevronDown,
   CircleAlert,
@@ -463,7 +464,7 @@ export function TenMeter({
         </p>
       ) : (
         <p className="flex gap-4 type-caption text-muted-foreground tabular-nums">
-          <span>{copy.thumbs.up(thumbs.up)}</span>
+          <EmojiText text={copy.thumbs.up(thumbs.up)} />
           <span>{copy.thumbs.down(thumbs.down)}</span>
         </p>
       )}

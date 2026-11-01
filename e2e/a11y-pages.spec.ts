@@ -74,6 +74,39 @@ test.describe("실제 화면: 공개", () => {
   }
 });
 
+// 👍는 보이는 모양 그대로, 읽기는 "좋아요"(T8.9 F6, src/components/a11y/emoji-text.tsx)
+test.describe("이모지 읽기: 👍 → 좋아요", () => {
+  test.use({
+    reducedMotion: "reduce",
+    geolocation: HERE,
+    permissions: ["geolocation"],
+  });
+
+  test("랜딩 데모 이유 줄", async ({ page }) => {
+    await page.goto("/");
+    const reason = page
+      .locator("p")
+      .filter({ hasText: /지난주 👍/ })
+      .first();
+    await expect(reason).toBeVisible();
+    // Chrome은 숨김 글자(sr-only, absolute) 뒤에 띄어쓰기를 넣어 "좋아요 한"으로 만든다. 읽기에는 지장 없다
+    expect(await reason.ariaSnapshot()).toMatch(/지난주 좋아요 ?한 국밥/);
+    // 이모지 글자는 접근성 트리에 없다
+    expect(await page.locator("main").ariaSnapshot()).not.toContain("👍");
+  });
+
+  test("지도 필터 칩과 안내", async ({ page }) => {
+    await mockRecommendSdks(page);
+    await page.goto("/map");
+    const chip = page.getByRole("button", { name: "좋아요 상위" });
+    await expect(chip).toBeVisible();
+    await expect(chip).toContainText("👍");
+    await expect(chip).toHaveAccessibleDescription(
+      "후기 3건 이상인 곳 중 좋아요 80% 이상입니다.",
+    );
+  });
+});
+
 test.describe("실제 화면: 둘러보기 추천과 지도", () => {
   test.use({
     reducedMotion: "reduce",

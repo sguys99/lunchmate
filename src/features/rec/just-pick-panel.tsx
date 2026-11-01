@@ -8,6 +8,7 @@
 //   숫자 3칸, 길찾기(primary)와 다시 고르기.
 // 등장은 패널 하나가 slow 페이드 + 8px 올라옴(CSS), 닫힘은 fast. 축소 모드면 전환 없음.
 // 접근성: role="dialog", 열리면 패널에 포커스, Tab은 패널 안에서만, Esc와 딤으로 닫고 버튼으로 포커스가 돌아간다.
+import { EmojiText } from "@/components/a11y/emoji-text";
 import { RotateCcw, XIcon } from "lucide-react";
 import { useEffect, useId, useRef, type KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -149,7 +150,7 @@ export default function JustPickPanel({
 
           <div className="mt-2">
             <p className="line-clamp-2 type-body-sm text-pretty text-muted-foreground">
-              {card.reason}
+              <EmojiText text={card.reason} />
             </p>
             <CardBadges card={card} className="mt-3 empty:hidden" />
           </div>
