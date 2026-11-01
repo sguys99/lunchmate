@@ -131,8 +131,12 @@ describe("toPlaceDetailStats", () => {
       { label: "혼밥 OK", count: 3 },
       { label: "조용함", count: 1 },
     ]);
-    expect(d.reviews?.map((r) => r.id)).toEqual(["r1"]);
-    expect(d.reviewTotal).toBe(1);
+    // 내 후기는 빼고, 내가 신고한 후기는 남겨 표시만 한다(D-13 안건 11)
+    expect(d.reviews?.map((r) => [r.id, r.reportedByMe])).toEqual([
+      ["r1", false],
+      ["r3", true],
+    ]);
+    expect(d.reviewTotal).toBe(2);
     expect(d.waiting).toEqual({ level: "walkIn", minutesAgo: 10 });
     expect(d.deal).toEqual({ title: "정식 9천 원", daysAgo: 2, untilLabel: "11월 9일" });
     expect(d.myVisit).toEqual({ dateLabel: "10월 22일", rating: "up" });

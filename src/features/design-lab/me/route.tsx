@@ -3,14 +3,12 @@
 import { Suspense } from "react";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
 import { MeA } from "./a/me-a";
-import { MeB } from "./b/me-b";
-import { MeC } from "./c/me-c";
 import { parseMeParams } from "./params";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-export type MeVariant = "a" | "b" | "c";
+export type MeVariant = "a";
 
-const VARIANTS = { a: MeA, b: MeB, c: MeC } as const;
+const VARIANTS = { a: MeA } as const;
 
 async function Screen({
   variant,

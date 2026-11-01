@@ -16,7 +16,7 @@
 //   mine=on           view=detail에서 내 후기가 이미 있는 식당
 import { parseDesignState, type DesignState } from "@/features/design-lab/mock";
 
-export const FEEDBACK_FLOWS = [
+const FEEDBACK_FLOWS = [
   "ask",
   "thanks",
   "compose",
@@ -25,7 +25,7 @@ export const FEEDBACK_FLOWS = [
   "edit",
   "delete",
 ] as const;
-export type FeedbackFlow = (typeof FEEDBACK_FLOWS)[number];
+type FeedbackFlow = (typeof FEEDBACK_FLOWS)[number];
 
 export type FeedbackAnswer = "up" | "down" | "skipped";
 

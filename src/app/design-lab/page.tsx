@@ -51,24 +51,19 @@ export default function DesignLabPage() {
         </Link>
       </Section>
 
+      {/* 6단계 시안(T6.4): 고른 안만 남기고 나머지는 지웠다(캡처와 비교 문서만 남김, D-11~D-13) */}
       {(
         [
-          ["feedback", feedbackLabCopy],
-          ["me", meLabCopy],
-          ["report", reportLabCopy],
+          ["feedback", "b", feedbackLabCopy.names.b, feedbackLabCopy],
+          ["me", "a", meLabCopy.names.a, meLabCopy],
+          ["report", "c", reportLabCopy.names.c, reportLabCopy],
         ] as const
-      ).map(([route, lab]) => (
+      ).map(([route, id, name, lab]) => (
         <Section key={route} title={lab.index.title} body={lab.index.body}>
           <div className="flex flex-wrap gap-4">
-            {(["a", "b", "c"] as const).map((id) => (
-              <Link
-                key={id}
-                href={`/design-lab/${route}/${id}`}
-                className={linkClass}
-              >
-                {lab.names[id]}
-              </Link>
-            ))}
+            <Link href={`/design-lab/${route}/${id}`} className={linkClass}>
+              {name}
+            </Link>
           </div>
         </Section>
       ))}

@@ -3,15 +3,13 @@
 // 흐름과 단계가 바뀌면 시안 상태를 처음부터 다시 그리도록 쿼리 전체를 key로 준다.
 import { Suspense } from "react";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
-import { ReportA } from "./a/report-a";
-import { ReportB } from "./b/report-b";
 import { ReportC } from "./c/report-c";
 import { parseReportParams } from "./params";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-export type ReportVariant = "a" | "b" | "c";
+export type ReportVariant = "c";
 
-const VARIANTS = { a: ReportA, b: ReportB, c: ReportC } as const;
+const VARIANTS = { c: ReportC } as const;
 
 async function Screen({
   variant,

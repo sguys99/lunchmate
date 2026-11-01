@@ -1,4 +1,4 @@
-// '나' 탭과 기록 시안 문구 (T6.2, /design-lab/me/{a,b,c}). HIS-01~03, FB-07, SET-01~05, T5.12a.
+// '나' 탭과 기록 시안 문구 (T6.2, /design-lab/me/a, D-12에서 A를 골라 B, C 문구는 지움). HIS-01~03, FB-07, SET-01~05, T5.12a.
 // 상태 안내, 결과, 설명, 오류는 습니다체, 질문과 제안은 해요체 (tasks.md 2.2절, copy-guide 4.2, 4.3, 4.9).
 // 설정 줄 이름은 me.ts(meCopy), 끼니 이름은 home.ts 값과 같은 말을 쓴다.
 // 시안을 고른 뒤(T6.4) 실제 화면(T6.13)으로 옮길 때 src/copy/me.ts로 정리한다.
@@ -6,12 +6,10 @@
 export const meLabCopy = {
   names: {
     a: "시안 A 기록 일지",
-    b: "시안 B 달력",
-    c: "시안 C 이번 달 돌아보기",
   },
   index: {
     title: "나 탭과 기록 시안 (T6.2)",
-    body: "기록, 즐겨찾기, 다시 안 갈 곳, 내 후기와 설정을 한 탭에 담은 세 방향입니다. 쿼리로 상태와 하위 화면을 바꿔 볼 수 있습니다.",
+    body: "고른 A안(기록 일지)만 남겼습니다. 기록, 즐겨찾기, 다시 안 갈 곳, 내 후기와 설정을 쿼리로 상태와 하위 화면을 바꿔 볼 수 있습니다.",
   },
 
   title: "나",
@@ -38,8 +36,6 @@ export const meLabCopy = {
   date: {
     md: (m: number, d: number) => `${m}월 ${d}일`,
     mdw: (m: number, d: number, w: string) => `${m}월 ${d}일 ${w}요일`,
-    month: (m: number) => `${m}월`,
-    monthYear: (y: number, m: number) => `${y}년 ${m}월`,
     weekRange: (m1: number, d1: number, m2: number, d2: number) =>
       m1 === m2 ? `${m1}월 ${d1}일~${d2}일` : `${m1}월 ${d1}일~${m2}월 ${d2}일`,
   },
@@ -49,7 +45,6 @@ export const meLabCopy = {
     visit: (date: string, meal: string) => `${date} ${meal}에 간 곳`,
     saved: (n: number) => `저장한 식당 ${n}`,
     review: (date: string) => `${date}에 남긴 후기`,
-    kakao: "카카오맵에서 보기",
     kakaoShort: "카카오맵",
     /** 카카오맵 링크 뒤에 붙는 스크린 리더 글자("카카오맵" + 이 값) */
     kakaoSr: (target: string) => ` 링크, ${target}`,
@@ -61,13 +56,11 @@ export const meLabCopy = {
   confirm: {
     title: "다녀오셨나요?",
     ask: (name: string) => `${name}, 다녀오셨나요?`,
-    pendingCount: (n: number) => `확인하지 않은 방문 ${n}곳`,
     up: "좋았어요",
     down: "별로였어요",
     no: "안 갔어요",
     thanks: "기록했습니다.",
     thanksNo: "안 간 곳으로 기록했습니다. 추천 점수에는 쓰지 않습니다.",
-    hint: "길찾기만 누르고 아직 답하지 않은 곳입니다.",
   },
 
   /** 기록 (HIS-01) */
@@ -79,8 +72,6 @@ export const meLabCopy = {
     count: (n: number) => `${n}곳`,
     more: "지난 기록 더 보기",
     end: "처음 기록까지 모두 봤습니다.",
-    all: "기록 모두 보기",
-    recent: "최근 기록",
     openPlace: (name: string) => `${name} 상세 보기`,
     listLabel: "방문 기록",
   },
@@ -99,9 +90,6 @@ export const meLabCopy = {
     unblocked: "다시 추천에 넣었습니다.",
     undo: "되돌리기",
     blockNote: "여기 있는 곳은 추천에 나오지 않습니다.",
-    blockSummary: (n: number) => `${n}곳을 추천에서 빼고 있습니다.`,
-    manage: "관리",
-    all: (n: number) => `${n}곳 모두 보기`,
     more: "더 보기",
     favoritesEmpty:
       "아직 즐겨찾기한 곳이 없습니다. 상세에서 별을 눌러 모아 볼까요?",
@@ -116,7 +104,6 @@ export const meLabCopy = {
     tab: "후기",
     title: "내 후기",
     count: (n: number) => `${n}개`,
-    all: (n: number) => `${n}개 모두 보기`,
     public: "공개",
     private: "나만 보기",
     privateHint:
@@ -135,36 +122,14 @@ export const meLabCopy = {
     noText: "글 없이 평가만 남겼습니다.",
   },
 
-  /** 이번 달 요약 (C) */
-  summary: {
-    title: (m: number) => `${m}월의 점심`,
-    visits: "다녀온 횟수",
-    visitsUnit: "번",
-    thumbs: "좋았어요",
-    thumbsUnit: "%",
-    top: "자주 간",
-    topNone: "아직 없음",
-    categories: "자주 간 종류",
-    categoryCount: (label: string, n: number) => `${label} ${n}번`,
-    sentence: (n: number, up: number) =>
-      `이번 달 ${n}번 다녀왔고 그중 ${up}번 좋았다고 남겼습니다.`,
-    thumbsFew: "평가 3개부터",
-  },
 
   /** 달력 (B) */
   calendar: {
     prev: "이전 달",
     next: "다음 달",
     label: (y: number, m: number) => `${y}년 ${m}월 방문 달력`,
-    today: "오늘",
-    dayLabel: (date: string, detail: string) =>
-      detail ? `${date}, ${detail}` : `${date}, 기록 없음`,
     pendingMark: "확인 전",
-    monthCount: (m: number, n: number) => `${m}월에 ${n}번 다녀왔습니다.`,
     noVisit: "이날은 기록이 없습니다.",
-    lists: "목록",
-    legendVisit: "다녀온 날",
-    legendPending: "확인 전",
   },
 
   /** 설정 묶음 (기존 4단계 화면으로 가는 줄) */
@@ -182,9 +147,6 @@ export const meLabCopy = {
 
   /** 데스크톱 오른쪽 칸 */
   side: {
-    weekMap: "이번 주 다녀온 곳 지도",
-    monthMap: "이번 달 다녀온 곳 지도",
-    myMap: "즐겨찾기와 다녀온 곳 지도",
   },
 
   /** 상태 */

@@ -21,6 +21,7 @@ import {
   StateGlyph,
 } from "@/components/states";
 import { buttonClass } from "@/components/ui/button-classes";
+import { DealBadge } from "@/components/badges/place-badges";
 import { Chip } from "@/components/ui/chip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { focusRing, hitArea44 } from "@/components/ui/interaction";
@@ -44,6 +45,8 @@ const copy = mapCopy;
 /**
  * 도보 분 알약. 왼쪽 8px 점이 카테고리 색, 오른쪽 "4분". 아래 8px 꼬리 끝이 좌표.
  * 고르면 면이 primary로 바뀌고 이름이 펼쳐지며, 점 자리에 카테고리 그림을 담은 작은 원이 붙는다(A에서 가져옴).
+ * 할인이 있으면 오른쪽 위에 6px primary 점(card 2px 테두리)을 붙이고 이름에 "할인 정보 있음"을 더한다.
+ * 표시만이고 묶음 알약에는 두지 않는다(D-09 보강 2026-11-01, DEAL-02).
  */
 export function WalkPill({
   place,
@@ -63,6 +66,7 @@ export function WalkPill({
         place.name,
         categoryLabel(place.category),
         place.walkMinutes,
+        place.deal,
       )}
       className={cn(
         "lm-map-marker flex flex-col items-center rounded-chip",
@@ -72,7 +76,7 @@ export function WalkPill({
       <span
         aria-hidden
         className={cn(
-          "lm-map-pill flex h-9 min-w-11 items-center gap-1.5 rounded-chip border pr-2.5",
+          "lm-map-pill relative flex h-9 min-w-11 items-center gap-1.5 rounded-chip border pr-2.5",
           selected
             ? "border-primary bg-primary pl-1 text-primary-foreground"
             : "border-border bg-card pl-2.5 text-foreground",
@@ -107,6 +111,12 @@ export function WalkPill({
             {copy.numbers.walkUnit}
           </span>
         </span>
+        {place.deal ? (
+          <span
+            data-deal-dot
+            className="absolute -top-1 right-2.5 size-1.5 rounded-full bg-primary ring-2 ring-card"
+          />
+        ) : null}
       </span>
       <span
         aria-hidden
@@ -491,8 +501,12 @@ export function PlaceRow({
       >
         <CategoryIllustration slug={place.category} size={40} />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate type-label text-foreground">
-            {place.name}
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="truncate type-label text-foreground">
+              {place.name}
+            </span>
+            {/* 카드와 같은 할인 배지. 지도 목록 행의 배지는 할인 하나뿐이라 최대 2개 규칙 안. 표시만 */}
+            {place.deal ? <DealBadge className="shrink-0" /> : null}
           </span>
           <NumbersInline place={place} />
         </span>

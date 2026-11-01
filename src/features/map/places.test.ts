@@ -35,6 +35,33 @@ describe("지도 식당 변환", () => {
     expect(out[1]?.favorite).toBe(false);
   });
 
+  it("집계가 있으면 제보 가격, 👍, 할인 표시를 붙이고 없으면 중립값", () => {
+    const out = toMapPlaces(
+      [r("1", 100, "음식점 > 한식 > 국밥"), r("2", 200, "음식점 > 한식")],
+      center,
+      {
+        meal: "lunch",
+        isFavorite: () => false,
+        statsOf: (id) =>
+          id === "1"
+            ? {
+                priceReport: { medianKRW: 9000, count: 3 },
+                thumbs: { up: 4, down: 1 },
+                deal: true,
+              }
+            : { priceReport: null, thumbs: { up: 0, down: 0 }, deal: false },
+      },
+    );
+    expect(out[0]).toMatchObject({
+      priceKRW: 9000,
+      priceEstimate: false,
+      thumbs: { up: 4, down: 1 },
+      deal: true,
+    });
+    expect(out[1]?.deal).toBe(false);
+    expect(out[1]?.priceEstimate).toBe(true);
+  });
+
   it("카카오 거리가 없으면 직접 잰다", () => {
     const [p] = toMapPlaces([r("1", null, "음식점 > 한식")], center, {
       meal: "lunch",

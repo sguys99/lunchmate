@@ -13,7 +13,7 @@
 //   menu=open                 하단 더 보기 메뉴를 연 채로
 import { parseDesignState, type DesignState } from "@/features/design-lab/mock";
 
-export const REPORT_FLOWS = [
+const REPORT_FLOWS = [
   "none",
   "deal",
   "deal-check",
@@ -23,14 +23,14 @@ export const REPORT_FLOWS = [
 ] as const;
 export type ReportFlow = (typeof REPORT_FLOWS)[number];
 
-export const REPORT_PHASES = [
+const REPORT_PHASES = [
   "form",
   "dup",
   "done",
   "ended",
   "cooldown",
 ] as const;
-export type ReportPhase = (typeof REPORT_PHASES)[number];
+type ReportPhase = (typeof REPORT_PHASES)[number];
 
 export type PlaceReportKind = "closed" | "price" | "wrong";
 

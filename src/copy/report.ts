@@ -44,7 +44,7 @@ export const reportLabels = {
   dealTypes: {
     lunch_special: "점심특선",
     discount: "할인",
-    event: "오픈, 기념 이벤트",
+    event: "개업, 기념 이벤트",
     happy_hour: "해피아워",
     other: "기타",
   } satisfies Record<DealType, string>,
@@ -119,7 +119,7 @@ export const reportCopy = {
     placeholders: {
       lunch_special: "예: 순대국 정식 9천 원",
       discount: "예: 포장하면 1천 원 할인",
-      event: "예: 오픈 기념 음료 한 잔 무료",
+      event: "예: 개업 기념 음료 한 잔 무료",
       happy_hour: "예: 오후 5시~7시 생맥주 반값",
       other: "예: 도장 10개 모으면 한 그릇 무료",
     },

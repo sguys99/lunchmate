@@ -235,6 +235,97 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       }
     }
 
+    // T6.1~T6.3 6단계 시안. D-11(피드백 B), D-12(나 탭 A), D-13(제보와 신고 C)만 남기고 나머지는 지웠다
+    for (const [route, id, queries] of [
+      [
+        "feedback",
+        "b",
+        [
+          "",
+          "?flow=thanks",
+          "?flow=compose",
+          "?flow=saved",
+          "?flow=later",
+          "?state=loading",
+          "?state=empty",
+          "?state=error",
+          "?state=error&fail=name",
+          "?state=offline",
+          "?view=detail",
+          "?view=detail&mine=on",
+          "?view=detail&flow=compose",
+          "?view=detail&mine=on&flow=edit",
+          "?view=detail&mine=on&flow=delete",
+          "?view=detail&state=empty",
+          "?view=detail&state=offline&mine=on",
+        ],
+      ],
+      [
+        "me",
+        "a",
+        [
+          "",
+          "?state=loading",
+          "?state=empty",
+          "?state=error",
+          "?state=offline",
+          "?names=fail",
+          "?auth=off",
+          "?view=places",
+          "?view=reviews",
+          "?view=settings",
+          "?more=on",
+        ],
+      ],
+      [
+        "report",
+        "c",
+        [
+          // ?menu=open은 캡처만 한다(실제 PlaceMoreMenu가 모달이라 바깥을 aria-hidden으로 가림)
+          "",
+          "?flow=deal",
+          "?flow=deal&phase=dup",
+          "?flow=deal&phase=done",
+          "?flow=deal&error=banned-word",
+          "?flow=deal&error=limit",
+          "?flow=deal&state=loading",
+          "?flow=deal&state=empty",
+          "?flow=deal&state=error",
+          "?flow=deal&state=offline",
+          "?flow=deal-check&phase=done",
+          "?flow=deal-check&phase=ended",
+          "?flow=wait&phase=done",
+          "?flow=wait&phase=cooldown",
+          "?flow=place&kind=price",
+          "?flow=place&phase=done",
+          "?flow=review-report",
+          "?flow=review-report&target=deal",
+          "?flow=review-report&phase=done",
+          "?flow=review-report&error=limit",
+          "?flow=review-report&error=banned-word",
+          "?flow=deal&step=2",
+          "?flow=deal&step=3",
+          "?flow=deal&step=4",
+        ],
+      ],
+    ] as const) {
+      for (const query of queries) {
+        test(`6단계 시안 ${route}/${id}${query}`, async ({ page }) => {
+          test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+          await openLabRoute(page, `/design-lab/${route}/${id}${query}`);
+          await expectNoA11yViolations(page);
+        });
+      }
+    }
+
+    // 식후 피드백 B: 한 탭 뒤 고마움 줄
+    test("6단계 시안 feedback/b 좋았어요 누른 뒤", async ({ page }) => {
+      test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
+      await openLabRoute(page, "/design-lab/feedback/b");
+      await page.getByRole("button", { name: "좋았어요", exact: true }).click();
+      await expectNoA11yViolations(page);
+    });
+
     test("PoC 목록", async ({ page }) => {
       test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
       const res = await page.goto("/design-lab/poc");

@@ -20,7 +20,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { MapPane, ShellSplit, TabBarView } from "@/components/app-shell";
 import { PlaceBadges } from "@/components/badges/place-badges";
 import type { PlaceBadge } from "@/components/badges/pick-badges";
@@ -922,7 +922,7 @@ export function EtcField({
 
 /* ---------- 식당 정보 제보 상세 (PLACE-05, 모두 선택) ---------- */
 
-export const PLACE_KINDS: readonly PlaceReportKind[] = [
+const PLACE_KINDS: readonly PlaceReportKind[] = [
   "closed",
   "price",
   "wrong",
@@ -1183,32 +1183,6 @@ export function RestFooter({
 
 /* ---------- 로딩 ---------- */
 
-export function DetailSkeleton() {
-  return (
-    <LoadingRegion label={copy.frame.loading} className="flex flex-col pb-6">
-      <div className="flex items-center gap-3">
-        <Skeleton className="size-14 shrink-0 rounded-full" />
-        <div className="flex flex-1 flex-col">
-          <SkeletonLine type="caption" className="w-10" />
-          <SkeletonLine type="title" className="w-40" />
-        </div>
-      </div>
-      <SkeletonLine type="body" className="mt-4 w-56" />
-      <div className="mt-6 flex flex-col border-t border-border">
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="flex h-14 items-center justify-between border-b border-border"
-          >
-            <SkeletonLine type="label" className="w-12" />
-            <SkeletonLine type="caption" className="w-24" />
-          </div>
-        ))}
-      </div>
-    </LoadingRegion>
-  );
-}
-
 /** 입력 자리 스켈레톤 (한도와 중복 확인을 불러오는 동안) */
 export function FormSkeleton({ rows = 3 }: { rows?: number }) {
   return (
@@ -1271,14 +1245,3 @@ export type DealForm = {
   untilDays: number;
   when: WhenValue;
 };
-
-export const EMPTY_WHEN: WhenValue = { days: [], slots: [] };
-
-export function useDealForm(initial: DealForm) {
-  const [form, setForm] = useState<DealForm>(initial);
-  return {
-    form,
-    set: <K extends keyof DealForm>(key: K, v: DealForm[K]) =>
-      setForm((f) => ({ ...f, [key]: v })),
-  };
-}

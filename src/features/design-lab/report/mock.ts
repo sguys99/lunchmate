@@ -1,9 +1,8 @@
 // 제보와 신고 시안 목업 (T6.3). 지금은 2026-10-31(금) 12:24 KST로 둔다.
 // 카카오 값(이름, 주소, 좌표)은 세션 메모리 값이라는 가정이고, 할인, 웨이팅, 후기는 place_id로 묶인 우리 데이터다.
-import {
-  EMPTY_PLACE_STATS,
-  type PlaceDetailPlace,
-  type PlaceDetailStats,
+import type {
+  PlaceDetailPlace,
+  PlaceDetailStats,
 } from "@/features/place/detail-model";
 
 export type DealType =
@@ -94,8 +93,6 @@ export const STATS_EMPTY: PlaceDetailStats = {
   deal: null,
 };
 
-export const STATS_LOADING: PlaceDetailStats = EMPTY_PLACE_STATS;
-
 export const DEALS: readonly DealItem[] = [
   {
     id: "d1",
@@ -158,8 +155,6 @@ export const UNTIL_OPTIONS = [
 
 export const DEFAULT_UNTIL_DAYS = 7;
 
-/** 목업 지금 시각과 웨이팅 쿨다운 */
-export const NOW_LABEL = "12시 24분";
 export const COOLDOWN_UNTIL_LABEL = "12시 54분";
 /** cooldown 단계: 내가 18분 전에 알림, 12분 남음 */
 export const MY_WAIT = { minutesAgo: 18, left: 12 } as const;

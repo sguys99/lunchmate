@@ -42,6 +42,8 @@ export type PlaceReview = {
   readonly visitMonth: number;
   readonly thumb: "up" | "down";
   readonly text: string;
+  /** 내가 신고한 후기: 나에게는 한 줄로 가리고 "보기"로 연다(D-13 안건 11). 목업은 생략 */
+  readonly reportedByMe?: boolean;
 };
 
 export type PlaceDetailStats = {

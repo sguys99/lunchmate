@@ -139,7 +139,7 @@ export const MOCK_VISITS: readonly Visit[] = [
   v(ymd(9, 25), "lunch", "rec", "visited", "down", P.fastfood),
 ];
 
-export const MOCK_REVIEWS: readonly MyReview[] = [
+const MOCK_REVIEWS: readonly MyReview[] = [
   {
     id: "review-1",
     date: ymd(10, 28),
@@ -203,7 +203,7 @@ export const MOCK_REVIEWS: readonly MyReview[] = [
 ];
 
 /** 즐겨찾기 12곳(최근 저장순). 7번째는 이름 미해결 */
-export const MOCK_FAVORITES: readonly SavedPlace[] = [
+const MOCK_FAVORITES: readonly SavedPlace[] = [
   { place: P.gukbap, savedOn: ymd(10, 28), lastVisit: ymd(10, 28) },
   { place: P.asian, savedOn: ymd(10, 29), lastVisit: ymd(10, 29) },
   { place: P.jungsik, savedOn: ymd(10, 23), lastVisit: ymd(10, 23) },
@@ -218,7 +218,7 @@ export const MOCK_FAVORITES: readonly SavedPlace[] = [
   { place: P.udon, savedOn: ymd(9, 3), lastVisit: null },
 ];
 
-export const MOCK_BLOCKLIST: readonly SavedPlace[] = [
+const MOCK_BLOCKLIST: readonly SavedPlace[] = [
   { place: P.fastfood, savedOn: ymd(10, 26), lastVisit: ymd(10, 26) },
   { place: P.bunsik, savedOn: ymd(10, 14), lastVisit: ymd(10, 14) },
   { place: P.lost2, savedOn: ymd(9, 2), lastVisit: null },
@@ -275,10 +275,6 @@ export function weekdayOf(date: Ymd): number {
   return new Date(utc(date)).getUTCDay();
 }
 
-export function sameDay(a: Ymd, b: Ymd): boolean {
-  return a.y === b.y && a.m === b.m && a.d === b.d;
-}
-
 /** 그 주 월요일 */
 export function weekStart(date: Ymd): Ymd {
   const w = weekdayOf(date);
@@ -286,7 +282,7 @@ export function weekStart(date: Ymd): Ymd {
   return fromUtc(utc(date) - back * DAY);
 }
 
-export function addDays(date: Ymd, days: number): Ymd {
+function addDays(date: Ymd, days: number): Ymd {
   return fromUtc(utc(date) + days * DAY);
 }
 
@@ -322,21 +318,6 @@ export function groupByWeek(visits: readonly Visit[], today: Ymd): WeekGroup[] {
   return groups;
 }
 
-export type MonthGroup = { y: number; m: number; visits: Visit[] };
-
-export function groupByMonth(visits: readonly Visit[]): MonthGroup[] {
-  const groups: MonthGroup[] = [];
-  for (const visit of visits) {
-    let g = groups.find((x) => x.y === visit.date.y && x.m === visit.date.m);
-    if (!g) {
-      g = { y: visit.date.y, m: visit.date.m, visits: [] };
-      groups.push(g);
-    }
-    g.visits.push(visit);
-  }
-  return groups;
-}
-
 /** 달력 칸(일요일 시작). 앞쪽 빈칸은 null */
 export function monthGrid(y: number, m: number): (number | null)[] {
   const firstW = weekdayOf({ y, m, d: 1 });
@@ -347,13 +328,9 @@ export function monthGrid(y: number, m: number): (number | null)[] {
   return cells;
 }
 
-export function visitsOn(visits: readonly Visit[], date: Ymd): Visit[] {
-  return visits.filter((x) => sameDay(x.date, date));
-}
-
 /* ---------- 이번 달 요약 (C) ---------- */
 
-export type MonthStats = {
+type MonthStats = {
   /** 다녀온 곳(visited) 수 */
   visited: number;
   /** 평가를 남긴 수 */

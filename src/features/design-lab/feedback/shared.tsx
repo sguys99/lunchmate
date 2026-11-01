@@ -248,7 +248,7 @@ function UnknownArt() {
 }
 
 /** 카카오맵 글자 링크 (이름 못 찾은 날, place_url만 저장해 둔 값) */
-export function KakaoMapLink({ className }: { className?: string }) {
+function KakaoMapLink({ className }: { className?: string }) {
   return (
     <a
       href={MOCK_PLACE_URL}
@@ -539,104 +539,6 @@ export function shortWon(priceKRW: number): string {
   if (rest !== 0) return formatWon(priceKRW);
   if (man === 0) return `${cheon}천 원`;
   return cheon === 0 ? `${man}만 원` : `${man}만 ${cheon}천 원`;
-}
-
-/** 직접 입력 칸: 숫자 키패드, 오른쪽 "원" */
-function PriceInput({
-  value,
-  onChange,
-  autoFocus,
-}: {
-  value: number | null;
-  onChange: (v: number | null) => void;
-  autoFocus?: boolean;
-}) {
-  return (
-    <div className="relative w-full max-w-56">
-      <input
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        // 실제 구현은 서버에서 zod로 다시 검사한다(CLAUDE.md 7장)
-        aria-label={copy.composer.priceInputLabel}
-        autoFocus={autoFocus}
-        value={value === null ? "" : value.toLocaleString("ko-KR")}
-        onChange={(e) => {
-          const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
-          onChange(digits === "" ? null : Number(digits));
-        }}
-        className={cn(
-          "h-12 w-full rounded-input border border-input bg-card pr-10 pl-4 type-body text-foreground tabular-nums outline-none placeholder:text-muted-foreground",
-          "transition-[border-color] duration-(--lm-duration-fast) ease-standard focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none",
-        )}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 type-body-sm text-muted-foreground"
-      >
-        {copy.composer.priceUnit}
-      </span>
-    </div>
-  );
-}
-
-/**
- * 가격 칩: 추정가 둘레 값 + "직접". 칩 하나 누르면 끝(한 탭), 다시 누르면 지운다.
- * onPicked는 칩으로 값을 고른 순간(C안이 다음 단계로 넘어갈 때 쓴다).
- */
-export function PriceChips({
-  draft,
-  presets,
-  labelledBy,
-  onPicked,
-}: {
-  draft: DraftApi;
-  presets: readonly number[];
-  labelledBy: string;
-  onPicked?: (priceKRW: number) => void;
-}) {
-  const { priceKRW, customPrice } = draft.draft;
-  const current = customPrice
-    ? "custom"
-    : priceKRW !== null && presets.includes(priceKRW)
-      ? String(priceKRW)
-      : null;
-  return (
-    <div className="flex flex-col gap-3">
-      <ChipGroup
-        aria-labelledby={labelledBy}
-        value={current ? [current] : []}
-        onValueChange={(v: unknown[]) => {
-          const next = v[0];
-          if (next === undefined) {
-            draft.patch({ priceKRW: null, customPrice: false });
-          } else if (next === "custom") {
-            draft.patch({ customPrice: true });
-          } else {
-            const value = Number(next);
-            draft.patch({ priceKRW: value, customPrice: false });
-            onPicked?.(value);
-          }
-        }}
-      >
-        {presets.map((v) => (
-          <Chip key={v} value={String(v)} className="tabular-nums">
-            {shortWon(v)}
-          </Chip>
-        ))}
-        <Chip value="custom">{copy.composer.priceCustom}</Chip>
-      </ChipGroup>
-      {customPrice ? (
-        <div className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]">
-          <PriceInput
-            value={priceKRW}
-            onChange={(v) => draft.patch({ priceKRW: v })}
-            autoFocus
-          />
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 /**

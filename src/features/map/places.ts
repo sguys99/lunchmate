@@ -3,7 +3,8 @@
 // 데이터 규칙 (CLAUDE.md 7장, T0.16)
 // - 입력(KakaoRestaurant)과 출력(MapPlace)은 세션 메모리 값이다. 저장, 로그, 분석 이벤트에 넣지 않는다.
 // - 도보 분은 검색 기준점(회사 핀, 현위치, 다시 찾기의 지도 가운데)에서 다시 잰다. 기준점 좌표도 메모리에만 있다.
-// - 가격, 👍는 place_id에 붙는 우리 집계(6단계)다. 그 전에는 카테고리 추정가와 빈 👍(콜드 스타트)다.
+// - 가격, 👍, 할인 표시는 place_id에 붙는 우리 집계(place_stats, 홈과 같은 쿼리)다. 받기 전이나 실패면
+//   카테고리 추정가와 빈 👍(콜드 스타트), 할인 없음이다.
 import { straightDistanceM } from "@/features/rec/candidates";
 import {
   kakaoCategorySlug,
@@ -34,17 +35,22 @@ export type MapPlace = {
   readonly priceEstimate: boolean;
   readonly thumbs: { readonly up: number; readonly down: number };
   readonly favorite: boolean;
+  /** 지금 보이는 할인이 있다. 표시만(마커 점, 목록 배지), 점수와 필터에 쓰지 않는다(AC-DEAL-2, D-09 보강 2026-11-01) */
+  readonly deal: boolean;
 };
 
 /** place_id에 붙는 우리 집계 중 지도 필터가 쓰는 것(6단계). 없으면 빈 값 */
 export type MapPlaceStats = {
   readonly priceReport: { medianKRW: number; count: number } | null;
   readonly thumbs: { readonly up: number; readonly down: number };
+  /** 할인 표시 여부(place_stats deal_count > 0). 표시만 */
+  readonly deal: boolean;
 };
 
 export const EMPTY_MAP_STATS: MapPlaceStats = {
   priceReport: null,
   thumbs: { up: 0, down: 0 },
+  deal: false,
 };
 
 export function toMapPlace(
@@ -79,6 +85,7 @@ export function toMapPlace(
     priceEstimate: price.source === "estimate",
     thumbs: stats.thumbs,
     favorite: ctx.favorite,
+    deal: stats.deal,
   };
 }
 

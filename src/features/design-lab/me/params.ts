@@ -8,7 +8,7 @@
 //   day=1~31        B 달력에서 고른 날(기본 가장 최근 기록일)
 import { parseDesignState, type DesignState } from "@/features/design-lab/mock";
 
-export const ME_VIEWS = [
+const ME_VIEWS = [
   "main",
   "history",
   "places",
@@ -18,7 +18,7 @@ export const ME_VIEWS = [
   "settings",
 ] as const;
 
-export type MeView = (typeof ME_VIEWS)[number];
+type MeView = (typeof ME_VIEWS)[number];
 
 export type MeParams = {
   state: DesignState;

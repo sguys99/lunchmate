@@ -1,17 +1,15 @@
-// 식후 피드백과 후기 시안 문구 (T6.1, /design-lab/feedback/{a,b,c}). FB-01~07, MOD-01 진입점, PRD 11.2.
+// 식후 피드백과 후기 시안 문구 (T6.1, /design-lab/feedback/b, D-11에서 B를 골라 A, C 문구는 지움). FB-01~07, MOD-01 진입점, PRD 11.2.
 // 묻기, 권유, 고마움은 해요체, 상태 안내, 고지, 오류, 결과는 습니다체 (tasks.md 2.2절, copy-guide 4.9, 4.10).
 // 띠 질문과 한 탭 라벨은 홈 D1과 같은 말(design-lab-home.ts screen.feedback)을 그대로 쓴다.
 // 시안을 고른 뒤(T6.4) 실제 화면(T6.8~T6.10)으로 옮길 때 src/copy/feedback.ts로 정리한다.
 
 export const feedbackLabCopy = {
   names: {
-    a: "시안 A 띠 펼침",
     b: "시안 B 한 장 시트",
-    c: "시안 C 한 번에 하나",
   },
   index: {
     title: "식후 피드백 시안 (T6.1)",
-    body: "한 탭 뒤 선택 입력, 상세에서 쓰기와 수정을 세 방향으로 비교합니다. 쿼리로 흐름과 상태를 바꿔 볼 수 있습니다.",
+    body: "고른 B안(한 장 시트)만 남겼습니다. 한 탭 뒤 선택 입력과 상세의 쓰기, 수정을 쿼리로 흐름과 상태를 바꿔 볼 수 있습니다.",
   },
 
   /** 이름을 못 찾은 날 (T5.12a, copy-guide 4.9) */
@@ -30,13 +28,10 @@ export const feedbackLabCopy = {
     rating: "어땠어요?",
     price: "실제 1인 가격",
     priceHint: (estimate: string) => `이 식당 추정 가격은 ${estimate}입니다.`,
-    priceCustom: "직접",
-    priceInputLabel: "실제 1인 가격 직접 입력",
     priceUnit: "원",
     priceDecrease: "500원 내리기",
     priceIncrease: "500원 올리기",
     priceUnset: "아직 고르지 않았습니다",
-    priceClear: "가격 지우기",
     tags: "어떤 곳이었나요?",
     tagsHint: "여러 개 고를 수 있습니다.",
     /** 태그 8종 (FB-02, copy-guide 4.9) */
@@ -53,7 +48,6 @@ export const feedbackLabCopy = {
     review: "한 줄 후기",
     reviewPlaceholder: "다음 사람에게 한 줄로 알려 주세요",
     reviewCount: (count: number, max: number) => `${count}/${max}`,
-    reviewOpen: "한 줄 후기 쓰기",
     visibility: "공개 범위",
     public: "공개",
     private: "나만 보기",
@@ -64,29 +58,14 @@ export const feedbackLabCopy = {
     save: "고친 내용 저장",
     cancel: "닫기",
     close: "후기 쓰기 닫기",
-    collapse: "접기",
     saved: "남겼습니다. 다음 추천에 반영합니다.",
-    savedEdit: "고친 내용을 저장했습니다.",
   },
 
-  /** C안 단계 */
-  steps: {
-    progress: (step: number, total: number) => `${total}단계 중 ${step}단계`,
-    price: "1인 얼마였어요?",
-    tags: "어떤 곳이었나요?",
-    review: "한 줄 남길까요?",
-    next: "다음",
-    skip: "건너뛰기",
-    done: "마치기",
-    back: "이전 단계",
-  },
 
   /** 띠가 묻는 동안 무시했을 때 (D-05 열린 안건) */
   later: {
     /** C: 나중에 버튼 */
     action: "나중에",
-    /** C: 미룬 뒤 띠 자리 한 줄 */
-    deferred: "나 탭 기록에서 언제든 남길 수 있습니다.",
     /** B: 길찾기 뒤 접힌 한 줄 */
     folded: (placeName: string) => `어제 간 ${placeName}`,
     foldedUnnamed: "어제 간 곳",
@@ -106,19 +85,16 @@ export const feedbackLabCopy = {
       composer: "인터넷에 연결되면 남길 수 있습니다.",
       write: "연결되면 후기를 쓸 수 있습니다.",
     },
-    noAsk: "오늘은 물어볼 식사가 없습니다.",
   },
 
   /** 상세에서 쓰기와 내 후기 (FB-06, FB-07) */
   detail: {
     write: "후기 쓰기",
-    writeHint: "다녀왔다면 방문 기록도 함께 남습니다.",
     mine: "내 후기",
     mineMeta: (month: number) => `${month}월 방문, 공개`,
     mineMetaPrivate: (month: number) => `${month}월 방문, 나만 보기`,
     edit: "수정",
     editLabel: "내 후기 수정",
-    remove: "삭제",
     removeLabel: "내 후기 삭제",
     confirm: {
       title: "후기를 지울까요?",
@@ -134,7 +110,6 @@ export const feedbackLabCopy = {
       tags: "태그",
       review: "한 줄 후기",
     },
-    rowEmpty: "비어 있음",
     publicReviews: "다른 사람 후기",
     publicEmpty: "아직 다른 사람 후기가 없습니다.",
     publicOffline: "연결되면 후기를 불러옵니다.",
@@ -143,10 +118,8 @@ export const feedbackLabCopy = {
   /** 후기 신고 진입점 (MOD-01, D-10 안건 11). 신고 시트 자체는 T6.3 */
   report: {
     menu: "후기 더 보기",
-    menuLabel: (nickname: string) => `${nickname} 후기 더 보기`,
     action: "신고",
     actionLabel: (nickname: string) => `${nickname} 후기 신고`,
-    expand: "전체 보기",
     pending: "신고 화면은 제보 시안(T6.3)에서 정합니다.",
   },
 } as const;

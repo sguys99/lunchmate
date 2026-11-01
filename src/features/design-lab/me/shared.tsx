@@ -237,7 +237,7 @@ export function KakaoLink({
   );
 }
 
-export function visitTitle(visit: Visit): string {
+function visitTitle(visit: Visit): string {
   return (
     visit.place.name ??
     copy.unresolved.visit(md(visit.date), copy.meal[visit.meal])
@@ -362,7 +362,7 @@ export function RatingMark({
 
 /* ---------- 방문 확인 (status candidate) ---------- */
 
-export type VisitAnswer = Rating | "no";
+type VisitAnswer = Rating | "no";
 
 /** 방문 후보 답 상태. 화면 안에서만(실제는 visits.status, feedback 저장) */
 export function useVisitAnswers() {
@@ -374,10 +374,10 @@ export function useVisitAnswers() {
   };
 }
 
-export type VisitAnswers = ReturnType<typeof useVisitAnswers>;
+type VisitAnswers = ReturnType<typeof useVisitAnswers>;
 
 /** 답을 반영한 상태와 평가 */
-export function effectiveVisit(visit: Visit, answers: VisitAnswers): Visit {
+function effectiveVisit(visit: Visit, answers: VisitAnswers): Visit {
   const a = answers.get(visit.id);
   if (visit.status !== "candidate" || !a) return visit;
   return a === "no"
@@ -386,7 +386,7 @@ export function effectiveVisit(visit: Visit, answers: VisitAnswers): Visit {
 }
 
 /** "다녀오셨나요?" 한 줄: 👍 👎 원형 버튼 + "안 갔어요" 글자 버튼 (FB-01과 같은 세 답, 3개 이하) */
-export function ConfirmVisit({
+function ConfirmVisit({
   visit,
   answers,
   disabled,
@@ -666,7 +666,7 @@ export function BlockRow({
 }
 
 /** 목록 + 더 보기. limit 뒤는 버튼으로 연다 */
-export function useMore(initial: boolean) {
+function useMore(initial: boolean) {
   const [more, setMore] = useState(initial);
   return { more, open: () => setMore(true) };
 }

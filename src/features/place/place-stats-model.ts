@@ -135,13 +135,13 @@ export type PlaceReviewRow = Nullable<{
   reported_by_me: boolean;
 }>;
 
-/** 공개 후기 한 건(화면용). 상세 PlaceReview에 신고, 내 것 표시와 태그를 더한 것 */
+/** 공개 후기 한 건(화면용). 상세 PlaceReview에 내 것 표시와 태그를 더한 것 */
 export type PublicReview = PlaceReview & {
   readonly avatarUrl: string | null;
   readonly priceKrw: number | null;
   readonly tags: readonly ReviewTag[];
   readonly isMine: boolean;
-  /** 내가 신고한 후기: 나에게는 바로 가리고 "보기"로 연다(D-13 안건 11) */
+  /** 내가 신고한 후기: 목록에 남기되 나에게는 한 줄로 가리고 "보기"로 연다(D-13 안건 11) */
   readonly reportedByMe: boolean;
 };
 
@@ -254,7 +254,8 @@ export function monthDayLabel(dateKey: string): string {
 /**
  * 상세 화면 모델(PlaceDetailStats)로 합친다. EMPTY_PLACE_STATS 대신 이것을 넘기면 된다.
  * - reviews: 공개 후기 상태. 없으면(불러오는 중) [], 실패면 null(상세의 "불러오지 못함").
- *   내 후기와 내가 신고한 후기는 목록에서 뺀다(내 후기는 상세가 따로 보이고, 신고한 후기는 가린다).
+ *   내 후기는 목록에서 뺀다(상세가 따로 보인다). 내가 신고한 후기는 남기고 reportedByMe로 표시해
+ *   목록이 그 자리에서 한 줄로 가린다(D-13 안건 11, 다른 사람에게는 3건 전까지 그대로 보인다, MOD-02).
  * - myVisits: 이 식당의 내 방문(최신순 아니어도 된다). 가장 최근 것을 "내 방문 기록" 한 줄로.
  */
 export function toPlaceDetailStats(input: {
@@ -270,7 +271,7 @@ export function toPlaceDetailStats(input: {
     reviewsResult === null
       ? null
       : reviewsResult?.status === "ok"
-        ? reviewsResult.reviews.filter((r) => !r.isMine && !r.reportedByMe)
+        ? reviewsResult.reviews.filter((r) => !r.isMine)
         : [];
   const firstDeal = input.deals?.[0] ?? null;
   const today = kstDateKey(input.now);

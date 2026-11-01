@@ -77,8 +77,8 @@ export const mapCopy = {
   myLocation: "현위치로 지도 옮기기",
   myLocationDone: "지도를 현위치로 옮겼습니다. 기준 위치는 그대로입니다.",
   myLocationFailed: "현위치를 찾지 못했습니다. 위치 권한을 확인해 주세요.",
-  markerLabel: (name: string, category: string, walk: number) =>
-    `${name}, ${category}, 도보 약 ${walk}분`,
+  markerLabel: (name: string, category: string, walk: number, deal = false) =>
+    `${name}, ${category}, 도보 약 ${walk}분${deal ? ", 할인 정보 있음" : ""}`,
   clusterLabel: (n: number) => `식당 ${n}곳이 모인 곳, 눌러서 펼치기`,
   clusterUnit: "곳",
   clusterOpened: (n: number) => `식당 ${n}곳을 펼쳤습니다.`,

@@ -184,7 +184,9 @@ test.describe("제보와 신고: 할인", () => {
       await expect(
         detail.getByText("할인 정보는 추천 순서에 쓰지 않습니다.").first(),
       ).toBeVisible();
-      await detail.getByText("아직 알려진 할인 정보가 없습니다.").scrollIntoViewIfNeeded();
+      await detail
+        .getByText("아직 알려진 할인 정보가 없습니다.")
+        .scrollIntoViewIfNeeded();
       await shot(page, "detail-now-empty");
 
       // 1 유형
@@ -508,7 +510,7 @@ test.describe("제보와 신고: 웨이팅, 정보 제보, 후기 신고", () =>
     }
   });
 
-  test("PLACE-05, MOD-01: 정보 제보와 후기 신고(신고한 후기는 나에게서 가림)", async ({
+  test("PLACE-05, MOD-01: 정보 제보와 후기 신고(신고한 후기는 나에게 한 줄로 가리고 보기로 연다)", async ({
     page,
     context,
     baseURL,
@@ -620,9 +622,21 @@ test.describe("제보와 신고: 웨이팅, 정보 제보, 후기 신고", () =>
         sheet.getByRole("heading", { name: "신고를 받았습니다" }),
       ).toBeVisible();
       await sheet.getByRole("button", { name: "닫기" }).last().click();
+      // D-13 안건 11: 목록에서 빼지 않고 그 자리에서 한 줄로 가린다. "보기"로 다시 연다
       await expect(
         detail.getByText("국물이 진하고 회전이 빠릅니다"),
       ).toHaveCount(0, { timeout: 10_000 });
+      await expect(
+        detail.getByText("신고한 후기입니다. 나에게는 가려 둡니다."),
+      ).toBeVisible();
+      await expect(
+        detail.getByRole("button", { name: /후기 더 보기$/ }),
+      ).toHaveCount(0);
+      await shot(page, "flag-review-hidden");
+      await detail.getByRole("button", { name: /후기 보기$/ }).click();
+      await expect(
+        detail.getByText("국물이 진하고 회전이 빠릅니다"),
+      ).toBeVisible();
       const reports = await readOwn<{ reason: string; note: string | null }[]>(
         env!,
         s.token,

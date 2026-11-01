@@ -97,7 +97,7 @@ export const feedbackCopy = {
       cancel: "그대로 두기",
     },
     /** 상세에서 쓰는데 오늘 이 끼니 후기가 이미 있음 (writeFromDetail duplicate) */
-    duplicateWrite: "오늘 이 끼니에 남긴 후기가 이미 있습니다. 내 후기에서 고칠 수 있습니다.",
+    duplicateWrite: "오늘 이 끼니에 남긴 후기가 이미 있습니다. 내 후기에서 고쳐 주세요.",
   },
 
   /** 상세의 내 후기와 다른 사람 후기 (T6.10, T6.14, PLACE-03, PLACE-06, D-11 안건 6, 7) */
@@ -135,6 +135,10 @@ export const feedbackCopy = {
     visitMonth: (month: number) => `${month}월 방문`,
     menuLabel: (nickname: string) => `${nickname} 후기 더 보기`,
     report: "신고",
+    /** 내가 신고한 후기를 나에게만 가린 한 줄(D-13 안건 11) */
+    reportedHidden: "신고한 후기입니다. 나에게는 가려 둡니다.",
+    reportedShow: "보기",
+    reportedShowLabel: (nickname: string) => `${nickname} 후기 보기`,
     /** 후기 신고 시트(D-13, T6.16) 전까지 쓰는 안내 */
     reportSoon: "후기 신고는 곧 열립니다.",
   },

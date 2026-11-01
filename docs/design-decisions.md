@@ -225,6 +225,9 @@
   - 확대 버그 원인과 고침: 네이버 지도는 정수 확대 단계만 있고 fitBounds가 내림해 원이 보이는 칸의 2/3 이하로 작아졌음(디자인 랩 목업은 소수 단계라 드러나지 않음). 가운데 보정도 목표 m/px로 계산해 원이 칸 아래로 처졌음. 이제 단계를 반올림하고 고른 단계의 실제 m/px로 가운데를 맞춤(`src/features/map/fit.ts` `planFit`). 카카오 상한(45곳)에 닿으면 받은 식당이 원보다 훨씬 안쪽에 모이므로(강남역 10분 원 515m, 45곳 모두 160m 안) 그 범위에 맞춤(`fitRadiusM`). 묶음 알약은 씨앗(가장 가까운 구성원) 자리에 둬서 묶음끼리 겹치지 않게 함.
   - 반영 위치: DESIGN.md 5장 "지도" 구현 중 확정 메모, `src/features/map/view-state.ts`(단계 전이, 시트 배치), `map-sheet.tsx`, `map-screen.tsx`, `map.css`
 
+- **구현 중 확정 2026-11-01 (사용자 결정, 할인 표시 DEAL-02)**: 지도 마커의 `할인` 배지는 알약에 글자를 더하지 않고 **도보 분 알약 오른쪽 위 6px 점**(`primary`, 2px `card` 링)으로 보이고, 마커 이름에 "할인 정보 있음"을 더함. 묶음 알약에는 없음. 시트 목록 행은 카드와 같은 `할인` 배지. 표시만(점수, 필터 반영 0, AC-DEAL-2). 집계는 홈과 같은 place_stats 쿼리(같은 값으로 목록의 제보 가격과 👍도 채움).
+  - 반영 위치: DESIGN.md 5장 "지도" 구현 중 확정(2026-11-01), PRD DEAL-02, `src/features/map/parts.tsx`(`WalkPill`, `PlaceRow`), `places.ts`, `use-map-screen.ts`
+
 ### D-10. G5 식당 상세
 
 - 게이트/화면: T5.0 식당 상세 (T5.2 시안, 게이트 T5.3), 관련 PRD PLACE-01~PLACE-08, NAV-01~NAV-04, DEAL-02, PRD 11.2
@@ -305,6 +308,7 @@
   - 구현 때 고칠 것(`g6-comparison-feedback.md` 6절): 390 × 844에서 고지 한 줄까지 첫 화면에 들어오게 스테퍼와 칩 사이 간격, 태그 격자 행 높이 40 검토, 칩을 누른 뒤 스크롤 위치, 스크롤 영역과 하단 "남기기" 사이는 그림자 대신 1px 선, 공용 `buttonClass()` 테두리 겹침(0e6e51f에서 고침, 다른 사용처 확인), 상세 "내 후기"는 D-10의 내 방문 기록 한 줄 아래, 다른 사람 후기는 접힘 행 "후기" 안
   - 번들: `pnpm build` 실측을 구현 뒤 `docs/design/bundle-log.md`에 남깁니다(추정 홈 0, 누른 뒤 입력 부품 약 +4~6 KB + Drawer)
   - 미선택 시안 코드(피드백 A, C 화면과 라우트, A 펼침 입력, C 단계 칸, C "나중에")는 구현 뒤 삭제하되, **C의 내 후기 항목 줄과 A의 머리줄 ⋯ 메뉴 부품은 실제 화면으로 옮긴 뒤** 지웁니다. 캡처와 `g6-comparison-feedback.md`는 남깁니다. 남긴 확인 화면: `/design-lab/feedback/b` (`?state=`, `?state=error&fail=name`, `?view=home|detail`, `?flow=`, `?mine=on`, `?answer=`)
+  - **미선택 시안 정리(2026-11-01, CLAUDE.md 6.1-5)**: 피드백 A, C 화면과 라우트, A, C만 쓰던 공용 조각(가격 칩, 가격 입력)과 문구를 지움. C 항목 줄과 A 머리줄 메뉴는 실제 화면(`src/features/feedback/`)에 이미 옮겨져 있어 남길 조각이 없었음. axe 검사는 `e2e/a11y.spec.ts` 6단계 루프로 옮김. 캡처와 `g6-comparison-feedback.md`는 남김.
 - 구현 중 확정 2026-11-01 (사용자가 질문 창에서 고름, 규칙 정본 DESIGN.md 5장 "식후 피드백", "식당 상세", PRD 10.2)
   - **`feedback_submitted`는 stage를 붙여 두 번까지 보냅니다.** 한 탭 답(홈 띠, 나 탭 늦은 답, 시트 안에서 새로 고른 평가)은 `stage: "tap"`, 시트의 세부 저장은 `stage: "detail"`. 응답률과 North Star는 tap만, 가격, 태그, 한 줄 후기 입력률은 detail만 셉니다.
   - **나 탭에서 연 상세의 길찾기 출처는 `detail`**(`directions_clicked.source`, `visits.source`, DB 변경 없음). 나 탭 기록 메타는 "상세에서". 이 방문 후보를 홈 띠가 물을 때 `feedback_prompt_shown.visit_source`도 `detail`입니다.
@@ -345,6 +349,7 @@
 - 후속 작업: 나 탭 구현 T6.13(규칙 정본 DESIGN.md 5장 "나 탭"), 상세 내 방문 기록 T6.14, 내 후기 수정은 D-11 시트(T6.10). 늦은 답 14일 판정은 T6.5 스키마와 T6.9 저장 함수에서 함께 정합니다(방문 상태 `candidate`의 답 허용 기간).
   - 구현 때 고칠 것(`g6-comparison-me.md` 6절): 미해결 후기 줄은 날짜 대신 순번("남긴 후기 3"), 이번 달 방문 0건이면 숫자 칸 숨김, 오프라인 비활성 버튼은 누르면 "연결되면 할 수 있습니다" 토스트, 문구를 `src/copy/me.ts`로 옮길 때 해요체 비율 다시 맞춤
   - 미선택 시안 코드(나 탭 B, C 화면과 라우트, B 달력, C 막대와 즐겨찾기 타일)는 구현 뒤 삭제하되, **C의 숫자 3칸 부품은 실제 기록 탭으로 옮긴 뒤** 지웁니다. 캡처와 `g6-comparison-me.md`는 남깁니다. 달력 보기는 8단계 뒤 저녁, 회식 사용이 늘면 다시 볼 후보로 남깁니다. 남긴 확인 화면: `/design-lab/me/a` (`?state=`, `?auth=off`, `?names=fail`, `?view=places|reviews|settings`, `?more=on`)
+  - **미선택 시안 정리(2026-11-01, CLAUDE.md 6.1-5)**: 나 탭 B, C 화면과 라우트, B, C만 쓰던 목업 함수와 문구(달력, 이번 달 요약)를 지움. C 숫자 3칸은 실제 기록 탭에 이미 옮겨져 있음. axe 검사는 `e2e/a11y.spec.ts`로 옮김. 캡처와 `g6-comparison-me.md`는 남김.
 
 ### D-13. G6 제보와 신고 입력
 
@@ -390,3 +395,5 @@
   - 구현 때 고칠 것(`g6-comparison-report.md` 4절, 6절): 홈 상세 위 시트는 **중첩 Drawer**(뒤 시트 밀림과 딤 두 겹 [확인 필요], Base UI 문서 중첩 절), 지도 탭 상세에서는 Drawer 하나, 상세 `Fold` 안쪽 칸에 `relative`(sr-only가 문서 높이를 늘리는 문제), 창 스크롤은 `window.scrollTo`, 요일 칩 간격 4px(360에서는 두 줄 허용), 질문이 바뀔 때 새 질문 제목으로 초점 이동
   - 번들: 실측은 구현 뒤 `docs/design/bundle-log.md`(추정: 상세 시트 안 약 0, 지도 시트에서 Drawer 약 +22~27 KB, 토스트 0)
   - 미선택 시안 코드(제보 A, B 화면과 라우트, A 토스트 결과, B 하단 줄 바뀜과 제자리 입력, C 웨이팅 고리)는 구현 뒤 삭제하되, **B의 결과 줄 + 되돌리기 부품은 실제 화면으로 옮긴 뒤** 지웁니다. 캡처와 `g6-comparison-report.md`는 남깁니다. 남긴 확인 화면: `/design-lab/report/c` (`?flow=`, `?phase=`, `?error=`, `?state=`, `?kind=`, `?target=`, `?step=`)
+  - **미선택 시안 정리(2026-11-01, CLAUDE.md 6.1-5)**: 제보 A, B 화면과 라우트, A, B만 쓰던 공용 조각과 문구를 지움. B 결과 줄과 되돌리기는 실제 화면(`src/features/report/`)에 이미 옮겨져 있음. axe 검사는 `e2e/a11y.spec.ts`로 옮김. 캡처와 `g6-comparison-report.md`는 남김.
+  - **구현 중 확정(2026-11-01, 안건 11)**: 신고한 후기는 목록에서 빼지 않고 그 자리에서 "신고한 후기입니다." + "보기" 한 줄로 가림(신고 메뉴 ⋯ 없음). "보기"를 누르면 본문을 엶. `place_reviews.reported_by_me`, `src/features/feedback/detail-reviews.tsx`.

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 // 상세 "내 후기"의 "오늘 후기 쓰기" (2026-11-01 사용자 결정). 판정 규칙은 feedback-target.test.ts todayWriteOffer.
+// 다른 사람 후기 중 내가 신고한 후기를 그 자리에서 가리기(D-13 안건 11).
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -16,7 +17,7 @@ vi.mock("./actions", () => ({
   myDailyLimitsAction: vi.fn(),
 }));
 
-const { MyReviewBlock } = await import("./detail-reviews");
+const { MyReviewBlock, PublicReviews } = await import("./detail-reviews");
 
 afterEach(() => {
   cleanup();
@@ -67,7 +68,9 @@ function wrap(ui: ReactNode) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={client}>{ui}</QueryClientProvider>,
+  );
 }
 
 describe("상세 내 후기의 오늘 후기 쓰기", () => {
@@ -82,7 +85,9 @@ describe("상세 내 후기의 오늘 후기 쓰기", () => {
         onWriteToday={onWrite}
       />,
     );
-    const button = await screen.findByRole("button", { name: "오늘 후기 쓰기" });
+    const button = await screen.findByRole("button", {
+      name: "오늘 후기 쓰기",
+    });
     expect(button).toHaveAttribute("aria-haspopup", "dialog");
     fireEvent.click(button);
     expect(onWrite).toHaveBeenCalledTimes(1);
@@ -141,7 +146,9 @@ describe("상세 내 후기의 오늘 후기 쓰기", () => {
         onWriteToday={onWrite}
       />,
     );
-    const button = await screen.findByRole("button", { name: "오늘 후기 쓰기" });
+    const button = await screen.findByRole("button", {
+      name: "오늘 후기 쓰기",
+    });
     expect(button).toHaveAttribute("aria-disabled", "true");
     fireEvent.click(button);
     expect(onWrite).not.toHaveBeenCalled();
@@ -153,5 +160,58 @@ describe("상세 내 후기의 오늘 후기 쓰기", () => {
 
     wrap(<MyReviewBlock review={review()} offline={false} onEdit={vi.fn()} />);
     expect(myVisitsAction).not.toHaveBeenCalled();
+  });
+});
+
+describe("다른 사람 후기: 내가 신고한 후기는 나에게만 가린다", () => {
+  const reviews = [
+    {
+      id: "r1",
+      nickname: "점심러",
+      visitMonth: 10,
+      thumb: "up" as const,
+      text: "빨리 나와요",
+    },
+    {
+      id: "r2",
+      nickname: "저녁러",
+      visitMonth: 9,
+      thumb: "down" as const,
+      text: "신고한 본문",
+      reportedByMe: true,
+    },
+  ];
+  const state = {
+    kind: "ok" as const,
+    reviews,
+    hasMore: false,
+    loadingMore: false,
+    onMore: vi.fn(),
+  };
+
+  it("목록에서 빼지 않고 한 줄로 가린 뒤 보기로 연다, 신고 메뉴는 두지 않는다", () => {
+    render(<PublicReviews state={state} write={null} onReport={vi.fn()} />);
+    expect(screen.getByText("빨리 나와요")).toBeInTheDocument();
+    expect(screen.queryByText("신고한 본문")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("신고한 후기입니다. 나에게는 가려 둡니다."),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    // 신고 메뉴는 신고하지 않은 후기에만
+    expect(
+      screen.getByRole("button", { name: "점심러 후기 더 보기" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "저녁러 후기 더 보기" }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "저녁러 후기 보기" }));
+    expect(screen.getByText("신고한 본문")).toBeInTheDocument();
+    expect(
+      screen.queryByText("신고한 후기입니다. 나에게는 가려 둡니다."),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "저녁러 후기 더 보기" }),
+    ).not.toBeInTheDocument();
   });
 });

@@ -2,15 +2,13 @@
 // 쿼리는 요청 시점 값이라 Suspense 안에서 읽는다(cacheComponents). 테마는 시스템 설정을 따른다.
 import { Suspense } from "react";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
-import { FeedbackA } from "./a/feedback-a";
 import { FeedbackB } from "./b/feedback-b";
-import { FeedbackC } from "./c/feedback-c";
 import { parseFeedbackParams } from "./params";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-export type FeedbackVariant = "a" | "b" | "c";
+export type FeedbackVariant = "b";
 
-const VARIANTS = { a: FeedbackA, b: FeedbackB, c: FeedbackC } as const;
+const VARIANTS = { b: FeedbackB } as const;
 
 async function Screen({
   variant,

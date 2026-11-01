@@ -26,6 +26,8 @@ import {
   type HereState,
 } from "@/features/rec/base-location";
 import { straightDistanceM } from "@/features/rec/candidates";
+import { statsLookup } from "@/features/rec/place-stats";
+import { placeStatsQuery } from "@/features/rec/stats-query";
 import { useTodaySession } from "@/features/rec/today-store";
 import { searchRadiusFromWalkMinutes } from "@/lib/format";
 import { restaurantsInRadiusQuery } from "@/lib/kakao/queries";
@@ -126,6 +128,18 @@ export function useMapScreen(data: MapData) {
   });
   const result = query.data;
 
+  /* ---------- 익명 집계 (가격 제보, 👍, 할인 표시). 홈과 같은 쿼리, 실패면 중립값 ---------- */
+
+  const placeIds = useMemo(
+    () => (result ? result.places.map((p) => p.id) : []),
+    [result],
+  );
+  const statsQuery = useQuery({
+    ...placeStatsQuery(placeIds),
+    enabled: placeIds.length > 0 && online,
+  });
+  const statsRows = statsQuery.data;
+
   /* ---------- 끼니와 예산 (상세 예산 판정, 추정 가격) ---------- */
 
   const [now] = useState(() => new Date(data.nowIso));
@@ -171,14 +185,27 @@ export function useMapScreen(data: MapData) {
       const s = userState(id);
       return s?.signedIn ? s.favorite : initialFavorites.has(id);
     };
+    const stats = statsLookup(statsRows);
     return {
-      places: toMapPlaces(split.visible, searchCenter, { meal, isFavorite }),
+      places: toMapPlaces(split.visible, searchCenter, {
+        meal,
+        isFavorite,
+        statsOf: (id) => {
+          const s = stats(id);
+          return {
+            priceReport: s.priceReport,
+            thumbs: s.thumbs,
+            deal: s.deal !== null,
+          };
+        },
+      }),
       hidden: split.hidden,
     };
     // favVersion: 즐겨찾기, 다시 안 갈 곳 캐시가 바뀌면 다시 계산
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     result,
+    statsRows,
     searchCenter?.lat,
     searchCenter?.lng,
     meal,
