@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fromKstWallTime } from "@/lib/time";
-import type { FeedbackDeps } from "./feedback-requests";
+import type { FeedbackDeps, OpenVisitRow } from "./feedback-requests";
 
 vi.mock("server-only", () => ({}));
 
@@ -29,6 +29,8 @@ function deps(over: Partial<FeedbackDeps> = {}): FeedbackDeps {
       status: "candidate",
     }),
     findVisit: async () => null,
+    listOpenVisits: async () => [],
+    latestReviewAt: async () => null,
     insertVisit: vi.fn(async () => ({ id: VISIT, error: null })),
     deleteVisit: vi.fn(async () => {}),
     setNotVisited: vi.fn(async () => ok),
@@ -284,6 +286,68 @@ describe("writeFromDetail (FB-06)", () => {
       bucket: "reviews",
     });
     expect(d.deleteVisit).toHaveBeenCalledWith("user-1", VISIT);
+  });
+  describe("답 없는 방문 후보가 있으면 그 방문을 평가한다 (2026-11-01)", () => {
+    const OPEN = "33333333-3333-4333-8333-333333333333";
+    const open = (over: Partial<OpenVisitRow> = {}): OpenVisitRow => ({
+      id: OPEN,
+      status: "candidate",
+      visitedOn: "2026-11-03",
+      createdAt: "2026-11-03T03:00:00Z",
+      review: null,
+      ...over,
+    });
+    it("마지막 후기 뒤의 길찾기 후보에 붙이고 새 방문은 만들지 않는다", async () => {
+      const d = deps({
+        listOpenVisits: async () => [open()],
+        latestReviewAt: async () => "2026-10-28T04:00:00Z",
+      });
+      await expect(writeFromDetail(input, d)).resolves.toEqual({
+        ok: true,
+        reviewId: REVIEW,
+        visitId: OPEN,
+      });
+      expect(d.insertVisit).not.toHaveBeenCalled();
+      expect(d.insertReview).toHaveBeenCalledWith(
+        "user-1",
+        OPEN,
+        expect.objectContaining({ rating: "up", price_krw: 9000 }),
+      );
+    });
+    it("마지막 후기보다 먼저 생긴 후보, 14일 지난 후보는 고르지 않는다", async () => {
+      const d = deps({
+        listOpenVisits: async () => [
+          open({ createdAt: "2026-10-27T03:00:00Z" }),
+          open({ id: VISIT, visitedOn: "2026-10-01", createdAt: "2026-10-01T03:00:00Z" }),
+        ],
+        latestReviewAt: async () => "2026-10-28T04:00:00Z",
+      });
+      await writeFromDetail(input, d);
+      expect(d.insertVisit).toHaveBeenCalled();
+    });
+    it("읽기에 실패하면 원래 흐름(오늘 방문)으로 간다", async () => {
+      const d = deps({
+        listOpenVisits: async () => {
+          throw new Error("load");
+        },
+      });
+      await expect(writeFromDetail(input, d)).resolves.toMatchObject({ ok: true });
+      expect(d.insertVisit).toHaveBeenCalled();
+    });
+    it("후보 평가가 막히면 그 오류를 돌려주고 방문은 지우지 않는다", async () => {
+      const d = deps({
+        listOpenVisits: async () => [open()],
+        insertReview: async () => ({
+          id: null,
+          error: { code: "23514", message: "reviews_daily_limit_exceeded" },
+        }),
+      });
+      await expect(writeFromDetail(input, d)).resolves.toMatchObject({
+        ok: false,
+        error: "limit",
+      });
+      expect(d.deleteVisit).not.toHaveBeenCalled();
+    });
   });
   it("평가 없이는 쓸 수 없다(D-11 안건 9), 장소명은 받지 않는다", async () => {
     const noRating: Record<string, unknown> = { ...input };

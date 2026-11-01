@@ -251,20 +251,49 @@ export async function submitReview(
   }
 }
 
-/** feedback_submitted 속성 (PRD 10.2). 개인 정보, 장소명 없음 */
-export function feedbackSubmittedProps(
-  rating: ReviewRating | "not_visited",
-  d: ReviewDraft | null,
-): {
+/** feedback_submitted stage (PRD 10.2, 2026-11-01): 한 탭 답 tap, 시트의 세부 저장 detail */
+export type FeedbackStage = "tap" | "detail";
+
+export type FeedbackSubmittedProps = {
   rating: ReviewRating | "not_visited";
+  stage: FeedbackStage;
   has_price: boolean;
   tag_count: number;
   has_review: boolean;
-} {
+};
+
+/**
+ * feedback_submitted 속성 (PRD 10.2). 개인 정보, 장소명, 글 내용 없음.
+ * d가 null이면 한 탭 답(stage tap, 세부 없음), 있으면 시트의 세부 저장(stage detail).
+ */
+export function feedbackSubmittedProps(
+  rating: ReviewRating | "not_visited",
+  d: ReviewDraft | null,
+): FeedbackSubmittedProps {
   return {
     rating,
+    stage: d ? "detail" : "tap",
     has_price: d?.priceKrw != null,
     tag_count: d?.tags.length ?? 0,
     has_review: d ? d.body.trim() !== "" : false,
   };
+}
+
+/**
+ * 시트 저장 한 번에 보낼 feedback_submitted 목록 (2026-11-01 사용자 결정).
+ * - 시트 안에서 새 평가를 만들면(접힌 줄에서 연 rate, 상세 쓰기 write) 한 탭 답 tap을 하나 보낸다.
+ * - 세부(가격, 태그, 글, 나만 보기)를 저장하면 detail을 하나 보낸다. 홈 한 탭 뒤 세부(details)와 수정(edit)은 detail만.
+ * 응답률과 North Star는 tap만, 입력률은 detail만 센다.
+ */
+export function feedbackSubmittedEvents(
+  mode: SheetMode,
+  rating: ReviewRating,
+  d: ReviewDraft,
+): FeedbackSubmittedProps[] {
+  const out: FeedbackSubmittedProps[] = [];
+  const createsRating = mode.kind === "rate" || mode.kind === "write";
+  if (createsRating) out.push(feedbackSubmittedProps(rating, null));
+  const savesDetails = hasDetails(d) || !d.isPublic;
+  if (!createsRating || savesDetails) out.push(feedbackSubmittedProps(rating, d));
+  return out;
 }

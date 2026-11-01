@@ -46,6 +46,24 @@ describe("이벤트 타입", () => {
     >().toEqualTypeOf<string>();
   });
 
+  it("feedback_submitted는 stage(tap/detail)를 필수로 갖는다 (2026-11-01)", () => {
+    expectTypeOf<
+      AnalyticsEventMap["feedback_submitted"]["stage"]
+    >().toEqualTypeOf<"tap" | "detail">();
+    const noStage: AnalyticsEvent = {
+      name: "feedback_submitted",
+      // @ts-expect-error stage 누락
+      properties: { rating: "up", has_price: false, tag_count: 0, has_review: false },
+    };
+    expect(noStage.name).toBe("feedback_submitted");
+  });
+
+  it("directions_clicked source는 rec, map, poll, detail (2026-11-01)", () => {
+    expectTypeOf<
+      AnalyticsEventMap["directions_clicked"]["source"]
+    >().toEqualTypeOf<"rec" | "map" | "poll" | "detail">();
+  });
+
   it("이름에 맞는 속성만 받는다", () => {
     const ok: AnalyticsEvent[] = [
       { name: "card_swiped", properties: { position: 2 } },
@@ -63,7 +81,7 @@ describe("이벤트 타입", () => {
 
     const wrongSource: AnalyticsEvent = {
       name: "directions_clicked",
-      // @ts-expect-error source는 rec, map, poll만 허용
+      // @ts-expect-error source는 rec, map, poll, detail만 허용
       properties: { place_id: "1", source: "home", app_or_web: "app" },
     };
     const missing: AnalyticsEvent = {

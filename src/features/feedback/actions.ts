@@ -77,6 +77,37 @@ function depsFor(supabase: ServerSupabase): FeedbackDeps {
         .maybeSingle();
       return { id: data?.id ?? null, error };
     },
+    async listOpenVisits(userId, key) {
+      const { data, error } = await supabase
+        .from("visits")
+        .select("id, status, visited_on, created_at, reviews(id)")
+        .eq("user_id", userId)
+        .eq("place_id", key.placeId)
+        .eq("status", "candidate")
+        .gte("visited_on", key.since)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw new Error("load");
+      return data.map((r) => ({
+        id: r.id,
+        status: "candidate" as const,
+        visitedOn: r.visited_on,
+        createdAt: r.created_at,
+        review: r.reviews?.id ?? null,
+      }));
+    },
+    async latestReviewAt(userId, placeId) {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("created_at")
+        .eq("user_id", userId)
+        .eq("place_id", placeId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw new Error("load");
+      return data?.created_at ?? null;
+    },
     async deleteVisit(userId, visitId) {
       await supabase.from("visits").delete().eq("user_id", userId).eq("id", visitId);
     },

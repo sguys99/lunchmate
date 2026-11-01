@@ -14,6 +14,7 @@ import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { adminPatch, rest } from "../src/lib/supabase/rls/harness";
 import { expectNoA11yViolations } from "./helpers/axe";
 import { fakePlaceId, mockRecommendSdks } from "./helpers/kakao-places-fake";
+import { capturePostHog, type CapturedEvent } from "./helpers/posthog-events";
 import { loadDbE2eEnv, readOwn, signInContext } from "./helpers/session";
 
 const env = loadDbE2eEnv();
@@ -21,6 +22,11 @@ const OFFICE = { lat: 37.5665, lng: 126.978 };
 const SHOTS = process.env.FEEDBACK_SHOTS === "1";
 const SHOT_DIR = join(process.cwd(), "docs/design/shots/2026-11-01");
 
+// posthog-js는 HeadlessChrome 사용자 에이전트를 봇으로 보고 이벤트를 버린다. 이벤트 속성(stage, source)을 보려고 보통 Chrome 값으로 둔다
+test.use({
+  userAgent:
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+});
 // FEEDBACK_DARK=1이면 다크 모드로(캡처용)
 test.use({ colorScheme: process.env.FEEDBACK_DARK === "1" ? "dark" : "light" });
 // FEEDBACK_360=1이면 최소 폭 360에서(캡처용, 가로 넘침 확인)
@@ -135,6 +141,39 @@ async function setup(
 
 const band = (page: Page) => page.getByRole("region", { name: "어제 식사" });
 
+/** 모은 PostHog 이벤트 중 feedback_submitted 속성(stage 확인, 2026-11-01) */
+const submitted = (events: CapturedEvent[]) =>
+  events
+    .filter((e) => e.event === "feedback_submitted")
+    .map((e) => ({
+      rating: e.properties.rating,
+      stage: e.properties.stage,
+      has_price: e.properties.has_price,
+      tag_count: e.properties.tag_count,
+      has_review: e.properties.has_review,
+    }));
+
+/**
+ * T6.9, D-11 6절: 390 × 844에서 스크롤 없이 공개 범위 고지 한 줄까지 보인다(고지 아래 끝이 고정 바닥 "남기기" 줄 위).
+ * 모바일 프로젝트(390 × 844)에서만 본다. 시트가 다 올라온 뒤 잰다.
+ */
+async function expectNoticeAboveFold(page: Page) {
+  const size = page.viewportSize();
+  if (!size || size.width !== 390 || size.height !== 844) return;
+  await page.waitForTimeout(450);
+  const sheet = page.getByRole("dialog");
+  const notice = await sheet
+    .getByText(/식당 집계에 들어갑니다\.$/)
+    .boundingBox();
+  const footer = await sheet
+    .getByRole("button", { name: /^(남기기|고친 내용 저장)$/ })
+    .locator("..")
+    .boundingBox();
+  expect(notice).not.toBeNull();
+  expect(footer).not.toBeNull();
+  expect(notice!.y + notice!.height).toBeLessThanOrEqual(footer!.y);
+}
+
 test.describe("식후 피드백: 홈 띠와 시트", () => {
   test.skip(!env, "RUN_DB_E2E=1과 Supabase 값(.env.local)이 있어야 실행합니다");
 
@@ -143,6 +182,7 @@ test.describe("식후 피드백: 홈 띠와 시트", () => {
     context,
     baseURL,
   }) => {
+    const events = await capturePostHog(context);
     const s = await setup(page, context, baseURL!, "fb1", {
       yesterdayVisit: true,
     });
@@ -171,6 +211,12 @@ test.describe("식후 피드백: 홈 띠와 시트", () => {
       });
       await expect(more).not.toHaveAttribute("aria-disabled", "true");
       await shot(page, "home-thanks");
+      // 한 탭 답은 stage tap(응답률, North Star에 센다)
+      await expect
+        .poll(() => submitted(events), { timeout: 20_000 })
+        .toEqual([
+          { rating: "up", stage: "tap", has_price: false, tag_count: 0, has_review: false },
+        ]);
 
       // 서버에 👍가 남았다(본인 세션으로 확인)
       await expect
@@ -193,6 +239,7 @@ test.describe("식후 피드백: 홈 띠와 시트", () => {
       ).toBeVisible();
       const save = sheet.getByRole("button", { name: "남기기" });
       await expect(save).toHaveAttribute("aria-disabled", "true");
+      await expectNoticeAboveFold(page);
       await shot(page, "sheet-empty");
 
       await sheet.getByRole("button", { name: "500원 올리기" }).click();
@@ -207,6 +254,12 @@ test.describe("식후 피드백: 홈 띠와 시트", () => {
         band(page).getByText("남겼습니다. 다음 추천에 반영합니다."),
       ).toBeVisible();
       await shot(page, "home-saved");
+      // 시트의 세부 저장은 stage detail 하나(한 탭 답을 다시 세지 않는다)
+      await expect
+        .poll(() => submitted(events).slice(1), { timeout: 20_000 })
+        .toEqual([
+          { rating: "up", stage: "detail", has_price: true, tag_count: 2, has_review: true },
+        ]);
 
       const reviews = await readOwn<
         { rating: string; price_krw: number | null; tags: string[]; body: string | null }[]
@@ -322,6 +375,162 @@ test.describe("식후 피드백: 상세에서 쓰고 고치기", () => {
       await expect(detail.getByText("후기를 지웠습니다.")).toBeVisible();
       const left = await readOwn<unknown[]>(env!, s.token, "reviews?select=id");
       expect(left).toHaveLength(0);
+    } finally {
+      await s.cleanup();
+    }
+  });
+});
+
+test.describe("식후 피드백: 나 탭에서 연 상세 (2026-11-01 결정)", () => {
+  test.skip(!env, "RUN_DB_E2E=1과 Supabase 값(.env.local)이 있어야 실행합니다");
+
+  /** 3일 전 남긴 후기 하나(이 식당의 마지막 후기) */
+  async function seedOldReview(token: string) {
+    const placeId = fakePlaceId(7);
+    const v = await rest<{ id: string }[]>(env!, "visits", {
+      method: "POST",
+      token,
+      body: {
+        place_id: placeId,
+        place_url: `https://place.map.kakao.com/${placeId}`,
+        meal: "lunch",
+        source: "rec",
+      },
+    });
+    expect(v.status).toBe(201);
+    const visitId = v.data![0]!.id;
+    const r = await rest<{ id: string }[]>(env!, "reviews", {
+      method: "POST",
+      token,
+      body: { visit_id: visitId, rating: "up" },
+    });
+    expect(r.status).toBe(201);
+    const d = kstDate(-3);
+    await adminPatch(env!, "visits", `id=eq.${visitId}`, {
+      visited_on: d,
+      created_at: `${d}T03:10:00Z`,
+    });
+    await adminPatch(env!, "reviews", `id=eq.${r.data![0]!.id}`, {
+      created_at: `${d}T04:00:00Z`,
+    });
+    return placeId;
+  }
+
+  test("길찾기 출처는 detail이고 나 탭에 상세에서로 남는다", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await stubNaverWeb(context);
+    const events = await capturePostHog(context);
+    const s = await setup(page, context, baseURL!, "fb4", {
+      yesterdayVisit: false,
+    });
+    try {
+      const placeId = await seedOldReview(s.token);
+      await page.goto("/me");
+      await page
+        .getByRole("button", { name: /상세 보기$/ })
+        .first()
+        .click({ timeout: 20_000 });
+      const detail = page.getByRole("dialog");
+      const go = detail.getByRole("button", { name: /길찾기$/ });
+      await expect(go).toBeVisible();
+      const popup = context.waitForEvent("page").catch(() => null);
+      await go.click();
+      const p = await popup;
+      await p?.close();
+      await expect
+        .poll(() =>
+          readOwn<{ source: string; status: string }[]>(
+            env!,
+            s.token,
+            `visits?place_id=eq.${placeId}&visited_on=eq.${kstDate(0)}&select=source,status`,
+          ),
+        )
+        .toEqual([{ source: "detail", status: "candidate" }]);
+      await expect
+        .poll(
+          () =>
+            events
+              .filter((e) => e.event === "directions_clicked")
+              .map((e) => e.properties.source),
+          { timeout: 20_000 },
+        )
+        .toEqual(["detail"]);
+      await page.keyboard.press("Escape");
+      await page.reload();
+      await expect(page.getByText(/상세에서/).first()).toBeVisible({
+        timeout: 20_000,
+      });
+    } finally {
+      await s.cleanup();
+    }
+  });
+
+  // place-detail.tsx(다른 작업 소유)의 MyReviewBlock에 onWriteToday={write}를 연결해야 버튼이 보인다.
+  test("내 후기가 있어도 다시 다녀오면 오늘 후기 쓰기, 그 방문 후보를 평가한다", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await stubNaverWeb(context);
+    const s = await setup(page, context, baseURL!, "fb5", {
+      yesterdayVisit: false,
+    });
+    try {
+      const placeId = await seedOldReview(s.token);
+      // 오늘 길찾기로 생긴 방문 후보(나 탭 상세, source detail)
+      const v = await rest(env!, "visits", {
+        method: "POST",
+        token: s.token,
+        body: {
+          place_id: placeId,
+          place_url: `https://place.map.kakao.com/${placeId}`,
+          meal: "lunch",
+          source: "detail",
+        },
+      });
+      expect(v.status).toBe(201);
+      await page.goto("/me");
+      await page
+        .getByRole("button", { name: /상세 보기$/ })
+        .first()
+        .click({ timeout: 20_000 });
+      const detail = page.getByRole("dialog");
+      await expect(detail.getByRole("heading", { name: "내 후기" })).toBeVisible({
+        timeout: 10_000,
+      });
+      const again = detail.getByRole("button", { name: "오늘 후기 쓰기" });
+      await expect(again).toBeVisible({ timeout: 10_000 });
+      await again.scrollIntoViewIfNeeded();
+      await shot(page, "detail-write-again");
+      await again.click();
+      const sheet = page.getByRole("dialog", { name: /후기$/ }).last();
+      await sheet.getByRole("button", { name: "별로였어요" }).click();
+      await sheet.getByRole("button", { name: "남기기" }).click();
+      await expect(sheet).toHaveCount(0);
+      await expect(
+        detail.getByText("후기를 남겼습니다. 다음 추천에 반영합니다."),
+      ).toBeVisible();
+      // 새 방문을 만들지 않고 오늘 후보를 평가했다: 방문 2건, 후기 2건
+      const visits = await readOwn<{ source: string; status: string }[]>(
+        env!,
+        s.token,
+        `visits?place_id=eq.${placeId}&select=source,status&order=created_at.asc`,
+      );
+      expect(visits).toEqual([
+        { source: "rec", status: "visited" },
+        { source: "detail", status: "visited" },
+      ]);
+      const reviews = await readOwn<{ rating: string }[]>(
+        env!,
+        s.token,
+        `reviews?place_id=eq.${placeId}&select=rating&order=created_at.asc`,
+      );
+      expect(reviews).toEqual([{ rating: "up" }, { rating: "down" }]);
+      // 마지막 후기가 오늘 방문이고 새 후보가 없으니 버튼은 사라진다
+      await expect(again).toHaveCount(0);
     } finally {
       await s.cleanup();
     }

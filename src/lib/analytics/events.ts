@@ -22,14 +22,20 @@ export interface AnalyticsEventMap {
   recommendation_reshuffled: { count_in_session: number };
   /** position은 카드 순서(0부터)다. 화면 좌표가 아니다. */
   card_swiped: { position: number };
+  /** source detail: 나 탭에서 연 상세의 길찾기(2026-11-01 사용자 결정) */
   directions_clicked: {
     place_id: string;
-    source: "rec" | "map" | "poll";
+    source: "rec" | "map" | "poll" | "detail";
     app_or_web: "app" | "web";
   };
-  /** rating: 👍 up, 👎 down, 안 갔어요 not_visited(FB-01, FB-05). */
+  /**
+   * rating: 👍 up, 👎 down, 안 갔어요 not_visited(FB-01, FB-05).
+   * stage: 한 탭 답 tap, 시트의 세부 저장 detail(2026-11-01 사용자 결정). 응답률과 North Star는 tap만,
+   * 가격, 태그, 글 입력률은 detail만 센다. 시트에서 새 평가와 세부를 함께 저장하면 tap과 detail을 하나씩 보낸다.
+   */
   feedback_submitted: {
     rating: "up" | "down" | "not_visited";
+    stage: "tap" | "detail";
     has_price: boolean;
     tag_count: number;
     has_review: boolean;
@@ -60,7 +66,7 @@ export interface AnalyticsEventMap {
   poll_result_shared: { channel: "kakao" | "save" };
   login_started: { provider: Provider; in_app_browser: boolean };
   login_completed: { provider: Provider; in_app_browser: boolean };
-  feedback_prompt_shown: { visit_source: "rec" | "poll" | "map" };
+  feedback_prompt_shown: { visit_source: "rec" | "poll" | "map" | "detail" };
   favorite_added: { place_id: string; source: "rec" | "map" | "detail" };
   poll_candidate_added: {
     place_id: string;

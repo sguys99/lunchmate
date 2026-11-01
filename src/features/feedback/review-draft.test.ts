@@ -5,6 +5,7 @@ import {
   clampPrice,
   draftFromReview,
   EMPTY_DRAFT,
+  feedbackSubmittedEvents,
   feedbackSubmittedProps,
   limitBody,
   pricePresets,
@@ -12,6 +13,8 @@ import {
   stepPrice,
   submitReview,
   withRetry,
+  type ReviewDraft,
+  type SheetMode,
   type SubmitDeps,
 } from "./review-draft";
 
@@ -194,6 +197,7 @@ describe("feedback_submitted 속성 (PRD 10.2)", () => {
   it("한 탭 답은 세부 없음", () => {
     expect(feedbackSubmittedProps("not_visited", null)).toEqual({
       rating: "not_visited",
+      stage: "tap",
       has_price: false,
       tag_count: 0,
       has_review: false,
@@ -207,6 +211,60 @@ describe("feedback_submitted 속성 (PRD 10.2)", () => {
         tags: ["quiet", "solo_ok"],
         body: "맛있어요",
       }),
-    ).toEqual({ rating: "up", has_price: true, tag_count: 2, has_review: true });
+    ).toEqual({
+      rating: "up",
+      stage: "detail",
+      has_price: true,
+      tag_count: 2,
+      has_review: true,
+    });
+  });
+});
+
+describe("시트 저장의 feedback_submitted 목록 (stage, 2026-11-01)", () => {
+  const withPrice = { ...EMPTY_DRAFT, rating: "up" as const, priceKrw: 9000 };
+  const bare = { ...EMPTY_DRAFT, rating: "up" as const };
+  const stages = (mode: SheetMode, d: ReviewDraft) =>
+    feedbackSubmittedEvents(mode, "up", d).map((e) => e.stage);
+
+  it("홈 한 탭 뒤 세부(details)는 detail 하나", () => {
+    expect(
+      stages({ kind: "details", reviewId: "r", rating: "up" }, withPrice),
+    ).toEqual(["detail"]);
+  });
+  it("접힌 줄(rate)에서 답만 하면 tap 하나, 세부까지면 tap과 detail", () => {
+    expect(stages({ kind: "rate", visitId: "v" }, bare)).toEqual(["tap"]);
+    expect(stages({ kind: "rate", visitId: "v" }, withPrice)).toEqual([
+      "tap",
+      "detail",
+    ]);
+  });
+  it("상세 쓰기(write)도 새 평가라 tap, 나만 보기는 세부로 친다", () => {
+    const mode: SheetMode = { kind: "write", placeId: "1", placeUrl: null };
+    expect(stages(mode, bare)).toEqual(["tap"]);
+    expect(stages(mode, { ...bare, isPublic: false })).toEqual([
+      "tap",
+      "detail",
+    ]);
+  });
+  it("수정(edit)은 세부가 비어도 detail 하나", () => {
+    expect(stages({ kind: "edit", reviewId: review.id, review }, bare)).toEqual([
+      "detail",
+    ]);
+  });
+  it("tap 속성은 세부가 비어 있다", () => {
+    const events = feedbackSubmittedEvents(
+      { kind: "rate", visitId: "v" },
+      "down",
+      withPrice,
+    );
+    expect(events[0]).toEqual({
+      rating: "down",
+      stage: "tap",
+      has_price: false,
+      tag_count: 0,
+      has_review: false,
+    });
+    expect(events[1]?.has_price).toBe(true);
   });
 });

@@ -3,6 +3,8 @@
 // 상세 본문(place-detail.tsx)이 쓴다. 홈에서는 상세 시트 청크 안이라 첫 로드 밖이다.
 // - 내 후기(C에서): 제목 + "10월 방문, 공개" + 위아래 선 사이 항목 줄 4개(만족, 1인 가격, 태그, 한 줄 후기).
 //   줄 전체가 버튼이고 누르면 같은 시트가 "내 후기 수정"으로 그 항목 위치까지 스크롤된 채 열린다. 오프라인이면 aria-disabled.
+//   마지막 후기 뒤에 다시 다녀왔으면(길찾기 후보 포함) 또는 마지막 후기가 오늘 이전 방문이면 항목 줄 아래 "오늘 후기 쓰기"
+//   글자 버튼(2026-11-01 사용자 결정, todayWriteOffer). 서버(writeFromDetail)가 답 없는 후보가 있으면 그 방문을 평가한다.
 // - 다른 사람 후기: 본문 2줄 말줄임 + 아래 caption 닉네임과 방문 월, 그 줄 끝 ⋯(Base UI Menu "신고", A에서). 내 후기에는 ⋯ 없음.
 //   비로그인은 목록 대신 "후기 N건은 로그인하면 볼 수 있습니다" + 로그인(사용자 결정, place_reviews는 로그인만).
 // - 비공개 후기 글은 이 목록에 오지 않는다(AC-FB-2, DB 보안 함수가 거른다).
@@ -15,7 +17,7 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
-import { forwardRef, useId, type ReactNode } from "react";
+import { forwardRef, useId, useMemo, type ReactNode } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
 import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,8 +25,10 @@ import { feedbackCopy, reviewTagLabels } from "@/copy/feedback";
 import type { PlaceReview } from "@/features/place/detail-model";
 import { formatWon } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { todayWriteOffer } from "./feedback-target";
 import type { MyReview } from "./my-records";
 import type { FieldKey } from "./review-form";
+import { usePlaceVisits } from "./use-my-records";
 
 const copy = feedbackCopy.detail;
 
@@ -61,12 +65,21 @@ export function MyReviewBlock({
   review,
   offline,
   onEdit,
+  onWriteToday,
 }: {
   review: MyReview;
   offline: boolean;
   onEdit: (field: FieldKey, opener: HTMLElement) => void;
+  /** 다시 다녀온 뒤 새 후기 쓰기(상세 "후기 쓰기"와 같은 시트). 없으면 버튼을 두지 않는다 */
+  onWriteToday?: (opener: HTMLElement) => void;
 }) {
   const titleId = useId();
+  const visits = usePlaceVisits(review.placeId, onWriteToday !== undefined);
+  const offer = useMemo(() => {
+    const data = visits.data;
+    if (!data?.signedIn) return null;
+    return todayWriteOffer(data.visits, review, new Date());
+  }, [visits.data, review]);
   const month = Number(review.visitedOn.slice(5, 7));
   const rows: { key: FieldKey; label: string; value: string; empty: boolean }[] =
     [
@@ -152,6 +165,24 @@ export function MyReviewBlock({
           </li>
         ))}
       </ul>
+      {onWriteToday && offer ? (
+        <div className="flex flex-col items-start gap-1 pt-2">
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-disabled={offline || undefined}
+            onClick={offline ? undefined : (e) => onWriteToday(e.currentTarget)}
+            className={textButton}
+          >
+            {copy.writeToday}
+          </button>
+          {offline ? (
+            <p className="type-caption text-muted-foreground">
+              {copy.writeOffline}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }

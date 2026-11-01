@@ -2,7 +2,7 @@
 //
 // - 묻는 띠(ask)와 접힌 줄(collapsed): 서버가 pickFeedbackTarget으로 고른 방문(feedbackBandAction). 오늘 길찾기를 눌렀으면 접힌 줄.
 //   영업일 48시간 판정(공휴일 표)은 서버에서 한다. 이 파일은 feedback-target.ts 값을 가져오지 않는다(홈 첫 로드 예산).
-//   길찾기 신호는 이 탭에서 누른 기록(directedToday) 또는 오늘 날짜의 방문 후보(rec, map, poll)가 있는지다(새로 고쳐도 같다).
+//   길찾기 신호는 이 탭에서 누른 기록(directedToday) 또는 오늘 날짜의 방문 후보(rec, map, poll, 답 전 detail)가 있는지다(새로 고쳐도 같다).
 // - 고마움 줄(thanks): 이 화면에서 방금 답했거나(local), 오늘 물은 방문에 이미 답이 있으면(새로 고침, 탭 이동 뒤에도) 그날 남긴다.
 // - 그 밖에는 띠가 없다(hidden). 오프라인과 비로그인은 화면이 아예 띠를 두지 않는다.
 import { kstDateKey } from "@/lib/time/kst";
@@ -40,7 +40,11 @@ export type BandView =
 const requestedOn = (v: MyVisit) =>
   v.feedbackRequestedAt ? kstDateKey(new Date(v.feedbackRequestedAt)) : null;
 
-/** 오늘 길찾기를 눌렀는가: 이 탭의 기록 또는 오늘 방문 후보(상세에서 쓴 후기는 길찾기가 아니다) */
+/**
+ * 오늘 길찾기를 눌렀는가: 이 탭의 기록 또는 오늘 방문 후보.
+ * 출처 detail은 두 가지다. 상세에서 바로 쓴 후기의 방문(곧바로 visited)은 길찾기가 아니고,
+ * 나 탭에서 연 상세의 길찾기(아직 candidate, 2026-11-01)는 길찾기다.
+ */
 export function directedToday(
   visits: readonly MyVisit[],
   now: Date,
@@ -48,7 +52,11 @@ export function directedToday(
 ): boolean {
   if (local) return true;
   const today = kstDateKey(now);
-  return visits.some((v) => v.visitedOn === today && v.source !== "detail");
+  return visits.some(
+    (v) =>
+      v.visitedOn === today &&
+      (v.source !== "detail" || v.status === "candidate"),
+  );
 }
 
 /** 서버가 고른 물을 방문 (feedbackBandAction target) */
@@ -108,7 +116,10 @@ export function bandView(input: {
   };
 }
 
-/** feedback_prompt_shown visit_source (PRD 10.2). 상세에서 쓴 방문은 묻지 않으므로 null */
-export function promptSource(v: MyVisit): "rec" | "poll" | "map" | null {
-  return v.source === "detail" ? null : v.source;
+/**
+ * feedback_prompt_shown visit_source (PRD 10.2). 묻는 방문은 늘 candidate라 상세에서 바로 쓴 후기의 방문은 오지 않는다.
+ * detail이 오면 나 탭에서 연 상세의 길찾기다(2026-11-01).
+ */
+export function promptSource(v: MyVisit): "rec" | "poll" | "map" | "detail" {
+  return v.source;
 }

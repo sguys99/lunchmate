@@ -72,6 +72,14 @@ describe("bandView", () => {
     expect(directedToday([today], now, false)).toBe(false);
   });
 
+  it("나 탭 상세에서 누른 오늘 길찾기(detail 후보)는 길찾기다 (2026-11-01)", () => {
+    const today = visit(kst(2026, 11, 4, 8, 50), {
+      source: "detail",
+      status: "candidate",
+    });
+    expect(directedToday([today], now, false)).toBe(true);
+  });
+
   it("방금 답했으면 고마움 줄", () => {
     const y = visit(kst(2026, 11, 3, 12));
     const v = bandView({
@@ -132,8 +140,8 @@ describe("bandView", () => {
 });
 
 describe("promptSource", () => {
-  it("상세에서 만든 방문은 이벤트 출처가 없다", () => {
-    expect(promptSource(visit(now, { source: "detail" }))).toBeNull();
+  it("방문 출처를 그대로 쓴다(detail은 나 탭 상세의 길찾기, 2026-11-01)", () => {
+    expect(promptSource(visit(now, { source: "detail" }))).toBe("detail");
     expect(promptSource(visit(now, { source: "poll" }))).toBe("poll");
   });
 });

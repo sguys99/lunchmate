@@ -196,6 +196,8 @@ export function HistoryPanel({
       name: "feedback_submitted",
       properties: {
         rating: a === "no" ? "not_visited" : a,
+        // 나 탭 늦은 답도 한 탭 답이다(2026-11-01)
+        stage: "tap",
         has_price: false,
         tag_count: 0,
         has_review: false,

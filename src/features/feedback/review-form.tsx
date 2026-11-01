@@ -47,18 +47,32 @@ export const textButton = cn(
   focusRing,
 );
 
+/**
+ * 시트 안 칩: 보이는 높이 36, 터치 44(hitArea44). 칩 사이 8이라 줄 간격 44로 터치 영역이 겹치지 않는다.
+ * 390 × 844에서 고지 한 줄까지 첫 화면에 들어오게 줄였다(D-11 6절, T6.9).
+ */
+const compactChip = cn("h-9", hitArea44);
+
 /** 입력 묶음 제목 (label 15) + 보조 한 줄. 시트 안은 h3 */
 function FieldHead({
   id,
   title,
   hint,
+  inline = false,
 }: {
   id: string;
   title: string;
   hint?: string;
+  /** 보조 한 줄을 제목 옆에(390 × 844 한 화면 맞추기, D-11 6절) */
+  inline?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div
+      className={cn(
+        "flex",
+        inline ? "flex-wrap items-baseline gap-x-2 gap-y-0.5" : "flex-col gap-1",
+      )}
+    >
       <h3 id={id} className="type-label text-foreground">
         {title}
       </h3>
@@ -115,7 +129,7 @@ export function RatingField({
 }) {
   const id = useId();
   return (
-    <Field name="rating" focus={focus} className="gap-3">
+    <Field name="rating" focus={focus} className="gap-2.5">
       <FieldHead
         id={id}
         title={copy.rating}
@@ -130,11 +144,11 @@ export function RatingField({
           if (next === "up" || next === "down") patch({ rating: next });
         }}
       >
-        <Chip value="up" data-first="" className="px-5">
+        <Chip value="up" data-first="" className={cn("px-5", compactChip)}>
           <ThumbsUp aria-hidden strokeWidth={1.5} />
           {feedbackCopy.ratings.up}
         </Chip>
-        <Chip value="down" className="px-5">
+        <Chip value="down" className={cn("px-5", compactChip)}>
           <ThumbsDown aria-hidden strokeWidth={1.5} />
           {feedbackCopy.ratings.down}
         </Chip>
@@ -175,7 +189,7 @@ export function PriceField({
       ? copy.priceReportHint(shortWon(Math.round(estimate / 100) * 100))
       : copy.priceEstimateHint(shortWon(estimate));
   return (
-    <Field name="price" focus={focus} className="gap-3">
+    <Field name="price" focus={focus} className="gap-2">
       <div className="flex items-start justify-between gap-3">
         <FieldHead id={id} title={copy.price} hint={hint} />
         {value !== null ? (
@@ -234,7 +248,11 @@ export function PriceField({
         className="justify-center"
       >
         {presets.map((v) => (
-          <Chip key={v} value={String(v)} className="tabular-nums">
+          <Chip
+            key={v}
+            value={String(v)}
+            className={cn("tabular-nums", compactChip)}
+          >
             {shortWon(v)}
           </Chip>
         ))}
@@ -256,8 +274,8 @@ export function TagsField({
 }) {
   const id = useId();
   return (
-    <Field name="tags" focus={focus} className="gap-3">
-      <FieldHead id={id} title={copy.tags} hint={copy.tagsHint} />
+    <Field name="tags" focus={focus} className="gap-2.5">
+      <FieldHead id={id} title={copy.tags} hint={copy.tagsHint} inline />
       <ChipGroup
         multiple
         aria-labelledby={id}
@@ -276,7 +294,7 @@ export function TagsField({
             key={tag}
             value={tag}
             data-first={i === 0 ? "" : undefined}
-            className="w-full"
+            className={cn("w-full", compactChip)}
           >
             {reviewTagLabels[tag]}
           </Chip>
@@ -313,7 +331,7 @@ export function BodyField({
         <textarea
           id={id}
           data-first=""
-          rows={2}
+          rows={1}
           enterKeyHint="done"
           aria-describedby={error ? `${countId} ${errorId}` : countId}
           aria-invalid={error ? true : undefined}
@@ -321,14 +339,15 @@ export function BodyField({
           value={draft.body}
           onChange={(e) => patch({ body: limitBody(e.target.value) })}
           className={cn(
-            "block w-full resize-none rounded-input border bg-card px-4 pt-3 pb-7 type-body text-foreground outline-none placeholder:text-muted-foreground",
+            // 한 줄 높이 48로 시작하고 글이 길어지면 늘어난다(field-sizing 미지원 브라우저는 칸 안 스크롤)
+            "block max-h-32 min-h-12 w-full resize-none rounded-input border bg-card py-3 pr-20 pl-4 type-body text-foreground outline-none [field-sizing:content] placeholder:text-muted-foreground",
             "transition-[border-color] duration-(--lm-duration-fast) ease-standard focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none",
             error ? "border-destructive" : "border-input",
           )}
         />
         <span
           aria-hidden
-          className="pointer-events-none absolute right-4 bottom-2 type-caption text-muted-foreground tabular-nums"
+          className="pointer-events-none absolute right-4 bottom-3.5 type-caption text-muted-foreground tabular-nums"
         >
           {copy.reviewCount(n, REVIEW_BODY_MAX)}
         </span>
@@ -365,7 +384,7 @@ export function VisibilityField({
 }) {
   const id = useId();
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between gap-3">
         <span id={id} className="type-label">
           {copy.visibility}
@@ -380,8 +399,12 @@ export function VisibilityField({
           }}
           className="flex-nowrap"
         >
-          <Chip value="public">{feedbackCopy.visibility.public}</Chip>
-          <Chip value="private">{feedbackCopy.visibility.private}</Chip>
+          <Chip value="public" className={compactChip}>
+            {feedbackCopy.visibility.public}
+          </Chip>
+          <Chip value="private" className={compactChip}>
+            {feedbackCopy.visibility.private}
+          </Chip>
         </ChipGroup>
       </div>
       <p className="type-caption break-keep text-muted-foreground">

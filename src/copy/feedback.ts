@@ -117,6 +117,8 @@ export const feedbackCopy = {
     removed: "후기를 지웠습니다.",
     saved: "후기를 남겼습니다. 다음 추천에 반영합니다.",
     write: "후기 쓰기",
+    /** 내 후기가 있어도 그 뒤에 다시 다녀왔을 때(2026-11-01 사용자 결정) */
+    writeToday: "오늘 후기 쓰기",
     writeOffline: "연결되면 후기를 쓸 수 있습니다.",
     listTitle: "다른 사람 후기",
     listEmpty: "아직 다른 사람 후기가 없습니다.",

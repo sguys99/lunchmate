@@ -5,7 +5,7 @@
 | 문서 | 제품 요구사항 정의서 (Product Requirements Document) |
 | 버전 | v0.2 |
 | 작성일 | 2026-10-28 |
-| 개정 | v0.2 (2026-10-28): 0단계 조사 결과(T0.14~T0.20, T0.27, `docs/research-notes.md`) 반영. 로그인 방식, 장소 데이터 저장 범위, 위치 규칙, OG 이미지, 오프라인과 장애 대체 동작. v0.2.1 (2026-10-30): G3 결과(design-decisions D-05) 반영. REC-04 카드 배치와 데스크톱 2단, REC-12 다시 고르기 직전 제외, FB-01 홈 첫 화면 한 줄 띠. v0.2.2 (2026-10-30): 4단계 시안 게이트 T4.3 결과(design-decisions D-07, D-08) 반영. ONB-01 핀 놓는 동작, ONB-02 예산 범위, ONB-04 건너뛰기 의미, AUTH-02, AUTH-06 약관 구성(필수 3, 마케팅 없음), AUTH-04 양쪽 OS 스킴 시도, AUTH-07 유도 시트와 전용 화면. v0.2.3 (2026-10-31): 5단계 시안 게이트 T5.3 결과(design-decisions D-09, D-10) 반영. MAP-02 알약 마커와 고른 마커만 그림, MAP-03 필터 기준, MAP-04 2단 시트, MAP-05 기준점, PLACE-01~04, 06, 07 상세 구성, 7장 점수식 W항과 "최근 3일" 정의, 10.2 `place_names_resolved` 이벤트. v0.2.4 (2026-10-31): AC-REC-4의 "3G 수준"을 Regular 3G 첫 방문(RTT 100ms, 내려받기 750kbps, 올리기 250kbps, CPU 4x, 캐시 없음)으로 명시(T5.41, `docs/design/g5-qa.md` 2절). v0.2.5 (2026-10-31): 6단계 시안 게이트 T6.4 결과(design-decisions D-11, D-12, D-13) 반영. FB-01 무시한 띠는 길찾기 뒤 한 줄로 접힘, FB-02 한 장 시트, FB-03과 11.2 집계 고지 문장, FB-04와 12장 주말, 공휴일 규칙 확정, FB-06, FB-07, HIS-01 주 단위 기록과 늦은 답 14일, PLACE-05 자유 글 없음, PLACE-07 2분 되돌리기, DEAL-04 같은 유형은 최신 하나, MOD-01 진입점과 할인 신고 사유, MOD-05 신고와 정보 제보 합산 30건 |
+| 개정 | v0.2 (2026-10-28): 0단계 조사 결과(T0.14~T0.20, T0.27, `docs/research-notes.md`) 반영. 로그인 방식, 장소 데이터 저장 범위, 위치 규칙, OG 이미지, 오프라인과 장애 대체 동작. v0.2.1 (2026-10-30): G3 결과(design-decisions D-05) 반영. REC-04 카드 배치와 데스크톱 2단, REC-12 다시 고르기 직전 제외, FB-01 홈 첫 화면 한 줄 띠. v0.2.2 (2026-10-30): 4단계 시안 게이트 T4.3 결과(design-decisions D-07, D-08) 반영. ONB-01 핀 놓는 동작, ONB-02 예산 범위, ONB-04 건너뛰기 의미, AUTH-02, AUTH-06 약관 구성(필수 3, 마케팅 없음), AUTH-04 양쪽 OS 스킴 시도, AUTH-07 유도 시트와 전용 화면. v0.2.3 (2026-10-31): 5단계 시안 게이트 T5.3 결과(design-decisions D-09, D-10) 반영. MAP-02 알약 마커와 고른 마커만 그림, MAP-03 필터 기준, MAP-04 2단 시트, MAP-05 기준점, PLACE-01~04, 06, 07 상세 구성, 7장 점수식 W항과 "최근 3일" 정의, 10.2 `place_names_resolved` 이벤트. v0.2.4 (2026-10-31): AC-REC-4의 "3G 수준"을 Regular 3G 첫 방문(RTT 100ms, 내려받기 750kbps, 올리기 250kbps, CPU 4x, 캐시 없음)으로 명시(T5.41, `docs/design/g5-qa.md` 2절). v0.2.5 (2026-10-31): 6단계 시안 게이트 T6.4 결과(design-decisions D-11, D-12, D-13) 반영. FB-01 무시한 띠는 길찾기 뒤 한 줄로 접힘, FB-02 한 장 시트, FB-03과 11.2 집계 고지 문장, FB-04와 12장 주말, 공휴일 규칙 확정, FB-06, FB-07, HIS-01 주 단위 기록과 늦은 답 14일, PLACE-05 자유 글 없음, PLACE-07 2분 되돌리기, DEAL-04 같은 유형은 최신 하나, MOD-01 진입점과 할인 신고 사유, MOD-05 신고와 정보 제보 합산 30건. v0.2.6 (2026-11-01): 10.2 `feedback_submitted`에 stage(tap/detail)와 지표 계산 기준, `directions_clicked`와 `feedback_prompt_shown`의 출처에 detail(나 탭에서 연 상세) 추가 |
 | 작성 | Kwang Myung |
 | 기반 문서 | `basic-plan.md` v0.1 (2026-10-28 수정본) |
 | 다음 문서 | `CLAUDE.md` → `tasks.md`(상세 작업계획) → `DESIGN.md`(디자인 정본) |
@@ -335,7 +335,7 @@
 | FB-03 | 후기 공개 여부 토글 (기본 공개). 토글 바로 아래에 "나만 보기를 골라도 가격, 만족 여부, 태그는 이름 없이 식당 집계에 들어갑니다."를 늘 보인다(11.2, D-11) | P0 |
 | FB-04 | 피드백 요청은 하루 최대 1회(같은 날 두 번 묻지 않음, 답하지 않으면 48시간 안에서 다음 날 다시 묻는다), 48시간 지난 방문은 묻지 않음. 48시간은 주말과 공휴일(대체공휴일 포함)을 빼고 세며, 주말에 다녀온 방문은 다음 평일에 묻는다 [확정] (12장, D-11). 홈 띠가 묻지 않게 된 방문은 나 탭에서 방문 후 14일까지 답할 수 있다(HIS-01) | P0 |
 | FB-05 | "안 갔어요"는 부정 신호로 쓰지 않음 | P0 |
-| FB-06 | 상세 화면에서 언제든 직접 후기 작성 가능 (방문 기록 자동 생성). FB-02와 같은 시트를 쓰고, 맨 앞의 👍 / 👎 답은 필수(D-11) | P1 |
+| FB-06 | 상세 화면에서 언제든 직접 후기 작성 가능 (방문 기록 자동 생성. 마지막 후기 뒤에 생긴 답 없는 방문 후보가 있으면 새 방문 대신 그 방문을 평가). FB-02와 같은 시트를 쓰고, 맨 앞의 👍 / 👎 답은 필수(D-11). 내 후기가 있어도 그 뒤에 다시 다녀왔거나 마지막 후기가 오늘 이전 방문이면 "오늘 후기 쓰기"로 새 후기를 남긴다(2026-11-01) | P1 |
 | FB-07 | 내 후기 수정·삭제. 상세의 내 후기는 항목 줄 4개(만족, 1인 가격, 태그, 한 줄 후기)로 보이고 줄을 누르면 같은 시트가 그 항목에서 열린다. 삭제는 한 번 더 묻는다(D-11) | P0 |
 
 **AC**
@@ -538,8 +538,8 @@ basic-plan 8장 테이블 구성을 따른다. PRD 보완 사항:
 | `recommendation_shown` | meal, origin(office/current), algo_version, place_ids |
 | `recommendation_reshuffled` | count_in_session |
 | `card_swiped` | position |
-| `directions_clicked` | place_id, source(rec/map/poll), app_or_web |
-| `feedback_submitted` | rating, has_price, tag_count, has_review |
+| `directions_clicked` | place_id, source(rec/map/poll/detail), app_or_web (detail: 나 탭에서 연 상세의 길찾기, 2026-11-01) |
+| `feedback_submitted` | rating, stage(tap/detail), has_price, tag_count, has_review (한 탭 답은 tap, 시트의 세부 저장은 detail. 시트에서 새 평가와 세부를 함께 남기면 tap과 detail을 하나씩 보낸다, 2026-11-01) |
 | `poll_created` | kind, candidate_count, quick(bool) |
 | `poll_link_shared` | channel(kakao/share/copy) |
 | `poll_invite_opened` | in_app_browser, logged_in |
@@ -554,14 +554,14 @@ basic-plan 8장 테이블 구성을 따른다. PRD 보완 사항:
 | `deal_checked` | deal_id, answer |
 | `poll_result_shared` | channel(kakao/save) |
 | `login_started` / `login_completed` | provider(kakao/google/naver), in_app_browser |
-| `feedback_prompt_shown` [PRD 추가] | visit_source(rec/poll/map) |
+| `feedback_prompt_shown` [PRD 추가] | visit_source(rec/poll/map/detail) |
 | `favorite_added` [PRD 추가] | place_id, source(rec/map/detail) |
 | `poll_candidate_added` [PRD 추가] | place_id, source(rec/map/detail/party) |
 | `place_names_resolved` [PRD 추가] | screen, total, unresolved, extra_calls (장소 이름 해석 집계, 좌표, place_id, 이름은 넣지 않음, T5.12a) |
 
 개인 식별 정보는 이벤트 속성에 넣지 않고, 위치 좌표는 보내지 않는다.
 
-**지표 계산에 쓰는 이벤트** (2.3절): North Star = `directions_clicked` + `poll_closed`(확정) + `feedback_submitted`(👍/👎, "안 갔어요" 제외). 추천 수락률 = `recommendation_shown` 세션 중 `directions_clicked`·`favorite_added`·`poll_candidate_added`(source=rec) 발생 비율. 피드백 응답률 = `feedback_submitted` ÷ `feedback_prompt_shown`.
+**지표 계산에 쓰는 이벤트** (2.3절): North Star = `directions_clicked` + `poll_closed`(확정) + `feedback_submitted`(stage=tap, 👍/👎, "안 갔어요" 제외). 추천 수락률 = `recommendation_shown` 세션 중 `directions_clicked`·`favorite_added`·`poll_candidate_added`(source=rec) 발생 비율. 피드백 응답률 = `feedback_submitted`(stage=tap) ÷ `feedback_prompt_shown`. 가격, 태그, 한 줄 후기 입력률은 `feedback_submitted`(stage=detail)의 has_price, tag_count, has_review로 본다(2026-11-01 사용자 결정).
 
 ---
 

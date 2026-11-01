@@ -84,8 +84,8 @@ export function DetailEntryProvider({
         },
         meal,
         budgetKRW: meal === "lunch" ? budget.lunch : budget.dinner,
-        // 나 탭 출처가 따로 없어 지도와 같은 값(directions_clicked, 방문 후보 source)
-        source: "map",
+        // 나 탭에서 연 상세는 detail(directions_clicked, 방문 후보 source, 2026-11-01 사용자 결정). 나 탭 기록에는 "상세에서"
+        source: "detail",
         origin: office ? { ...office, kind: "office" } : null,
         headingLevel: "h2",
       });

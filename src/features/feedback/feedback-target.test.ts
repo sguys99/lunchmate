@@ -6,6 +6,8 @@ import {
   feedbackBandMode,
   isAskableVisit,
   pickFeedbackTarget,
+  pickOpenVisit,
+  todayWriteOffer,
   wasPromptedToday,
   type MyVisit,
 } from "./feedback-target";
@@ -169,5 +171,46 @@ describe("feedbackBandMode (D-11 안건 2)", () => {
     ],
   ] as const)("%o → %s", (input, mode) => {
     expect(feedbackBandMode(input)).toBe(mode);
+  });
+});
+
+describe("상세 쓰기가 붙일 방문과 오늘 후기 쓰기 (2026-11-01)", () => {
+  const now = kst(2026, 11, 4, 12, 30);
+  const latest = { createdAt: kst(2026, 10, 30, 13).toISOString(), visitedOn: "2026-10-30" };
+
+  it("마지막 후기 뒤의 답 없는 후보 중 가장 최근 것을 고른다", () => {
+    const older = visit(kst(2026, 11, 2, 12));
+    const newer = visit(kst(2026, 11, 3, 12));
+    expect(pickOpenVisit([older, newer], latest.createdAt, now)?.id).toBe(newer.id);
+  });
+  it("후기 전 후보, 답한 방문, 안 갔어요, 14일 지난 방문은 고르지 않는다", () => {
+    const visits = [
+      visit(kst(2026, 10, 29, 12)),
+      visit(kst(2026, 11, 3, 12), { status: "visited", review: { id: "r", rating: "up" } }),
+      visit(kst(2026, 11, 3, 18), { status: "not_visited" }),
+    ];
+    expect(pickOpenVisit(visits, latest.createdAt, now)).toBeNull();
+    expect(pickOpenVisit([visit(kst(2026, 10, 15, 12))], null, now)).toBeNull();
+  });
+  it("후기가 없으면 14일 안 후보 아무거나(가장 최근)", () => {
+    const v = visit(kst(2026, 11, 1, 12));
+    expect(pickOpenVisit([v], null, now)?.id).toBe(v.id);
+  });
+
+  it("새 후보가 있으면 그 방문으로 보인다", () => {
+    const v = visit(kst(2026, 11, 4, 11, 50), { source: "detail" });
+    expect(todayWriteOffer([v], latest, now)).toEqual({ visitId: v.id });
+  });
+  it("새 후보가 없어도 마지막 후기가 오늘 이전 방문이면 오늘 새 방문으로 보인다", () => {
+    expect(todayWriteOffer([], latest, now)).toEqual({ visitId: null });
+  });
+  it("마지막 후기가 오늘 방문이고 새 후보가 없으면 보이지 않는다", () => {
+    expect(
+      todayWriteOffer(
+        [],
+        { createdAt: kst(2026, 11, 4, 12).toISOString(), visitedOn: "2026-11-04" },
+        now,
+      ),
+    ).toBeNull();
   });
 });

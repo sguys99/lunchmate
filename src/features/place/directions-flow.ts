@@ -17,7 +17,8 @@ import {
   type DirectionsResult,
 } from "./launch-directions";
 
-export type DirectionsSource = "rec" | "map" | "poll";
+/** 길찾기를 누른 곳. detail은 나 탭에서 연 상세(2026-11-01 사용자 결정, visits.source와 같은 값) */
+export type DirectionsSource = "rec" | "map" | "poll" | "detail";
 
 export type StartDirectionsArgs = {
   placeId: string;

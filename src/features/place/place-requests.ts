@@ -25,7 +25,7 @@ export const visitRequestSchema = z
     placeId: placeIdSchema,
     placeUrl: z.string().max(200).nullable().optional(),
     meal: z.enum(["lunch", "dinner"]),
-    source: z.enum(["rec", "poll", "map"]),
+    source: z.enum(["rec", "poll", "map", "detail"]),
   })
   .refine(placeUrlMatches);
 
@@ -86,7 +86,7 @@ export type PlaceDeps = {
       place_id: string;
       place_url: string | null;
       meal: "lunch" | "dinner";
-      source: "rec" | "poll" | "map";
+      source: "rec" | "poll" | "map" | "detail";
     },
   ) => Promise<InsertOutcome>;
   isFavorite: (userId: string, placeId: string) => Promise<boolean>;

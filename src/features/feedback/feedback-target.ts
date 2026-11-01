@@ -113,6 +113,48 @@ export function canWriteReviewFor(
   return days >= 0 && days <= LATE_ANSWER_DAYS;
 }
 
+type OpenVisitFields = Pick<MyVisit, "id" | "status" | "visitedOn" | "createdAt"> & {
+  readonly review: unknown;
+};
+
+/**
+ * 상세에서 쓰는 후기를 붙일 방문 (FB-06, 2026-11-01 사용자 결정): 이 식당의 내 마지막 후기 뒤에 생긴
+ * 답 없는 방문 후보(길찾기로 생긴 candidate, 방문일 포함 14일 안) 중 가장 최근 것. 없으면 null(새 방문을 만든다).
+ * 안 갔어요로 답한 방문은 고르지 않는다(그날 안 갔다고 했으므로). 서버 writeFromDetail과 상세 버튼이 같이 쓴다.
+ */
+export function pickOpenVisit<V extends OpenVisitFields>(
+  visits: readonly V[],
+  latestReviewAt: string | null,
+  now: Date,
+): V | null {
+  const after = latestReviewAt === null ? null : Date.parse(latestReviewAt);
+  const open = visits.filter(
+    (v) =>
+      v.status === "candidate" &&
+      v.review === null &&
+      canWriteReviewFor({ visitedOn: v.visitedOn, review: null }, now) &&
+      (after === null || Date.parse(v.createdAt) > after),
+  );
+  open.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  return open[0] ?? null;
+}
+
+/**
+ * 내 후기가 있는 상세에서 "오늘 후기 쓰기"를 보일지 (2026-11-01 사용자 결정). 보이면 붙일 방문(없으면 null, 오늘 새 방문).
+ * - 마지막 후기 뒤에 새 방문(길찾기 후보 포함)이 있으면 그 방문에.
+ * - 그런 방문이 없어도 마지막 후기가 오늘(KST) 이전 방문이면 오늘 새 방문으로.
+ * - 마지막 후기가 오늘 방문이고 새 방문이 없으면 보이지 않는다(그 후기를 고친다).
+ */
+export function todayWriteOffer(
+  visits: readonly OpenVisitFields[],
+  latest: { readonly createdAt: string; readonly visitedOn: string },
+  now: Date,
+): { readonly visitId: string | null } | null {
+  const open = pickOpenVisit(visits, latest.createdAt, now);
+  if (open) return { visitId: open.id };
+  return latest.visitedOn < kstDateKey(now) ? { visitId: null } : null;
+}
+
 export type FeedbackBandMode = "hidden" | "ask" | "collapsed" | "thanks";
 
 /**

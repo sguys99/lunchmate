@@ -146,13 +146,10 @@ export default function FeedbackBand({
     void markFeedbackPromptedAction({ visitId: askVisit.id }).catch(
       () => undefined,
     );
-    const source = promptSource(askVisit);
-    if (source) {
-      track({
-        name: "feedback_prompt_shown",
-        properties: { visit_source: source },
-      });
-    }
+    track({
+      name: "feedback_prompt_shown",
+      properties: { visit_source: promptSource(askVisit) },
+    });
   }, [shown, askVisit, todayKey]);
 
   // 답한 뒤 누른 버튼이 사라지므로 상태 줄로 초점을 옮긴다

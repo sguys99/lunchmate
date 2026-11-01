@@ -35,6 +35,29 @@ export function useMyVisits(
   return useQuery({ ...myVisitsQuery(range), enabled });
 }
 
+/** 상세가 보는 이 식당 내 방문 범위. use-place-stats.ts MY_VISIT_LOOKBACK_DAYS와 같아야 같은 쿼리를 나눠 쓴다 */
+export const PLACE_VISIT_LOOKBACK_DAYS = 60;
+
+/** 이 식당의 내 방문(상세 내 방문 기록, "오늘 후기 쓰기" 판정). 상세 집계 훅과 같은 키라 요청은 한 번이다 */
+export function usePlaceVisits(placeId: string, enabled = true) {
+  const todayKey = kstDateKey(new Date());
+  const range = useMemo(
+    () => ({
+      from: kstDateKey(
+        addKstDays(new Date(), -PLACE_VISIT_LOOKBACK_DAYS),
+      ),
+      to: todayKey,
+    }),
+    [todayKey],
+  );
+  return useQuery({
+    queryKey: dbKeys.myVisits(range.from, range.to, placeId),
+    queryFn: () => myVisitsAction({ ...range, placeId }),
+    staleTime: STALE_MS,
+    enabled,
+  });
+}
+
 /** 나 탭 기록 "더 보기": 2주씩 거슬러 올라간다(D-12 안건 7) */
 export const HISTORY_PAGE_DAYS = 14;
 

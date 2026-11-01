@@ -4,7 +4,7 @@
 // - 모바일: 아래 시트(위 라운드 28, 손잡이, 딤, 최대 92dvh). 데스크톱(1024 이상): 가운데 대화상자(최대 448, 85dvh, 라운드 card, 1px border).
 // - 열리면 시트 제목(항목 줄에서 열면 그 항목 첫 입력)으로 초점, Esc와 딤으로 닫힘, 닫히면 연 버튼(또는 finalFocus)으로 복귀.
 // - 상세 시트 위에서 열면 중첩 Drawer다. 딤은 forceRender로 상세 위에 한 겹 더 깐다.
-// - 저장: review-draft.ts submitReview(자동 재시도 1회). 성공하면 쿼리 무효화, feedback_submitted, onSaved 뒤 닫는다.
+// - 저장: review-draft.ts submitReview(자동 재시도 1회). 성공하면 쿼리 무효화, feedback_submitted(새 평가 tap, 세부 detail), onSaved 뒤 닫는다.
 //   실패하면 고른 값을 그대로 두고 바닥에 이유와 "다시 보내기"(D-11 안건 11). 금칙어는 한 줄 후기 칸 아래에 둔다.
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
@@ -42,7 +42,7 @@ import {
   canSubmit,
   draftFromReview,
   EMPTY_DRAFT,
-  feedbackSubmittedProps,
+  feedbackSubmittedEvents,
   needsRating,
   submitReview,
   withRetry,
@@ -223,11 +223,10 @@ function ReviewForm({
       setBusy(false);
       return;
     }
-    // 홈 한 탭 뒤 세부(details)도 한 번 더 보낸다: 가격, 태그, 글 여부는 이 이벤트로만 알 수 있다
-    track({
-      name: "feedback_submitted",
-      properties: feedbackSubmittedProps(r.rating, draft),
-    });
+    // 새 평가면 stage tap, 세부를 남겼으면 stage detail(2026-11-01). 가격, 태그, 글 여부는 detail로만 알 수 있다
+    for (const properties of feedbackSubmittedEvents(mode, r.rating, draft)) {
+      track({ name: "feedback_submitted", properties });
+    }
     void invalidateAfterWrite(client, "review", config.placeId);
     config.onSaved?.({ reviewId: r.reviewId, rating: r.rating, draft });
     setBusy(false);
@@ -280,7 +279,8 @@ function ReviewForm({
 
   return (
     <>
-      <DrawerContent className="flex flex-col gap-8 px-7 pt-3 pb-8 max-[23.75rem]:px-5">
+      {/* 블록 사이 24: 390 × 844에서 공개 범위 고지 한 줄까지 첫 화면에 든다(D-11 6절, T6.9) */}
+      <DrawerContent className="flex flex-col gap-6 px-7 pt-2 pb-8 max-[23.75rem]:px-5">
         {needsRating(mode) ? (
           <RatingField
             draft={draft}
@@ -289,7 +289,7 @@ function ReviewForm({
             hint={mode.kind === "write" || mode.kind === "rate"}
           />
         ) : config.from === "home" ? (
-          <p className="-mt-3 type-caption break-keep text-muted-foreground">
+          <p className="-mt-2 type-caption break-keep text-muted-foreground">
             {copy.hint}
           </p>
         ) : null}

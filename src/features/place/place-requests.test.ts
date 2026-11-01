@@ -41,6 +41,14 @@ describe("saveVisit (NAV-04)", () => {
       source: "rec",
     });
   });
+  it("나 탭에서 연 상세의 길찾기는 출처 detail로 저장한다 (2026-11-01)", async () => {
+    const d = deps();
+    await saveVisit({ ...visit, source: "detail" }, d);
+    expect(d.insertVisit).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({ source: "detail" }),
+    );
+  });
   it("place_url이 없어도 된다", async () => {
     const d = deps();
     await saveVisit({ ...visit, placeUrl: undefined }, d);

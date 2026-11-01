@@ -8,13 +8,19 @@
 // - 하루 20건, 14일, 내 방문 확인은 DB 트리거가 판정하고 여기서는 오류 이름을 결과로 바꾼다(db-errors.ts).
 // - "안 갔어요"는 후기가 아니라 visits.status = not_visited(FB-05). 14일 판정은 DB에 없어 여기서 한다(canAnswerLate).
 // - 상세에서 직접 쓰기(FB-06)는 방문(source detail)을 만들고 후기를 붙인다. 후기가 실패하면 방금 만든 방문은 지운다.
+//   다만 마지막 후기 뒤에 생긴 답 없는 방문 후보(길찾기, 14일 안)가 있으면 새 방문 대신 그 방문을 평가한다(2026-11-01 사용자 결정).
 import * as z from "zod";
 import { hasBannedIssue, withoutBannedContent } from "@/lib/moderation";
 import { mapPgError, type PgErrorLike } from "@/lib/supabase/db-errors";
 import { fail, type WriteResult } from "@/lib/supabase/write-result";
-import { getMeal, kstDateKey, type Meal } from "@/lib/time";
+import { addKstDays, getMeal, kstDateKey, type Meal } from "@/lib/time";
+import { LATE_ANSWER_DAYS } from "@/lib/time/constants";
 import { placeIdSchema } from "@/features/place/place-requests";
-import { canAnswerLate, type VisitStatus } from "./feedback-target";
+import {
+  canAnswerLate,
+  pickOpenVisit,
+  type VisitStatus,
+} from "./feedback-target";
 import {
   REVIEW_BODY_MAX,
   REVIEW_PRICE_MAX,
@@ -123,6 +129,15 @@ export type VisitSummary = {
   status: VisitStatus;
 };
 
+export type OpenVisitRow = {
+  id: string;
+  status: VisitStatus;
+  visitedOn: string;
+  createdAt: string;
+  /** 붙은 후기가 있으면 그 id */
+  review: string | null;
+};
+
 /** 바꾼 행 수와 오류 */
 export type Changed = { count: number; error: PgErrorLike };
 export type Inserted = { id: string | null; error: PgErrorLike };
@@ -144,6 +159,13 @@ export type FeedbackDeps = {
       source: "detail";
     },
   ) => Promise<Inserted>;
+  /** 이 식당의 내 방문 후보(status candidate, visited_on >= since). 상세 쓰기가 붙일 방문을 고른다 */
+  listOpenVisits: (
+    userId: string,
+    key: { placeId: string; since: string },
+  ) => Promise<OpenVisitRow[]>;
+  /** 이 식당의 내 마지막 후기 created_at. 없으면 null */
+  latestReviewAt: (userId: string, placeId: string) => Promise<string | null>;
   deleteVisit: (userId: string, visitId: string) => Promise<void>;
   setNotVisited: (userId: string, visitId: string) => Promise<Changed>;
   markPrompted: (userId: string, visitId: string) => Promise<Changed>;
@@ -292,7 +314,8 @@ export type WriteFromDetailResult = WriteResult<{
 }>;
 
 /**
- * 상세에서 직접 후기 쓰기 (FB-06). 오늘 이 끼니의 방문(source detail)을 만들거나 이미 있는 방문에 붙인다.
+ * 상세에서 직접 후기 쓰기 (FB-06). 마지막 후기 뒤의 답 없는 방문 후보가 있으면 그 방문을 평가하고(2026-11-01),
+ * 없으면 오늘 이 끼니의 방문(source detail)을 만들거나 이미 있는 방문에 붙인다.
  * 그 방문에 이미 후기가 있으면 duplicate(화면은 내 후기 수정으로 안내).
  */
 export async function writeFromDetail(
@@ -306,6 +329,17 @@ export async function writeFromDetail(
   const v = p.data;
   const now = deps.now();
   const meal = getMeal(now);
+  const row: ReviewWriteRow = { rating: v.rating, ...toRow(v) };
+
+  // 마지막 후기 뒤에 생긴 답 없는 방문 후보가 있으면 그 방문을 평가한다(중복 방문을 만들지 않는다).
+  // 읽기에 실패하면 고르지 않고 원래 흐름(오늘 이 끼니 방문)으로 간다.
+  const open = await findOpenVisit(userId, v.placeId, now, deps);
+  if (open) {
+    const review = await deps.insertReview(userId, open, row);
+    if (!review.error && review.id)
+      return { ok: true, reviewId: review.id, visitId: open };
+    return mapPgError(review.error) ?? fail("save");
+  }
 
   let visitIdValue: string;
   let createdVisit = false;
@@ -333,10 +367,27 @@ export async function writeFromDetail(
     visitIdValue = existing.id;
   }
 
-  const row: ReviewWriteRow = { rating: v.rating, ...toRow(v) };
   const review = await deps.insertReview(userId, visitIdValue, row);
   if (!review.error && review.id)
     return { ok: true, reviewId: review.id, visitId: visitIdValue };
   if (createdVisit) await deps.deleteVisit(userId, visitIdValue).catch(() => {});
   return mapPgError(review.error) ?? fail("save");
+}
+
+async function findOpenVisit(
+  userId: string,
+  placeId: string,
+  now: Date,
+  deps: FeedbackDeps,
+): Promise<string | null> {
+  try {
+    const since = kstDateKey(addKstDays(now, -LATE_ANSWER_DAYS));
+    const [visits, latestAt] = await Promise.all([
+      deps.listOpenVisits(userId, { placeId, since }),
+      deps.latestReviewAt(userId, placeId),
+    ]);
+    return pickOpenVisit(visits, latestAt, now)?.id ?? null;
+  } catch {
+    return null;
+  }
 }
