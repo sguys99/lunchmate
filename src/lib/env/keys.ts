@@ -31,6 +31,8 @@ export const CLIENT_ENV_KEYS = [
   // Sentry DSN은 브라우저에도 노출되는 공개 값이므로 서버와 클라이언트가 이 키 하나를 함께 쓴다 (T0.35)
   "NEXT_PUBLIC_SENTRY_DSN",
   "NEXT_PUBLIC_DESIGN_LAB",
+  // NEXT_PUBLIC_CONTACT_EMAIL(T8.6 문의 이메일)은 일부러 여기 넣지 않는다. 서버 컴포넌트에서만 src/lib/contact가 읽고,
+  // 이 목록은 clientEnv를 거쳐 홈 첫 번들에 들어가기 때문이다(홈 JS 예산). 선택 값이라 필수 검사도 필요 없다.
 ] as const;
 
 export type ServerEnvKey = (typeof SERVER_ENV_KEYS)[number];

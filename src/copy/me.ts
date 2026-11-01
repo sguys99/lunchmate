@@ -11,7 +11,7 @@ export const meCopy = {
     settings: "설정",
     display: "화면",
     account: "계정",
-    legal: "약관과 정책",
+    legal: "문의와 정책",
   },
 
   /** 나 탭 첫 화면의 줄 이름과 요약 */
@@ -23,8 +23,10 @@ export const meCopy = {
     name: "이름",
     account: "계정 관리",
     signOut: "로그아웃",
+    contact: "문의하기",
     terms: "이용약관",
     privacy: "개인정보 처리방침",
+    location: "위치정보 처리 안내",
   },
   summary: {
     officesNone: "없음",
@@ -37,6 +39,37 @@ export const meCopy = {
     cravingNone: "고르지 않음",
     cravingExpired: "기간 끝남",
     nameNone: "이름 없음",
+  },
+
+  /**
+   * 문의하기 /me/contact (T8.6, MOD-07). 채널은 이메일 하나(사용자 결정 11/01).
+   * 인앱 브라우저에서 메일 앱이 열리지 않을 수 있어 주소 복사가 주 동작, 메일 앱 열기는 보조.
+   * 주소(NEXT_PUBLIC_CONTACT_EMAIL)가 비어 있으면 항목을 숨기지 않고 준비 중 안내를 보인다.
+   */
+  contact: {
+    metaTitle: "문의하기",
+    title: "문의하기",
+    body: "오류, 신고 결과, 계정 문제처럼 앱에서 해결되지 않는 일은 이메일로 받습니다.",
+    addressLabel: "문의 이메일",
+    copy: "주소 복사",
+    copied: "주소를 복사했습니다. 메일 앱에 붙여 넣어 보내 주세요.",
+    copyFailed: "복사하지 못했습니다. 주소를 길게 눌러 직접 복사해 주세요.",
+    openMail: "메일 앱 열기",
+    mailSubject: "[런치메이트 문의]",
+    inAppHint:
+      "카카오톡 같은 앱 안에서 열었다면 메일 앱이 열리지 않을 수 있습니다. 그럴 때는 주소를 복사해 주세요.",
+    includeTitle: "함께 적어 주시면 빨리 확인합니다",
+    include: [
+      "겪은 일과 그때 보던 화면",
+      "쓰는 기기와 브라우저",
+      "오류 화면에 보인 참고 번호",
+    ],
+    reply:
+      "답장은 보내 주신 주소로 드립니다. 메일 주소와 내용은 답변에만 씁니다.",
+    pending: {
+      title: "문의 주소를 준비하고 있습니다",
+      body: "정식 서비스를 시작하기 전에 이곳에 주소를 올립니다. 급한 문제는 베타 안내를 받은 곳으로 알려 주세요.",
+    },
   },
 
   /** 화면 설정 (SET-04, D-04). 이 기기에만 저장한다 */

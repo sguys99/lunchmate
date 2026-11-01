@@ -191,6 +191,7 @@ NEXT_PUBLIC_POSTHOG_KEY / NEXT_PUBLIC_POSTHOG_HOST / NEXT_PUBLIC_SENTRY_DSN   # 
 SENTRY_AUTH_TOKEN               # 서버 전용, 소스맵 업로드용 (Vercel에만, 선택)
 # NAVER_LOGIN_CLIENT_ID / NAVER_LOGIN_CLIENT_SECRET: 서버 전용, T0.14 대안 설계(서버 직접 구현)로 갈 때만 추가
 NEXT_PUBLIC_DESIGN_LAB          # true일 때만 /design-lab 노출 (프로덕션 false)
+NEXT_PUBLIC_CONTACT_EMAIL       # 문의 이메일(T8.6). 서버 컴포넌트에서만 읽음(src/lib/contact), 비면 "준비하고 있습니다" 안내, 바꾸면 재배포
 ```
 카카오·네이버·구글 로그인 Client ID/Secret은 **앱 환경변수가 아니다.** Supabase 대시보드(Authentication > Sign In / Providers)에만 입력한다(T0.14·T0.20).
 도메인 관련 값(`appname`, OAuth Redirect, 카카오 플랫폼 도메인)은 하드코딩하지 말고 `NEXT_PUBLIC_SITE_URL`에서 만든다.

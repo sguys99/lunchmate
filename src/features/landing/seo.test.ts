@@ -34,7 +34,7 @@ describe("robotsFor", () => {
   });
 
   it("랜딩과 약관은 열어 둔다", () => {
-    for (const p of ["/", "/terms", "/privacy"]) {
+    for (const p of ["/", "/terms", "/privacy", "/location"]) {
       expect(blocked(p), p).toBe(false);
     }
   });
