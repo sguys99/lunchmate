@@ -154,6 +154,7 @@ export type Database = {
           hidden_at: string | null
           hidden_reason: string | null
           id: string
+          moderated_at: string | null
           place_id: string
           place_url: string | null
           slots: string[]
@@ -172,6 +173,7 @@ export type Database = {
           hidden_at?: string | null
           hidden_reason?: string | null
           id?: string
+          moderated_at?: string | null
           place_id: string
           place_url?: string | null
           slots?: string[]
@@ -190,6 +192,7 @@ export type Database = {
           hidden_at?: string | null
           hidden_reason?: string | null
           id?: string
+          moderated_at?: string | null
           place_id?: string
           place_url?: string | null
           slots?: string[]
@@ -199,6 +202,27 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      place_moderation: {
+        Row: {
+          closed_status: string
+          decided_at: string
+          decided_by: string | null
+          place_id: string
+        }
+        Insert: {
+          closed_status: string
+          decided_at?: string
+          decided_by?: string | null
+          place_id: string
+        }
+        Update: {
+          closed_status?: string
+          decided_at?: string
+          decided_by?: string | null
+          place_id?: string
         }
         Relationships: []
       }
@@ -468,6 +492,8 @@ export type Database = {
           provider: string | null
           role: string
           status: string
+          suspended_reason: string | null
+          suspended_until: string | null
           terms_agreed_at: string | null
           updated_at: string
           user_id: string
@@ -480,6 +506,8 @@ export type Database = {
           provider?: string | null
           role?: string
           status?: string
+          suspended_reason?: string | null
+          suspended_until?: string | null
           terms_agreed_at?: string | null
           updated_at?: string
           user_id: string
@@ -492,6 +520,8 @@ export type Database = {
           provider?: string | null
           role?: string
           status?: string
+          suspended_reason?: string | null
+          suspended_until?: string | null
           terms_agreed_at?: string | null
           updated_at?: string
           user_id?: string
@@ -554,6 +584,7 @@ export type Database = {
           hidden_reason: string | null
           id: string
           is_public: boolean
+          moderated_at: string | null
           place_id: string
           price_krw: number | null
           rating: string
@@ -569,6 +600,7 @@ export type Database = {
           hidden_reason?: string | null
           id?: string
           is_public?: boolean
+          moderated_at?: string | null
           place_id: string
           price_krw?: number | null
           rating: string
@@ -584,6 +616,7 @@ export type Database = {
           hidden_reason?: string | null
           id?: string
           is_public?: boolean
+          moderated_at?: string | null
           place_id?: string
           price_krw?: number | null
           rating?: string
@@ -693,6 +726,112 @@ export type Database = {
       add_poll_candidate: {
         Args: { p_place_id: string; p_place_url?: string; p_poll_id: string }
         Returns: string
+      }
+      admin_clear_user: { Args: { p_user_id: string }; Returns: string }
+      admin_closures: {
+        Args: never
+        Returns: {
+          closed_count: number
+          dismissed_at: string
+          first_reported_at: string
+          gone: number
+          last_reported_at: string
+          moved: number
+          place_id: string
+          place_url: string
+          today: number
+          unspecified: number
+        }[]
+      }
+      admin_decide_closure: {
+        Args: { p_place_id: string; p_result: string }
+        Returns: string
+      }
+      admin_decide_item: {
+        Args: {
+          p_include_author?: boolean
+          p_reason?: string
+          p_result: string
+          p_target_id: string
+          p_target_type: string
+        }
+        Returns: {
+          action_id: string
+          target_id: string
+          target_type: string
+        }[]
+      }
+      admin_log: {
+        Args: { p_limit?: number }
+        Returns: {
+          action: string
+          admin_nickname: string
+          by_system: boolean
+          created_at: string
+          duration: string
+          id: string
+          reason: string
+          reverted_at: string
+          target_id: string
+          target_nickname: string
+          target_place_id: string
+          target_type: string
+          target_user_id: string
+          undoable: boolean
+        }[]
+      }
+      admin_reported_items: {
+        Args: never
+        Returns: {
+          author_hidden_count: number
+          author_id: string
+          author_joined_at: string
+          author_nickname: string
+          author_provider: string
+          author_reports_received: number
+          author_status: string
+          author_suspended_until: string
+          auto_hidden: boolean
+          body: string
+          first_reported_at: string
+          notes: string[]
+          place_id: string
+          private_now: boolean
+          rating: string
+          reasons: Json
+          report_count: number
+          target_id: string
+          target_type: string
+          written_at: string
+        }[]
+      }
+      admin_set_suspension: {
+        Args: {
+          p_duration?: string
+          p_reason?: string
+          p_status: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      admin_undo: { Args: { p_action_ids: string[] }; Returns: number }
+      admin_users: {
+        Args: { p_query?: string }
+        Returns: {
+          hidden_count: number
+          hidden_since_review: number
+          joined_at: string
+          kind: string
+          nickname: string
+          provider: string
+          recent_items: Json
+          reports_received: number
+          role: string
+          status: string
+          suspended_reason: string
+          suspended_until: string
+          user_id: string
+        }[]
       }
       cancel_poll: { Args: { p_poll_id: string }; Returns: undefined }
       cancel_unsent_poll: { Args: { p_poll_id: string }; Returns: boolean }

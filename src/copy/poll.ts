@@ -251,5 +251,6 @@ export const pollCopy = {
     suggestionsFull: "제안은 한 사람이 3곳까지 기다릴 수 있습니다.",
     save: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
     joinFailed: "투표방에 들어가지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    suspended: "이용이 제한된 계정이라 투표하거나 후보를 넣을 수 없습니다.",
   },
 } as const;

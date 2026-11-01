@@ -7,6 +7,8 @@
 // - 분석 이벤트: poll_voted(is_first_vote), poll_closed(마감, 취소를 처음 본 참여자 한 명, claim_poll_closed_report), poll_candidate_added(승인).
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "@/components/ui/lazy-toaster";
+import { pollCopy } from "@/copy/poll";
 import { track } from "@/lib/analytics";
 import {
   addCandidateAction,
@@ -167,6 +169,12 @@ export function usePollRoom(pollId: string, online: boolean) {
         if (r.error === "closed" || r.error === "expired") {
           setSendState({ status: "idle" });
           void client.invalidateQueries({ queryKey: key });
+          return false;
+        }
+        // 정지된 계정(T8.5): 다시 보내도 같은 결과라 재시도 대신 안내만 한다
+        if (r.error === "suspended") {
+          setSendState({ status: "idle" });
+          void toast(pollCopy.errors.suspended);
           return false;
         }
         setSendState({ status: "failed", picks: [...next] });

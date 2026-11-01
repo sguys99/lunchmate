@@ -3,6 +3,7 @@
 // - 20261101120000(T6.5): <bucket>_daily_limit_exceeded, reviews_visit_not_found, reviews_visit_too_old,
 //   report_target_unavailable, report_own_target, deal_not_open, not_authenticated, place_stats_too_many_ids
 // - 20261031120000(T5.14): visits_daily_limit_exceeded, visits_status_back_to_candidate
+// - 20261101180000(T8.5): account_suspended(정지된 계정의 쓰기, 공통 트리거 block_suspended_writer)
 // 원문 message와 hint는 화면에 그대로 보내지 않는다. 문구는 src/copy/moderation.ts writeErrorCopy.
 
 /** 일일 한도 칸 (MOD-05, DEAL-04, T5.14 방문 20) */
@@ -30,6 +31,8 @@ export type WriteErrorCode =
   | "cooldown"
   /** 되돌리기 시간(웨이팅 2분)이 지남 */
   | "undo_expired"
+  /** 관리자가 정지한 계정이라 쓸 수 없음 (MOD-06, T8.5). 로그인과 읽기는 된다 */
+  | "suspended"
   /** 그 밖의 저장 실패(네트워크 등). 다시 보내기 */
   | "save";
 
@@ -54,6 +57,8 @@ const LIMIT_RE = /\b(reviews|reports|deals|visits)_daily_limit_exceeded\b/;
 export function mapPgError(error: PgErrorLike): WriteFailure | null {
   if (!error) return null;
   const msg = error.message ?? "";
+  if (msg.includes("account_suspended"))
+    return { ok: false, error: "suspended" };
   const limit = LIMIT_RE.exec(msg);
   if (limit?.[1]) {
     return { ok: false, error: "limit", bucket: limit[1] as LimitBucket };

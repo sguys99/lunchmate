@@ -70,7 +70,9 @@ export function SuggestPanel({
           ? copy.errors.suggestionsFull
           : code === "closed"
             ? copy.errors.closed
-            : copy.errors.save;
+            : code === "suspended"
+              ? copy.errors.suspended
+              : copy.errors.save;
 
   const review = async (c: RoomCandidate, approve: boolean) => {
     setBusy(c.id);

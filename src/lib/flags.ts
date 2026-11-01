@@ -61,6 +61,14 @@ export const FLAGS = {
     owner: "T5.20, T5.23 (해제 T7.35, 프로덕션은 auth 해제와 함께)",
     productionOff: true,
   },
+  adminConsole: {
+    description:
+      "관리자 화면 /admin (MOD-06, T8.5). 마이그레이션 20261101180000(admin_* 함수) 적용 전에는 목록이 오류 상태로 보인다. 로그인 묶음과 함께 프로덕션에 연다: auth의 productionOff를 지울 때 이 플래그의 productionOff도 함께 지운다. 관리자 role 확인은 레이아웃과 DB 함수가 따로 한다.",
+    default: false,
+    source: { type: "const", value: true },
+    owner: "T8.5 (해제: auth 해제와 함께)",
+    productionOff: true,
+  },
   betaFeedback: {
     description: "나 탭의 베타 전용 피드백 버튼.",
     default: false,

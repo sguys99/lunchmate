@@ -27,6 +27,7 @@
     "test:e2e:poll": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/poll-flow.spec.ts e2e/poll-room.spec.ts e2e/poll-create.spec.ts e2e/party.spec.ts",
     "test:e2e:feedback-reco": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/feedback-reco.spec.ts",
     "test:e2e:report": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/report.spec.ts",
+    "test:e2e:admin": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/admin.spec.ts",
     "test:e2e:auth-off": "E2E_AUTH_OFF=1 playwright test --project=mobile --project=desktop e2e/auth-off.spec.ts",
     "test:e2e:visual": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=visual-mobile --project=visual-desktop",
     "test:e2e:a11y": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=mobile --project=desktop e2e/a11y.spec.ts",

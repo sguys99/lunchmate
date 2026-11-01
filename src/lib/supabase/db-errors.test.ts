@@ -58,4 +58,10 @@ describe("mapPgError", () => {
       error: "save",
     });
   });
+  it("정지된 계정의 쓰기(account_suspended, T8.5) → suspended", () => {
+    expect(mapPgError(err("account_suspended", "42501"))).toEqual({
+      ok: false,
+      error: "suspended",
+    });
+  });
 });

@@ -200,6 +200,7 @@ export const pollCreateCopy = {
     exists: "이미 넣은 후보입니다.",
     multi_votes: "이미 표가 있어 방식을 바꿀 수 없습니다.",
     no_office: "회사 위치를 먼저 정해 주세요. 나 탭 설정에서 바꿀 수 있습니다.",
+    suspended: "이용이 제한된 계정이라 투표를 만들 수 없습니다.",
     save: "반영하지 못했습니다. 잠시 후 다시 시도해 주세요.",
   } satisfies Record<PollWriteError, string>,
 

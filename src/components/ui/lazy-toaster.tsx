@@ -7,7 +7,7 @@
 // - Sonner는 Toaster가 구독하기 전에 만든 토스트도 구독 시점에 다시 보내 주므로(ToastState.subscribe) 첫 토스트가 사라지지 않는다.
 // - 반환값은 Promise<토스트 id>. 바로 닫을 일이 있으면 id 옵션을 직접 정해 넘긴다.
 // 디자인 랩처럼 첫 로드가 상관없는 곳은 sonner.tsx의 Toaster, toast를 그대로 써도 된다.
-import type { ExternalToast } from "sonner";
+import type { ExternalToast, ToasterProps } from "sonner";
 import { lazy, Suspense, useSyncExternalStore } from "react";
 
 type ToastId = string | number;
@@ -64,8 +64,11 @@ const Toaster = lazy(() =>
   import("./sonner").then((mod) => ({ default: mod.Toaster })),
 );
 
-/** 앱 셸에 한 번만 둔다. 첫 toast() 호출 전에는 아무것도 그리지 않고 아무것도 받지 않는다 */
-export function LazyToaster() {
+/**
+ * 앱 셸에 한 번만 둔다. 첫 toast() 호출 전에는 아무것도 그리지 않고 아무것도 받지 않는다.
+ * props는 sonner.tsx Toaster로 넘긴다(하단 탭이 없는 화면의 offset 덮어쓰기, 예: /admin).
+ */
+export function LazyToaster(props: ToasterProps = {}) {
   const active = useSyncExternalStore(
     subscribe,
     () => requested,
@@ -74,7 +77,7 @@ export function LazyToaster() {
   if (!active) return null;
   return (
     <Suspense fallback={null}>
-      <Toaster />
+      <Toaster {...props} />
     </Suspense>
   );
 }

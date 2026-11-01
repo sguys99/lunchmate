@@ -24,6 +24,8 @@ export type PollErrorCode =
   /** 기피 확인 하루 10번 */
   | "avoid_limit"
   | "invalid"
+  /** 관리자가 정지한 계정 (MOD-06, T8.5, 20261101180000 account_suspended) */
+  | "suspended"
   | "save";
 
 export type PollFailure = { ok: false; error: PollErrorCode };
@@ -31,6 +33,7 @@ export type PollResult<T extends object = object> =
   ({ ok: true } & T) | PollFailure;
 
 const TABLE: readonly [string, PollErrorCode][] = [
+  ["account_suspended", "suspended"],
   ["not_authenticated", "unauthenticated"],
   ["poll_not_found", "not_found"],
   ["poll_candidate_not_found", "not_found"],

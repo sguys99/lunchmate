@@ -623,7 +623,9 @@ function VotingView({
             ? copy.errors.closed
             : writeError === "not_host"
               ? copy.errors.notHost
-              : copy.errors.save}
+              : writeError === "suspended"
+                ? copy.errors.suspended
+                : copy.errors.save}
         </p>
       ) : null}
 

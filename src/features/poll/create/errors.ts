@@ -28,6 +28,8 @@ export type PollWriteError =
   | "multi_votes"
   /** 기준점으로 쓸 회사 핀이 없음(온보딩 전) */
   | "no_office"
+  /** 관리자가 정지한 계정 (MOD-06, T8.5) */
+  | "suspended"
   /** 그 밖(네트워크 등). 다시 보내기 */
   | "save";
 
@@ -42,6 +44,7 @@ export function pollFail(error: PollWriteError): {
 }
 
 const RULES: readonly [RegExp, PollWriteError][] = [
+  [/\baccount_suspended\b/, "suspended"],
   [/\bpolls_daily_limit_exceeded\b/, "limit"],
   [/\bpoll_closes_at_range\b/, "deadline"],
   [/\bpoll_already_shared\b/, "shared"],

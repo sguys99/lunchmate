@@ -3,14 +3,13 @@
 // 목업 닉네임과 식당 이름, 후기 글은 모두 지어낸 값이다. 시안을 고른 뒤(T8.5) 실제 구현 때 src/copy/admin.ts로 옮긴다.
 
 export const adminLabCopy = {
+  /** T8.5 뒤 선택안 C만 남겼다(D-19). 실제 화면은 /admin, 문구는 src/copy/admin.ts */
   names: {
-    a: "관리자 시안 A 받은편지함",
-    b: "관리자 시안 B 표와 일괄 처리",
-    c: "관리자 시안 C 한 건씩 검토",
+    c: "관리자 시안 C 한 건씩 검토 (선택안)",
   },
   index: {
     title: "관리자 화면 시안 (T8.5a)",
-    body: "신고된 후기, 폐업 제보, 사용자 정지, 처리 이력을 세 방향으로 비교합니다. 데스크톱 1280이 기준이고 390에서도 쓸 수 있게 했습니다.",
+    body: "고른 시안 C를 확인 화면으로 남겼습니다. 실제 화면은 /admin에 있습니다.",
   },
 
   /** 공통 틀 */
@@ -18,7 +17,6 @@ export const adminLabCopy = {
     brand: "런치메이트 관리",
     signedInAs: (nick: string) => `${nick} 님, 관리자`,
     navLabel: "관리 메뉴",
-    back: "목록으로",
     loading: "관리 목록을 불러오는 중입니다",
   },
 
@@ -111,12 +109,7 @@ export const adminLabCopy = {
     confirmClosed: "폐업 확인",
     dismissClosed: "영업 중으로 두기",
     undo: "되돌리기",
-    clearSelection: "선택 해제",
-    selectAll: "모두 선택",
-    selectRow: (label: string) => `${label} 선택`,
     expand: "펼치기",
-    collapse: "접기",
-    more: "처리 더 보기",
     hideWithReason: (reason: string) => `${reason} 사유로 숨기기`,
   },
 
@@ -161,12 +154,6 @@ export const adminLabCopy = {
     unsuspendBody:
       "바로 다시 후기와 제보를 남길 수 있습니다. 숨긴 글은 그대로 둡니다.",
     unsuspendAction: "정지 풀기",
-    bulkHideTitle: (n: number) => `${n}건을 숨길까요?`,
-    bulkHideBody:
-      "고른 글을 모두 같은 사유로 숨깁니다. 처리 이력에서 하나씩 되돌릴 수 있습니다.",
-    bulkRestoreTitle: (n: number) => `${n}건을 복구할까요?`,
-    bulkRestoreBody:
-      "복구한 글은 바로 다른 분들께 다시 보이고, 지금까지의 신고는 세지 않습니다.",
     closedTitle: "폐업으로 확인할까요?",
     closedBody:
       "추천과 지도에서 계속 뺍니다. 처리 이력에서 되돌릴 수 있습니다.",
@@ -186,8 +173,6 @@ export const adminLabCopy = {
 
   /** 사용자 */
   users: {
-    searchLabel: "닉네임으로 찾기",
-    searchPlaceholder: "닉네임",
     candidates: "정지 검토가 필요한 분",
     candidatesHelp: "숨겨진 글이 2건 이상인 분을 먼저 보여 줍니다.",
     suspendedList: "정지 중",
@@ -231,27 +216,6 @@ export const adminLabCopy = {
     },
   },
 
-  /** 목록 머리와 표 */
-  table: {
-    caption: "신고된 후기 목록",
-    columns: {
-      target: "대상",
-      body: "내용",
-      reasons: "사유",
-      count: "신고",
-      author: "작성자",
-      status: "상태",
-      at: "접수",
-    },
-    filterStatus: "상태",
-    filterReason: "사유",
-    selected: (n: number) => `${n}건 선택됨`,
-    searchLabel: "닉네임이나 장소 번호로 찾기",
-    searchPlaceholder: "닉네임, 장소 번호",
-    closuresCaption: "폐업 제보 목록",
-    usersCaption: "사용자 목록",
-    logCaption: "처리 이력 목록",
-  },
 
   /** 한 건씩 검토 큐 */
   queue: {
@@ -266,12 +230,10 @@ export const adminLabCopy = {
   /** 키보드 단축키 */
   keys: {
     title: "단축키",
-    move: "위아래 이동",
     hide: "숨기기",
     keep: "문제없음, 복구",
     suspend: "작성자 정지",
     undo: "되돌리기",
-    help: "J와 K로 옮기고 H로 숨깁니다",
   },
 
   /** 4상태 */
