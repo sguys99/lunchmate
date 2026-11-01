@@ -8,12 +8,15 @@
 //   ?voters=<명> ?votes=<1위 표>                  결과 숫자
 //   ?name=<식당 이름> ?cat=<카테고리 slug>          결과 공유 이미지(브라우저)에만 쓰는 확정 식당. 서버 OG는 읽지 않는다
 //   ?safe=on                                     원본 이미지 위에 안전 영역 선을 켠 채로 연다
-// OG 라우트만: ?v=a|b|c ?img=invite|result
+// OG 라우트만: ?img=invite|result (그림은 실제 PollOgArt, D-17 A)
 import { parseDesignState, type DesignState } from "@/features/design-lab/mock";
 import { CATEGORY_SLUGS, type CategorySlug } from "@/features/place/categories";
+import type { PollOg } from "@/features/poll/share/og-data";
+import type { OgImageKind } from "@/features/poll/share/types";
 
-export type ShareVariant = "a" | "b" | "c";
-export type OgImageKind = "invite" | "result";
+/** 남긴 확인 화면: a 서버 OG(링크 미리보기), b 결과 공유 이미지와 시트 (D-17) */
+export type ShareVariant = "a" | "b";
+export type { OgImageKind } from "@/features/poll/share/types";
 
 export type ShareParams = {
   state: DesignState;
@@ -76,7 +79,7 @@ export function parseShareParams(raw: Raw): ShareParams {
 }
 
 export function parseVariant(value: string | undefined): ShareVariant {
-  return value === "b" || value === "c" ? value : "a";
+  return value === "b" ? "b" : "a";
 }
 
 export function parseImageKind(value: string | undefined): OgImageKind {
@@ -84,13 +87,8 @@ export function parseImageKind(value: string | undefined): OgImageKind {
 }
 
 /** OG 라우트에 넘길 쿼리 (서버 OG가 쓰는 값만. 식당 이름과 카테고리는 넣지 않는다) */
-export function ogQuery(
-  variant: ShareVariant,
-  img: OgImageKind,
-  p: ShareParams,
-): string {
+export function ogQuery(img: OgImageKind, p: ShareParams): string {
   const q = new URLSearchParams({
-    v: variant,
     img,
     kind: p.kind,
     title: p.title,
@@ -100,4 +98,20 @@ export function ogQuery(
     votes: String(p.votes),
   });
   return q.toString();
+}
+
+/** 목업 값 → 실제 OG 그림 입력 (결과 그림이면 확정, 초대 그림이면 진행 중) */
+export function labPollOg(p: ShareParams, img: OgImageKind): PollOg {
+  if (p.state === "error") return { state: "unavailable" };
+  return {
+    state: img === "result" ? "closed" : "open",
+    kind: p.kind,
+    title: p.title,
+    rawTitle: p.title,
+    candidateCount: p.candidates,
+    deadline: p.deadline,
+    voters: p.voters,
+    topVotes: p.votes,
+    version: "lab",
+  };
 }

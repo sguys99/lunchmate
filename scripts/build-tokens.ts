@@ -10,6 +10,7 @@
  *              (언더스코어로 시작하는 템플릿 제외) → src/styles/design-candidates.css, 시안마다 [data-design="<id>"] 세트
  * 모드 2(확정): 루트 DESIGN.md가 있으면 → src/styles/tokens.css (:root, .dark, 시스템 다크)
  *              + src/lib/motion/tokens.generated.ts (Motion용 JS 상수: duration, easing, spring, T2.11)
+ *              + src/lib/design/share-palette.generated.ts (공유 이미지용 16진 색, T7.14, T7.20)
  *              시안 문서는 보존용이라 검증(스키마, 대비)만 하고 CSS는 만들지 않는다(T1.20).
  *              남아 있는 design-candidates.css는 지우고, --check에서는 "남은 생성물"로 실패한다.
  *
@@ -225,6 +226,10 @@ try {
     outputs.push({
       file: toTs.THEME_COLOR_OUT,
       content: toTs.themeColorFile(final.tokens),
+    });
+    outputs.push({
+      file: toTs.SHARE_PALETTE_OUT,
+      content: toTs.sharePaletteFile(final.tokens, contrast.oklchToHex),
     });
   } else {
     console.log(

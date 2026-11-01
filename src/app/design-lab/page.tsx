@@ -55,7 +55,7 @@ export default function DesignLabPage() {
         </Link>
       </Section>
 
-      {/* 7단계 시안(T7.1~T7.4): 게이트 T7.5 뒤 고른 안만 남긴다 */}
+      {/* 7단계 시안(T7.1~T7.4): 게이트 T7.5 뒤 고른 안만 남긴다(D-14~D-17) */}
       <Section title={copy.g7Title} body={copy.g7Body}>
         {(
           [
@@ -66,13 +66,14 @@ export default function DesignLabPage() {
           ] as const
         ).map(([route, names]) => (
           <div key={route} className="flex flex-wrap gap-4">
-            {(["a", "b", "c"] as const).map((id) => (
+            {/* 각 시안 문구의 names에 남은 안만 링크한다(미선택 안을 지우면 함께 빠진다) */}
+            {Object.entries(names).map(([id, name]) => (
               <Link
                 key={id}
                 href={`/design-lab/${route}/${id}`}
                 className={linkClass}
               >
-                {names[id]}
+                {name}
               </Link>
             ))}
           </div>

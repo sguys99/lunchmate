@@ -8,10 +8,9 @@ const nextConfig: NextConfig = {
   // design-lab 화면은 루트 DESIGN.md 프런트매터를 서버에서 읽는다(getScreenTokens, T1.14, T1.20).
   // 시안 B 일러스트 확인 페이지(T2.8까지 유지)는 보존된 b.DESIGN.md를 읽는다. 함수 번들에 문서가 들어가도록 명시한다.
   outputFileTracingIncludes: {
-    "/design-lab/**": [
-      "./DESIGN.md",
-      "./docs/design/candidates/b.DESIGN.md",
-    ],
+    "/design-lab/**": ["./DESIGN.md", "./docs/design/candidates/b.DESIGN.md"],
+    // 투표 링크 미리보기 이미지의 서버 글꼴(KS X 1001 woff 두 개, T7.14, D-17 안건 4)
+    "/api/og/poll/**": ["./src/features/poll/share/og-fonts/*.woff"],
   },
   // 웹 글꼴(목록 CSS와 woff2 조각)은 버전 경로라 내용이 바뀌지 않는다. 글꼴을 바꾸면 WEB_FONTS_VERSION과 폴더를 올린다
   // (src/lib/fonts/web-fonts.ts, scripts/fonts/build-font-subsets.py).

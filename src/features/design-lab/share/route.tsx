@@ -1,33 +1,29 @@
-// OG 이미지와 결과 공유 이미지 시안 라우트 (T7.4). 쿼리 규약은 ./params.ts 머리 주석.
+// 공유 이미지 확인 화면 (T7.4 시안을 T7.14, T7.20 실제 구현으로 옮긴 뒤 남긴 것, D-17). 쿼리 규약은 ./params.ts 머리 주석.
 // 쿼리는 요청 시점 값이라 Suspense 안에서 읽는다(cacheComponents). 테마는 시스템 설정을 따른다.
-// 1절 카카오톡 말풍선 모형 / 2절 서버 OG 원본과 안전 영역 / 3절 브라우저에서 만드는 결과 공유 이미지.
+// a: 카카오톡 말풍선 모형과 서버 OG 원본(실제 PollOgArt). b: 실제 결과 공유 시트(ResultShareSheet, 브라우저 canvas).
 import { Suspense } from "react";
 import { shareLabCopy } from "@/copy/design-lab-share";
 import { clientEnv } from "@/lib/env/client";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
-import { loadSharePalette } from "./palette";
+import { shareCopy } from "@/copy/share";
 import {
   ogQuery,
   parseShareParams,
   type ShareParams,
   type ShareVariant,
 } from "./params";
-import { ShareStudio } from "./share-studio";
+import { ResultShareDemo } from "./result-share-demo";
 import { SourceImages } from "./source-images";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
 const t = shareLabCopy.page;
-const k = shareLabCopy.kakao;
+const k = shareCopy.meta;
 
-function ogSrc(
-  variant: ShareVariant,
-  img: "invite" | "result",
-  p: ShareParams,
-) {
-  return `/design-lab/share/og?${ogQuery(variant, img, p)}`;
+function ogSrc(img: "invite" | "result", p: ShareParams) {
+  return `/design-lab/share/og?${ogQuery(img, p)}`;
 }
 
 /** 카카오톡 피드 메시지 모형 (sendDefault feed: 이미지, 제목, 설명, 버튼). 색은 앱 토큰으로 흉내만 낸다 */
@@ -128,18 +124,17 @@ async function Screen({
   searchParams: Promise<SearchParams>;
 }) {
   const p = parseShareParams(await searchParams);
-  const palette = await loadSharePalette();
   const loading = p.state === "loading";
   const domain = new URL(
     clientEnv().NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ).host;
   const invite = {
-    src: ogSrc(variant, "invite", p),
-    alt: shareLabCopy.og.alt.invite(p.candidates, p.deadline),
+    src: ogSrc("invite", p),
+    alt: shareCopy.og.alt.invite(p.candidates, p.deadline),
   };
   const result = {
-    src: ogSrc(variant, "result", p),
-    alt: shareLabCopy.og.alt.result(p.voters, p.votes),
+    src: ogSrc("result", p),
+    alt: shareCopy.og.alt.result(p.voters, p.votes),
   };
 
   const chat = (
@@ -150,7 +145,7 @@ async function Screen({
           loading={loading}
           title={k.inviteTitle(p.title)}
           description={k.inviteDescription(p.candidates, p.deadline)}
-          button={k.inviteButton}
+          button={shareCopy.kakao.inviteButton}
         />
       </Sender>
       <Sender>
@@ -165,10 +160,6 @@ async function Screen({
     </>
   );
 
-  const s = shareLabCopy.shareImage;
-  const og = shareLabCopy.og;
-  const cat = palette.category[p.category];
-
   return (
     <DesignScope className="min-h-dvh flex-1 bg-background text-foreground">
       <main className="mx-auto flex w-full max-w-[1120px] flex-col gap-14 px-6 py-10 desktop:px-10">
@@ -180,85 +171,77 @@ async function Screen({
           </p>
         </header>
 
-        <section aria-labelledby="share-chat" className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2">
-            <h2 id="share-chat" className="type-heading">
-              {t.chatHeading}
-            </h2>
-            <p className="type-body-sm text-muted-foreground">{t.chatBody}</p>
-          </div>
-          <div className="grid gap-6 desktop:grid-cols-2">
-            <ChatPanel label={t.chatLight}>{chat}</ChatPanel>
-            {/* .dark는 tokens.css가 아무 요소에나 거는 다크 범위 선택자 */}
-            <ChatPanel label={t.chatDark} className="dark">
-              {chat}
-            </ChatPanel>
-          </div>
-        </section>
+        {variant === "a" ? (
+          <>
+            <section
+              aria-labelledby="share-chat"
+              className="flex flex-col gap-5"
+            >
+              <div className="flex flex-col gap-2">
+                <h2 id="share-chat" className="type-heading">
+                  {t.chatHeading}
+                </h2>
+                <p className="type-body-sm text-muted-foreground">
+                  {t.chatBody}
+                </p>
+              </div>
+              <div className="grid gap-6 desktop:grid-cols-2">
+                <ChatPanel label={t.chatLight}>{chat}</ChatPanel>
+                {/* .dark는 tokens.css가 아무 요소에나 거는 다크 범위 선택자 */}
+                <ChatPanel label={t.chatDark} className="dark">
+                  {chat}
+                </ChatPanel>
+              </div>
+            </section>
 
-        <section aria-labelledby="share-source" className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2">
-            <h2 id="share-source" className="type-heading">
-              {t.sourceHeading}
-            </h2>
-            <p className="type-body-sm text-muted-foreground">{t.sourceBody}</p>
-          </div>
-          <SourceImages
-            loading={loading}
-            initialSafe={p.safe}
-            images={[
-              { ...invite, caption: t.inviteCaption },
-              { ...result, caption: t.resultCaption },
-            ]}
-          />
-        </section>
-
-        <section
-          aria-labelledby="share-result"
-          className="flex max-w-[480px] flex-col gap-5"
-        >
-          <div className="flex flex-col gap-2">
-            <h2 id="share-result" className="type-heading">
-              {t.shareHeading}
-            </h2>
-            <p className="type-body-sm text-muted-foreground">{t.shareBody}</p>
-          </div>
-          <ShareStudio
-            state={p.state}
-            palette={{
-              background: palette.background,
-              card: palette.card,
-              foreground: palette.foreground,
-              mutedForeground: palette.mutedForeground,
-              border: palette.border,
-              primary: palette.primary,
-              track: palette.track,
-              catSurface: cat.surface,
-              catInk: cat.ink,
-            }}
-            data={{
-              variant,
-              kind: p.kind,
-              title: p.title,
-              placeName: p.placeName,
-              category: p.category,
-              voters: p.voters,
-              votes: p.votes,
-              dateLabel: p.dateLabel,
-              texts: {
-                brand: shareLabCopy.brand,
-                celebrate: s.celebrate[p.kind],
-                votesOf: s.votesOf(p.voters, p.votes),
-                resultCaption: og.ticketResult[p.kind],
-                final: s.ticketFinal,
-                votersLabel: og.labels.voters,
-                topLabel: og.labels.top,
-                unitVote: og.units.vote,
-                unitPerson: og.units.person,
-              },
-            }}
-          />
-        </section>
+            <section
+              aria-labelledby="share-source"
+              className="flex flex-col gap-5"
+            >
+              <div className="flex flex-col gap-2">
+                <h2 id="share-source" className="type-heading">
+                  {t.sourceHeading}
+                </h2>
+                <p className="type-body-sm text-muted-foreground">
+                  {t.sourceBody}
+                </p>
+              </div>
+              <SourceImages
+                loading={loading}
+                initialSafe={p.safe}
+                images={[
+                  { ...invite, caption: t.inviteCaption },
+                  { ...result, caption: t.resultCaption },
+                ]}
+              />
+            </section>
+          </>
+        ) : (
+          <section
+            aria-labelledby="share-result"
+            className="flex max-w-[480px] flex-col gap-5"
+          >
+            <div className="flex flex-col gap-2">
+              <h2 id="share-result" className="type-heading">
+                {t.shareHeading}
+              </h2>
+              <p className="type-body-sm text-muted-foreground">
+                {t.shareBody}
+              </p>
+            </div>
+            <ResultShareDemo
+              initialOpen={p.state !== "empty"}
+              code="4vdvm3887pr7"
+              title={p.title}
+              kind={p.kind}
+              placeId="1"
+              placeName={p.state === "error" ? null : p.placeName}
+              category={p.state === "error" ? null : p.category}
+              votes={p.votes}
+              voters={p.voters}
+            />
+          </section>
+        )}
       </main>
     </DesignScope>
   );

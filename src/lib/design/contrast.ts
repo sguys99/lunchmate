@@ -66,6 +66,24 @@ export function oklchToLinearSrgb(color: {
   ];
 }
 
+/**
+ * oklch 문자열 → 6자리 16진 sRGB(채널 클램프, 알파 버림). 공유 이미지 팔레트 생성(T7.14, T7.20)이 쓴다.
+ * Satori(next/og)와 canvas에는 CSS 변수가 없어 값을 넘겨야 한다.
+ */
+export function oklchToHex(value: string): string {
+  const v = parseOklchValue(value);
+  if (!v) throw new Error(`oklch 형식이 아닙니다: ${value}`);
+  const toByte = (linear: number) => {
+    const c = linear < 0 ? 0 : linear > 1 ? 1 : linear;
+    const s = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+    return Math.round(s * 255)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  const [r, g, b] = oklchToLinearSrgb(v);
+  return "#" + toByte(r) + toByte(g) + toByte(b);
+}
+
 /** 변환 오차(부동소수)로 생기는 아주 작은 이탈은 gamut 밖으로 보지 않는다. */
 const GAMUT_EPSILON = 1e-4;
 

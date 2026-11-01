@@ -62,3 +62,52 @@ export function themeColorFile(tokens: DesignFrontmatter): string {
     "",
   ].join("\n");
 }
+
+/** 생성 경로 (저장소 루트 기준). 서버 OG(next/og)와 브라우저 canvas 공유 이미지가 읽는다(T7.14, T7.20, D-17 안건 5). */
+export const SHARE_PALETTE_OUT = "src/lib/design/share-palette.generated.ts";
+
+/**
+ * 확정본 라이트 색 → 공유 이미지용 6자리 16진 sRGB.
+ * Satori와 canvas는 CSS 변수도 oklch도 확실히 읽지 못해 값을 넘겨야 한다. 이미지는 테마와 무관하게 늘 라이트다
+ * (og:image에는 prefers-color-scheme이 없고, 저장한 이미지는 어디서 열릴지 모른다).
+ * 이 파일은 상대 모듈에서 타입만 가져오므로 oklch → 16진 변환은 호출하는 쪽(scripts/build-tokens.ts)이 넘긴다.
+ */
+export function sharePaletteFile(
+  tokens: DesignFrontmatter,
+  toHex: (oklch: string) => string,
+): string {
+  const header = [
+    "/*",
+    " * 생성물, 직접 수정 금지. 원본: DESIGN.md (루트) 프런트매터 color.light",
+    " * 다시 만들기: pnpm tokens (scripts/build-tokens.ts, 변환: src/lib/design/to-ts.ts)",
+    ` * ${metaLine(tokens)}`,
+    " */",
+  ].join("\n");
+  const { shadcn, app, category } = tokens.color.light;
+  const value = {
+    background: toHex(shadcn.background),
+    card: toHex(shadcn.card),
+    foreground: toHex(shadcn.foreground),
+    muted: toHex(shadcn.muted),
+    mutedForeground: toHex(shadcn["muted-foreground"]),
+    border: toHex(shadcn.border),
+    primary: toHex(shadcn.primary),
+    primaryForeground: toHex(shadcn["primary-foreground"]),
+    track: toHex(app["vote-bar-track"]),
+    chart3: toHex(shadcn["chart-3"]),
+    category: Object.fromEntries(
+      Object.entries(category).map(([slug, v]) => [
+        slug,
+        { surface: toHex(v.surface), ink: toHex(v.ink) },
+      ]),
+    ),
+  };
+  return [
+    header,
+    "",
+    `export const sharePalette = ${JSON.stringify(value)} as const;`,
+    "",
+    "export type SharePalette = typeof sharePalette;",
+    "",
+  ].join("\n");
+}
