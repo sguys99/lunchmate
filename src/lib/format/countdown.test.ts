@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { countdownFromMs, countdownUntil, formatCountdown } from "@/lib/format";
+import {
+  countdownFromMs,
+  countdownUnits,
+  countdownUntil,
+  formatCountdown,
+} from "@/lib/format";
 import { HOUR_MS, MINUTE_MS, fromKstWallTime } from "@/lib/time";
 
 describe("countdownFromMs", () => {
@@ -76,5 +81,34 @@ describe("countdownUntil (마감 정각 포함)", () => {
 
   it("잘못된 Date는 RangeError", () => {
     expect(() => countdownUntil(new Date("x"), deadline)).toThrow(RangeError);
+  });
+});
+
+describe("countdownUnits (투표방, G7)", () => {
+  const t = (ms: number) => countdownUnits(ms)?.text ?? null;
+  it("10분 미만은 분과 두 자리 초", () => {
+    expect(t(9 * MINUTE_MS + 5_000)).toBe("9분 05초");
+    expect(t(MINUTE_MS)).toBe("1분 00초");
+  });
+  it("1분 미만은 초만", () => {
+    expect(t(40_000)).toBe("40초");
+    expect(t(1)).toBe("1초");
+  });
+  it("10분 이상은 분 올림, 초 없음", () => {
+    expect(t(12 * MINUTE_MS + 40_000)).toBe("13분");
+    expect(t(10 * MINUTE_MS)).toBe("10분");
+    expect(t(59 * MINUTE_MS + 30_000)).toBe("1시간");
+  });
+  it("1시간 이상은 시간과 분", () => {
+    expect(t(HOUR_MS + 20 * MINUTE_MS)).toBe("1시간 20분");
+    expect(t(2 * HOUR_MS)).toBe("2시간");
+    expect(t(7 * 24 * HOUR_MS)).toBe("168시간");
+  });
+  it("마감이면 null, 숫자 칸을 나눠 준다", () => {
+    expect(countdownUnits(0)).toBeNull();
+    expect(countdownUnits(9 * MINUTE_MS + 5_000)?.parts).toEqual([
+      { value: 9, unit: "분" },
+      { value: 5, unit: "초" },
+    ]);
   });
 });

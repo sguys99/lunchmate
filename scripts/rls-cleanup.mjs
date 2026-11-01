@@ -3,6 +3,8 @@
 //       pnpm test:rls:cleanup --yes     → 실제로 삭제
 // 대상: 이메일이 test_rls_로 시작하는 Auth 사용자(src/lib/supabase/rls/harness.ts가 만든 계정)만.
 // auth 사용자를 지우면 profiles, offices, preferences, avoid_rules는 on delete cascade로 함께 지워진다.
+// 투표방(T7.6)은 방장이 지워져도 host_id만 null이 되어 남는다. 그래서 방장 없는(host_id null) 방 가운데
+// 제목이 test_로 시작하는 것(t7-poll RLS 테스트, E2E가 만든 방)을 함께 지운다. 후보, 참여자, 표는 cascade.
 // secret 키는 Auth Admin API 호출에만 쓰고 출력하지 않는다.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -42,8 +44,48 @@ for (let page = 1; page < 100; page += 1) {
   if (users.length < 200) break;
 }
 
+// 방장 없는 test_ 투표방. 사용자보다 먼저 세지만 지우는 것은 사용자를 지운 뒤(방장이 지워져야 host_id가 null)
+async function orphanTestPolls() {
+  const res = await fetch(
+    `${url}/rest/v1/polls?select=id,title&host_id=is.null&limit=1000`,
+    { headers },
+  );
+  if (res.status === 404) return []; // 마이그레이션 전
+  if (!res.ok) {
+    console.error(`[rls-cleanup] 투표방 조회 실패 (${res.status})`);
+    return [];
+  }
+  const rows = await res.json();
+  return rows.filter(
+    (p) => typeof p.title === "string" && p.title.startsWith("test_"),
+  );
+}
+
+async function cleanupPolls() {
+  const polls = await orphanTestPolls();
+  if (polls.length === 0) {
+    console.log("[rls-cleanup] 지울 테스트 투표방이 없습니다.");
+    return;
+  }
+  if (!apply) {
+    console.log(`[rls-cleanup] 방장 없는 테스트 투표방 ${polls.length}개`);
+    return;
+  }
+  for (let i = 0; i < polls.length; i += 100) {
+    const ids = polls.slice(i, i + 100).map((p) => p.id);
+    const res = await fetch(`${url}/rest/v1/polls?id=in.(${ids.join(",")})`, {
+      method: "DELETE",
+      headers,
+    });
+    console.log(
+      `[rls-cleanup] 투표방 ${res.ok ? "삭제" : `실패 ${res.status}`} ${ids.length}개`,
+    );
+  }
+}
+
 if (targets.length === 0) {
   console.log("[rls-cleanup] 지울 테스트 사용자가 없습니다.");
+  await cleanupPolls();
   process.exit(0);
 }
 
@@ -60,6 +102,7 @@ for (const u of targets) {
     `[rls-cleanup] ${res.ok ? "삭제" : `실패 ${res.status}`} ${u.email}`,
   );
 }
+await cleanupPolls();
 if (!apply)
   console.log(
     `[rls-cleanup] ${targets.length}명. 지우려면 --yes를 붙여 다시 실행하세요.`,
