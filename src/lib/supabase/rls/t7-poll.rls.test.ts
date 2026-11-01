@@ -18,6 +18,7 @@
 // - 동점 대기(G7): 1위가 둘이면 tie, 방장이 고르거나 30분 뒤 서버 룰렛.
 // - 탈퇴(T7.29): 진행 중 방의 표는 지워지고, 끝난 방은 익명 참여자로 남고, 방장 탈퇴 시 진행 중 방은 취소.
 // - 한도(MOD-05): 하루 10개, 보내기 전 만들기 취소는 한도를 돌려준다.
+// - T7.30: poll_closed 보고권(claim_poll_closed_report)은 마감, 취소된 방마다 처음 부른 참여자 한 명만 받는다.
 // Realtime 집계 수신(AC-POLL-1)은 웹소켓이 필요해 E2E(T7.31)에서 본다.
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -220,7 +221,14 @@ describe.skipIf(!ready)(
           place(2),
           place(3),
         ]);
-        expect(JSON.stringify(r.data)).not.toMatch(
+        // 확정된 방에서만 채우는 결과 숫자(20261101150000)는 진행 중이면 null이다
+        const raw = r.data as Record<string, unknown>;
+        expect(raw.top_votes).toBeNull();
+        expect(raw.voted_count).toBeNull();
+        const rest = { ...raw };
+        delete rest.top_votes;
+        delete rest.voted_count;
+        expect(JSON.stringify(rest)).not.toMatch(
           /votes|invite_code|host_id|user_id/,
         );
       });
@@ -814,6 +822,79 @@ describe.skipIf(!ready)(
       });
     });
 
+    describe("T7.30 poll_closed 보고권은 방마다 한 번", () => {
+      type Claim = {
+        claimed: boolean;
+        reason?: string;
+        participant_count?: number;
+      };
+      const claim = (user: TestUser | null, id: string) =>
+        rpc<Claim>(
+          e,
+          "claim_poll_closed_report",
+          { p_poll_id: id },
+          user?.token,
+        );
+
+      it("진행 중이면 false, 마감 뒤 두 참여자 중 처음 한 명만 true, 비참여자는 false, 비로그인은 거부", async (ctx) => {
+        // 20261101170000 적용 전에는 함수가 없다(PGRST202). 그때는 건너뛴다
+        const probe = await claim(host, "00000000-0000-0000-0000-000000000000");
+        if (probe.error) ctx.skip();
+
+        // 공용 방장의 하루 생성 한도(10)와 겹치지 않게 따로 방장을 둔다
+        const owner = await createTestUser(e, runId, "pr");
+        created.push(owner.id);
+        const p = await createPoll(owner, [place(301), place(302)]);
+        await rpc(e, "join_poll", { p_code: p.invite_code }, b.token);
+        const s = (await getPoll(owner, p.poll_id)).data!;
+        await rpc(
+          e,
+          "cast_vote",
+          { p_poll_id: p.poll_id, p_candidate_ids: [s.candidates[0]!.id] },
+          b.token,
+        );
+
+        const early = await claim(b, p.poll_id);
+        expect(early.error).toBeNull();
+        expect(early.data?.claimed).toBe(false);
+
+        await rpc(e, "close_poll_now", { p_poll_id: p.poll_id }, owner.token);
+
+        const outside = await claim(outsider, p.poll_id);
+        expect(outside.data?.claimed).toBe(false);
+
+        const first = await claim(b, p.poll_id);
+        expect(first.error).toBeNull();
+        expect(first.data).toEqual({
+          claimed: true,
+          reason: "host",
+          participant_count: 2,
+        });
+        const second = await claim(owner, p.poll_id);
+        expect(second.data?.claimed).toBe(false);
+        const again = await claim(b, p.poll_id);
+        expect(again.data?.claimed).toBe(false);
+
+        const anon = await claim(null, p.poll_id);
+        expect(anon.error).not.toBeNull();
+      });
+
+      it("방장이 취소한 방은 reason cancel로 한 번", async (ctx) => {
+        const probe = await claim(host, "00000000-0000-0000-0000-000000000000");
+        if (probe.error) ctx.skip();
+        const owner = await createTestUser(e, runId, "ps");
+        created.push(owner.id);
+        const p = await createPoll(owner, [place(303), place(304)]);
+        await rpc(e, "cancel_poll", { p_poll_id: p.poll_id }, owner.token);
+        const r = await claim(owner, p.poll_id);
+        expect(r.data).toEqual({
+          claimed: true,
+          reason: "cancel",
+          participant_count: 1,
+        });
+      });
+    });
+
     describe("T7.29, T7.22 탈퇴", () => {
       it("진행 중 방의 표는 지워지고, 끝난 방은 익명으로 남고, 방장 탈퇴는 진행 중 방을 취소한다", async () => {
         const leaver = await createTestUser(e, runId, "pl");
@@ -840,7 +921,12 @@ describe.skipIf(!ready)(
           { p_poll_id: done.poll_id, p_candidate_ids: [sd.candidates[0]!.id] },
           leaver.token,
         );
-        await rpc(e, "close_poll_now", { p_poll_id: done.poll_id }, owner.token);
+        await rpc(
+          e,
+          "close_poll_now",
+          { p_poll_id: done.poll_id },
+          owner.token,
+        );
 
         const hosted = await createPoll(leavingHost, [place(205), place(206)]);
         await rpc(e, "join_poll", { p_code: hosted.invite_code }, b.token);

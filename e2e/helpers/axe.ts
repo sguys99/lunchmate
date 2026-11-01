@@ -48,6 +48,17 @@ export async function expectNoA11yViolations(
   if (options.disableRules?.length)
     builder = builder.disableRules(options.disableRules);
 
+  // 등장 전환(opacity 0에서 시작하는 페이드) 도중에 검사하면 반투명 글자를 대비 미달로 잡는다.
+  // 끝이 있는 애니메이션과 전환이 모두 끝난 뒤 검사한다(무한 반복인 실시간 점 ping 등은 기다리지 않는다)
+  await page.waitForFunction(
+    () =>
+      document.getAnimations().every((a) => {
+        const end = a.effect?.getComputedTiming().endTime;
+        return a.playState !== "running" || end === Infinity;
+      }),
+    null,
+    { timeout: 5_000 },
+  );
   const { violations } = await builder.analyze();
   expect(violations, formatViolations(violations)).toEqual([]);
 }

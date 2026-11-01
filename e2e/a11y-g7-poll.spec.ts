@@ -39,7 +39,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
   test.describe(`투표방 시안 테마 ${theme}`, () => {
     test.use({ colorScheme: theme, reducedMotion: "reduce" });
 
-    for (const v of ["a", "b", "c"] as const) {
+    for (const v of ["a"] as const) {
       for (const q of QUERIES) {
         test(`poll/${v}${q}`, async ({ page }) => {
           test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
@@ -51,8 +51,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       test(`poll/${v} 투표한 뒤`, async ({ page }) => {
         test.skip(!designLabOn, "NEXT_PUBLIC_DESIGN_LAB=true일 때만");
         await openLabRoute(page, `/design-lab/poll/${v}`);
-        // B는 보고 있는 카드가 곧 고른 곳이라 고르기 단계가 없다
-        if (v !== "b") await page.getByRole("radio").first().click();
+        await page.getByRole("radio").first().click();
         await page.getByRole("button", { name: /투표하기/ }).click();
         await expect(
           page.getByRole("button", { name: "선택 바꾸기" }),

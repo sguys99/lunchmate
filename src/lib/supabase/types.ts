@@ -360,6 +360,7 @@ export type Database = {
           anchor_lng: number
           closed_at: string | null
           closed_reason: string | null
+          closed_reported_at: string | null
           closes_at: string
           created_at: string
           host_id: string | null
@@ -382,6 +383,7 @@ export type Database = {
           anchor_lng: number
           closed_at?: string | null
           closed_reason?: string | null
+          closed_reported_at?: string | null
           closes_at: string
           created_at?: string
           host_id?: string | null
@@ -404,6 +406,7 @@ export type Database = {
           anchor_lng?: number
           closed_at?: string | null
           closed_reason?: string | null
+          closed_reported_at?: string | null
           closes_at?: string
           created_at?: string
           host_id?: string | null
@@ -697,6 +700,7 @@ export type Database = {
         Args: { p_candidate_ids: string[]; p_poll_id: string }
         Returns: boolean
       }
+      claim_poll_closed_report: { Args: { p_poll_id: string }; Returns: Json }
       close_poll_now: { Args: { p_poll_id: string }; Returns: undefined }
       create_poll: {
         Args: {
@@ -851,6 +855,15 @@ export type Database = {
           p_multi?: boolean
           p_poll_id: string
           p_title?: string
+        }
+        Returns: undefined
+      }
+      update_poll_anchor: {
+        Args: {
+          p_anchor_lat: number
+          p_anchor_lng: number
+          p_poll_id: string
+          p_radius_m: number
         }
         Returns: undefined
       }

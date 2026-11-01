@@ -3,14 +3,13 @@
 import { Suspense } from "react";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
 import { PollA } from "./a/poll-a";
-import { PollB } from "./b/poll-b";
-import { PollC } from "./c/poll-c";
 import { parsePollParams } from "./params";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-export type PollVariant = "a" | "b" | "c";
+export type PollVariant = "a";
 
-const VARIANTS = { a: PollA, b: PollB, c: PollC } as const;
+// G7(D-14)에서 A를 골라 B, C는 지웠다. C 참여 줄과 B 결과 카드는 실제 화면(src/features/poll/room)으로 옮겼다
+const VARIANTS = { a: PollA } as const;
 
 async function Screen({
   variant,
