@@ -102,6 +102,8 @@ const LoadFailedCard = lazy(() =>
 const NeedLocationCard = lazy(() =>
   states().then((m) => ({ default: m.NeedLocationCard })),
 );
+const preloadStaleNote = () => import("./today-stale-note");
+const StaleNote = lazy(preloadStaleNote);
 const OfflineCard = lazy(() =>
   states().then((m) => ({ default: m.OfflineCard })),
 );
@@ -256,6 +258,11 @@ export function TodayScreen({
     enabled: center !== null && online && !data.loadFailed,
   });
   const places = query.data?.places;
+  // 받은 결과가 생기면(온라인) "연결 전 결과" 줄 청크를 미리 받아 둔다. 끊긴 뒤에는 받을 수 없기 때문이다(T8.3)
+  const hasPlaces = Boolean(places);
+  useEffect(() => {
+    if (hasPlaces && online) void preloadStaleNote().catch(() => {});
+  }, [hasPlaces, online]);
 
   const placesById = useMemo(
     () => new Map((places ?? []).map((p) => [p.id, p])),
@@ -873,6 +880,9 @@ export function TodayScreen({
     );
   }
 
+  const showStale =
+    !online && Boolean(places) && docked && !data.loadFailed && !needLocation;
+
   return (
     <div
       className={cn(
@@ -891,6 +901,12 @@ export function TodayScreen({
         directedToday={session.directedOn === kstDateKey(now)}
         className="mt-5 desktop:mt-4"
       />
+      {/* 탭이 열린 채 끊김: 세션 메모리의 결과를 "연결 전 결과"로 표시(T8.3, APP-02). 기기에는 저장하지 않는다 */}
+      {showStale ? (
+        <Suspense fallback={null}>
+          <StaleNote className="mt-5 desktop:mt-4" />
+        </Suspense>
+      ) : null}
       <p aria-live="polite" className="sr-only">
         {announcement}
       </p>

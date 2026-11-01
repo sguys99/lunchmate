@@ -179,6 +179,13 @@
   - **카카오 장애, 한도 초과(PRD 12장 수정안)**: 재시도 1회 후 오류 안내 + "네이버 지도에서 주변 식당 보기"(네이버 지도 웹/앱 검색 링크, 검색어 "음식점")와 "다시 시도" 버튼. 즐겨찾기 대체 추천은 이름, 거리를 알 수 없어 제공하지 않는다. 사용자 메모가 있는 즐겨찾기가 있으면 "즐겨찾기에서 고르기"(메모 + 카카오맵 링크) 보조 동작만 둔다.
   - PRD 12장 표 문구 교체 제안: "카카오 API 오류, 한도 초과 | 재시도 1회 후 오류 안내 + 네이버 지도에서 주변 식당 보기 + 다시 시도. 장소 데이터 저장 금지로 즐겨찾기 기반 대체 추천은 제공하지 않음(research-notes T0.16-3)". "오프라인 | 마지막 설정 + 세션 중 받은 결과(탭이 열려 있을 때만) + 재연결 시 자동 새로고침".
 - 남은 불확실성: 같은 탭 안 메모리 보존(TanStack Query `gcTime` 동안)이 운영정책 제5조 제20호의 "사용자 환경 개선 목적" 캐시로 인정되는지 카카오에 문의 권장. 인정되지 않으면 `staleTime`, `gcTime`을 짧게(예: 화면 이탈 즉시 폐기) 잡는다.
+- **서비스 워커 캐시 범위 (T8.4 구현, 2026-11-01)**: 정본 코드는 `public/sw.js` 머리 주석, 검사는 `src/lib/sw/sw-policy.test.ts`(파일을 그대로 읽어 실행).
+  - 허용 목록(같은 출처 GET만): `/_next/static/`(해시 붙은 JS, CSS, 빌드에 들어간 일러스트), `/fonts/`(버전 경로 웹 글꼴), `/offline`(오프라인 폴백 HTML, 설치 때 쿠키 없이 받음), `/favicon.ico`. 응답은 200 basic이고 `Cache-Control`에 no-store, private가 없을 때만 넣는다.
+  - 명시적 제외(허용 목록보다 먼저 검사): 다른 출처 전부, 특히 `dapi.kakao.com`과 `*.kakao.com`, `*.kakaocdn.net`, `*.daumcdn.net`, `*.daum.net`, 네이버 지도 `*.naver.com`, `*.naver.net`, `*.pstatic.net`, `*.supabase.co`, PostHog, Sentry. 다른 출처 요청에는 `respondWith`를 부르지 않아 서비스 워커가 아예 손대지 않는다. 같은 출처의 `/api/`, `/auth/`, `/_next/image`, `/_next/data/`, RSC 요청(`RSC` 헤더, `?_rsc=`), Range 요청, GET이 아닌 요청, 페이지 HTML(네비게이션 응답, 로그인 화면이 들어 있을 수 있음)도 저장하지 않는다.
+  - 네비게이션은 네트워크 우선(navigation preload), 실패하면 미리 받은 `/offline`을 원래 주소 그대로 보여 준다. `/offline`은 정적 안내와 다시 시도만 있고, online 이벤트에 원래 주소를 다시 연다.
+  - 버전: 등록 주소 `/sw.js?v=<빌드 버전>`(next.config `env.LM_SW_VERSION`, Vercel 커밋 SHA 앞 12자 또는 빌드 시각). 새 워커 활성화 때 이전 `lm-shell-*` 캐시를 지운다. 등록은 프로덕션 빌드에서만, load 뒤 유휴 시간에 인라인 스크립트로 한다(홈 JS 번들 증가 없음). 개발(`next dev`)에서는 같은 스크립트가 `/sw.js` 등록을 해제하고 `lm-shell-*` 캐시를 지운다. `/sw.js` 응답 헤더는 Next.js PWA 가이드 권장값(no-cache, no-store, CSP `default-src 'self'`).
+  - 탭이 열린 채 끊긴 경우의 "연결 전 결과"는 서비스 워커가 아니라 TanStack Query 세션 메모리가 맡는다(오늘 카드 위 한 줄, 지도 목록 줄, 나 탭 배너). 재연결 시 `refetchOnReconnect`로 다시 부른다.
+  - 출처: Next.js 16 PWA 가이드(`node_modules/next/dist/docs/01-app/02-guides/progressive-web-apps.md`, https://nextjs.org/docs/app/guides/progressive-web-apps, 오프라인은 Serwist를 한 선택지로 소개하지만 범위가 좁아 직접 작성), MDN Service Worker API(https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), FetchEvent.respondWith, NavigationPreloadManager.
 
 #### T0.16-4 서버 OG 이미지(POLL-04, POLL-09S)의 식당 이름과 카카오 REST 키
 

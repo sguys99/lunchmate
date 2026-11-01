@@ -1,8 +1,14 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
+// 서비스 워커 버전(T8.4): 빌드마다 바뀌는 값. 등록 주소 /sw.js?v=에 붙어 새 배포 때 새 워커가 설치되고 이전 캐시를 지운다.
+// Vercel은 커밋 SHA, 로컬 빌드는 빌드 시각(src/lib/sw/register-script.ts).
+const swVersion =
+  process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || Date.now().toString(36);
+
 const nextConfig: NextConfig = {
   /* config options here */
+  env: { LM_SW_VERSION: swVersion },
   cacheComponents: true,
   partialPrefetching: true,
   // design-lab 화면은 루트 DESIGN.md 프런트매터를 서버에서 읽는다(getScreenTokens, T1.14, T1.20).
@@ -16,6 +22,24 @@ const nextConfig: NextConfig = {
   // (src/lib/fonts/web-fonts.ts, scripts/fonts/build-font-subsets.py).
   async headers() {
     return [
+      // 서비스 워커 스크립트는 HTTP 캐시에 두지 않는다(Next.js PWA 가이드 "Securing your application", T8.4)
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
+          },
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self'",
+          },
+        ],
+      },
       {
         source: "/fonts/:version/:path*",
         headers: [

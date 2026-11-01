@@ -7,6 +7,7 @@ import { siteCopy } from "@/copy/common";
 import { themeColor } from "@/lib/design/theme-color.generated";
 import { siteUrl } from "@/lib/env/site";
 import { WEB_FONTS_INIT_SCRIPT } from "@/lib/fonts/web-fonts";
+import { swRegisterScript } from "@/lib/sw/register-script";
 import { UI_PREFS_INIT_SCRIPT } from "@/lib/ui-prefs/init-script";
 
 // metadataBase: canonical, og:url 같은 상대 주소를 NEXT_PUBLIC_SITE_URL 기준 절대 주소로 만든다(도메인 하드코딩 금지, CLAUDE.md 12장).
@@ -37,6 +38,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: UI_PREFS_INIT_SCRIPT }} />
         {/* 웹 글꼴 목록 링크: 재방문은 지금 붙이고, 첫 방문은 화면이 뜬 뒤 붙인다. 사용자 입력 없는 고정 문자열 */}
         <script dangerouslySetInnerHTML={{ __html: WEB_FONTS_INIT_SCRIPT }} />
+        {/* 서비스 워커 등록(프로덕션, load 뒤 유휴 시간) 또는 해제(개발). 앱 셸만 캐시한다(T8.4, public/sw.js). 고정 문자열 */}
+        <script dangerouslySetInnerHTML={{ __html: swRegisterScript() }} />
       </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
