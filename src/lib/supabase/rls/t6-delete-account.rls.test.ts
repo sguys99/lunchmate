@@ -45,9 +45,10 @@ const ready =
   (await schemaReady(env, "reviews")) &&
   (await residueReady(env));
 
-// 6단계까지 auth.users를 참조하는 테이블. account_residue가 이 목록을 모두 찾아야 한다(누락 = 카탈로그 질의 오류)
+// 7단계까지 auth.users를 참조하는 테이블(투표 테이블은 set null 또는 cascade, T7.29). account_residue가 이 목록을 모두 찾아야 한다(누락 = 카탈로그 질의 오류)
 const EXPECTED = [
   "private.daily_usage",
+  "private.poll_avoid_usage",
   "public.avoid_rules",
   "public.blocklist",
   "public.favorites",
@@ -55,6 +56,9 @@ const EXPECTED = [
   "public.place_deal_checks",
   "public.place_deals",
   "public.place_reports",
+  "public.poll_candidates",
+  "public.poll_members",
+  "public.polls",
   "public.preferences",
   "public.profiles",
   "public.review_reports",
@@ -179,7 +183,12 @@ describe.skipIf(!ready)(
         "dinner",
       );
       const xDeal = await deal(x, P_X, "discount");
-      await rpc(e, "report_wait", { p_place_id: P_X, p_level: "long" }, x.token);
+      await rpc(
+        e,
+        "report_wait",
+        { p_place_id: P_X, p_level: "long" },
+        x.token,
+      );
       await post(x, "place_reports", { place_id: P_X, kind: "closed" });
 
       // ── 남의 기록에 x가 남긴 응답 ──
@@ -320,7 +329,12 @@ describe.skipIf(!ready)(
     });
 
     it("account_residue는 사용자 세션과 비로그인이 부를 수 없다", async () => {
-      const asUser = await rpc(e, "account_residue", { p_user_id: a.id }, a.token);
+      const asUser = await rpc(
+        e,
+        "account_residue",
+        { p_user_id: a.id },
+        a.token,
+      );
       expect(asUser.error).not.toBeNull();
       const asAnon = await rpc(e, "account_residue", { p_user_id: a.id });
       expect(asAnon.error).not.toBeNull();

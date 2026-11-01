@@ -32,8 +32,15 @@ export const ACCOUNT_DELETION_SCOPE = [
   "place_deal_checks", // 아직 해요, 끝났어요 응답
   "wait_reports",
   "private.daily_usage", // 일일 한도 카운터
-  // T7.29에서 확장: poll_votes(진행 중 투표의 내 표 삭제), 확정된 투표는 익명 참여자로 남김(참여자 user_id를 null로),
-  //   방장인 진행 중 투표방은 취소 처리
+  // T7.29 (supabase/migrations/20261101140000_t7_6_polls.sql). poll_votes에는 user_id가 없어 참여자 행으로 묶인다.
+  //   polls.host_id, poll_candidates.added_by, poll_members.user_id는 on delete set null(남의 투표방 결과를 지키려고).
+  //   트리거: 진행 중(open, tie) 방의 내 참여자 행은 지워지고(내 표도 cascade로 삭제), 끝난 방은 익명 참여자로 남는다.
+  //   내가 방장인 진행 중 방은 취소(closed_reason host_left, PRD 12장). 확인은 account_residue + t7-poll RLS "T7.29, T7.22 탈퇴".
+  "poll_members", // 진행 중 방은 삭제, 끝난 방은 user_id null(익명 참여자)
+  "poll_votes", // 진행 중 방의 내 표(참여자 행 cascade)
+  "polls", // 내가 연 방은 host_id null, 진행 중이면 host_left로 취소
+  "poll_candidates", // 내가 넣은 후보는 added_by null(후보는 방에 남음)
+  "private.poll_avoid_usage", // 기피 경고 호출 카운터
 ] as const;
 
 export type DeleteAccountDeps = {

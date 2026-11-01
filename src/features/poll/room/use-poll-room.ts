@@ -204,13 +204,14 @@ export function usePollRoom(pollId: string, online: boolean) {
       resolveTie: (candidateId: string | null) =>
         run(() => resolveTieAction({ pollId, candidateId })),
       cancel: () => run(() => cancelPollAction(pollId)),
+      // 투표방 안 후보 넣기와 제안은 기준점 근처 장소 목록에서 고른다. 추천 수락률(source rec)에 섞이지 않게 map (T7.30)
       review: (candidateId: string, approve: boolean, placeId: string) =>
         run(async () => {
           const r = await reviewSuggestionAction({ candidateId, approve });
           if (r.ok && approve) {
             track({
               name: "poll_candidate_added",
-              properties: { place_id: placeId, source: "rec" },
+              properties: { place_id: placeId, source: "map" },
             });
           }
           return r;
@@ -221,7 +222,7 @@ export function usePollRoom(pollId: string, online: boolean) {
           if (r.ok && isHost) {
             track({
               name: "poll_candidate_added",
-              properties: { place_id: placeId, source: "rec" },
+              properties: { place_id: placeId, source: "map" },
             });
           }
           return r;

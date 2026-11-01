@@ -58,7 +58,7 @@ tasks.md에서 다음 미완료 작업부터 진행해줘. 시작 전에 관련 
 | 4 | 인증, 온보딩, 설정 | 1.5주 | ⛔ 시안 + G4 | 완료 (10/31, 온보딩 B + C 단축, 로그인 B + A 시트, 실기기 확인 남음) | 29/30 |
 | 5 | 추천, 지도, 상세, 길찾기 | 1.5주 | ⛔ 시안 + G5 | 완료 (10/31, 지도 B + A 그림, 상세 C + A + B, 실기기 확인 남음) | 43/43 |
 | 6 | 피드백, 후기, 기록, 제보 | 1.5주 | ⛔ 시안 + G6 | 완료 (11/01, 피드백 B + C + A, 나 탭 A + C, 제보 C + B, 실기기 확인 남음) | 33/33 |
-| 7 | 투표, 회식 | 1.5주 | ⛔ 시안 + G7 | 진행 중 (11/01 T7.5, 투표방 A + C + B, 투표 만들기 C + B + A, 회식 C + B, 공유 OG A + 이미지 B, 7.1 데이터, 7.2 투표, 7.3 회식 완료) | 28/36 |
+| 7 | 투표, 회식 | 1.5주 | ⛔ 시안 + G7 | 진행 중 (11/01 T7.5, 투표방 A + C + B, 투표 만들기 C + B + A, 회식 C + B, 공유 OG A + 이미지 B, 7.1 데이터, 7.2 투표, 7.3 회식 완료, 7.4 점검 완료) | 33/36 |
 | 8 | 다듬기: PWA, 모션, 접근성, 성능, 관리자 | 1주 | G8 | 대기 | 0/22 |
 | 9 | 클로즈드 베타 | 1주 이상 | G9 | 대기 | 0/13 |
 | 10 | 공개 출시 준비 | 1주 | G10 | 대기 | 0/14 |
@@ -590,12 +590,12 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 #### 7.4 마무리
 
-- [ ] T7.29 탈퇴 시 투표 처리 (진행 중 표 삭제, 확정 투표는 익명 참여자)
-- [ ] T7.30 이벤트: `poll_candidate_added`, `poll_created`, `poll_link_shared`, `poll_invite_opened`, `poll_voted`, `poll_closed`, `poll_result_shared`(channel kakao/save/share, D-17), `party_searched`
-- [ ] T7.31 E2E: 투표 생성 → 2인 투표 → 확정 (Playwright 두 브라우저 컨텍스트)
+- [x] T7.29 (11/01 완료, ACCOUNT_DELETION_SCOPE에 poll_members, poll_votes, polls, poll_candidates, private.poll_avoid_usage, account_residue 기대 목록에 투표 테이블, 탈퇴 안내와 약관 제5조, 처리방침 보관과 파기에 투표 처리 문장, 근거 t7-poll RLS "T7.29, T7.22 탈퇴") 탈퇴 시 투표 처리 (진행 중 표 삭제, 확정 투표는 익명 참여자)
+- [x] T7.30 (11/01 완료, 8종 PRD 이름과 속성 일치(타입과 prd-events.test.ts), 투표방 안 후보 넣기와 제안 승인 source rec → map(추천 수락률 부풀림 방지), 좌표와 개인 식별 정보 없음) 이벤트: `poll_candidate_added`, `poll_created`, `poll_link_shared`, `poll_invite_opened`, `poll_voted`, `poll_closed`, `poll_result_shared`(channel kakao/save/share, D-17), `party_searched`
+- [x] T7.31 (11/01 완료, `e2e/poll-flow.spec.ts` 홈 친구랑 정하기 → 링크 복사 → 친구 참여와 투표 → 2초 갱신 → 방장 결정 → 두 화면 결과와 방문 후보, 컨텍스트 2개, 3회 반복 x 2뷰포트 6/6, `pnpm test:e2e:poll`) E2E: 투표 생성 → 2인 투표 → 확정 (Playwright 두 브라우저 컨텍스트)
 - [ ] T7.32 `[실기기]` 카카오톡 공유 미리보기, 인앱 로그인 복귀, 실시간 갱신 2초
-- [ ] T7.33 문구 점검 (`lint:copy`), 카카오톡 공유 문구와 OG 텍스트 포함
-- [ ] T7.34 4상태와 다크 점검
+- [x] T7.33 (11/01 완료, 금지 문자 0, poll 28%, poll-create 27%, party 33%, share 34%, anchor-picker 30%, 카카오톡 공유 템플릿, OG 글, 메타는 share.ts) 문구 점검 (`lint:copy`), 카카오톡 공유 문구와 OG 텍스트 포함
+- [x] T7.34 (11/01 완료, `e2e/poll-states.spec.ts` 투표 탭과 투표방 로딩, 오류, 빈, 오프라인, 결과, 결과 공유 시트 x 라이트, 다크, 390, 1280, 360 + axe 8/8(2회), 캡처 `poll-states-live__*` 50장, test:e2e:a11y 468건 회귀 없음. 데스크톱 투표 탭 우측 지도 칸 비어 있음은 8단계 다듬기 후보(g7-qa.md)) 4상태와 다크 점검
 - [ ] T7.35 홈과 상세의 투표 관련 플래그 해제
 - [ ] T7.36 **G7 확인**: POLL, PARTY P0 AC 통과, 채택된 P1(빠른 투표, 기피 경고, 결과 공유) 동작
 

@@ -58,6 +58,10 @@ describe("deleteAccount (AUTH-05)", () => {
         "place_deals",
         "place_deal_checks",
         "wait_reports",
+        "poll_members",
+        "poll_votes",
+        "polls",
+        "poll_candidates",
         "private.daily_usage",
       ]),
     );
