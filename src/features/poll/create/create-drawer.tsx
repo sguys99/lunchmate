@@ -41,6 +41,7 @@ import {
   DrawerViewport,
 } from "@/components/ui/drawer";
 import { focusRing } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { anchorPickerCopy } from "@/copy/anchor-picker";
 import { pollCreateCopy as copy } from "@/copy/poll-create";
 import { AnchorPickerLazy } from "@/features/map/anchor-picker-lazy";
@@ -969,6 +970,7 @@ function ChoosePoll({
   const row = cn(
     "flex min-h-14 w-full items-center gap-3 rounded-md py-2 text-left type-label aria-disabled:opacity-50",
     focusRing,
+    rowPress,
   );
   return (
     <div className="flex flex-col gap-2">
@@ -1296,6 +1298,7 @@ function AnchorLine({
                 className={cn(
                   "flex min-h-12 w-full items-center gap-2 rounded-md text-left type-label",
                   focusRing,
+                  rowPress,
                 )}
               >
                 <MapPin aria-hidden className="size-4" strokeWidth={1.5} />
@@ -1313,6 +1316,7 @@ function AnchorLine({
               className={cn(
                 "flex min-h-12 w-full items-center gap-2 rounded-md text-left type-label",
                 focusRing,
+                rowPress,
               )}
             >
               <MapIcon aria-hidden className="size-4" strokeWidth={1.5} />

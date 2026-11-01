@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { focusRing } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +54,7 @@ export function SettingsLinkRow({
           rowClass,
           "group hover:text-foreground active:text-foreground",
           focusRing,
+          rowPress,
         )}
       >
         <span className="shrink-0 type-body">{label}</span>

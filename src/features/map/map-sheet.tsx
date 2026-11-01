@@ -19,6 +19,7 @@ import {
   type ReactNode,
 } from "react";
 import { focusRing } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { mapCopy } from "@/copy/map";
 import { cn } from "@/lib/utils";
 import {
@@ -225,6 +226,7 @@ export function MapSheet({
             className={cn(
               "flex h-11 w-full items-center px-(--lm-layout-gutter) text-left type-label",
               focusRing,
+              rowPress,
               "focus-visible:-outline-offset-4",
             )}
           >

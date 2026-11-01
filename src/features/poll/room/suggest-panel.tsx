@@ -15,6 +15,7 @@ import { straightDistanceM } from "@/features/rec/candidates";
 import { kakaoCategorySlug } from "@/features/rec/kakao-category";
 import { walkMinutesFromMeters } from "@/lib/format";
 import { restaurantsInRadiusQuery } from "@/lib/kakao/queries";
+import { rowPress } from "@/components/ui/row-press";
 import { cn } from "@/lib/utils";
 import type { PollErrorCode } from "./errors";
 import {
@@ -277,7 +278,10 @@ function PlacePicker({
                   onClick={() => {
                     if (busy === null) onPick(p.id, p.placeUrl);
                   }}
-                  className="flex min-h-14 w-full items-center gap-3 rounded-lg py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:bg-muted"
+                  className={cn(
+                    "flex min-h-14 w-full items-center gap-3 rounded-lg py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                    rowPress,
+                  )}
                 >
                   <CategoryIllustration
                     slug={slug}

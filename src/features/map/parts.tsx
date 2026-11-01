@@ -25,6 +25,7 @@ import { DealBadge } from "@/components/badges/place-badges";
 import { Chip } from "@/components/ui/chip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { focusRing, hitArea44, pressMotion } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { mapCopy } from "@/copy/map";
 import { categoryLabel, type CategorySlug } from "@/features/place/categories";
 import { CATEGORY_INK } from "@/features/place/category-ink";
@@ -505,6 +506,7 @@ export function PlaceRow({
           "relative flex min-h-18 w-full items-center gap-4 py-3 text-left",
           "before:absolute before:top-3 before:bottom-3 before:-left-(--lm-layout-gutter) before:w-0.5 before:bg-primary before:opacity-0 aria-current:before:opacity-100 desktop:before:-left-10",
           focusRing,
+          rowPress,
         )}
       >
         <CategoryIllustration slug={place.category} size={40} />

@@ -17,6 +17,7 @@ import {
   OfflineState,
 } from "@/components/states";
 import { focusRing } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { pollCreateCopy } from "@/copy/poll-create";
 import { myPollsAction, type MyPollRow } from "@/features/poll/create/actions";
 import { myPollsKey } from "@/features/poll/create/keys";
@@ -202,8 +203,9 @@ function PollRow({ poll, now }: { poll: MyPollRow; now: Date }) {
         onPointerEnter={focusMap}
         onFocus={focusMap}
         className={cn(
-          "flex min-h-18 items-center gap-4 rounded-md py-3 hover:bg-muted/50 active:bg-muted/50",
+          "flex min-h-18 items-center gap-4 rounded-md py-3 hover:bg-muted/50",
           focusRing,
+          rowPress,
         )}
       >
         <span className="flex min-w-0 flex-1 flex-col gap-1">

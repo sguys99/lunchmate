@@ -824,7 +824,7 @@ export function TodayScreen({
                     <li
                       key={card.id}
                       data-reveal
-                      style={{ "--reveal": 5 + i } as CSSProperties}
+                      style={{ "--reveal": 3 + i } as CSSProperties}
                       className="flex min-w-0"
                     >
                       <AltTile

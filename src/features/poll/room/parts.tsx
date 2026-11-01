@@ -259,7 +259,8 @@ export function LiveDot() {
   return (
     <span className="inline-flex items-center gap-1.5 type-caption text-muted-foreground">
       <span aria-hidden className="relative flex size-2">
-        <span className="absolute inset-0 rounded-full bg-success opacity-40 motion-safe:animate-ping motion-safe:[animation-duration:2.4s]" />
+        {/* 실시간 점 둘레: 스켈레톤과 같은 3.2초 opacity 호흡, 축소 모드면 정지(둘레 숨김). T8.8 사용자 결정 P3 */}
+        <span className="absolute -inset-1 rounded-full bg-success/30 opacity-0 motion-safe:animate-skeleton-breathe" />
         <span className="relative size-2 rounded-full bg-success" />
       </span>
       <span aria-label={copy.live.onLabel}>{copy.live.on}</span>

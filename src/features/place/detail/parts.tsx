@@ -15,6 +15,7 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import { EstimateMark } from "@/components/badges/estimate-mark";
 import { Skeleton } from "@/components/ui/skeleton";
 import { focusRing, hitArea48, pressMotion } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { badgeCopy } from "@/copy/badges";
 import { placeCopy } from "@/copy/place";
 import { formatShortWon, formatWon, priceBandParts } from "@/lib/format";
@@ -62,6 +63,7 @@ export function Fold({
           className={cn(
             "flex min-h-14 w-full items-center gap-3 py-2 text-left",
             focusRing,
+            rowPress,
           )}
         >
           <span className="w-16 shrink-0 type-label">{title}</span>

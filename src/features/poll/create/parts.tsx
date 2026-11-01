@@ -17,6 +17,7 @@ import { LoadingRegion, SkeletonLine } from "@/components/states";
 import { buttonClass as rawButtonClass } from "@/components/ui/button-classes";
 import { Chip, ChipGroup } from "@/components/ui/chip";
 import { focusRing, hitArea44, pressMotion } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pollCreateCopy as copy } from "@/copy/poll-create";
 import { CATEGORY_INK } from "@/features/place/category-ink";
@@ -117,6 +118,7 @@ export function Row({
           className={cn(
             "flex min-h-14 w-full items-center gap-4 rounded-md py-2 text-left",
             focusRing,
+            rowPress,
           )}
         >
           {head}
@@ -246,6 +248,7 @@ export function PickRow({
         className={cn(
           "flex min-h-14 w-full items-center gap-3 rounded-md py-2 text-left aria-disabled:opacity-50",
           focusRing,
+          rowPress,
         )}
       >
         {place.category ? (

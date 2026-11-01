@@ -4,6 +4,7 @@
 import { LogOut } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { focusRing } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { authCopy } from "@/copy/auth";
 import { meCopy } from "@/copy/me";
 import { useOnlineStatus } from "@/lib/network";
@@ -32,6 +33,7 @@ export function SignOutRow() {
           className={cn(
             "flex min-h-14 w-full items-center justify-between gap-4 py-3 text-left aria-disabled:opacity-60",
             focusRing,
+            rowPress,
           )}
         >
           <span className="flex flex-col gap-0.5">

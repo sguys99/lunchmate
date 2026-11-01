@@ -21,6 +21,7 @@ import {
 import { forwardRef, useId, useMemo, useState, type ReactNode } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
 import { focusRing, hitArea44 } from "@/components/ui/interaction";
+import { rowPress } from "@/components/ui/row-press";
 import { Skeleton } from "@/components/ui/skeleton";
 import { feedbackCopy, reviewTagLabels } from "@/copy/feedback";
 import type { PlaceReview } from "@/features/place/detail-model";
@@ -144,8 +145,9 @@ export function MyReviewBlock({
                 offline ? undefined : (e) => onEdit(row.key, e.currentTarget)
               }
               className={cn(
-                "flex min-h-14 w-full items-center gap-3 py-3 text-left transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted/50 active:bg-muted/50 aria-disabled:pointer-events-none aria-disabled:opacity-60 motion-reduce:transition-none",
+                "flex min-h-14 w-full items-center gap-3 py-3 text-left transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted/50 aria-disabled:pointer-events-none aria-disabled:opacity-60 motion-reduce:transition-none",
                 focusRing,
+                rowPress,
               )}
             >
               <span className="w-20 shrink-0 type-caption text-muted-foreground">

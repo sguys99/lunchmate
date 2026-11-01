@@ -3,7 +3,7 @@
 작성 2026-11-01. 기준은 DESIGN.md 프런트매터 `motion`(duration fast 180, base 260, slow 300, easing standard/enter/exit/emphasized, spring 5종, stagger 70)과 7장, CLAUDE.md 6.2절(150~300ms, 의미 있을 때만, reduced motion)과 13장(첫 화면 등장은 CSS, Motion은 상호작용 뒤).
 토큰 값은 바꾸지 않았다(`pnpm tokens` 결과 변화 없음). DESIGN.md는 본문 서술 두 곳만 구현에 맞췄다(아래 F15).
 
-요약: 발견 25건, 조치 16건, 유지(근거 기록) 6건, 사용자 제안 3건.
+요약: 발견 25건, 조치 16건, 유지(근거 기록) 6건, 사용자 제안 3건(2026-11-01 모두 채택, 적용 완료).
 
 ## 1. 화면별 모션 목록
 
@@ -64,11 +64,11 @@
 | F14 | Sheet 딤 slow(Dialog는 base), Dialog 딤 닫힘 곡선 없음 | Sheet 딤 base, 둘 다 닫힘 `ease-exit` | components/ui/sheet, dialog |
 | F15 | DESIGN.md 5장 "바텀시트 열림은 sheet 스프링", 7장 "Base UI Drawer + sheet 스프링"이 실제(CSS 전환, slow enter / fast exit, 화면별 절은 이미 이 값)와 다름 | 본문을 구현에 맞춰 고침. `sheet` 스프링은 Motion 예비안(`spring-sheet`)에서만 쓴다고 명시. 프런트매터 값 변경 없음 | DESIGN.md |
 | F16 | 지도 로딩 자리만 `animate-pulse`(2s, 진한 막대)라 앱 공통 스켈레톤(3.2s 느린 호흡)과 박자, 색이 다름 | 공통 `Skeleton`으로 교체 | map/components/map-view |
-| F17 | 투표방 실시간 점 ping 2.4s 무한 반복 | 유지(실시간 상태 표시라 의미 있음, `motion-safe`). 제안 P3 | poll/room/parts |
-| F18 | 홈 다시 뽑기 완료까지 약 0.9초(퇴장 180 + 대안 블록 5, 6번째 지연 350~420 + 300) | 유지(D-04 확정). 제안 P2 | rec/today-screen, today.css |
+| F17 | 투표방 실시간 점 ping 2.4s 무한 반복 | P3 결정으로 3.2초 opacity 호흡으로 바꿈 | poll/room/parts |
+| F18 | 홈 다시 뽑기 완료까지 약 0.9초(퇴장 180 + 대안 블록 5, 6번째 지연 350~420 + 300) | P2 결정으로 대안 순번 3, 4, 약 0.76초 | rec/today-screen, today.css |
 | F19 | 그냥 골라줘 R1 2초 연출 | 유지(D-05 확정, 결과는 누르는 순간 정해지고 다시 누르면 건너뜀) | rec/just-pick |
 | F20 | 랜딩 손짓 2.4초 뒤 1회 | 유지(D-06, 첫 화면에서 움직이는 것 하나, LCP 영향 없음) | landing/landing.css |
-| F21 | 목록 줄(지도 목록, 로그아웃 줄, 상세 접힘 행 머리, 투표 만들기 후보 줄, 시트 안 선택 줄)에 눌림 표시 없음 | 미조치: 줄 전체 면을 칠하면 여백 없는 줄에서 잘려 보여 새 규칙이 필요. 제안 P1 | map/parts, me/sign-out-row, place/detail/parts, poll/create/parts, create-drawer |
+| F21 | 목록 줄(지도 목록, 로그아웃 줄, 상세 접힘 행 머리, 투표 만들기 후보 줄, 시트 안 선택 줄)에 눌림 표시 없음 | P1 결정으로 공통 `rowPress`(줄 안 글자와 그림 opacity 0.6) 적용 | map/parts, me/sign-out-row, place/detail/parts, poll/create/parts, create-drawer |
 | F22 | 색 전환 일부에 `motion-reduce:transition-none` 없음 | 유지: 위치 이동이 아닌 색 변화이고, 앱 설정 줄이기는 globals.css 안전망이 0.01ms로 끈다 | 여러 곳 |
 | F23 | 화면(탭) 전환 방식 | 일관: 모든 탭 이동은 즉시 교체, 뷰 전환이나 페이지 등장 애니메이션 없음(10초 원칙). 탭 막대만 base/fast | app-shell/tab-bar |
 | F24 | 저장 중 표시(버튼 위 2px 선 pulse) 4곳 | 유지: 진행 표시, 모두 `motion-safe` | me/save-bar, me/office-new-screen, onboarding(2) |
@@ -85,12 +85,13 @@
 | 홈 큰 카드 | 카드 전체는 반응하지 않고 안의 버튼만(DESIGN 5장) |
 | 홈 대안 카드 | scale 0.98 + 테두리 `input` |
 | 하단 탭 | 글자와 아이콘 `foreground` |
+| 목록 줄(줄 전체가 버튼, 링크) | 줄 안 글자와 그림만 opacity 0.6(`rowPress`, P1) |
 
-## 4. 사용자 제안(미조치)
+## 4. 사용자 제안과 결정 (2026-11-01, 세 건 모두 추천안 선택)
 
-- **P1 목록 줄 눌림 규칙**: 줄 전체 버튼(지도 목록, 설정과 로그아웃 줄, 상세 접힘 행 머리, 투표 만들기 후보 줄)에 누르는 순간 표시가 없습니다. 후보는 (a) 줄 안쪽 글자와 그림만 `opacity` 0.6으로 흐리기(면 없음, 여백 없는 줄에도 맞음), (b) 좌우로 거터만큼 넓힌 `muted/50` 면(투표 탭 목록 방식). 고요함을 지키는 쪽은 (a)입니다.
-- **P2 홈 다시 뽑기 길이**: 지금은 끝날 때까지 약 0.9초입니다. 대안 블록의 순서 번호를 5, 6에서 3, 4로 당기면 약 0.76초, 대안 두 장을 큰 카드 숫자 줄(3)과 함께 띄우면 약 0.69초가 됩니다. D-04 확정 사항이라 바꾸지 않았습니다.
-- **P3 실시간 점**: ping(2배 확대 후 사라짐)을 무한 반복하는 대신 `opacity`만 느리게 숨 쉬게(스켈레톤과 같은 3.2초) 바꾸면 투표방에서 움직임이 더 조용해집니다.
+- **P1 목록 줄 눌림 규칙 → (a) 채택, 적용함**: 줄 전체가 버튼이나 링크인 목록은 면을 칠하지 않고 줄 안 글자와 그림(직계 자식)만 opacity 0.6으로 흐립니다(fast standard, 축소 모드면 전환 없이 바로). 공통 클래스 `rowPress`(`src/components/ui/row-press.ts`, 홈 첫 로드에 들어가지 않게 interaction.ts와 분리). 적용: 지도 목록 줄과 시트 아래 안내 줄(map/parts, map-sheet), 설정 링크 줄과 로그아웃 줄(me/parts, me/sign-out-row), 상세 접힘 행 머리(place/detail/parts), 투표 만들기 후보 줄과 시트 안 선택 줄(poll/create/parts, create-drawer), 투표 탭 목록 줄(poll-tab), 투표방 후보 제안 줄(suggest-panel), 상세 후기 줄(detail-reviews). 투표 탭, 제안, 후기 줄의 데스크톱 hover 면은 그대로 두고 눌림 면(`active:bg-*`)만 `rowPress`로 바꿨습니다. 안쪽 여백이 있는 메뉴 항목(위치 메뉴, 더 보기 메뉴, 온보딩 검색 결과)은 메뉴 문법이라 면 강조를 유지합니다.
+- **P2 홈 다시 뽑기 길이 → 채택, 적용함**: 대안 블록 순번 5, 6 → 3, 4(숫자 줄과 함께). 끝날 때까지 약 0.9초 → 약 0.76초. design-decisions D-04 아래 기록, DESIGN.md 5장 "오늘(홈) 화면" 모션 갱신. 파일 rec/today-screen(`--reveal: 3 + i`), today-cards와 today.css 주석.
+- **P3 실시간 점 → 채택, 적용함**: ping(2배 확대 무한 반복)을 둘레 원의 opacity 호흡(스켈레톤과 같은 `animate-skeleton-breathe` 3.2초, 크기 변화 없음)으로 바꿨습니다. 축소 모드면 둘레를 숨기고 점만 남습니다. 파일 poll/room/parts `LiveDot`.
 
 ## 5. 검증
 
