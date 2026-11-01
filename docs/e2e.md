@@ -8,7 +8,7 @@ Playwright 설정은 `playwright.config.ts`. 모두 dev 서버(`pnpm dev`)로 �
 | `pnpm test:e2e:a11y` | axe 검사만, 디자인 랩을 켜고 (T2.17) | mobile, desktop |
 | `pnpm test:e2e:recommend` | 추천 → 길찾기(T5.40). 비로그인 2건은 늘 돌고, 로그인 사용자(방문 후보 저장)는 `.env.local`의 Supabase 값이 있을 때만. 카카오는 `e2e/helpers/kakao-places-fake.ts` 가짜 | mobile, desktop |
 | `RUN_PERF=1 ... e2e/perf-today.spec.ts` | 홈 성능 AC-REC-4(T5.41). 프로덕션 빌드(`pnpm build && pnpm start -p 3200`)에 `PLAYWRIGHT_BASE_URL`로 붙인다. 결과는 `docs/design/g5-qa.md` | mobile, desktop |
-| `pnpm test:e2e:visual` | 컴포넌트 갤러리 섹션별 스냅샷 (T2.16) | visual-mobile, visual-desktop |
+| `pnpm test:e2e:visual` | 컴포넌트 갤러리 섹션별 스냅샷(T2.16)과 8단계 화면 전체 페이지 스냅샷(T8.20) | visual-mobile, visual-desktop |
 
 ## 이미 떠 있는 dev 서버 쓰기
 
@@ -25,6 +25,8 @@ PLAYWRIGHT_BASE_URL=http://localhost:3100 pnpm test:e2e:visual
 - 기준 이미지: `e2e/__screenshots__/gallery.spec.ts/<프로젝트>/<테마>-<섹션>-darwin.png`. 약 2MB.
 - 허용 오차: 픽셀 비율 0.2%, 색 차 임계 0.15. 레이아웃과 색 변화는 잡고 안티앨리어싱만 넘긴다.
 - Next dev 인디케이터는 `e2e/visual/screenshot.css`로 스냅샷에서만 숨긴다.
+- 8단계 화면(T8.20, `e2e/visual/pages.spec.ts`): 관리자 `/design-lab/admin/c?state=ready`(뷰포트만), 앱 아이콘 `/design-lab/app-icon/a`, `/offline`, `/terms`, `/privacy`, `/location` 6개 x 라이트, 다크 x 390px, 1280px = 24장. 시계 고정(2026-11-02 12:00 KST), `Math.random` 시드 고정. 약관 3종의 문의 이메일 줄은 `NEXT_PUBLIC_CONTACT_EMAIL`이 없는 상태가 기준이라 값을 넣으면 기준을 갱신한다. 문의하기(`/me/contact`)는 로그인 필요라 제외.
+- 2026-11-02 T8.20: 갤러리 48장은 8단계 변경 후에도 차이 0(갱신 없음), 8단계 화면 24장 새로 추가, 연속 2회 28건 모두 통과(흔들림 없음).
 
 의도한 변경으로 화면이 바뀌었으면 기준을 갱신하고, 바뀐 PNG를 눈으로 확인한 뒤 같은 커밋에 넣는다.
 
