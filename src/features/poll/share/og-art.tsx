@@ -3,6 +3,7 @@
 // 식당 이름과 카테고리는 받지 않는다(T0.16-4). 이미지는 늘 라이트 팔레트이고 올리브는 한 군데만 쓴다(DESIGN.md 5장 "공유 이미지").
 import type { CSSProperties, ReactNode } from "react";
 import { shareCopy } from "@/copy/share";
+import { appIconSvg, monoInk, svgDataUrl } from "@/features/pwa/icon-art";
 import { sharePalette as P } from "@/lib/design/share-palette.generated";
 import type { OgImageKind, PollOg } from "./og-data";
 
@@ -46,11 +47,20 @@ function Frame({ children }: { children: ReactNode }) {
   );
 }
 
+/** 왼쪽 위 기호(T8.2, D-18 안건 6): 앱 아이콘 그릇의 tiny 단계를 글자색 한 가지로. 올리브는 이미지마다 한 군데라 색을 쓰지 않는다 */
+const BRAND_MARK = svgDataUrl(
+  appIconSvg({ ink: monoInk(P.foreground), level: "tiny", size: 24 }),
+);
+
 function Top({ label }: { label: string }) {
   return (
     <div style={row({ justifyContent: "space-between", alignItems: "center" })}>
-      <div style={{ ...sans(28, P.foreground), letterSpacing: "-0.01em" }}>
-        {shareCopy.brand}
+      <div style={row({ alignItems: "center", gap: 10 })}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Satori(next/og)는 img만 그린다 */}
+        <img src={BRAND_MARK} width={24} height={24} alt="" />
+        <div style={{ ...sans(28, P.foreground), letterSpacing: "-0.01em" }}>
+          {shareCopy.brand}
+        </div>
       </div>
       <div style={sans(28)}>{label}</div>
     </div>

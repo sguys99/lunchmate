@@ -11,6 +11,7 @@ import { Suspense, type ReactNode } from "react";
 import { AppShell, BottomTabBar, TabBarView } from "@/components/app-shell";
 import { LazyToaster } from "@/components/ui/lazy-toaster";
 import { LoginGateProvider } from "@/features/auth/login-prompt/gate";
+import { InstallPromptLoader } from "@/features/pwa/install-prompt-loader";
 import { AnalyticsPageviews } from "@/lib/analytics/provider";
 import { isEnabled } from "@/lib/flags";
 import { QueryProvider } from "@/lib/query";
@@ -50,6 +51,8 @@ export default function AppLayout({
           </AppShell>
           {/* 첫 toast() 호출 때 sonner를 받는다(T2.22). 화면 코드는 @/components/ui/lazy-toaster의 toast를 쓴다 */}
           <LazyToaster />
+          {/* 3번째 방문부터 1회 설치 유도(T8.2, APP-01). 조건이 맞을 때만 청크를 받아 토스트로 묻는다 */}
+          <InstallPromptLoader />
           <Suspense fallback={null}>
             <AnalyticsPageviews />
           </Suspense>

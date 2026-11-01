@@ -570,7 +570,7 @@
 | # | 안건 | 결정 |
 | --- | --- | --- |
 | 1 | 시안 | **A 그릇 한 점** |
-| 2 | 바탕색 | **샌드 바탕, 올리브 그릇** (앱 안 일러스트와 같은 모습) |
+| 2 | 바탕색 | **샌드 바탕, 올리브 그릇** (앱 안 일러스트와 같은 모습). T8.2 실제 크기 확인 뒤 사용자가 **두 단계 낮춘 샌드(토큰 track)**를 고름(경계 확인 캡처 `t8-2-icon-sand-lightness-alternatives.png`) |
 | 3 | maskable | 같은 그림, 매니페스트 항목 두 개(any 192, 512 + maskable 192, 512) |
 | 4 | iOS 시작 이미지 | 생성 스크립트 `scripts/build-pwa-assets.mjs`(Playwright), 결과 `public/pwa/`, 라이트/다크 `media` |
 | 5 | 파비콘 | `src/app/icon.svg` + `favicon.ico`(32) + `apple-icon.png`(180), 16px은 tiny 단계(김 줄 생략) |

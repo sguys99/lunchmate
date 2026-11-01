@@ -111,3 +111,34 @@ export function sharePaletteFile(
     "",
   ].join("\n");
 }
+
+/** 생성 경로 (저장소 루트 기준). 매니페스트(src/app/manifest.ts)와 PWA 산출물 스크립트가 읽는다(T8.2, D-18 안건 7, 9). */
+export const PWA_COLORS_OUT = "src/lib/design/pwa-colors.generated.ts";
+
+/**
+ * 확정본 배경색 → 매니페스트와 시작 이미지용 6자리 16진 sRGB.
+ * 매니페스트 background_color, theme_color는 CSS 색 문자열이지만 oklch를 읽지 못하는 파서가 있어 16진으로 넘긴다.
+ * 값이 하나뿐인 매니페스트는 라이트 샌드(light), iOS 다크 시작 이미지는 다크 차콜(dark)을 쓴다.
+ */
+export function pwaColorsFile(
+  tokens: DesignFrontmatter,
+  toHex: (oklch: string) => string,
+): string {
+  const header = [
+    "/*",
+    " * 생성물, 직접 수정 금지. 원본: DESIGN.md (루트) 프런트매터 color.{light,dark}.shadcn.background",
+    " * 다시 만들기: pnpm tokens (scripts/build-tokens.ts, 변환: src/lib/design/to-ts.ts)",
+    ` * ${metaLine(tokens)}`,
+    " */",
+  ].join("\n");
+  const value = {
+    light: toHex(tokens.color.light.shadcn.background),
+    dark: toHex(tokens.color.dark.shadcn.background),
+  };
+  return [
+    header,
+    "",
+    `export const pwaColors = ${JSON.stringify(value)} as const;`,
+    "",
+  ].join("\n");
+}

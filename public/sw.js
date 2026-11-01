@@ -6,7 +6,8 @@
  *   1) /_next/static/  빌드 산출물(JS, CSS, 빌드에 들어간 일러스트와 이미지). 파일 이름에 해시가 있어 내용이 바뀌지 않는다.
  *   2) /fonts/          웹 글꼴 목록과 조각(버전 경로, next.config headers의 immutable)
  *   3) /offline         오프라인 폴백 HTML(로그인 정보, 장소 데이터가 없는 정적 화면). 설치 때 미리 받는다.
- *   4) /favicon.ico
+ *   4) /favicon.ico, /icon.svg, /apple-icon.png, /manifest.webmanifest, /pwa/icon-*.png (홈 화면 앱 아이콘과 매니페스트, T8.2)
+ *      iOS 시작 이미지(/pwa/startup-*)는 홈 화면에 추가할 때 iOS가 따로 받으므로 넣지 않는다.
  * - 캐시하지 않는 것(명시적 제외, 허용 목록보다 먼저 검사):
  *   - 다른 출처 전부. 특히 카카오(dapi.kakao.com, *.kakao.com, *.kakaocdn.net, *.daumcdn.net, *.daum.net),
  *     네이버 지도(*.naver.com, *.naver.net, *.pstatic.net), Supabase(*.supabase.co), PostHog, Sentry.
@@ -59,7 +60,19 @@ const NEVER_CACHE_PATH_PREFIXES = [
 
 /** 캐시해도 되는 같은 출처 경로(앱 셸) */
 const SHELL_PATH_PREFIXES = ["/_next/static/", "/fonts/"];
-const SHELL_EXACT_PATHS = [OFFLINE_URL, "/favicon.ico"];
+// 아이콘 경로는 src/features/pwa/assets.ts와 같아야 한다(sw-policy.test.ts가 대조한다)
+const SHELL_EXACT_PATHS = [
+  OFFLINE_URL,
+  "/favicon.ico",
+  "/icon.svg",
+  "/apple-icon.png",
+  "/manifest.webmanifest",
+  "/pwa/icon-192.png",
+  "/pwa/icon-512.png",
+  "/pwa/icon-maskable-192.png",
+  "/pwa/icon-maskable-512.png",
+  "/pwa/icon-monochrome-512.png",
+];
 
 function hostMatches(hostname, domain) {
   return hostname === domain || hostname.endsWith("." + domain);

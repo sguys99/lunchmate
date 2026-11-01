@@ -11,7 +11,7 @@ import { getKstParts } from "@/lib/time";
 import { shareCopy } from "@/copy/share";
 import { parseInviteCode } from "@/features/poll/invite-code";
 import { isOgDrawable } from "./ks-x-1001";
-import { shortHash } from "./og-url";
+import { OG_ART_VERSION, shortHash } from "./og-url";
 import type { PollKind } from "./types";
 
 export type { OgImageKind } from "./types";
@@ -101,7 +101,16 @@ export function toPollOg(raw: Preview | null, now: Date): PollOg {
   // 진행 중과 동점 대기는 같은 그림(초대)이라 open으로 묶는다
   const state = closed ? "closed" : "open";
   const version = shortHash(
-    [state, kind, raw.title, raw.closes_at, candidateCount, voters, topVotes]
+    [
+      OG_ART_VERSION,
+      state,
+      kind,
+      raw.title,
+      raw.closes_at,
+      candidateCount,
+      voters,
+      topVotes,
+    ]
       .map(String)
       .join("|"),
   );

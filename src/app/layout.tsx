@@ -4,6 +4,8 @@ import "./globals.css";
 // public/fonts/v1/faces.css이고 WEB_FONTS_INIT_SCRIPT가 붙인다(첫 방문은 화면이 뜬 뒤, 재방문은 첫 페인트 전, docs/design/g5-qa.md 2.6절)
 import "./fonts/fonts.css";
 import { siteCopy } from "@/copy/common";
+import { startupImageLinks } from "@/features/pwa/assets";
+import { installInitScript } from "@/features/pwa/install-script";
 import { themeColor } from "@/lib/design/theme-color.generated";
 import { siteUrl } from "@/lib/env/site";
 import { WEB_FONTS_INIT_SCRIPT } from "@/lib/fonts/web-fonts";
@@ -17,6 +19,14 @@ export const metadata: Metadata = {
   title: { default: siteCopy.name, template: siteCopy.titleTemplate },
   description: siteCopy.description,
   applicationName: siteCopy.name,
+  // 홈 화면 앱(T8.2, APP-01, D-18). 매니페스트는 src/app/manifest.ts, 아이콘은 파일 규칙(icon.svg, favicon.ico, apple-icon.png).
+  // iOS 시작 이미지는 기기 크기마다 라이트/다크 한 장씩(features/pwa/assets.ts, `pnpm pwa:assets`). 상태 막대는 기본(밝은 바탕 검은 글자).
+  appleWebApp: {
+    capable: true,
+    title: siteCopy.name,
+    statusBarStyle: "default",
+    startupImage: startupImageLinks(),
+  },
 };
 
 // 주소 표시줄 색을 화면 바탕(DESIGN.md background)과 잇는다. 값은 pnpm tokens 생성물(T4.28).
@@ -40,6 +50,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: WEB_FONTS_INIT_SCRIPT }} />
         {/* 서비스 워커 등록(프로덕션, load 뒤 유휴 시간) 또는 해제(개발). 앱 셸만 캐시한다(T8.4, public/sw.js). 고정 문자열 */}
         <script dangerouslySetInnerHTML={{ __html: swRegisterScript() }} />
+        {/* 설치 유도(T8.2, APP-01): 방문 세기와 beforeinstallprompt 보관. 유도 UI는 앱 셸이 조건이 맞을 때만 지연 로드. 고정 문자열 */}
+        <script dangerouslySetInnerHTML={{ __html: installInitScript() }} />
       </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

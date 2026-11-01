@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import vm from "node:vm";
 import { describe, expect, it, vi } from "vitest";
+import { APP_FILE_ICONS, PWA_ICONS } from "@/features/pwa/assets";
 
 const ORIGIN = "https://lunchmate.example";
 const SOURCE = readFileSync(join(process.cwd(), "public", "sw.js"), "utf8");
@@ -117,6 +118,24 @@ describe("카카오, 외부 출처는 캐시하지 않는다", () => {
 });
 
 describe("같은 출처: 앱 셸만 캐시한다", () => {
+  it("홈 화면 앱 아이콘과 매니페스트는 캐시한다(assets.ts와 sw.js 목록 대조, T8.2)", () => {
+    const paths = [
+      ...Object.values(PWA_ICONS),
+      ...Object.values(APP_FILE_ICONS),
+      "/manifest.webmanifest",
+    ];
+    for (const p of paths) {
+      expect(kind({ url: `${ORIGIN}${p}` }), p).toBe("shell");
+    }
+    expect(kind({ url: `${ORIGIN}/icon.svg?f0a1b2c3` })).toBe("shell");
+  });
+
+  it("iOS 시작 이미지는 캐시하지 않는다(홈 화면에 추가할 때 iOS가 받는다)", () => {
+    expect(kind({ url: `${ORIGIN}/pwa/startup-1170x2532-light.png` })).toBe(
+      "passthrough",
+    );
+  });
+
   it.each([
     "/_next/static/chunks/abc123.js",
     "/_next/static/css/app.css",

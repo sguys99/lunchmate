@@ -1,6 +1,6 @@
-// 앱 아이콘과 스플래시 시안 화면 (T8.1, /design-lab/app-icon/<a|b|c|d>).
+// 앱 아이콘과 스플래시 확인 화면 (T8.1 시안, D-18 선택 후 A만 남김, /design-lab/app-icon/a).
 //
-//   ?tone=sand|olive                          바탕 바꿔 보기 (기본은 시안마다 다름, art.tsx DEFAULT_TONE)
+//   ?tone=sand|olive                          바탕 바꿔 보기 (기본 샌드, 올리브는 게이트에서 비교한 변형)
 //   ?state=ready|loading|empty|error|offline  4상태를 아이콘 화면 뜻으로 옮김
 //        loading  스플래시를 멈춘 채로 맨 위에 / empty  해당 없음(기본과 같음, 안내 한 줄)
 //        error    maskable을 빼먹었을 때 안드로이드가 줄여 넣는 모습 / offline  오프라인 첫 화면(T8.3)의 아이콘 자리

@@ -31,6 +31,7 @@
     "test:e2e:visual": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=visual-mobile --project=visual-desktop",
     "test:e2e:a11y": "NEXT_PUBLIC_DESIGN_LAB=true playwright test --project=mobile --project=desktop e2e/a11y.spec.ts",
     "shots": "node scripts/shots.mjs",
+    "pwa:assets": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-pwa-assets.mjs",
     "postbuild": "node scripts/check-client-secrets.mjs && node scripts/bundle-report.mjs",
     "check:secrets": "node scripts/check-client-secrets.mjs",
     "lint:copy": "node scripts/check-copy.ts",

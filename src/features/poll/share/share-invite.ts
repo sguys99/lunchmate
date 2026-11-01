@@ -9,7 +9,7 @@ import { shareCopy } from "@/copy/share";
 import { pollRoomHref } from "@/features/poll/routes";
 import { track } from "@/lib/analytics";
 import { absoluteUrl } from "@/lib/env/site";
-import { pollOgImagePath, shortHash } from "./og-url";
+import { OG_ART_VERSION, pollOgImagePath, shortHash } from "./og-url";
 import type { ShareInviteInput, ShareOutcome } from "./types";
 
 const t = shareCopy.invite;
@@ -96,6 +96,7 @@ export async function shareInvite(
               "invite",
               shortHash(
                 [
+                  OG_ART_VERSION,
                   input.kind,
                   input.title,
                   input.closesAt,
