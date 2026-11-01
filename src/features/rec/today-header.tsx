@@ -8,7 +8,7 @@
 import { Check, ChevronDown, Info, LocateFixed, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { focusRing, hitArea44 } from "@/components/ui/interaction";
+import { focusRing, hitArea44, pressMotion } from "@/components/ui/interaction";
 import { homeCopy } from "@/copy/home";
 import { getKstParts, type Meal } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -58,7 +58,7 @@ export function MealToggle({
               "inline-flex h-11 min-w-11 items-center justify-center rounded-sm px-2 type-label underline-offset-[0.4rem] transition-colors duration-(--lm-duration-fast) ease-standard",
               on
                 ? "text-foreground underline decoration-foreground decoration-1"
-                : "text-muted-foreground hover:text-foreground",
+                : "text-muted-foreground hover:text-foreground active:text-foreground",
               focusRing,
             )}
           >
@@ -146,7 +146,7 @@ export function LocationChip({
 
   const isHere = base.kind === "here";
   const itemClass = cn(
-    "flex min-h-11 w-full items-center gap-2.5 rounded-md px-3 text-left type-label transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted",
+    "flex min-h-11 w-full items-center gap-2.5 rounded-md px-3 text-left type-label transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted active:bg-muted",
     focusRing,
   );
 
@@ -161,9 +161,10 @@ export function LocationChip({
         aria-busy={locating || undefined}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex h-10 max-w-full items-center gap-1.5 rounded-chip border border-border px-3 type-label whitespace-nowrap text-foreground transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted",
+          "inline-flex h-10 max-w-full items-center gap-1.5 rounded-chip border border-border px-3 type-label whitespace-nowrap text-foreground hover:bg-muted active:bg-muted",
           hitArea44,
           focusRing,
+          pressMotion,
         )}
       >
         {isHere ? (
@@ -196,7 +197,7 @@ export function LocationChip({
           id={listId}
           aria-label={copy.location.menuLabel}
           onKeyDown={onKeyDown}
-          className="absolute top-full left-0 z-20 mt-2 flex w-64 max-w-[calc(100vw-3rem)] flex-col gap-0.5 rounded-lg border border-border bg-popover p-1.5 text-popover-foreground shadow-lg motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-fast)] dark:border-input"
+          className="absolute top-full left-0 z-20 mt-2 flex w-64 max-w-[calc(100vw-3rem)] flex-col gap-0.5 rounded-lg border border-border bg-popover p-1.5 text-popover-foreground shadow-lg ease-enter motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-fast)] dark:border-input"
         >
           {offices.map((o) => {
             const current = base.kind === "office" && base.office.id === o.id;

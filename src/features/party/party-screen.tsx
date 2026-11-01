@@ -268,7 +268,7 @@ function Questions({
               aria-label={copy.questions.prev}
               onClick={() => setStep(1)}
               className={cn(
-                "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted",
+                "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted active:bg-muted",
                 focusRing,
               )}
             >
@@ -279,7 +279,7 @@ function Questions({
               href={pollTabHref}
               aria-label={copy.head.back}
               className={cn(
-                "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted",
+                "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted active:bg-muted",
                 focusRing,
               )}
             >
@@ -546,6 +546,10 @@ function Results({
 
   const picks = result?.picks ?? [];
   const picked = picks.filter((p) => !excluded.has(p.id));
+  /** 5곳 미만의 까닭이 주류 조건이면 제안과 버튼을 주류로 맞춘다 */
+  const fewByAlcohol = Boolean(
+    cond.alcohol && result && result.filtered.alcohol > 0,
+  );
   const loading =
     online && (kakao.isPending || (kakao.isSuccess && !statsSettled));
   const title =
@@ -631,12 +635,11 @@ function Results({
         {picks.length < 5 ? (
           <FewNote
             count={picks.length}
-            body={
-              cond.alcohol && result.filtered.alcohol > 0
-                ? copy.few.alcoholBody
-                : copy.few.body
+            body={fewByAlcohol ? copy.few.alcoholBody : copy.few.body}
+            actionLabel={
+              fewByAlcohol ? copy.few.alcoholAction : copy.few.action
             }
-            onAction={() => openEdit("budget")}
+            onAction={() => openEdit(fewByAlcohol ? "alcohol" : "budget")}
           />
         ) : null}
         <EvidenceLegend className="mt-6" />
@@ -803,7 +806,7 @@ function Sentence({
                   ? "text-primary decoration-primary decoration-solid decoration-[1.5px]"
                   : t.off
                     ? "text-muted-foreground decoration-muted-foreground"
-                    : "decoration-muted-foreground hover:decoration-foreground",
+                    : "decoration-muted-foreground hover:decoration-foreground active:decoration-foreground",
                 focusRing,
               )}
             >
@@ -984,7 +987,7 @@ function BaseLine({
             setOpen((v) => !v);
           }}
           className={cn(
-            "relative rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground",
+            "relative rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:decoration-foreground",
             "before:absolute before:-inset-x-2 before:-inset-y-3",
             focusRing,
           )}
@@ -1014,7 +1017,7 @@ function BaseLine({
           <Link
             href="/me/offices"
             className={cn(
-              "inline-flex min-h-11 items-center rounded-sm px-1 type-caption text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3",
+              "inline-flex min-h-11 items-center rounded-sm px-1 type-caption text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:decoration-foreground",
               focusRing,
             )}
           >
@@ -1027,7 +1030,7 @@ function BaseLine({
               setPicking(true);
             }}
             className={cn(
-              "inline-flex min-h-11 items-center rounded-sm px-1 type-caption text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3",
+              "inline-flex min-h-11 items-center rounded-sm px-1 type-caption text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:decoration-foreground",
               focusRing,
             )}
           >

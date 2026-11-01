@@ -277,7 +277,7 @@ function PlacePicker({
                   onClick={() => {
                     if (busy === null) onPick(p.id, p.placeUrl);
                   }}
-                  className="flex min-h-14 w-full items-center gap-3 rounded-lg py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  className="flex min-h-14 w-full items-center gap-3 rounded-lg py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:bg-muted"
                 >
                   <CategoryIllustration
                     slug={slug}

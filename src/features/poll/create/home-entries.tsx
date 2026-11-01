@@ -15,7 +15,7 @@ import PollCreateHost from "./host";
 const copy = homeCopy.today.actions;
 
 const link = cn(
-  "inline-flex min-h-11 items-center rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
+  "inline-flex min-h-11 items-center rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground active:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
   focusRing,
 );
 

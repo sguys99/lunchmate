@@ -103,7 +103,7 @@ export function OfficeNewScreen({
               href={backHref}
               aria-label={copy.close}
               className={cn(
-                "-mr-3 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground",
+                "-mr-3 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground active:text-foreground",
                 focusRing,
               )}
             >

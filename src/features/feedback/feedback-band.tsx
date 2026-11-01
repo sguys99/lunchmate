@@ -184,9 +184,7 @@ export default function FeedbackBand({
       }
       reviewId = r.reviewId;
     }
-    setLocal((l) =>
-      l && l.visit.id === target.id ? { ...l, reviewId } : l,
-    );
+    setLocal((l) => (l && l.visit.id === target.id ? { ...l, reviewId } : l));
     track({
       name: "feedback_submitted",
       properties: feedbackSubmittedProps(answer, null),
@@ -315,7 +313,9 @@ export default function FeedbackBand({
   } else if (view.kind === "collapsed") {
     body = (
       <div className="flex min-h-11 items-center gap-3 py-1">
-        {place ? <CategoryIllustration slug={place.category} size={24} /> : null}
+        {place ? (
+          <CategoryIllustration slug={place.category} size={24} />
+        ) : null}
         <p className="min-w-0 flex-1 truncate type-body-sm text-muted-foreground">
           {place ? copy.folded(place.name) : copy.foldedUnnamed}
         </p>
@@ -382,7 +382,7 @@ function BandSkeleton() {
 }
 
 const textButton = cn(
-  "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
+  "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
   hitArea44,
   focusRing,
 );
@@ -465,7 +465,7 @@ function Thumb({
       aria-label={feedbackCopy.ratings[kind]}
       onClick={() => onAnswer(kind)}
       className={cn(
-        "inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted",
+        "inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted active:bg-muted",
         pressMotion,
         focusRing,
       )}
@@ -490,7 +490,7 @@ const StatusLine = forwardRef<
     <div
       ref={ref}
       tabIndex={-1}
-      className="flex min-h-11 items-center gap-3 py-1 outline-none motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
+      className="flex min-h-11 items-center gap-3 py-1 ease-enter outline-none motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
     >
       <p
         role={tone === "error" ? "alert" : "status"}

@@ -151,10 +151,10 @@ function Tabs({
             onClick={() => choose(t)}
             onKeyDown={onKey}
             className={cn(
-              "h-12 type-label transition-colors duration-(--lm-duration-fast) motion-reduce:transition-none",
+              "h-12 type-label transition-colors duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
               t === tab
                 ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground",
+                : "text-muted-foreground hover:text-foreground active:text-foreground",
               focusRing,
             )}
           >
@@ -172,7 +172,7 @@ function Tabs({
         role="tabpanel"
         id={`${baseId}-panel`}
         aria-labelledby={`${baseId}-tab-${tab}`}
-        className="flex flex-1 animate-in flex-col pt-6 duration-(--lm-duration-base) fade-in motion-reduce:animate-none"
+        className="flex flex-1 animate-in flex-col pt-6 duration-(--lm-duration-base) ease-enter fade-in motion-reduce:animate-none"
       >
         {render(tab)}
       </div>

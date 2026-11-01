@@ -70,7 +70,7 @@ export default function PlaceDetailDrawer({
               <DrawerClose
                 aria-label={copy.detail.close}
                 className={cn(
-                  "inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+                  "inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
                   focusRing,
                 )}
               >

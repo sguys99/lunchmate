@@ -78,7 +78,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
       className={cn(
         "inline-flex min-h-11 items-center justify-center gap-1.5 type-label whitespace-nowrap select-none",
         "transition-colors duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
-        "hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 data-active:text-foreground",
+        "hover:text-foreground active:text-foreground disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 data-active:text-foreground",
         "group-data-[variant=line]/tabs-list:px-0.5",
         "group-data-[variant=segment]/tabs-list:min-h-10 group-data-[variant=segment]/tabs-list:rounded-button group-data-[variant=segment]/tabs-list:px-4",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",

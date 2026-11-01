@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { focusRing } from "@/components/ui/interaction";
+import { focusRing, pressMotion } from "@/components/ui/interaction";
 import {
   adminCopy as copy,
   type AdminReportReason,
@@ -186,7 +186,7 @@ export function PlaceLine({
           rel="noreferrer"
           aria-label={copy.place.kakaoMapLabel(placeId)}
           className={cn(
-            "inline-flex min-h-11 items-center gap-1 rounded-sm type-caption text-muted-foreground underline decoration-1 underline-offset-3 hover:text-foreground",
+            "inline-flex min-h-11 items-center gap-1 rounded-sm type-caption text-muted-foreground underline decoration-1 underline-offset-3 hover:text-foreground active:text-foreground",
             focusRing,
           )}
         >
@@ -269,7 +269,7 @@ export function ReviewBody({
   return (
     <p
       className={cn(
-        "break-keep text-foreground [overflow-wrap:anywhere]",
+        "[overflow-wrap:anywhere] break-keep text-foreground",
         size === "large" ? "type-heading" : "type-body",
         clamp && "line-clamp-1",
       )}
@@ -419,7 +419,7 @@ export function HideReasonFieldset({
         return (
           <label
             key={r}
-            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-input px-2 hover:bg-muted"
+            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-input px-2 hover:bg-muted active:bg-muted"
           >
             <input
               ref={value === r ? firstRef : undefined}
@@ -467,10 +467,11 @@ function RadioPills<T extends string>({
           <label
             key={k}
             className={cn(
-              "relative inline-flex h-10 cursor-pointer items-center rounded-chip border px-4 type-label transition-colors duration-(--lm-duration-fast) ease-standard has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring has-focus-visible:outline-solid motion-reduce:transition-none",
+              "relative inline-flex h-10 cursor-pointer items-center rounded-chip border px-4 type-label has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring has-focus-visible:outline-solid",
+              pressMotion,
               value === k
                 ? "border-primary text-primary ring-[0.5px] ring-primary ring-inset"
-                : "border-border text-foreground hover:bg-muted",
+                : "border-border text-foreground hover:bg-muted active:bg-muted",
             )}
           >
             <input
@@ -620,13 +621,13 @@ export function ConfirmDialog({
 
 export function logTarget(e: LogEntry): string {
   if (e.targetType === "user")
-    return e.targetUserId
-      ? nicknameOf(e.targetNickname)
-      : copy.log.deletedUser;
+    return e.targetUserId ? nicknameOf(e.targetNickname) : copy.log.deletedUser;
   const place = e.targetPlaceId ? copy.place.idLabel(e.targetPlaceId) : "";
   if (e.targetType === "place") return place;
   const kind = copy.target[e.targetType];
-  return e.targetId ? `${kind}, ${place}` : `${copy.log.deletedTarget}, ${place}`;
+  return e.targetId
+    ? `${kind}, ${place}`
+    : `${copy.log.deletedTarget}, ${place}`;
 }
 
 export function logDetail(e: LogEntry): string | null {

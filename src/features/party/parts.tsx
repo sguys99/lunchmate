@@ -6,7 +6,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import { EmptyState, ErrorState, OfflineState } from "@/components/states";
 import { buttonClass as rawButtonClass } from "@/components/ui/button-classes";
-import { focusRing } from "@/components/ui/interaction";
+import { focusRing, pressMotion } from "@/components/ui/interaction";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { partyCopy as copy } from "@/copy/party";
@@ -40,11 +40,11 @@ export const enterClass =
 
 /** stagger 70ms (DESIGN.md 7장) */
 export function staggerStyle(i: number) {
-  return { animationDelay: `${i * 70}ms` };
+  return { animationDelay: `calc(${i} * var(--lm-stagger))` };
 }
 
 export const textLinkClass = cn(
-  "inline-flex min-h-11 items-center rounded-sm type-label text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground",
+  "inline-flex min-h-11 items-center rounded-sm type-label text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:decoration-foreground",
   focusRing,
 );
 
@@ -186,7 +186,7 @@ export function EvidenceList({
                 rel="noreferrer"
                 aria-label={copy.evidence.checkNaverLabel(name)}
                 className={cn(
-                  "relative rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground",
+                  "relative rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:decoration-foreground",
                   "before:absolute before:-inset-x-1 before:-inset-y-3",
                   focusRing,
                 )}
@@ -326,7 +326,8 @@ export function HeadcountStepper({
   labelledBy?: string;
 }) {
   const round = cn(
-    "inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted disabled:opacity-40",
+    "inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted active:bg-muted disabled:opacity-40",
+    pressMotion,
     focusRing,
   );
   return (
@@ -498,10 +499,13 @@ export function PartyOffline() {
 export function FewNote({
   count,
   body,
+  actionLabel = copy.few.action,
   onAction,
 }: {
   count: number;
   body: string;
+  /** 본문 제안과 같은 조건을 여는 버튼 이름(기본 "예산 바꾸기") */
+  actionLabel?: string;
   onAction: () => void;
 }) {
   return (
@@ -518,7 +522,7 @@ export function FewNote({
         onClick={onAction}
         className={cn(buttonClass("secondary", "sm"), "mt-4")}
       >
-        {copy.few.action}
+        {actionLabel}
       </button>
     </section>
   );

@@ -24,7 +24,7 @@ import { buttonClass } from "@/components/ui/button-classes";
 import { DealBadge } from "@/components/badges/place-badges";
 import { Chip } from "@/components/ui/chip";
 import { Skeleton } from "@/components/ui/skeleton";
-import { focusRing, hitArea44 } from "@/components/ui/interaction";
+import { focusRing, hitArea44, pressMotion } from "@/components/ui/interaction";
 import { mapCopy } from "@/copy/map";
 import { categoryLabel, type CategorySlug } from "@/features/place/categories";
 import { CATEGORY_INK } from "@/features/place/category-ink";
@@ -214,9 +214,10 @@ export function ResearchButton({
       onClick={onClick}
       aria-busy={busy || undefined}
       className={cn(
-        "lm-map-rise inline-flex h-10 items-center gap-1.5 rounded-chip border border-border bg-card px-4 type-label text-foreground shadow-sm",
+        "lm-map-rise inline-flex h-10 items-center gap-1.5 rounded-chip border border-border bg-card px-4 type-label text-foreground shadow-sm hover:bg-muted active:bg-muted",
         hitArea44,
         focusRing,
+        pressMotion,
       )}
     >
       <RotateCw aria-hidden className="size-4" strokeWidth={1.75} />
@@ -240,9 +241,10 @@ export function LocateButton({
       aria-label={copy.myLocation}
       aria-busy={busy || undefined}
       className={cn(
-        "inline-flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm",
+        "inline-flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm hover:bg-muted active:bg-muted",
         busy && "text-muted-foreground",
         focusRing,
+        pressMotion,
       )}
     >
       <LocateFixed aria-hidden className="size-5" strokeWidth={1.5} />
@@ -290,7 +292,13 @@ export function BaseChip({
         type="button"
         onClick={onReturn}
         aria-label={copy.backToBase}
-        className={cn(cls, hitArea44, focusRing)}
+        className={cn(
+          cls,
+          "hover:bg-muted active:bg-muted",
+          hitArea44,
+          focusRing,
+          pressMotion,
+        )}
       >
         {inner}
       </button>
@@ -434,7 +442,7 @@ export function HiddenNote({
       aria-label={copy.hidden.linkLabel(count)}
       className={cn(
         cls,
-        "rounded-sm underline decoration-border underline-offset-4 hover:text-foreground",
+        "rounded-sm underline decoration-border underline-offset-4 hover:text-foreground active:text-foreground",
         hitArea44,
         focusRing,
       )}
@@ -625,7 +633,7 @@ export function StateCard({ children }: { children: ReactNode }) {
 }
 
 const secondaryText = cn(
-  "inline-flex min-h-11 items-center gap-1 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground",
+  "inline-flex min-h-11 items-center gap-1 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground active:text-foreground",
   focusRing,
 );
 

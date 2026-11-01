@@ -54,7 +54,7 @@ export function LegalDocumentView({ doc }: { doc: LegalDocument }) {
                   <a
                     href={`mailto:${email}`}
                     className={cn(
-                      "break-all underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground",
+                      "break-all underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground active:decoration-foreground",
                       focusRing,
                     )}
                   >
@@ -71,7 +71,7 @@ export function LegalDocumentView({ doc }: { doc: LegalDocument }) {
               <Link
                 href={s.link.href}
                 className={cn(
-                  "inline-flex min-h-11 items-center self-start type-body-sm underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground",
+                  "inline-flex min-h-11 items-center self-start type-body-sm underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground active:decoration-foreground",
                   focusRing,
                 )}
               >

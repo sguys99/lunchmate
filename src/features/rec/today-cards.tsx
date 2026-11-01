@@ -54,7 +54,7 @@ const HERO_ART =
   "-mt-3 -mr-4 -mb-6 shrink-0 @max-[23.75rem]/screen:-mr-3 @max-[23.75rem]/screen:-mb-3 @max-[23.75rem]/screen:size-28 desktop:size-32 desktop:-mb-5";
 
 const textButton = cn(
-  "inline-flex h-6 shrink-0 items-center rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground",
+  "inline-flex h-6 shrink-0 items-center rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground",
   hitArea44,
   focusRing,
 );
@@ -208,13 +208,14 @@ export function AltTile({
       type="button"
       onClick={onPromote}
       className={cn(
-        "flex min-h-18 w-full min-w-0 flex-col justify-center gap-1 rounded-card border bg-card px-3 py-2.5 text-left transition-[border-color,opacity] ease-standard hover:border-input",
+        // pressMotion을 먼저 두고 전환 속성을 뒤에서 덮는다: 눌림 scale과 R1의 테두리, 흐림(opacity)을 함께 전환한다(T8.7)
+        pressMotion,
+        "flex min-h-18 w-full min-w-0 flex-col justify-center gap-1 rounded-card border bg-card px-3 py-2.5 text-left transition-[border-color,opacity,scale] ease-standard hover:border-input active:border-input",
         spot
           ? "duration-(--lm-duration-fast)"
           : "duration-(--lm-duration-base)",
         spot === "on" ? "border-primary" : "border-border",
         spot === "dim" && "opacity-40",
-        pressMotion,
         focusRing,
       )}
     >

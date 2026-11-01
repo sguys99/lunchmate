@@ -262,7 +262,7 @@ function LoginDivider({ className, id }: { className?: string; id?: string }) {
 // 문장 안 링크라 글자 크기는 그대로 두고 터치 영역만 44px로 넓힌다(T3.5)
 const termsLink = cn(
   hitArea44,
-  "text-foreground underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground",
+  "text-foreground underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground active:decoration-foreground",
   focusRing,
 );
 

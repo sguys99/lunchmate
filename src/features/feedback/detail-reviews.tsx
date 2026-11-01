@@ -34,7 +34,7 @@ import { usePlaceVisits } from "./use-my-records";
 const copy = feedbackCopy.detail;
 
 const textButton = cn(
-  "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
+  "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
   hitArea44,
   focusRing,
 );
@@ -49,7 +49,7 @@ export const ResultLine = forwardRef<
       ref={ref}
       tabIndex={-1}
       role="status"
-      className="flex min-h-11 items-center gap-2 type-body-sm outline-none motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
+      className="flex min-h-11 items-center gap-2 type-body-sm ease-enter outline-none motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
     >
       <Check
         aria-hidden
@@ -144,7 +144,7 @@ export function MyReviewBlock({
                 offline ? undefined : (e) => onEdit(row.key, e.currentTarget)
               }
               className={cn(
-                "flex min-h-14 w-full items-center gap-3 py-3 text-left transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted/50 aria-disabled:pointer-events-none aria-disabled:opacity-60 motion-reduce:transition-none",
+                "flex min-h-14 w-full items-center gap-3 py-3 text-left transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted/50 active:bg-muted/50 aria-disabled:pointer-events-none aria-disabled:opacity-60 motion-reduce:transition-none",
                 focusRing,
               )}
             >
@@ -383,7 +383,7 @@ function ReviewMenu({
       <Menu.Trigger
         aria-label={copy.menuLabel(review.nickname)}
         className={cn(
-          "ml-auto inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground data-popup-open:bg-muted",
+          "ml-auto inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground data-popup-open:bg-muted",
           focusRing,
         )}
       >

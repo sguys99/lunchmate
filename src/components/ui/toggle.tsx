@@ -23,12 +23,12 @@ const toggleVariants = cva(
     variants: {
       variant: {
         chip: cn(
-          "h-10 rounded-chip border border-border px-4 type-label text-foreground hover:bg-muted",
+          "h-10 rounded-chip border border-border px-4 type-label text-foreground hover:bg-muted active:bg-muted",
           "data-pressed:border-primary data-pressed:text-primary data-pressed:ring-[0.5px] data-pressed:ring-primary data-pressed:ring-inset data-pressed:hover:bg-transparent",
           hitArea48,
         ),
         quiet: cn(
-          "size-11 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground data-pressed:text-primary data-pressed:[&_svg]:fill-current [&_svg:not([class*='size-'])]:size-5",
+          "size-11 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground data-pressed:text-primary data-pressed:[&_svg]:fill-current [&_svg:not([class*='size-'])]:size-5",
           hitArea44,
         ),
       },

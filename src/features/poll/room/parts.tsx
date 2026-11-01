@@ -64,7 +64,7 @@ export function StickyActions({
 }
 
 export const iconButton = cn(
-  "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted",
+  "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted active:bg-muted",
   focusRing,
 );
 
@@ -477,7 +477,7 @@ export function VoteBar({
         animate={{ scaleX: ratio }}
         transition={reduced ? INSTANT : motionPresets["spring-bar"].transition}
         className={cn(
-          "block h-full w-full origin-left rounded-full transition-colors duration-(--lm-duration-base)",
+          "block h-full w-full origin-left rounded-full transition-colors duration-(--lm-duration-base) ease-standard",
           leading ? "bg-vote-bar" : "bg-chart-3",
         )}
       />
@@ -527,7 +527,7 @@ export function SelectMark({
         multi ? (
           <Check className="size-3.5 text-primary" strokeWidth={2} />
         ) : (
-          <span className="size-2.5 rounded-full bg-primary motion-safe:transition-transform motion-safe:duration-(--lm-duration-fast) motion-safe:starting:scale-0" />
+          <span className="size-2.5 rounded-full bg-primary ease-standard motion-safe:transition-transform motion-safe:duration-(--lm-duration-fast) motion-safe:starting:scale-0" />
         )
       ) : null}
     </span>

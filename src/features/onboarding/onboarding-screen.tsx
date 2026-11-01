@@ -188,7 +188,7 @@ export function OnboardingScreen({
                 onClick={ob.finishNow}
                 aria-disabled={ob.finishing || !ob.online || undefined}
                 className={cn(
-                  "mx-auto -mt-1 inline-flex h-11 items-center px-2 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50",
+                  "mx-auto -mt-1 inline-flex h-11 items-center px-2 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground active:text-foreground active:decoration-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50",
                   focusRing,
                 )}
               >
@@ -284,7 +284,7 @@ function SheetHeader({ ob }: { ob: Onboarding }) {
             onClick={ob.back}
             aria-label={commonCopy.actions.back}
             className={cn(
-              "-ml-3 flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-foreground",
+              "-ml-3 flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-foreground active:text-foreground",
               focusRing,
             )}
           >
@@ -309,7 +309,7 @@ function SheetHeader({ ob }: { ob: Onboarding }) {
                       "relative inline-flex h-11 items-center type-caption whitespace-nowrap disabled:cursor-default",
                       active
                         ? "text-foreground underline decoration-1 underline-offset-[6px]"
-                        : "text-muted-foreground enabled:hover:text-foreground",
+                        : "text-muted-foreground enabled:hover:text-foreground enabled:active:text-foreground",
                       focusRing,
                     )}
                   >
@@ -327,7 +327,7 @@ function SheetHeader({ ob }: { ob: Onboarding }) {
           onClick={ob.skip}
           aria-disabled={(ob.step === 3 && !ob.online) || undefined}
           className={cn(
-            "-mr-1 inline-flex h-11 shrink-0 items-center px-1 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50",
+            "-mr-1 inline-flex h-11 shrink-0 items-center px-1 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground active:text-foreground active:decoration-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50",
             focusRing,
           )}
         >

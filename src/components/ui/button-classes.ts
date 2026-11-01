@@ -23,7 +23,7 @@ export const buttonVariantClasses = {
     "border-border text-foreground hover:bg-muted active:bg-muted disabled:text-muted-foreground disabled:opacity-60 aria-disabled:opacity-60 aria-expanded:bg-muted",
   ghost:
     "border-transparent text-foreground hover:bg-muted active:bg-muted disabled:text-muted-foreground disabled:opacity-60 aria-disabled:opacity-60 aria-expanded:bg-muted",
-  link: "border-transparent rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:scale-100 disabled:text-muted-foreground disabled:opacity-60",
+  link: "border-transparent rounded-sm text-foreground underline decoration-muted-foreground decoration-1 underline-offset-3 hover:decoration-foreground active:decoration-foreground active:scale-100 disabled:text-muted-foreground disabled:opacity-60",
   destructive:
     "border-destructive/40 text-destructive hover:bg-muted active:bg-muted disabled:opacity-60 aria-disabled:opacity-60",
 } as const;

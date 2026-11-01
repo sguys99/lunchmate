@@ -54,7 +54,7 @@ const SIGN_IN_ACTION = "/auth/sign-in";
 const EXTERNAL_FALLBACK_MS = 1500;
 
 const iconButton = cn(
-  "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted",
+  "inline-flex size-11 items-center justify-center rounded-full text-foreground hover:bg-muted active:bg-muted",
   focusRing,
 );
 

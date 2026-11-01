@@ -14,7 +14,7 @@ const loadMenu = () => import("./card-menu");
 const CardMenu = lazy(loadMenu);
 
 const trigger = cn(
-  "inline-flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-foreground data-popup-open:text-foreground",
+  "inline-flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-foreground active:text-foreground data-popup-open:text-foreground",
   hitArea44,
   focusRing,
 );

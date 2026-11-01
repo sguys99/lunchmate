@@ -48,7 +48,7 @@ export function PollTab() {
         <Link
           href={partyHref}
           className={cn(
-            "inline-flex min-h-11 items-center rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground",
+            "inline-flex min-h-11 items-center rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground active:text-foreground",
             focusRing,
           )}
         >
@@ -202,7 +202,7 @@ function PollRow({ poll, now }: { poll: MyPollRow; now: Date }) {
         onPointerEnter={focusMap}
         onFocus={focusMap}
         className={cn(
-          "flex min-h-18 items-center gap-4 rounded-md py-3 hover:bg-muted/50",
+          "flex min-h-18 items-center gap-4 rounded-md py-3 hover:bg-muted/50 active:bg-muted/50",
           focusRing,
         )}
       >

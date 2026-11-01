@@ -144,7 +144,7 @@ export function CravingForm({
             onClick={() => void commit([])}
             aria-disabled={state.busy || !state.online || undefined}
             className={cn(
-              "mx-auto -mt-1 inline-flex h-11 items-center px-2 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50",
+              "mx-auto -mt-1 inline-flex h-11 items-center px-2 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground active:text-foreground active:decoration-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50",
               focusRing,
             )}
           >

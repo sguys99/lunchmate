@@ -94,7 +94,7 @@ export default function JustPickPanel({
         className={cn(
           "absolute inset-0 bg-overlay transition-opacity duration-(--lm-duration-fast) ease-exit motion-reduce:transition-none",
           !reduced &&
-            "animate-in fade-in-0 [animation-duration:var(--lm-duration-base)]",
+            "animate-in ease-enter fade-in-0 [animation-duration:var(--lm-duration-base)]",
           closing && "opacity-0",
         )}
       />

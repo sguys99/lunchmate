@@ -49,7 +49,11 @@ export function SettingsLinkRow({
       <Link
         href={href}
         prefetch={external ? false : undefined}
-        className={cn(rowClass, "group hover:text-foreground", focusRing)}
+        className={cn(
+          rowClass,
+          "group hover:text-foreground active:text-foreground",
+          focusRing,
+        )}
       >
         <span className="shrink-0 type-body">{label}</span>
         <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">

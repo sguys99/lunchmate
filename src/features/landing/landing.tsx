@@ -14,7 +14,7 @@ import "./landing.css";
 const copy = landingCopy;
 
 const headerLinkClass = cn(
-  "inline-flex h-11 min-w-11 items-center justify-center type-label underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground desktop:hidden",
+  "inline-flex h-11 min-w-11 items-center justify-center type-label underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground active:decoration-foreground desktop:hidden",
   focusRing,
 );
 

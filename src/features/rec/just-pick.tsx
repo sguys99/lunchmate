@@ -61,6 +61,7 @@ export type JustPick = {
 const loadPanel = () => import("./just-pick-panel");
 const JustPickPanel = lazy(loadPanel);
 
+/** 결과 패널이 닫히는 시간. --lm-duration-fast와 같다(홈 첫 로드에 토큰 모듈을 넣지 않으려고 숫자로 둔다, T8.7) */
 const CLOSE_MS = 180;
 /** 건너뛴 직후 이만큼은 닫기를 받지 않는다(ms) */
 const SKIP_GUARD_MS = 400;

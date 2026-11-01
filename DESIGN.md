@@ -448,7 +448,7 @@ layout:
 
 ### 바텀시트
 - 위쪽 라운드 28px(`sheet: 2xl`), 면 `popover`, 그림자 대신 위쪽 헤어라인(`shadow.sheet`). 손잡이 36x4px `border` 색. 뒤 딤 `overlay` 32%.
-- 열림은 `sheet` 스프링(감쇠비 1.07, 오버슈트 없음) 약 300ms, 닫힘은 `exit` easing 180ms. 시트 안 제목은 title 세리프, 본문 블록 사이 lg.
+- 열림은 slow 300 `enter`(감속, 오버슈트 없음), 닫힘은 fast 180 `exit`, 뒤 딤은 열림 base `standard`와 닫힘 fast `exit`. Base UI Drawer와 지도 시트는 CSS 전환이라 스프링 대신 이 곡선을 쓰고, `sheet` 스프링(감쇠비 1.07)은 Motion 예비안(`spring-sheet` 프리셋)에서만 씁니다(T8.7, 2026-11-01 구현과 맞춤). 끄는 동안은 손가락을 바로 따릅니다. 시트 안 제목은 title 세리프, 본문 블록 사이 lg.
 
 ### 하단 탭
 - 높이 64 + safe-area, 면 `background`, 위쪽 1px `border`. 4개(오늘, 지도, 투표, 나), Lucide 1.5px 아이콘 22px + caption 라벨.
@@ -738,7 +738,7 @@ layout:
 - **사용 지점**
   - 카드 넘김: 스와이프 대신 크로스페이드 + 8px 수평 이동(base, `swipe` 스프링으로 손가락 추적), 이전/다음 버튼 필수.
   - 다시 뽑기: 카드 3장이 섞이는 셔플 대신 현재 카드가 페이드아웃, 새 카드가 stagger 70ms로 위에서 아래 블록 순서(식당명, 숫자, 이유)대로 페이드인.
-  - 바텀시트: Base UI Drawer + `sheet` 스프링.
+  - 바텀시트: Base UI Drawer, 열림 slow `enter`, 닫힘 fast `exit`(5장 "바텀시트"). `sheet` 스프링은 Motion 예비안에서만.
   - 득표 바: `bar` 스프링, 숫자는 NumberFlow로 굴리되 속도는 base.
   - 그냥 골라줘: 화면 카드 위 R1 하이라이트 순회(fast 테두리 전환, 간격 60→260ms, 2초 예산), 결과 패널 slow 페이드. 5장 "그냥 골라줘".
   - 어제 피드백 띠: 답한 뒤 높이가 base 260ms `standard`로 한 줄로 줄어듭니다(누른 뒤에만).

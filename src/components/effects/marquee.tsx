@@ -104,7 +104,7 @@ export function Marquee({
         onClick={() => setPaused((p) => !p)}
         aria-label={paused ? playLabel : pauseLabel}
         className={cn(
-          "inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-(--lm-duration-fast) hover:bg-muted hover:text-foreground",
+          "inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
           focusRing,
         )}
       >

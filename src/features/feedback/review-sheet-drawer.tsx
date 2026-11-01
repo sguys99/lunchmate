@@ -72,7 +72,10 @@ export type ReviewSheetConfig = {
   /** 세션 메모리의 식당명. 해석 실패면 null */
   readonly name: string | null;
   /** 가격 힌트와 칩 기준(원) */
-  readonly price: { readonly value: number; readonly kind: "estimate" | "report" };
+  readonly price: {
+    readonly value: number;
+    readonly kind: "estimate" | "report";
+  };
   /** 홈에서 열면 제목 아래 "모두 선택입니다" 한 줄 */
   readonly from: "home" | "detail";
   /** 내 후기 항목 줄에서 연 항목 (D-11 안건 6) */
@@ -144,7 +147,7 @@ export default function ReviewSheetDrawer({
             className={cn(
               "max-h-[92dvh] border-t border-border data-ending-style:duration-(--lm-duration-fast) data-ending-style:ease-exit",
               "min-[64rem]:max-h-[85dvh] min-[64rem]:max-w-md min-[64rem]:rounded-card min-[64rem]:border min-[64rem]:shadow-none",
-              "min-[64rem]:transition-[transform,opacity] min-[64rem]:data-starting-style:[transform:translateY(0.5rem)] min-[64rem]:data-starting-style:opacity-0 min-[64rem]:data-ending-style:[transform:translateY(0.5rem)] min-[64rem]:data-ending-style:opacity-0",
+              "min-[64rem]:transition-[transform,opacity] min-[64rem]:data-ending-style:[transform:translateY(0.5rem)] min-[64rem]:data-ending-style:opacity-0 min-[64rem]:data-starting-style:[transform:translateY(0.5rem)] min-[64rem]:data-starting-style:opacity-0",
             )}
           >
             <DrawerHandle className="mt-3 mb-0 h-1 w-9 min-[64rem]:hidden" />
@@ -162,7 +165,7 @@ export default function ReviewSheetDrawer({
               <DrawerClose
                 aria-label={copy.close}
                 className={cn(
-                  "-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+                  "-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
                   focusRing,
                 )}
               >
@@ -197,9 +200,7 @@ function ReviewForm({
   // 접힌 줄에서 한 탭 답만 저장되고 세부가 실패했을 때(다시 보내기는 세부만)
   const savedReviewId = useRef<string | undefined>(undefined);
   const [confirming, setConfirming] = useState(false);
-  const [deleteFailure, setDeleteFailure] = useState<WriteFailure | null>(
-    null,
-  );
+  const [deleteFailure, setDeleteFailure] = useState<WriteFailure | null>(null);
   const patch = (next: Partial<ReviewDraft>) => {
     setDraft((d) => ({ ...d, ...next }));
     // 금칙어 오류는 글을 고치면 지운다(다른 오류는 다시 보낼 때까지 둔다)
@@ -268,8 +269,7 @@ function ReviewForm({
   }
 
   const banned = failure?.error === "banned";
-  const footerMsg =
-    failure && !banned ? failureMessage(failure, mode) : null;
+  const footerMsg = failure && !banned ? failureMessage(failure, mode) : null;
   const submitLabel =
     failure?.error === "save"
       ? moderationCopy.retry
@@ -322,7 +322,10 @@ function ReviewForm({
       </DrawerContent>
       <div className="flex shrink-0 flex-col gap-3 border-t border-border bg-popover px-7 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] max-[23.75rem]:px-5 min-[64rem]:pb-5">
         {!online ? (
-          <p role="status" className="type-caption break-keep text-muted-foreground">
+          <p
+            role="status"
+            className="type-caption break-keep text-muted-foreground"
+          >
             {copy.offline}
           </p>
         ) : footerMsg ? (
@@ -337,7 +340,9 @@ function ReviewForm({
           aria-disabled={!ready || !online || busy || undefined}
           aria-busy={busy || undefined}
           aria-describedby={
-            !ready && needsRating(mode) && online ? "review-sheet-need" : undefined
+            !ready && needsRating(mode) && online
+              ? "review-sheet-need"
+              : undefined
           }
           onClick={() => void submit()}
           className={cn(buttonClass("primary"), "w-full")}

@@ -14,7 +14,7 @@ import {
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { EstimateMark } from "@/components/badges/estimate-mark";
 import { Skeleton } from "@/components/ui/skeleton";
-import { focusRing, hitArea48 } from "@/components/ui/interaction";
+import { focusRing, hitArea48, pressMotion } from "@/components/ui/interaction";
 import { badgeCopy } from "@/copy/badges";
 import { placeCopy } from "@/copy/place";
 import { formatShortWon, formatWon, priceBandParts } from "@/lib/format";
@@ -32,7 +32,7 @@ const copy = placeCopy;
 
 /** 밑줄 글자 버튼, 링크 (터치 44) */
 export const textAction = cn(
-  "relative inline-flex min-h-11 items-center gap-1.5 type-caption text-foreground underline decoration-border decoration-1 underline-offset-[3px] hover:decoration-foreground",
+  "relative inline-flex min-h-11 items-center gap-1.5 type-caption text-foreground underline decoration-border decoration-1 underline-offset-[3px] hover:decoration-foreground active:decoration-foreground",
   focusRing,
 );
 
@@ -161,7 +161,9 @@ export function CompactNumbers({
           >
             <dt className="type-caption text-muted-foreground">{label}</dt>
             <dd className="flex min-h-[1.35rem] items-center">
-              <Skeleton className={cn("h-4 rounded-badge", i === 0 ? "w-20" : "w-10")} />
+              <Skeleton
+                className={cn("h-4 rounded-badge", i === 0 ? "w-20" : "w-10")}
+              />
             </dd>
           </div>
         ))}
@@ -621,9 +623,10 @@ export function NowBlock({
               aria-disabled={disabled || !onReportWaiting || undefined}
               onClick={() => onReportWaiting?.(level)}
               className={cn(
-                "inline-flex h-10 items-center rounded-chip border border-border px-4 type-label text-foreground transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted active:bg-muted aria-disabled:pointer-events-none aria-disabled:opacity-50 motion-reduce:transition-none",
+                "inline-flex h-10 items-center rounded-chip border border-border px-4 type-label text-foreground hover:bg-muted active:bg-muted aria-disabled:pointer-events-none aria-disabled:opacity-50",
                 hitArea48,
                 focusRing,
+                pressMotion,
               )}
             >
               {badgeCopy.waitingLevels[level]}

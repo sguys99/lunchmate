@@ -196,7 +196,7 @@ export function ResultShareSheet({
               <DrawerClose
                 aria-label={t.close}
                 className={cn(
-                  "-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+                  "-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
                   focusRing,
                 )}
               >

@@ -20,6 +20,7 @@ import { toast } from "@/components/ui/lazy-toaster";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { adminCopy as copy, type AdminReportReason } from "@/copy/admin";
 import { commonCopy } from "@/copy/common";
+import { motionTokens } from "@/lib/motion/tokens.generated";
 import { useOnlineStatus } from "@/lib/network/use-online-status";
 import { cn } from "@/lib/utils";
 import {
@@ -73,8 +74,8 @@ import {
 } from "./parts";
 
 const QUERY_KEY = ["admin", "snapshot"] as const;
-/** 처리한 카드가 빠지는 시간. --lm-duration-base와 같다 */
-const LEAVE_MS = 260;
+/** 처리한 카드가 빠지는 시간. --lm-duration-base 토큰에서 읽는다(T8.7) */
+const LEAVE_MS = motionTokens.duration.base;
 
 const cardEnter =
   "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-right-2 motion-safe:[animation-duration:var(--lm-duration-base)] motion-safe:[animation-timing-function:var(--lm-ease-enter)]";
@@ -96,7 +97,8 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-type Outcome = { ok: true; actionIds: string[] } | { ok: false; error: AdminErrorCode };
+type Outcome =
+  { ok: true; actionIds: string[] } | { ok: false; error: AdminErrorCode };
 
 /* ---------- 화면 상태와 처리 ---------- */
 
@@ -164,7 +166,10 @@ function useAdminConsole() {
     });
   };
 
-  const undo = (actionIds: readonly string[], restoreKeys: readonly string[]) => {
+  const undo = (
+    actionIds: readonly string[],
+    restoreKeys: readonly string[],
+  ) => {
     void undoAction({ actionIds: [...actionIds] }).then((r) => {
       if (r.ok) {
         unhide(restoreKeys);
@@ -383,11 +388,7 @@ export function AdminConsole({ adminNickname }: { adminNickname: string }) {
           ) : (
             <section className="flex flex-col gap-4">
               <h1 className="type-title">{copy.log.title}</h1>
-              <LogList
-                entries={data.log}
-                onUndo={c.undo}
-                disabled={disabled}
-              />
+              <LogList entries={data.log} onUndo={c.undo} disabled={disabled} />
               <p className="type-caption text-muted-foreground">
                 {copy.log.retention}
               </p>
@@ -485,7 +486,10 @@ function ReviewQueue({
   const visible = sortQueue(data.items.filter((i) => !c.hidden.has(i.key)));
   const queue = orderWithSkipped(visible, skipped);
   const current = queue[0] ?? null;
-  const { headingRef, announce, markMoved } = useCardFocus(current?.key ?? null, queue.length);
+  const { headingRef, announce, markMoved } = useCardFocus(
+    current?.key ?? null,
+    queue.length,
+  );
   const chosen = reason ?? (current ? topReason(current) : "other");
   const othersList = current
     ? visible.filter(
@@ -530,7 +534,10 @@ function ReviewQueue({
   const skip = () => {
     if (!current || queue.length < 2) return;
     markMoved();
-    setSkipped((prev) => [...prev.filter((k) => k !== current.key), current.key]);
+    setSkipped((prev) => [
+      ...prev.filter((k) => k !== current.key),
+      current.key,
+    ]);
     reset();
   };
   const undoLast = () => {
@@ -572,7 +579,11 @@ function ReviewQueue({
   return (
     <div className="flex flex-col gap-6">
       {live}
-      <Progress done={c.done.reviews} total={total} label={copy.sections.reviews} />
+      <Progress
+        done={c.done.reviews}
+        total={total}
+        label={copy.sections.reviews}
+      />
       <article
         key={current.key}
         aria-labelledby={`card-${current.key}`}
@@ -614,7 +625,7 @@ function ReviewQueue({
         {reasonStep ? (
           <div
             ref={reasonRef}
-            className="flex scroll-mb-28 flex-col gap-4 border-t border-border pt-6 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:[animation-duration:var(--lm-duration-base)]"
+            className="flex scroll-mb-28 flex-col gap-4 border-t border-border pt-6 ease-enter motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)] motion-safe:slide-in-from-bottom-1"
           >
             <HideReasonFieldset
               item={current}
@@ -651,7 +662,10 @@ function ReviewQueue({
           </div>
           <ReasonTally item={current} />
           {current.notes.map((n, i) => (
-            <p key={i} className="type-body-sm break-keep [overflow-wrap:anywhere]">
+            <p
+              key={i}
+              className="type-body-sm [overflow-wrap:anywhere] break-keep"
+            >
               <span className="text-muted-foreground">{copy.noteTitle}: </span>
               {n}
             </p>
@@ -759,7 +773,10 @@ function ClosureQueue({
     ...open.filter((x) => skipped.includes(x.placeId)),
   ];
   const current = list[0] ?? null;
-  const { headingRef, announce, markMoved } = useCardFocus(current?.placeId ?? null, list.length);
+  const { headingRef, announce, markMoved } = useCardFocus(
+    current?.placeId ?? null,
+    list.length,
+  );
   const total = c.done.closures + list.length;
   const live = (
     <p role="status" className="sr-only">
@@ -770,7 +787,11 @@ function ClosureQueue({
     return (
       <div className="flex flex-col gap-8">
         {live}
-        <Progress done={c.done.closures} total={total} label={copy.sections.closures} />
+        <Progress
+          done={c.done.closures}
+          total={total}
+          label={copy.sections.closures}
+        />
         <AllDone />
       </div>
     );
@@ -790,7 +811,11 @@ function ClosureQueue({
   return (
     <div className="flex flex-col gap-6">
       {live}
-      <Progress done={c.done.closures} total={total} label={copy.sections.closures} />
+      <Progress
+        done={c.done.closures}
+        total={total}
+        label={copy.sections.closures}
+      />
       <article
         key={current.placeId}
         aria-labelledby={`closure-${current.placeId}`}
@@ -806,7 +831,9 @@ function ClosureQueue({
             {excluded ? copy.status.excluded : copy.status.reported}
           </Badge>
           <span className="ml-auto type-caption text-muted-foreground tabular-nums">
-            {copy.closures.lastReported(formatKstDateTime(current.lastReportedAt))}
+            {copy.closures.lastReported(
+              formatKstDateTime(current.lastReportedAt),
+            )}
           </span>
         </div>
         <h2
@@ -820,7 +847,10 @@ function ClosureQueue({
         <PlaceLine placeId={current.placeId} size="heading" showHint />
         <dl className="grid grid-cols-3 divide-x divide-border">
           {cells.map(([label, n]) => (
-            <div key={label} className="flex min-w-0 flex-col gap-1.5 px-4 first:pl-0">
+            <div
+              key={label}
+              className="flex min-w-0 flex-col gap-1.5 px-4 first:pl-0"
+            >
               <dt className="type-caption break-keep text-muted-foreground">
                 {label}
               </dt>
@@ -836,7 +866,9 @@ function ClosureQueue({
           ) : null}
           {current.dismissedAt ? (
             <p className="type-body-sm break-keep text-muted-foreground">
-              {copy.closures.dismissedBefore(formatKstDate(current.dismissedAt))}
+              {copy.closures.dismissedBefore(
+                formatKstDate(current.dismissedAt),
+              )}
             </p>
           ) : null}
           <p className="type-body-sm break-keep text-muted-foreground">
@@ -910,7 +942,10 @@ function UserQueue({
   );
   const suspended = data.users.filter((u) => u.kind === "suspended");
   const current = candidates[0] ?? null;
-  const { headingRef, announce, markMoved } = useCardFocus(current?.id ?? null, candidates.length);
+  const { headingRef, announce, markMoved } = useCardFocus(
+    current?.id ?? null,
+    candidates.length,
+  );
   const leaving = current !== null && c.leaving === `user:${current.id}`;
 
   return (
@@ -1010,7 +1045,11 @@ function UserQueue({
             {copy.users.suspendedNone}
           </p>
         ) : (
-          <UserList users={suspended} onPick={setDialogUser} disabled={disabled} />
+          <UserList
+            users={suspended}
+            onPick={setDialogUser}
+            disabled={disabled}
+          />
         )}
       </section>
 
@@ -1185,7 +1224,7 @@ function Timeline({
       {entries.map((e) => (
         <li
           key={e.id}
-          className="relative motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
+          className="relative ease-enter motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
         >
           <span
             aria-hidden

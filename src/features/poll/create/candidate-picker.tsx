@@ -161,7 +161,7 @@ export function CandidatePicker({
           href="/map"
           onClick={onMap}
           className={cn(
-            "inline-flex min-h-11 w-fit items-center rounded-sm type-label underline decoration-border underline-offset-4",
+            "inline-flex min-h-11 w-fit items-center rounded-sm type-label underline decoration-border underline-offset-4 hover:decoration-foreground active:decoration-foreground",
             focusRing,
           )}
         >
@@ -210,7 +210,7 @@ function Group({
           type="button"
           onClick={() => setMore(true)}
           className={cn(
-            "inline-flex min-h-11 w-fit items-center rounded-sm type-caption text-muted-foreground underline decoration-border underline-offset-3",
+            "inline-flex min-h-11 w-fit items-center rounded-sm type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground",
             focusRing,
           )}
         >

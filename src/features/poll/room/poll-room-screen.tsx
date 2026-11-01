@@ -85,16 +85,14 @@ function RoomBody({ pollId }: { pollId: string }) {
     if (query.isError) {
       const code =
         query.error instanceof PollLoadError ? query.error.code : "save";
+      // 마감 뒤 새로 들어온 사람은 다시 시도해도 같으므로 마감 안내와 투표 탭 버튼을 보인다(T8.13)
+      if (online && code === "not_member") return <RoomNotice kind="closed" />;
       return (
         <div className="flex flex-1 flex-col justify-center py-10">
           {online ? (
             <ErrorState
               title={copy.states.error.title}
-              body={
-                code === "not_member"
-                  ? copy.notices.closed.body
-                  : copy.states.error.body
-              }
+              body={copy.states.error.body}
               action={{
                 label: copy.actions.retry,
                 onClick: () => void query.refetch(),
@@ -1040,7 +1038,7 @@ function ResultView({
         <p className="type-caption text-muted-foreground">{wayText}</p>
         <h1
           className={cn(
-            "motion-safe:duration-slow mt-4 type-display text-balance break-keep motion-safe:transition-[opacity,translate] motion-safe:ease-enter motion-safe:starting:translate-y-2 motion-safe:starting:opacity-0",
+            "mt-4 type-display text-balance break-keep motion-safe:transition-[opacity,translate] motion-safe:duration-(--lm-duration-slow) motion-safe:ease-enter motion-safe:starting:translate-y-2 motion-safe:starting:opacity-0",
           )}
         >
           {copy.result.celebrate[poll.kind]}
@@ -1050,7 +1048,7 @@ function ResultView({
       <section
         aria-label={copy.result.winner(nameOf(place, winnerIndex + 1))}
         className={cn(
-          "mt-8 rounded-card border border-border bg-card px-6 pt-6 pb-6 motion-safe:delay-150",
+          "mt-8 rounded-card border border-border bg-card px-6 pt-6 pb-6 motion-safe:delay-[calc(var(--lm-stagger)*2)]",
           enterClass,
         )}
       >

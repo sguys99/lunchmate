@@ -196,7 +196,7 @@ export function LocationSearch({ ob }: { ob: LocationSearchState }) {
               setOpen(false);
             }}
             className={cn(
-              "absolute top-1/2 right-0.5 flex size-11 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:text-foreground",
+              "absolute top-1/2 right-0.5 flex size-11 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:text-foreground active:text-foreground",
               focusRing,
             )}
           >
@@ -238,7 +238,7 @@ export function LocationSearch({ ob }: { ob: LocationSearchState }) {
                       setInput(r.name);
                     }}
                     className={cn(
-                      "flex min-h-12 w-full flex-col items-start justify-center rounded-md px-3 py-2 text-left hover:bg-muted",
+                      "flex min-h-12 w-full flex-col items-start justify-center rounded-md px-3 py-2 text-left hover:bg-muted active:bg-muted",
                       focusRing,
                     )}
                   >
@@ -286,7 +286,7 @@ export function LocateButton({ ob }: { ob: LocateButtonState }) {
         ob.locating ? copy.location.locating : copy.location.locateLabel
       }
       className={cn(
-        "flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted aria-disabled:pointer-events-none aria-disabled:opacity-60",
+        "flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground hover:bg-muted active:bg-muted aria-disabled:pointer-events-none aria-disabled:opacity-60",
         focusRing,
         pressMotion,
       )}
@@ -573,7 +573,7 @@ function CustomAvoid({ ob }: { ob: AvoidState }) {
                 aria-label={copy.avoid.customRemove(item)}
                 onClick={() => ob.removeCustom(item)}
                 className={cn(
-                  "inline-flex h-10 items-center gap-1.5 rounded-chip border border-primary pr-3 pl-4 type-label text-primary ring-[0.5px] ring-primary ring-inset hover:bg-muted",
+                  "inline-flex h-10 items-center gap-1.5 rounded-chip border border-primary pr-3 pl-4 type-label text-primary ring-[0.5px] ring-primary ring-inset hover:bg-muted active:bg-muted",
                   focusRing,
                   pressMotion,
                   hitArea48,

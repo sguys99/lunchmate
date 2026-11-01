@@ -267,7 +267,7 @@ export function HistoryPanel({
                 key={g.key}
                 aria-labelledby={`me-week-${g.key}`}
                 className={cn(
-                  "flex animate-in flex-col duration-(--lm-duration-base) fade-in motion-reduce:animate-none",
+                  "flex animate-in flex-col duration-(--lm-duration-base) ease-enter fade-in motion-reduce:animate-none",
                   gi > 0 && "mt-8",
                 )}
               >
@@ -508,7 +508,7 @@ function VisitRow({
       {wasCandidate && answer !== undefined ? (
         <p
           role="status"
-          className="animate-in pl-12 type-caption text-muted-foreground duration-(--lm-duration-fast) fade-in motion-reduce:animate-none"
+          className="animate-in pl-12 type-caption text-muted-foreground duration-(--lm-duration-fast) ease-enter fade-in motion-reduce:animate-none"
         >
           {answer === "no" ? copy.confirm.thanksNo : copy.confirm.thanks}
         </p>
@@ -605,7 +605,7 @@ function FirstVisit() {
   return (
     <section
       aria-labelledby="me-first-visit"
-      className="flex animate-in flex-col duration-(--lm-duration-slow) fade-in motion-reduce:animate-none"
+      className="flex animate-in flex-col duration-(--lm-duration-slow) ease-enter fade-in motion-reduce:animate-none"
     >
       <div aria-hidden className="relative flex h-16 items-center gap-6">
         <span className="absolute top-1/2 right-0 left-0 border-t border-dashed border-input" />

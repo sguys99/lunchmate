@@ -68,7 +68,7 @@ export function TextButton({
       type="button"
       onClick={rest["aria-disabled"] ? undefined : onClick}
       className={cn(
-        "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
+        "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
         hitArea44,
         focusRing,
         className,
@@ -134,7 +134,7 @@ export function Row({
       {open && !readOnly ? (
         <div
           id={id}
-          className="flex flex-col gap-4 pb-4 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
+          className="flex flex-col gap-4 pb-4 ease-enter motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
         >
           {children}
         </div>
@@ -211,7 +211,7 @@ export function CandidateRow({
           aria-disabled={removeDisabled || undefined}
           onClick={removeDisabled ? undefined : onRemove}
           className={cn(
-            "-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground aria-disabled:opacity-40",
+            "-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground aria-disabled:opacity-40",
             focusRing,
             pressMotion,
           )}
@@ -398,7 +398,7 @@ export function DeadlineTiles({
               "flex min-h-20 flex-col items-start justify-between rounded-card border bg-card px-4 py-3 text-left",
               on
                 ? "[border-width:1.5px] border-primary"
-                : "border-border hover:bg-muted",
+                : "border-border hover:bg-muted active:bg-muted",
               focusRing,
               pressMotion,
             )}
@@ -564,7 +564,7 @@ export function SuccessMark() {
   return (
     <span
       aria-hidden
-      className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-success-surface text-success-foreground motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:[animation-duration:var(--lm-duration-slow)]"
+      className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-success-surface text-success-foreground ease-enter motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:[animation-duration:var(--lm-duration-slow)]"
     >
       <Check className="size-4" strokeWidth={2} />
     </span>

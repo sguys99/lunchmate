@@ -296,7 +296,7 @@ function FavoriteRow({
         place={place}
         pending={names.pending}
         className={cn(
-          "transition-opacity duration-(--lm-duration-fast) motion-reduce:transition-none",
+          "transition-opacity duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
           !on && "opacity-50",
         )}
       />
@@ -330,7 +330,7 @@ function FavoriteRow({
         <Star
           aria-hidden
           className={cn(
-            "size-5 transition-[fill,color] duration-(--lm-duration-fast) motion-reduce:transition-none",
+            "size-5 transition-[fill,color] duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
             on ? "fill-foreground text-foreground" : "text-muted-foreground",
           )}
           strokeWidth={1.5}
@@ -385,7 +385,7 @@ function BlockRow({
         {released ? (
           <span
             role="status"
-            className="animate-in type-caption text-muted-foreground duration-(--lm-duration-fast) fade-in motion-reduce:animate-none"
+            className="animate-in type-caption text-muted-foreground duration-(--lm-duration-fast) ease-enter fade-in motion-reduce:animate-none"
           >
             {copy.places.unblocked}
           </span>

@@ -219,7 +219,7 @@ function ReviewItem({
           ref={doneRef}
           role="status"
           tabIndex={-1}
-          className="animate-in type-body-sm text-muted-foreground duration-(--lm-duration-base) fade-in focus:outline-none motion-reduce:animate-none"
+          className="animate-in type-body-sm text-muted-foreground duration-(--lm-duration-base) ease-enter fade-in focus:outline-none motion-reduce:animate-none"
         >
           {copy.reviews.deleted}
         </p>
@@ -308,7 +308,7 @@ function ReviewItem({
           role="group"
           aria-label={copy.reviews.deleteAsk}
           aria-busy={phase === "busy" || undefined}
-          className="ml-11 flex animate-in flex-col gap-3 rounded-card border border-border bg-card p-4 duration-(--lm-duration-base) fade-in motion-reduce:animate-none"
+          className="ml-11 flex animate-in flex-col gap-3 rounded-card border border-border bg-card p-4 duration-(--lm-duration-base) ease-enter fade-in motion-reduce:animate-none"
         >
           <p className="type-body-sm break-keep">
             {copy.reviews.deleteAsk}

@@ -6,7 +6,12 @@ import { Check, Flag, Tag } from "lucide-react";
 import { forwardRef, type ReactNode } from "react";
 import type { WaitingLevel } from "@/components/badges/pick-badges";
 import { Badge } from "@/components/ui/badge";
-import { focusRing, hitArea44, hitArea48 } from "@/components/ui/interaction";
+import {
+  focusRing,
+  hitArea44,
+  hitArea48,
+  pressMotion,
+} from "@/components/ui/interaction";
 import { badgeCopy } from "@/copy/badges";
 import { reportCopy, reportLabels } from "@/copy/report";
 import { cn } from "@/lib/utils";
@@ -22,18 +27,19 @@ export const enterClass =
 export const reportCls = {
   /** 작은 테두리 버튼(높이 40, 터치 48). 웨이팅 3버튼, 아직 해요/끝났어요 */
   pill: cn(
-    "inline-flex h-10 items-center justify-center gap-1.5 rounded-chip border border-border px-4 type-label text-foreground transition-[border-color,color,background-color,opacity] duration-(--lm-duration-fast) ease-standard hover:bg-muted active:bg-muted aria-disabled:opacity-50 motion-reduce:transition-none",
+    "inline-flex h-10 items-center justify-center gap-1.5 rounded-chip border border-border px-4 type-label text-foreground hover:bg-muted active:bg-muted aria-disabled:opacity-50",
     "aria-pressed:border-primary aria-pressed:text-primary aria-pressed:ring-[0.5px] aria-pressed:ring-primary aria-pressed:ring-inset aria-pressed:hover:bg-transparent",
     hitArea48,
     focusRing,
+    pressMotion,
   ),
   /** 밑줄 글자 버튼 (터치 44) */
   text: cn(
-    "relative inline-flex min-h-11 items-center gap-1.5 type-caption text-foreground underline decoration-border decoration-1 underline-offset-[3px] hover:decoration-foreground aria-disabled:opacity-50",
+    "relative inline-flex min-h-11 items-center gap-1.5 type-caption text-foreground underline decoration-border decoration-1 underline-offset-[3px] hover:decoration-foreground active:decoration-foreground aria-disabled:opacity-50",
     focusRing,
   ),
   ghostIcon: cn(
-    "inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground aria-disabled:opacity-50",
+    "inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground aria-disabled:opacity-50",
     focusRing,
   ),
 };

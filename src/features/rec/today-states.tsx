@@ -22,7 +22,7 @@ const copy = homeCopy.today;
 const states = homeCopy.states;
 
 const secondaryText = cn(
-  "inline-flex items-center gap-1.5 self-start rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground",
+  "inline-flex items-center gap-1.5 self-start rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground active:text-foreground",
   hitArea44,
   focusRing,
 );

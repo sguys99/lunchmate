@@ -424,7 +424,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       className={cn(
-        "-ml-2 inline-flex h-11 items-center gap-1 self-start rounded-button pr-3 pl-1 type-label text-muted-foreground hover:text-foreground",
+        "-ml-2 inline-flex h-11 items-center gap-1 self-start rounded-button pr-3 pl-1 type-label text-muted-foreground hover:text-foreground active:text-foreground",
         focusRing,
       )}
     >

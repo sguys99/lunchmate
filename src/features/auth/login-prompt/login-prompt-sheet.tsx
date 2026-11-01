@@ -42,7 +42,7 @@ const copy = authCopy;
 const ID = "login-prompt";
 
 const iconButton = cn(
-  "inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+  "inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
   focusRing,
 );
 

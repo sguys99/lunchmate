@@ -4,13 +4,7 @@
 // 순서: (상세 쓰기, 접힌 줄, 수정) 한 탭 답 → 1인 가격(스테퍼 + 칩 3) → 태그 8종 2열 → 한 줄 후기(늘 보임)
 //   → 공개 범위와 집계 포함 고지 한 줄 → (수정) 내 후기 삭제.
 // 접근성: 칩 묶음은 role="group" + 제목 id, 가격 숫자 aria-live, 글자 수는 aria-describedby, 금칙어 오류는 role="alert".
-import {
-  AlertCircle,
-  Minus,
-  Plus,
-  ThumbsDown,
-  ThumbsUp,
-} from "lucide-react";
+import { AlertCircle, Minus, Plus, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { buttonClass } from "@/components/ui/button-classes";
 import { Chip, ChipGroup } from "@/components/ui/chip";
@@ -42,7 +36,7 @@ type Patch = (next: Partial<ReviewDraft>) => void;
 
 /** 밑줄 글자 버튼 (caption, 터치 44) */
 export const textButton = cn(
-  "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
+  "inline-flex h-7 w-fit shrink-0 items-center gap-1 rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
   hitArea44,
   focusRing,
 );
@@ -70,7 +64,9 @@ function FieldHead({
     <div
       className={cn(
         "flex",
-        inline ? "flex-wrap items-baseline gap-x-2 gap-y-0.5" : "flex-col gap-1",
+        inline
+          ? "flex-wrap items-baseline gap-x-2 gap-y-0.5"
+          : "flex-col gap-1",
       )}
     >
       <h3 id={id} className="type-label text-foreground">
@@ -180,7 +176,7 @@ export function PriceField({
   const atMin = value !== null && value <= REVIEW_PRICE_MIN;
   const atMax = value !== null && value >= REVIEW_PRICE_MAX;
   const round = cn(
-    "inline-flex size-12 shrink-0 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted aria-disabled:pointer-events-none aria-disabled:opacity-40",
+    "inline-flex size-12 shrink-0 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted active:bg-muted aria-disabled:pointer-events-none aria-disabled:opacity-40",
     pressMotion,
     focusRing,
   );
@@ -340,7 +336,7 @@ export function BodyField({
           onChange={(e) => patch({ body: limitBody(e.target.value) })}
           className={cn(
             // 한 줄 높이 48로 시작하고 글이 길어지면 늘어난다(field-sizing 미지원 브라우저는 칸 안 스크롤)
-            "block max-h-32 min-h-12 w-full resize-none rounded-input border bg-card py-3 pr-20 pl-4 type-body text-foreground outline-none [field-sizing:content] placeholder:text-muted-foreground",
+            "block [field-sizing:content] max-h-32 min-h-12 w-full resize-none rounded-input border bg-card py-3 pr-20 pl-4 type-body text-foreground outline-none placeholder:text-muted-foreground",
             "transition-[border-color] duration-(--lm-duration-fast) ease-standard focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid motion-reduce:transition-none",
             error ? "border-destructive" : "border-input",
           )}
@@ -435,7 +431,7 @@ export function DeleteConfirm({
     <div
       role="group"
       aria-labelledby={id}
-      className="flex flex-col gap-3 rounded-card border border-border bg-card p-5 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
+      className="flex flex-col gap-3 rounded-card border border-border bg-card p-5 ease-enter motion-safe:animate-in motion-safe:fade-in-0 motion-safe:[animation-duration:var(--lm-duration-base)]"
     >
       <h3 id={id} ref={ref} tabIndex={-1} className="type-label outline-none">
         {copy.confirm.title}
@@ -467,13 +463,7 @@ export function DeleteConfirm({
 }
 
 /** 시트 바닥과 삭제 확인의 오류 한 줄 */
-export function FormError({
-  title,
-  body,
-}: {
-  title: string;
-  body?: string;
-}) {
+export function FormError({ title, body }: { title: string; body?: string }) {
   return (
     <p
       role="alert"

@@ -610,8 +610,8 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T8.5a (11/01 완료, A 받은편지함, B 표와 일괄 처리, C 한 건씩 검토, `docs/design/g8-comparison-admin.md`, 캡처 93장. 선택 D-19: **C + B 같은 작성자 일괄 숨김 + A 단축키 안내와 이력 목록**, 정지는 쓰기 차단 + 공개 후기 숨김, 로그인 허용, 안건 15건 기본안) 관리자 화면 시안 3안 이상 (신고 목록, 처리 흐름, 데스크톱 우선) ⛔ 선택
 - [x] T8.5 (11/01 완료, D-19 C 한 건씩 + B 같은 작성자 일괄 숨김 + A 단축키와 이력 목록, 마이그레이션 `20261101180000_t8_5_admin_moderation.sql`(정지 열, 정지 쓰기 차단 트리거, moderated_at, place_moderation, private.moderation_actions, admin_* 9개, 정지 만료와 이력 정리 크론, 사용자 승인 후 적용), RLS 144건 통과(t8-admin 20), `e2e/admin.spec.ts` 360, 390, 1280 x 라이트, 다크 + axe 0, 캡처 `admin-live__*` 69장, 플래그 `adminConsole`은 프로덕션에서 로그인과 함께. 실제 관리자 지정은 사용자가 SQL 편집기에서) 관리자 화면 `/admin`: 신고 후기, 폐업 제보, 사용자 정지 (MOD-06)
 - [x] T8.6 (11/01 완료, 사용자 결정 이메일 하나, `NEXT_PUBLIC_CONTACT_EMAIL`(서버에서만 읽음), 설정 "문의와 정책" 묶음 첫 줄, `/me/contact` 주소 크게 + 주소 복사(주 동작) + 메일 앱 열기, 주소 없으면 준비 중 안내, `e2e/contact-legal.spec.ts`. 주소 값은 사용자가 .env.local과 Vercel에 등록) 문의 채널 링크 (MOD-07)
-- [ ] T8.7 모션 폴리싱 패스: 전 화면 전환, 눌림 피드백, 시트 스프링을 DESIGN.md 토큰과 대조
-- [ ] T8.8 마이크로 인터랙션 감사: 효과가 결정을 늦추는 곳 제거
+- [x] T8.7 (11/01 완료, `docs/design/g8-motion-audit.md` 25건 중 16건 조치: 터치 기기 눌림 표시 70곳 `active:` 짝, 칩과 지도 떠 있는 버튼 `pressMotion` 통일, 없는 클래스 `duration-slow` 수정, 하드코딩 지연을 토큰으로, Drawer 닫힘 fast exit와 딤 박자, 지도 로딩 공통 Skeleton, DESIGN.md 시트 서술 정정. 토큰 값 변경 없음, /today 변화 없음) 모션 폴리싱 패스: 전 화면 전환, 눌림 피드백, 시트 스프링을 DESIGN.md 토큰과 대조
+- [x] T8.8 (11/01 완료, 탭 이동 즉시 교체 확인, 시트 닫힘 지연 120ms 제거, reduced motion 누락 없음, 다시 뽑기 길이와 실시간 점은 제안으로 사용자 결정) 마이크로 인터랙션 감사: 효과가 결정을 늦추는 곳 제거
 - [ ] T8.9 접근성 감사: 키보드, 스크린리더(VoiceOver, TalkBack), 대비, 레이블
 - [ ] T8.10 Lighthouse 모바일 성능 85 이상, 접근성 90 이상
 - [ ] T8.11 번들 예산 재점검과 `bundle-log.md` 정리. 7단계에서 next/og 런타임 비용(약 0.5 KB) 때문에 `bundle-report` 기본 예산을 임시 201 KB로 올림(사용자 결정 11/01): 홈 코드를 0.4 KB 이상 줄여 200 KB로 되돌리기

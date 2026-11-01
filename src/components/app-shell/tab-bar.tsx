@@ -79,7 +79,7 @@ export function TabBarView({
                   "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 type-caption whitespace-nowrap transition-colors duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
                   isActive
                     ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
+                    : "text-muted-foreground hover:text-foreground active:text-foreground",
                   focusRing,
                   "focus-visible:-outline-offset-4",
                 )}

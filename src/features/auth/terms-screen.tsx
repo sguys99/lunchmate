@@ -142,7 +142,7 @@ export function TermsScreen({ next, action, provider }: TermsScreenProps) {
                         prefetch={false}
                         aria-label={copy.viewLabel(title)}
                         className={cn(
-                          "inline-flex h-11 shrink-0 items-center gap-1 px-1 type-caption text-muted-foreground underline decoration-muted-foreground/60 underline-offset-3 hover:text-foreground",
+                          "inline-flex h-11 shrink-0 items-center gap-1 px-1 type-caption text-muted-foreground underline decoration-muted-foreground/60 underline-offset-3 hover:text-foreground active:text-foreground",
                           focusRing,
                         )}
                       >
@@ -201,7 +201,7 @@ export function TermsScreen({ next, action, provider }: TermsScreenProps) {
               form={LATER_FORM}
               aria-describedby="terms-later-note"
               className={cn(
-                "inline-flex h-11 items-center px-2 type-label text-foreground underline decoration-muted-foreground underline-offset-3",
+                "inline-flex h-11 items-center px-2 type-label text-foreground underline decoration-muted-foreground underline-offset-3 hover:decoration-foreground active:decoration-foreground",
                 focusRing,
               )}
             >

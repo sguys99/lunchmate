@@ -727,7 +727,7 @@ export function PlaceDetailActions({
         <Star
           aria-hidden
           className={cn(
-            "size-5 transition-[fill,color] duration-(--lm-duration-fast) motion-reduce:transition-none",
+            "size-5 transition-[fill,color] duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
             fav.on ? "fill-foreground text-foreground" : "text-foreground",
           )}
           strokeWidth={1.5}

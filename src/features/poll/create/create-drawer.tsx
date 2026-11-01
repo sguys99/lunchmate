@@ -751,7 +751,7 @@ export default function CreateDrawer({
               <DrawerClose
                 aria-label={copy.sheet.close}
                 className={cn(
-                  "-mt-1 -mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+                  "-mt-1 -mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
                   focusRing,
                 )}
               >
@@ -1084,7 +1084,7 @@ function Notice({
             <Link
               href="/me/settings"
               className={cn(
-                "inline-flex min-h-11 items-center rounded-sm type-label underline decoration-border underline-offset-4",
+                "inline-flex min-h-11 items-center rounded-sm type-label underline decoration-border underline-offset-4 hover:decoration-foreground active:decoration-foreground",
                 focusRing,
               )}
             >
@@ -1410,7 +1410,7 @@ function ShareFooter({
         href={roomHref}
         onClick={onGoRoom}
         className={cn(
-          "mx-auto inline-flex min-h-11 items-center rounded-sm type-caption text-muted-foreground underline decoration-border underline-offset-3",
+          "mx-auto inline-flex min-h-11 items-center rounded-sm type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground",
           focusRing,
         )}
       >

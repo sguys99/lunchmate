@@ -7,6 +7,8 @@
 // - 포털은 기본 document.body. 디자인 랩처럼 토큰 범위(data-design) 안에서 열어야 하면
 //   <DrawerPortal container={...}>로 범위 요소를 넘긴다.
 // - 스냅: Drawer snapPoints를 쓰면 Popup transform에 --drawer-snap-point-offset을 더한다(아래 기본 클래스에 포함).
+// - 모션(DESIGN.md 5장 바텀시트, T8.7): 열림 slow 300 enter, 닫힘 fast 180 exit, 딤은 열림 base standard와 닫힘 fast exit.
+//   Base UI Drawer는 CSS 전환이라 sheet 스프링 대신 enter 곡선을 쓴다(sheet 스프링은 Motion 예비안 spring-sheet 프리셋).
 // - 스와이프 중 전환 시간 0, 놓을 때는 --drawer-swipe-strength 비례. reduced motion이면 전환 없음.
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
 import type { ComponentProps } from "react";
@@ -38,7 +40,7 @@ function DrawerBackdrop({
     <DrawerPrimitive.Backdrop
       data-slot="drawer-backdrop"
       className={cn(
-        "fixed inset-0 bg-overlay opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity duration-(--lm-duration-slow) ease-standard data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*var(--lm-duration-slow,300ms))] data-starting-style:opacity-0 data-swiping:duration-0 motion-reduce:transition-none",
+        "fixed inset-0 bg-overlay opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity duration-(--lm-duration-base) ease-standard data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*var(--lm-duration-fast,180ms))] data-ending-style:ease-exit data-starting-style:opacity-0 data-swiping:duration-0 motion-reduce:transition-none",
         className,
       )}
       {...props}
@@ -73,7 +75,7 @@ function DrawerPopup({
       className={cn(
         "relative flex max-h-[calc(100%-2rem)] min-h-0 w-full max-w-(--lm-layout-max-width,30rem) flex-col rounded-t-sheet bg-popover text-popover-foreground shadow-sheet outline-none",
         "[transform:translateY(calc(var(--drawer-snap-point-offset,0px)+var(--drawer-swipe-movement-y,0px)))] transition-transform duration-(--lm-duration-slow) ease-enter",
-        "data-ending-style:[transform:translateY(100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*var(--lm-duration-slow,300ms))] data-starting-style:[transform:translateY(100%)] data-swiping:duration-0 data-swiping:select-none motion-reduce:transition-none",
+        "data-ending-style:[transform:translateY(100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*var(--lm-duration-fast,180ms))] data-ending-style:ease-exit data-starting-style:[transform:translateY(100%)] data-swiping:duration-0 data-swiping:select-none motion-reduce:transition-none",
         className,
       )}
       {...props}

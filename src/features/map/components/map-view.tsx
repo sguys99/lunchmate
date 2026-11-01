@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { mapCopy } from "@/copy/map";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "@/lib/map/constants";
 import { classifyMapError, type MapErrorKind } from "@/lib/map/errors";
@@ -106,9 +107,10 @@ function MapSkeleton() {
       aria-label={mapCopy.loadingLabel}
       className="absolute inset-0 flex flex-col gap-3 bg-muted p-4"
     >
-      <div className="h-8 w-2/5 rounded-md bg-border motion-safe:animate-pulse" />
-      <div className="flex-1 rounded-md bg-accent motion-safe:animate-pulse" />
-      <div className="h-10 w-full rounded-md bg-border motion-safe:animate-pulse" />
+      {/* 앱 공통 스켈레톤(느린 호흡, 축소 모드 정지)과 같은 박자 (T8.7) */}
+      <Skeleton className="h-8 w-2/5 rounded-md" />
+      <Skeleton className="flex-1 rounded-md" />
+      <Skeleton className="h-10 w-full rounded-md" />
     </div>
   );
 }

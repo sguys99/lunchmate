@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 export const btn = {
   /** 밑줄 글자 버튼 (터치 44) */
   text: cn(
-    "relative inline-flex min-h-11 items-center gap-1.5 type-caption text-foreground underline decoration-border decoration-1 underline-offset-[3px] hover:decoration-foreground aria-disabled:opacity-50",
+    "relative inline-flex min-h-11 items-center gap-1.5 type-caption text-foreground underline decoration-border decoration-1 underline-offset-[3px] hover:decoration-foreground active:decoration-foreground aria-disabled:opacity-50",
     focusRing,
   ),
   /** 원형 아이콘 버튼 44 (테두리) */
@@ -198,7 +198,7 @@ export function PlaceName({
         onPointerEnter={onPreload}
         onFocus={onPreload}
         className={cn(
-          "relative min-h-6 max-w-full truncate text-left type-label hover:underline hover:decoration-border hover:underline-offset-[3px]",
+          "relative min-h-6 max-w-full truncate text-left type-label hover:underline hover:decoration-border hover:underline-offset-[3px] active:underline active:decoration-border active:underline-offset-[3px]",
           hitArea44,
           focusRing,
           className,
