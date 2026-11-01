@@ -3,6 +3,8 @@
 // - 투표방 화면이 poll-map-store에 기준점과 후보 핀을 넣는다. 1위(단독)나 확정 핀만 올리브.
 // - 1024px 이상일 때만 네이버 지도 SDK를 동적으로 받는다. 실패하면 조용한 빈 지도 자리(MapPane).
 // - 핀 모양과 색은 오늘(홈) 지도와 같은 클래스(today.css)를 쓴다. 이름은 textContent로만 넣는다.
+// - 투표 탭(@map/poll, T8.11b)도 PollMapCanvas에 view를 직접 넘겨 같은 지도를 쓴다. 진행 중 투표가 없으면
+//   기본 사무실을 오늘 지도와 같은 사무실 기준점(건물 원, baseKind "office")으로 보인다.
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { MapPane } from "@/components/app-shell";
 import type { LatLng, MapInstance, MarkerHandle } from "@/lib/map/types";
@@ -26,10 +28,17 @@ function useDesktop(): boolean {
   );
 }
 
-function baseElement(): HTMLElement {
+/** 정적 SVG(사용자 입력 없음): Lucide building-2. 오늘 지도(today-map.tsx)의 사무실 기준점과 같다 */
+const BUILDING_SVG =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>';
+
+export type PollMapBaseKind = "here" | "office";
+
+function baseElement(kind: PollMapBaseKind): HTMLElement {
   const el = document.createElement("span");
   el.className = "lm-today-base";
-  el.dataset.kind = "here";
+  el.dataset.kind = kind;
+  if (kind === "office") el.innerHTML = BUILDING_SVG;
   return el;
 }
 
@@ -62,12 +71,23 @@ export function PollMap() {
   const desktop = useDesktop();
   const view = usePollMap((s) => s.view);
   if (!desktop || !view.base) return <MapPane />;
-  return <LiveMap view={view} />;
+  return <PollMapCanvas view={view} />;
 }
 
-function LiveMap({ view }: { view: PollMapView }) {
+/**
+ * 지도 칸 본체. view.base가 있을 때만 그린다(없으면 부르는 쪽이 MapPane).
+ * 1024px 판정은 부르는 쪽이 한다. SDK 실패나 인증 실패면 MapPane.
+ */
+export function PollMapCanvas({
+  view,
+  baseKind = "here",
+}: {
+  view: PollMapView;
+  baseKind?: PollMapBaseKind;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapInstance | null>(null);
+  const startRef = useRef(view.base);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -86,7 +106,7 @@ function LiveMap({ view }: { view: PollMapView }) {
         const provider = createNaverMapProvider();
         await provider.load();
         if (cancelled) return;
-        const center = usePollMap.getState().view.base;
+        const center = startRef.current;
         if (!center) return;
         map = provider.createMap(element, { center, zoom: 16 });
         mapRef.current = map;
@@ -121,8 +141,8 @@ function LiveMap({ view }: { view: PollMapView }) {
     const handles: MarkerHandle[] = [
       map.addMarker({
         position: view.base,
-        content: baseElement(),
-        anchor: { x: 7, y: 7 },
+        content: baseElement(baseKind),
+        anchor: baseKind === "office" ? { x: 14, y: 14 } : { x: 7, y: 7 },
         zIndex: 1,
       }),
     ];
@@ -140,7 +160,7 @@ function LiveMap({ view }: { view: PollMapView }) {
     }
     return () => handles.forEach((h) => h.remove());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, pinKey, baseKey, view.activeId]);
+  }, [status, pinKey, baseKey, view.activeId, baseKind]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "@/components/ui/lazy-toaster";
 import { pollCopy } from "@/copy/poll";
 import { track } from "@/lib/analytics";
+import { pollRoomKey } from "../create/keys";
 import {
   addCandidateAction,
   cancelPollAction,
@@ -31,8 +32,7 @@ import {
 } from "./model";
 import type { LiveState, PollSubscription } from "./realtime";
 
-export const pollRoomKey = (pollId: string) =>
-  ["db", "poll", "room", pollId] as const;
+export { pollRoomKey };
 
 /** 실시간이 끊긴 동안 다시 읽는 간격 */
 const LOST_POLL_MS = 4_000;

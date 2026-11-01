@@ -4,6 +4,7 @@
 // - 보내지 않고 닫은 방도 "진행 중"에 남는다(D-15 안건 3). 줄을 누르면 투표방(/poll/<code>)에서 다시 보낼 수 있다.
 // - 머리 오른쪽 "회식 후보 찾기"(D-16 안건 7). 주 버튼은 두지 않는다(만들기는 오늘 화면 "친구랑 정하기").
 // - 4상태: 스켈레톤 줄, 빈 상태(오늘 추천으로), 오류(다시 불러오기), 오프라인.
+// - 데스크톱 우측 지도(@map/poll, T8.11b): 진행 중 줄에 마우스나 초점을 두면 지도가 그 방의 후보 핀으로 바뀐다.
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -26,6 +27,7 @@ import { track } from "@/lib/analytics";
 import { useOnlineStatus } from "@/lib/network";
 import { getKstParts, kstDayDiff } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { usePollTabMapFocus } from "./map-focus-store";
 
 const copy = pollCreateCopy.tab;
 
@@ -191,10 +193,14 @@ function PollRow({ poll, now }: { poll: MyPollRow; now: Date }) {
             ? copy.voted
             : copy.notVoted;
   const past = poll.status === "closed" || poll.status === "canceled";
+  const setMapFocus = usePollTabMapFocus((s) => s.setFocus);
+  const focusMap = past ? undefined : () => setMapFocus(poll.pollId);
   return (
     <li className="border-b border-border">
       <Link
         href={pollRoomHref(poll.code)}
+        onPointerEnter={focusMap}
+        onFocus={focusMap}
         className={cn(
           "flex min-h-18 items-center gap-4 rounded-md py-3 hover:bg-muted/50",
           focusRing,
