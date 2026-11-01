@@ -50,3 +50,7 @@ next-env.d.ts
 # supabase CLI 링크 상태 (supabase/.gitignore와 중복 보호)
 supabase/.temp/
 supabase/.branches/
+
+# DB 백업(T8.17)은 저장소 밖(~/lunchmate-backups)에 둔다. 실수로 안에 만들어도 올라가지 않게
+/backups/
+*.sql.gz

@@ -397,6 +397,8 @@ function onGoogleClick() {
 - Vercel의 "commercial" 판단은 사례별이며 불명확하면 Vercel Support 문의가 공식 경로다.
 - Vercel과 Supabase 한도 수치는 자주 바뀐다. 베타 직전에 다시 확인한다.
 
+갱신 2026-11-01 (T8.17): 결론 유지. 무료 플랜은 자동 백업 "Not included", Pro는 7일(https://supabase.com/pricing), "We recommend that free tier plan projects regularly export their data"(https://supabase.com/docs/guides/platform/backups). 보탤 점 두 가지. (1) `supabase db dump`는 pg_dump를 컨테이너에서 돌리므로 Docker가 실행 중이어야 한다(https://supabase.com/docs/reference/cli/supabase-db-dump, 공식 백업 안내 https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore 도 Docker Desktop 설치를 요구). (2) 기본 스키마 덤프는 auth, storage 스키마를 빼지만 `--data-only` 덤프는 auth.users 데이터를 포함한다(CLI 2.115 `--dry-run` 확인). 그래서 역할, 스키마, 데이터 세 파일로 받는다. 세부는 아래 "8단계 운영 점검" T8.17.
+
 ### T0.20 카카오 provider의 이메일 필수 여부와 비즈 앱 전환 필요성
 
 **질문**: Supabase 카카오 provider가 이메일을 필수로 요구하는가? 카카오 이메일 동의 항목에 비즈 앱 전환이 필요한가? "Allow users without an email" 같은 옵션으로 닉네임과 프로필 사진만 받는 구성이 가능한가?
@@ -593,3 +595,95 @@ const loadMax = () => import("./features-max").then((r) => r.default)
 - Pretendard npm 패키지는 2023-11 이후 릴리스가 없다(저장소는 2026-07 푸시). 폰트 자체는 안정적이지만, 새 버전이 나오면 경로가 바뀔 수 있다.
 
 반영: 2026-10-28, 영향 목록 1~7, 9번. tasks.md(2.4절 Motion, Base UI Drawer, 복사형, Embla 행과 사용 규칙(SDK 지연 로딩, `zod/mini`, `next analyze`), T0.30, T0.35, T2.13), CLAUDE.md(2장 Next.js 16.x, React 19, shadcn base 계열, Base UI Drawer, 3장 `pnpm analyze`), prd.md(13장 PostHog 행). 8번(shadcn 계열 선택)은 T0.22에서 `base-vega`로 이미 결정됨
+
+## 8단계 운영 점검
+
+### T8.15 rate limit와 금칙어 최종 수치 점검 (MOD-04, MOD-05, DEAL-04, PLACE-05, PLACE-07, POLL-01)
+
+- 점검일: 2026-11-01. 기준: PRD v0.2.7, 마이그레이션 9개(20261030120000~20261101180000), `src/lib/moderation`, 서버 액션.
+- 결론: **PRD의 모든 한도 수치가 DB에서 강제되고 화면 문구와 일치한다. 금칙어는 PRD 대상 입력 경로 전부(후기, 할인 내용, 신고 기타 글, 투표방 제목, 닉네임)에 서버 액션에서 적용된다. 다만 금칙어는 DB가 아니라 서버 액션에서만 검사하므로, 로그인한 사용자가 publishable 키와 자기 세션으로 PostgREST를 직접 부르면 금칙어를 건너뛸 수 있다(한도는 DB라 건너뛸 수 없음).** 수치 변경과 DB 변경은 없다. 수치 정합성은 `src/lib/moderation/limits.test.ts`가 PRD = 마이그레이션 = 문구로 고정한다.
+
+#### 한도 표
+
+| 대상 | PRD | 구현 값 | 강제 위치 | 화면 |
+| --- | --- | --- | --- | --- |
+| 후기 | 하루 20 (MOD-05) | 20 | DB `private.consume_daily_quota('reviews')`, reviews insert 트리거. 지워도 줄지 않음 | 열 때 미리 알림 + 저장 오류 `moderationCopy.limits.reviews` |
+| 신고 + 식당 정보 제보 | 합산 하루 30 (MOD-05, D-13) | 30 | DB 같은 함수 `reports`, review_reports와 place_reports insert 트리거 | `limits.reports` |
+| 할인 제보 | 하루 10 (DEAL-04) | 10 | DB `register_deal` 안에서 `deals` | `limits.deals` |
+| 투표방 만들기 | 하루 10 (MOD-05) | 10, 보내기 전 취소는 반환 | DB `create_poll`의 `polls`, `cancel_unsent_poll`의 `refund_daily_quota` | `pollCreateCopy` "하루 10개까지" |
+| 방문 기록 | 하루 20 (T5.14) | 20 | DB visits insert 트리거 | `limits.visits` |
+| 웨이팅 | 같은 식당 30분 1회, 2분 되돌리기 (PLACE-07) | 30분, 2분 | DB `report_wait`, wait_reports 삭제 정책 | cooldown(retryAt) |
+| 정보 제보 같은 종류 | 같은 식당 같은 종류 하루 1회 (PLACE-05) | 1회 | DB unique (user_id, place_id, kind, kst_day) | duplicate |
+| 같은 대상 신고 | 1회 | 1회 | DB unique (user_id, review_id), (user_id, deal_id) | duplicate |
+| 할인 같은 유형 | 최신 하나 (DEAL-04 병합) | 하나 | DB 부분 unique index + `register_deal` replace | 중복 단계 |
+| 아직 해요 / 끝났어요 | 1인 1응답 | 1 | DB 기본 키 (deal_id, user_id) | |
+| 투표방 참여 | 최대 30명 | 30 | DB `join_poll` | |
+| 후보 | 2~5곳, 제안 승인 후 5곳 유지 | 2~5, 참여자 제안 대기 1인 3곳 | DB `create_poll`, `add_poll_candidate` | |
+| 기피 경고 확인 | (T7.6 설계) | 한 방 하루 10번 | DB `poll_avoid_flags` + `private.poll_avoid_usage` | |
+| 글자 수 | 후기 100, 할인 60, 제목 20, 닉네임 20 | 같음 | DB check + zod | |
+| 사무실, 기피 규칙, 즐겨찾기, 다시 안 갈 곳 | (스팸 방지 상한) | 5, 50, 300, 300 | DB 트리거 | |
+| 정지 계정 쓰기 | (MOD-06) | 차단 | DB `block_suspended_writer` | suspended |
+
+#### 금칙어 적용 지점
+
+| 입력 | 대상 근거 | 검사 위치 | 비고 |
+| --- | --- | --- | --- |
+| 한 줄 후기(작성, 수정, 상세 직접 쓰기) | MOD-04 | 서버 액션 zod `withoutBannedContent` (`feedback-requests.ts`) | |
+| 할인 내용 | DEAL-04 | 서버 액션 (`report-requests.ts` registerDealSchema) | |
+| 신고 "기타" 글(후기, 할인) | DEAL-04, D-13 | 서버 액션 (`report-requests.ts` note) | |
+| 투표방 제목(만들기, 고치기) | POLL-01 | 서버 액션 (`poll/create/actions.ts` titleSchema) | |
+| 닉네임(나 탭) | 4단계 사용자 결정 | 서버 액션 (`me/settings.ts`) | |
+| 첫 로그인 닉네임(카카오, 구글, 네이버) | T6.17 후속 | `/auth/callback`에서 검사, 걸리면 "점심손님 NNNN" | |
+| 정보 제보, 웨이팅, 투표, 제안 | 자유 글 없음 | 해당 없음 | 칩과 숫자만 |
+| 사무실 이름, 기피 규칙 값 | 본인만 보는 값 | 검사 안 함 | 다른 사람에게 보이지 않음 |
+
+목록: 192개(T8.15에서 도박, 투자 권유, 홍보 문의 합성어 10개 추가, D-13 상한 200 안). 오탐 예문 5개를 테스트에 함께 넣었다.
+
+#### 빠진 곳과 위험
+
+1. **금칙어 직접 호출 우회(중간)**: reviews, review_reports, profiles는 authenticated에 insert/update 열 권한이 있고 `create_poll`, `update_poll`, `register_deal`은 authenticated가 실행할 수 있다. 서버 액션을 거치지 않으면 금칙어 검사가 없다. 한도와 정지, 신고 3건 자동 숨김(MOD-02)은 DB라 그대로 걸린다. 선택지는 아래 "사용자 결정".
+2. **투표(cast_vote)와 제안 반복(낮음)**: 표는 후보마다 1표라 수는 늘지 않지만 다시 보내기마다 Realtime 방송이 나간다. 참여자 제안은 대기 3곳 상한이 있으나 방장이 거절하면 지워져 다시 제안할 수 있다. 한 방 안 30명 범위라 MVP에서는 두고 베타 지표로 본다.
+3. **만들고 취소 반복(낮음)**: 보내기 전 취소는 한도를 돌려주므로 만들기와 취소를 되풀이할 수 있다. 행은 지워지고 남는 데이터가 없어 두었다.
+4. **닉네임 변경 빈도(낮음)**: 설정 저장은 rate limit 대상 밖(CLAUDE.md 7장 목록 밖). 금칙어는 걸린다.
+
+#### 사용자 결정
+
+- 금칙어 우회 대응. 기본안 A.
+  - A. MVP와 클로즈드 베타는 지금 구조 유지. 우회에는 개발자 도구와 토큰 추출이 필요하고, 신고 3건 자동 숨김과 관리자 정지가 뒤를 받친다. 공개 출시 전 다시 본다.
+  - B. DB 안전망: 핵심 욕설과 연락처 정규식만 SQL 함수로 옮겨 reviews, place_deals, review_reports, polls, profiles 트리거에서 거절. 목록이 TS와 SQL 두 벌이 되어 함께 고쳐야 한다. 새 마이그레이션 1개.
+  - C. 직접 쓰기 권한 회수: 해당 열의 insert/update 권한을 거두고 쓰기를 보안 함수 + 서버 전용 확인으로 옮긴다. 가장 확실하지만 RLS 테스트와 서버 액션을 넓게 고쳐야 한다.
+
+### T8.17 데이터 백업
+
+- 결론: T0.19대로 **필요**. `pnpm db:backup`(`scripts/db-backup.mjs`)을 만들었다. 공식 백업 안내와 같은 역할, 스키마, 데이터 세 덤프를 `supabase db dump --linked`로 받아 gzip, 저장소 밖 `~/lunchmate-backups/<KST 날짜_시각>/`(LUNCHMATE_BACKUP_DIR)에 폴더 700, 파일 600으로 두고 manifest.json(크기, sha256)을 남긴다. 8개(LUNCHMATE_BACKUP_KEEP)를 넘는 옛 폴더는 지운다. 저장소 안 경로, 연결 프로젝트와 SUPABASE_PROJECT_REF 불일치는 거절한다. DB 비밀번호는 환경변수 SUPABASE_DB_PASSWORD로만 CLI에 넘기고 CLI 출력은 가린 뒤 보여 준다(`--dry-run` 출력에 PGPASSWORD가 그대로 찍히므로 스크립트는 CLI dry-run을 쓰지 않는다).
+- 실행 조건: supabase CLI 로그인과 link, **Docker 실행 중**.
+- 2026-11-01 시도: `pnpm db:backup --dry-run` 통과, 실제 덤프는 Docker가 꺼져 있어 실행하지 못했다(종료 코드 2, 안내 문구 출력).
+- 복원(새 프로젝트, 공식 안내): `gunzip *.sql.gz` 뒤 `psql --single-transaction --variable ON_ERROR_STOP=1 --file roles.sql --file schema.sql --command 'SET session_replication_role = replica' --file data.sql --dbname <연결 문자열>`. 클라우드 개발 DB에 직접 복원하는 것은 파괴적 작업이라 사용자 명시 요청 없이는 하지 않는다(CLAUDE.md 7.1).
+- 주 1회 실행(로컬 launchd 예시, 매주 월요일 09:00. Docker Desktop이 켜져 있어야 한다):
+
+```xml
+<!-- ~/Library/LaunchAgents/com.lunchmate.db-backup.plist, 등록: launchctl load ~/Library/LaunchAgents/com.lunchmate.db-backup.plist -->
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.lunchmate.db-backup</string>
+  <key>WorkingDirectory</key><string>/Users/kmyu/Desktop/project/lunchmate</string>
+  <key>ProgramArguments</key><array>
+    <string>/bin/zsh</string><string>-lc</string><string>pnpm db:backup</string>
+  </array>
+  <key>StartCalendarInterval</key><dict>
+    <key>Weekday</key><integer>1</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key><string>/Users/kmyu/lunchmate-backups/backup.log</string>
+  <key>StandardErrorPath</key><string>/Users/kmyu/lunchmate-backups/backup.log</string>
+</dict></plist>
+```
+
+  cron이면 `0 9 * * 1 cd /Users/kmyu/Desktop/project/lunchmate && /bin/zsh -lc 'pnpm db:backup' >> ~/lunchmate-backups/backup.log 2>&1`.
+- 사용자 결정: 실행 방식. 기본안 로컬 launchd(비밀값이 기기 밖으로 나가지 않음). 대안 GitHub Actions 주 1회(러너에 Docker 있음, 저장소 Secrets에 DB 비밀번호와 SUPABASE_ACCESS_TOKEN 등록 필요, 결과물은 암호화 후 비공개 보관소에. auth.users와 비공개 후기가 들어가므로 Actions 아티팩트에 평문으로 두지 않는다). 베타 시작 시 Pro 전환(일일 백업 7일)을 다시 검토한다.
+- 백업에는 개인정보(auth.users, 비공개 후기, 사무실 핀 좌표)가 들어간다. iCloud 같은 동기화 폴더에 두지 않는다. 카카오 장소 데이터는 DB에 place_id, place_url만 있어 백업에도 그 이상은 없다(T0.16).
+
+### T8.18 테스트 계정 정리
+
+- `pnpm test:cleanup`(`scripts/test-cleanup.mjs`, 기존 `pnpm test:rls:cleanup`과 같은 스크립트로 통합). 기본 드라이런, `--yes`일 때만 지운다.
+- 세 겹 판정(`scripts/test-cleanup/policy.mjs`, 테스트 있음): 닉네임 test_(프로필, 없으면 가입 메타데이터) + 이메일 test_rls_@RLS_TEST_EMAIL_DOMAIN(기본 example.com, 하네스와 E2E 헬퍼만 만드는 모양) + email provider만. 셋 다 맞으면 삭제, 일부만 맞으면 "확인 필요"로 보이기만 한다. 실제 사용자는 소셜 로그인이고 이메일을 받지 않으므로 닉네임을 test_로 지어도 지워지지 않는다.
+- 사용자 삭제는 Auth Admin API, 딸린 데이터는 on delete cascade(T6.27). 방장 없는 test_ 제목 투표방을 이어서 지운다. 출력에는 id 앞 8자와 닉네임만, 이메일과 키는 찍지 않는다.
+- 2026-11-01 드라이런: Auth 사용자 3명 가운데 삭제 대상 0명, 확인 필요 0명, 방장 없는 테스트 투표방 38개(E2E 잔여). 삭제는 실행하지 않았다.
