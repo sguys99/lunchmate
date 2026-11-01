@@ -1,7 +1,7 @@
 // 식당 상세 시안 문구 (T5.2, /design-lab/place/c). PLACE-01~08, NAV-01~04.
 // D-10에서 C안을 골라 A, B 화면과 그 안만 쓰던 문구는 지웠다(CLAUDE.md 6.1-5).
 // 상태 안내와 설명은 습니다체, 제안과 피드백 요청은 해요체 (tasks.md 2.2절, copy-guide 4.2, 4.3, 4.9, 4.12).
-// 배지, 버튼, 웨이팅 단계 같은 공용 라벨은 badges.ts, home.ts(placeDetailCopy), common.ts 값을 쓴다.
+// 배지, 버튼, 웨이팅 단계 같은 공용 라벨은 badges.ts, design-lab-preview.ts(placeDetailCopy), common.ts 값을 쓴다.
 // 시안을 고른 뒤(T5.3) 실제 상세(T5.33~T5.35)로 옮길 때 src/copy/place.ts로 정리한다.
 
 export const placeLabCopy = {

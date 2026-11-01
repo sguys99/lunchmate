@@ -184,29 +184,3 @@ export const homeCopy = {
     },
   },
 } as const;
-
-// 투표 득표 바와 상세 바텀시트 문구 (design-lab 비교 화면 2, T1.12).
-export const pollPreviewCopy = {
-  participants: (count: number) => `${count}명 참여`,
-  votes: (count: number) => `${count}표`,
-  deadline: (hhmm: string) => `${hhmm} 마감`,
-  minutesLeft: (minutes: number) => `${minutes}분 남음`,
-  myVote: "내 선택",
-  vote: "투표하기",
-  /** 득표가 하나도 없을 때 (design-lab 시트 화면의 empty 상태) */
-  noVotes: "아직 투표한 사람이 없습니다. 먼저 골라볼까요?",
-} as const;
-
-export const placeDetailCopy = {
-  address: "주소",
-  phone: "전화",
-  hours: "영업시간",
-  menu: "대표 메뉴",
-  call: "전화 걸기",
-  viewOnNaver: "네이버 플레이스에서 보기",
-  addToPoll: "투표에 추가",
-  favorite: "즐겨찾기",
-  share: "공유",
-  reviewCount: (count: number) => `후기 ${count}건`,
-  priceReportCount: (count: number) => `제보 ${count}건`,
-} as const;

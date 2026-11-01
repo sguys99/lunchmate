@@ -1,6 +1,7 @@
 // 4상태 공용 로직 (T1.13). 상태별로 어떤 데이터와 문구를 쓰는지는 여기서 정하고,
 // 스켈레톤, 빈 상태, 오류, 오프라인의 시각 표현은 시안별 화면이 정한다.
-import { homeCopy, pollPreviewCopy } from "@/copy/home";
+import { pollPreviewCopy } from "@/copy/design-lab-preview";
+import { homeCopy } from "@/copy/home";
 import {
   MOCK_DETAIL_PLACE,
   MOCK_HOME_EMPTY,

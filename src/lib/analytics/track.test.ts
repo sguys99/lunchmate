@@ -8,13 +8,8 @@ const posthogMock = vi.hoisted(() => ({
 vi.mock("posthog-js", () => ({ default: posthogMock }));
 
 import type { AnalyticsEvent } from "./events";
-import {
-  MAX_QUEUED_EVENTS,
-  initPostHog,
-  posthogBeforeSend,
-  posthogConfig,
-  resetPostHogForTest,
-} from "./posthog";
+import { MAX_QUEUED_EVENTS, initPostHog, resetPostHogForTest } from "./posthog";
+import { posthogBeforeSend, posthogConfig } from "./posthog-config";
 import { FILTERED } from "./scrub";
 import { capturePageview, track } from "./track";
 import type { CaptureResult } from "posthog-js";

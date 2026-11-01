@@ -28,9 +28,9 @@ function args(name) {
 }
 
 const routes = args("route").length > 0 ? args("route") : DEFAULT_ROUTES;
-// 홈 예산은 200 KB. 7단계에서 next/og 라우트(투표 OG, POLL-04)가 Turbopack 런타임에 비동기 모듈 지원(약 0.5 KB)을
-// 모든 페이지에 더해 임시로 201 KB(사용자 결정 2026-11-01). T8.11에서 홈 코드를 줄여 200으로 되돌린다.
-const budgetKb = Number(arg("budget", "201"));
+// 홈 예산은 200 KB(CLAUDE.md 9장). 7단계 next/og 런타임 비용(약 0.5 KB) 때문에 잠시 201 KB였다가
+// T8.11에서 홈 첫 로드를 줄여 200으로 되돌렸다(docs/design/bundle-log.md 2026-11-01).
+const budgetKb = Number(arg("budget", "200"));
 const dir = resolve(arg("dir", ".next"));
 const statsPath = resolve(dir, "diagnostics/route-bundle-stats.json");
 

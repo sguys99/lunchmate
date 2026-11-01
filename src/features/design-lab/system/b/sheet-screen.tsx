@@ -9,7 +9,8 @@ import * as m from "motion/react-m";
 import { Check, X } from "lucide-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { quietStoneScreenCopy as copy } from "@/copy/design-lab-quiet-stone";
-import { homeCopy, placeDetailCopy, pollPreviewCopy } from "@/copy/home";
+import { placeDetailCopy, pollPreviewCopy } from "@/copy/design-lab-preview";
+import { homeCopy } from "@/copy/home";
 import { SheetSkeleton, SkeletonLine } from "@/components/states";
 import { Skeleton } from "@/components/ui/skeleton";
 import {

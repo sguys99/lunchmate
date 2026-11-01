@@ -14,7 +14,7 @@
 // distinct_id를 서버에서 읽기)
 import type { AnalyticsEvent, AnalyticsPropertyValue } from "./events";
 import { sanitizeEventProperties } from "./events";
-import { POSTHOG_DEFAULT_HOST } from "./posthog";
+import { POSTHOG_DEFAULT_HOST } from "./posthog-config";
 
 /**
  * 로그인 시작부터 콜백까지 같은 익명 id를 잇는 쿠키. /auth/sign-in이 넣고 /auth/callback이 읽은 뒤 지운다.

@@ -8,7 +8,7 @@
 // - 보유 기간: 탈퇴 시 auth.users on delete cascade(T6.27), 웨이팅 제보 하루(lunchmate_purge_wait_reports), 일일 한도 카운터
 //   그제 이전 삭제(lunchmate_purge_daily_usage), 관리자 처리 이력 1년(lunchmate_purge_moderation_actions), 끝난 투표는
 //   poll_members.user_id on delete set null(익명 참여자). 끝난 투표방 자체의 삭제 시점은 아직 없다(남은 일).
-// - 분석과 오류: src/lib/analytics/posthog.ts(autocapture 끔, identify 없음, person_profiles identified_only, $geoip_disable,
+// - 분석과 오류: src/lib/analytics/posthog-config.ts(autocapture 끔, identify 없음, person_profiles identified_only, $geoip_disable,
 //   좌표 스크러버), sentry-options.ts(sendDefaultPii false, 좌표 스크러버). 호스트 us.i.posthog.com, ingest.us.sentry.io.
 // - 리전: Supabase 서울 ap-northeast-2(docs/setup-guide.md, T0.10), Vercel 서버 함수 icn1(vercel.json).
 // 법정 기재 항목 근거: 개인정보 보호법 제30조 제1항, 제28조의8 제2항(국외 이전 공개 사항), 개인정보보호위원회

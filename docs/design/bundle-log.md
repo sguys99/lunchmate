@@ -3,6 +3,32 @@
 > 라이브러리를 추가할 때마다 홈 번들에 주는 영향을 기록합니다(tasks.md 2.4절, CLAUDE.md 9장).
 > **홈(오늘) 화면 JS 예산: 200KB (gzip) 이하.** 측정은 `pnpm build` 후 `pnpm bundle:report` 기준입니다. 기본으로 랜딩 `/`(모든 라우트가 공유하는 루트 첫 로드)와 실제 홈 `/today` 두 라우트의 첫 로드 gzip 합계를 재고, 하나라도 예산을 넘으면 exit 1입니다. `postbuild`에 연결되어 있어 `pnpm build`와 Vercel 빌드가 예산 초과 시 실패합니다(T2.22). 원인 추적은 `pnpm analyze` 후 `next analyze export --route <경로>`로 하고, 예산에 가까워지면 추가 전에 사용자에게 묻습니다.
 
+## 최근 측정 요약 (5단계 이후)
+
+긴 비고는 아래 "기록" 표에 있고, 이 표는 단계별 첫 로드 합계만 모았습니다. 값은 모두 `pnpm build` postbuild(`bundle-report`, 파일 gzip level 9) 기준입니다.
+
+| 날짜 | 시점 | `/` (gzip) | `/today` (gzip) | 검사 예산 | 여유 (`/today`) |
+| --- | --- | --- | --- | --- | --- |
+| 2026-10-31 | 5단계 재측정 (T5.41) | 177.8 KB | 198.3 KB | 200 KB | 1.7 KB |
+| 2026-11-01 | 6단계 피드백 UI (T6.8~T6.14) | 177.8 KB | 199.9 KB | 200 KB | 0.1 KB |
+| 2026-11-01 | 6단계 제보와 신고, 마무리 | 178.0 KB | 199.8 KB | 200 KB | 0.2 KB |
+| 2026-11-01 | 7단계 투표와 회식 (next/og 런타임 +0.5 KB) | 178.6 KB | 200.4 KB | 201 KB (임시) | 0.6 KB |
+| 2026-11-01 | 8단계 서비스 워커, 오프라인 (T8.3, T8.4) | 178.7 KB | 200.5 KB | 201 KB (임시) | 0.5 KB |
+| 2026-11-01 | T8.11 착수 시점 (T8.7, T8.8 모션 정리 등 포함) | 178.7 KB | 200.7 KB | 201 KB (임시) | 0.3 KB |
+| 2026-11-01 | **T8.11 감량 후** | **178.7 KB** | **199.0 KB** | **200 KB (복귀)** | **1.0 KB** |
+
+### T8.11 감량 내역 (2026-11-01)
+
+| 항목 | 무엇을 옮겼나 | `/today` 변화 (gzip) |
+| --- | --- | --- |
+| 분석 시작 코드의 env 검증 제거 | `scheduleAnalytics()`(`src/lib/analytics/index.ts`)가 `clientEnv()` 대신 `process.env.NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`를 직접 읽는다(Sentry DSN과 같은 방식). `src/lib/env/client.ts`와 `keys.ts`(키 목록, 필수 판정, 오류 클래스)가 홈 첫 로드에서 빠짐. 형식 검증은 서버 시작 때(`instrumentation` → `env/server.ts` → `clientEnv()`) 그대로 한다 | 아래 항목과 합쳐 -1.4 KB (200.7 → 199.3) |
+| PostHog 옵션과 전송 직전 필터 분리 | `posthogConfig`, `posthogBeforeSend`, `POSTHOG_DEFAULT_HOST`를 `src/lib/analytics/posthog-config.ts`로 옮기고 `initPostHog()`가 `posthog-js`와 함께 동적 import. 첫 로드에는 큐(`captureOrQueue`)만 남는다. 필터 동작과 적용 시점(초기화 때 `before_send` 등록)은 같다 | (위에 포함) |
+| design-lab 전용 문구 분리 | `src/copy/home.ts`의 `pollPreviewCopy`, `placeDetailCopy`(design-lab 시안 B 시트 화면 전용)를 `src/copy/design-lab-preview.ts`로 옮김. 홈 첫 로드 청크에 실려 있던 문자열이 빠짐 | -0.3 KB (199.3 → 199.0) |
+
+- 결과: `/today` 200.7 → **199.0 KB**(-1.7 KB), `/` 178.7 KB(변화 없음, 바뀐 모듈은 모두 `(app)` 레이아웃 아래). 검사 기본 예산을 201 → **200 KB**로 되돌림(`scripts/bundle-report.mjs`).
+- 분석 방법: `pnpm analyze` 후 `next analyze export --route /today`와 `--route /`의 JSON Lines에서 `bootstrap`, `render_dependent` 그룹의 클라이언트 JS 출력만 첫 로드로 보고, `part` 레코드(소스 파일별 크기)를 `/`에 없는 소스만 골라 합산했다. `/today` 전용 첫 로드 모듈은 약 47 KB(파일별 개별 gzip 합이라 실제보다 크게 잡힘)였고, 큰 순서는 `today-screen.tsx` 4.8, `today-cards.tsx` 2.4, TanStack Query core(queryObserver, query, queryClient, mutation 등) 약 11, `copy/home.ts` 2.1, `today-header.tsx` 2.0, `env/client.ts` + `keys.ts` 1.6, zustand persist 1.0 KB였다.
+- 남겨 둔 후보(다음 감량 때): `copy/home.ts`의 지연 화면 전용 문구(`needLocation`, `states.empty/error/offline`, `justPick` 결과 카드, `error.naverLink`, 약 0.3 KB 추정)를 지연 청크 쪽 파일로 나누기. 홈 컴포넌트와 design-lab이 같은 객체를 공유하므로 사용처를 함께 바꿔야 한다. TanStack Query의 mutation과 infinite 모듈은 `QueryClient`가 직접 참조해 트리 셰이킹되지 않는다.
+
 ## 기록 방법
 
 - 홈 번들 영향: 홈 첫 로드에 포함되는 gzip 증가량. 동적 import나 다른 라우트에만 들어가면 `0`으로 쓰고 비고에 실제 청크 크기를 적습니다.
@@ -40,3 +66,4 @@
 | 2026-11-01 | 6단계 마무리: 지도 할인 점과 목록 할인 배지(D-09 보강), 지도 집계 연결, 신고한 후기 한 줄 가림(D-13 안건 11), 미선택 6단계 시안 삭제 (의존성 변화 없음) | 지도 마커 오른쪽 위 6px 점, 시트 목록 `할인` 배지(`DealBadge` 정적 import, 툴팁 없음), 지도가 홈과 같은 place_stats 쿼리(`rec/stats-query`, 읽기 본체는 queryFn 안 동적 import) | `/today` 0, `/` 0, `/map` -0.4 KB (297.7 → 297.3) | `/today` 199.8 KB, `/` 178.0 KB | **`/` 178.0 KB, `/today` 199.8 KB (예산 통과, 여유 0.2 KB)**, `/map` 297.3 KB | `pnpm build`(postbuild `bundle-report` 통과, 파일 gzip), `/map`은 `node scripts/bundle-report.mjs --route /map`(참고값). 지도 코드는 홈 첫 로드 밖이고 배지와 집계 쿼리 모듈은 이미 지도 상세 청크와 공용이라 늘지 않았다. `/map` 감소분은 같은 작업 트리의 다른 변경(문구 정리 등)이 섞인 값 |
 | 2026-11-01 | 7단계 투표와 회식 구현(T7.11~T7.28), 의존성 변화 없음(Kakao JS SDK 2.8.3은 CDN 스크립트, 공유 누를 때 로드) | 홈 "친구랑 정하기", "회식 모드" 진입 줄, 카드 더 보기 "투표에 추가", 투표 OG 라우트 `/api/og/poll/[code]`(next/og) | 진입 줄 전체(버튼, 로그인 뒤 복귀, 만들기 시트 자리)를 `home-entries.tsx`로 떼어 React.lazy, 진입 로직은 누른 뒤 `add-to-poll`, 시트 본체는 그 뒤 `next/dynamic` | `/today` +0.6 KB (199.8 → 200.4) | **`/today` 200.4 KB (예산 임시 201 KB, 사용자 결정)**, `/` 178.6 KB | `pnpm build`(파일 gzip). 원인을 빌드 비교로 나눔: (1) **next/og 라우트**: 6단계 끝(d855142) 199.8 → 시안 커밋 0ea0183 200.3. design-lab 공유 시안의 OG 라우트를 빼면 199.8로 돌아가고, 지금 트리에서 OG 라우트 두 개를 모두 빼면 -0.5 KB. Turbopack 런타임 청크(`turbopack-*.js`)가 3.8 → 4.3 KB로 커지며 비동기 모듈 지원("turbopack queues", 청크 로더)이 붙는다. 서버 라우트지만 브라우저 런타임에 반영되는 프레임워크 비용이라 실제 OG 라우트(POLL-04)를 두는 한 남는다. (2) 홈 진입 코드: 처음 +0.9 KB(200.7)였고 진입 줄 지연 로딩으로 +0.1 KB까지 줄임. `countdownUnits`를 `countdown-units.ts`로 나눈 것은 수치 변화 없음(확인용으로 남김). **T8.11에서 홈 코드 0.4 KB 이상을 줄여 예산을 200 KB로 되돌린다** |
 | 2026-11-01 | 8단계 서비스 워커와 오프라인 기본 화면 (T8.3, T8.4, 새 npm 의존성 없음) | `public/sw.js`(직접 작성, 앱 셸만 캐시), `/offline` 폴백 화면, 오늘 "연결 전 결과" 한 줄 | 등록은 루트 layout 인라인 스크립트(load 뒤 유휴 시간, JS 청크 없음). "연결 전 결과" 줄은 `today-stale-note.tsx` React.lazy, 카드가 뜬 뒤 온라인일 때 미리 받음. 오프라인 문구는 `src/copy/offline.ts`로 분리 | `/today` +0.1 KB (같은 작업 트리 200.4 → 200.5), `/` 0 (178.7) | **`/` 178.7 KB, `/today` 200.5 KB (예산 임시 201 KB 통과, 여유 0.5 KB)** | `pnpm build`(postbuild 통과). 첫 시도는 `/today` 201.3, `/` 179.0으로 초과: 문구를 `common.ts`(모든 라우트 공용)에, wifi-off 아이콘을 `inline-icons.tsx`(루트 오류 경계 경유 모든 라우트 첫 로드)에 넣은 몫(+0.3), 줄 컴포넌트를 홈 첫 로드에 둔 몫(+0.6). 문구와 아이콘을 별도 파일로, 줄을 지연 청크로 옮겨 회수. `sw.js`(약 7 KB raw)는 정적 파일이라 첫 로드 밖 |
+| 2026-11-01 | 번들 예산 재점검 (T8.11, 의존성 변화 없음) | 홈 예산 200 KB 복귀 | 분석 시작 코드의 env 검증 제거, PostHog 옵션 동적 import, design-lab 전용 문구 분리 | `/today` -1.7 KB (200.7 → 199.0), `/` 0 (178.7) | **`/` 178.7 KB, `/today` 199.0 KB (예산 200 KB 통과, 여유 1.0 KB)** | `pnpm build`(postbuild 통과, 검사 기본 예산 201 → 200). 착수 시점 200.7 KB는 8단계 T8.3, T8.4 기록(200.5) 뒤 모션 감사 등 다른 8단계 작업이 더해진 값. 항목별 수치와 분석 방법은 위 "T8.11 감량 내역" |
