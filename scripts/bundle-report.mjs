@@ -1,6 +1,6 @@
 // 라우트별 첫 로드 JS(gzip) 합계를 계산하고, 한 라우트라도 예산을 넘으면 exit 1.
 // 입력: `next build`가 만드는 .next/diagnostics/route-bundle-stats.json (Turbopack 빌드).
-// 사용: node scripts/bundle-report.mjs [--route / --route /today] [--budget 200] [--dir .next]
+// 사용: node scripts/bundle-report.mjs [--route / --route /today] [--budget 201] [--dir .next]
 //   --route를 주지 않으면 DEFAULT_ROUTES를 모두 검사한다. postbuild에서 자동 실행되어 Vercel 빌드도 막는다 (T2.22).
 // 의존성 없음(Node 내장만). 라우트마다 마지막 줄은 docs/design/bundle-log.md 표에 붙여넣는 형식이다.
 import { readFileSync, existsSync } from "node:fs";
@@ -28,7 +28,9 @@ function args(name) {
 }
 
 const routes = args("route").length > 0 ? args("route") : DEFAULT_ROUTES;
-const budgetKb = Number(arg("budget", "200"));
+// 홈 예산은 200 KB. 7단계에서 next/og 라우트(투표 OG, POLL-04)가 Turbopack 런타임에 비동기 모듈 지원(약 0.5 KB)을
+// 모든 페이지에 더해 임시로 201 KB(사용자 결정 2026-11-01). T8.11에서 홈 코드를 줄여 200으로 되돌린다.
+const budgetKb = Number(arg("budget", "201"));
 const dir = resolve(arg("dir", ".next"));
 const statsPath = resolve(dir, "diagnostics/route-bundle-stats.json");
 
@@ -83,7 +85,9 @@ function report(route) {
   console.log(
     `합계: ${kb(totalGzip)} KB gzip (raw ${kb(totalRaw)} KB), 예산 ${budgetKb} KB, 여유 ${(budgetKb - totalGzip / 1024).toFixed(1)} KB`,
   );
-  console.log(`| ${today} | | | | +? KB | ${kb(totalGzip)} KB (\`${route}\`) | |`);
+  console.log(
+    `| ${today} | | | | +? KB | ${kb(totalGzip)} KB (\`${route}\`) | |`,
+  );
   console.log("");
   return { route, total: totalGzip, over };
 }

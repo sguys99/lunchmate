@@ -53,9 +53,22 @@ export function detailContent(
     headingLevel: "h2",
     // 상세에서 길찾기를 눌러도 어제 피드백 띠를 접는다(T6.8, D-11 안건 2)
     onDirectionsLaunched: () =>
-      useTodaySession
-        .getState()
-        .patch({ directedOn: kstDateKey(new Date()) }),
+      useTodaySession.getState().patch({ directedOn: kstDateKey(new Date()) }),
+    // 투표에 추가(T7.12, D-15 안건 9). 메뉴 노출은 flags.pollEntry가 정한다(place-detail.tsx)
+    onAddToPoll: () =>
+      void import("@/features/poll/create/add-to-poll").then((m) =>
+        m.addPlaceToPoll(
+          {
+            placeId: card.id,
+            placeUrl: card.placeUrl,
+            name: card.name,
+            category: card.category,
+            position: card.position,
+          },
+          "detail",
+          p.meal,
+        ),
+      ),
   };
 }
 

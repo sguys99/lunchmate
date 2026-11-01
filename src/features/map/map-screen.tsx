@@ -28,6 +28,7 @@ import {
   PlaceDetailBody,
   type PlaceDetailProps,
 } from "@/features/place/detail";
+import { addPlaceToPoll } from "@/features/poll/create/add-to-poll";
 import { useReducedMotion } from "@/features/rec/use-reduced-motion";
 import { naverPlaceSearchUrl } from "@/lib/naver/directions";
 import { cn } from "@/lib/utils";
@@ -177,6 +178,19 @@ function detailProps(s: MapScreenState, place: MapPlace): PlaceDetailProps {
         : { kind: "current", name: copy.base.here, position: b.center }
       : null,
     headingLevel: "h2",
+    // 투표에 추가(T7.12, D-15 안건 9). 메뉴 노출은 flags.pollEntry가 정한다(place-detail.tsx)
+    onAddToPoll: () =>
+      addPlaceToPoll(
+        {
+          placeId: place.id,
+          placeUrl: place.placeUrl,
+          name: place.name,
+          category: place.category,
+          position: place.position,
+        },
+        "map",
+        s.meal,
+      ),
   };
 }
 

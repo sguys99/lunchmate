@@ -33,13 +33,21 @@ export const TOKEN_EASINGS = [
   "emphasized",
 ] as const;
 
-const twMerge = extendTailwindMerge({
+/**
+ * 타입 스케일 묶음 유틸리티 type-*(globals.css @utility, 글꼴, 크기, 줄 높이, 굵기, 자간을 한 번에).
+ * 사용자 정의 클래스라 tailwind-merge가 그룹을 모르면 `type-title`과 `type-heading`이 둘 다 남아 CSS 순서로
+ * 결정된다(DrawerTitle 기본 type-title에 type-heading을 넘겨도 바뀌지 않던 문제, T7.11). 한 그룹으로 묶어 뒤의 값이 이긴다.
+ */
+const twMerge = extendTailwindMerge<"type-step">({
   extend: {
     theme: {
       text: [...TOKEN_TEXT_STEPS],
       radius: [...TOKEN_RADIUS_COMPONENTS],
       shadow: ["sheet"],
       ease: [...TOKEN_EASINGS],
+    },
+    classGroups: {
+      "type-step": [{ type: [...TOKEN_TEXT_STEPS] }],
     },
   },
 });

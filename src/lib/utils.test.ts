@@ -31,6 +31,16 @@ describe("cn 토큰 이름 (T1.19)", () => {
     expect(cn("text-body text-title")).toBe("text-title");
   });
 
+  it("타입 스케일 묶음 type-*은 뒤의 값으로 병합한다(DrawerTitle 기본값 덮어쓰기)", () => {
+    expect(cn("type-title break-keep", "type-heading")).toBe(
+      "break-keep type-heading",
+    );
+    expect(cn("type-body-sm", "type-caption text-muted-foreground")).toBe(
+      "type-caption text-muted-foreground",
+    );
+    expect(cn("type-label text-foreground")).toBe("type-label text-foreground");
+  });
+
   it("컴포넌트 라운드와 그림자, 이징을 같은 그룹으로 병합한다", () => {
     expect(cn("rounded-md", "rounded-button")).toBe("rounded-button");
     expect(cn("shadow-md", "shadow-sheet")).toBe("shadow-sheet");

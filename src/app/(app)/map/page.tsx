@@ -9,6 +9,7 @@ import { mapCopy } from "@/copy/map";
 import { loadMap } from "@/features/map/load-map";
 import { MapScreen } from "@/features/map/map-screen";
 import { MapScreenSkeleton } from "@/features/map/map-skeleton";
+import { PollCreateHostSlot } from "@/features/poll/create/host-slot";
 import { isEnabled } from "@/lib/flags";
 
 export const metadata: Metadata = { title: mapCopy.metaTitle };
@@ -23,7 +24,13 @@ async function MapTab({
   const params = await searchParams;
   const data = await loadMap(params);
   const lab = isEnabled("designLab") && params.map === "lab";
-  return <MapScreen data={data} providerKind={lab ? "lab" : "naver"} />;
+  return (
+    <>
+      <MapScreen data={data} providerKind={lab ? "lab" : "naver"} />
+      {/* 상세 "투표에 추가"(T7.12). 진입점 플래그가 켜질 때만 둔다(T7.35) */}
+      {isEnabled("pollEntry") ? <PollCreateHostSlot /> : null}
+    </>
+  );
 }
 
 export default function Page(props: { searchParams: Promise<SearchParams> }) {

@@ -5,9 +5,7 @@
 
 export const pollCreateLabCopy = {
   names: {
-    a: "시안 A 한 장 시트",
-    b: "시안 B 한 질문씩",
-    c: "시안 C 먼저 만들고 고치기",
+    c: "투표 만들기 C 먼저 만들고 고치기 (G7 선택안, 확인 화면)",
   },
   index: {
     title: "투표 만들기 시안 (T7.2)",

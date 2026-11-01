@@ -88,6 +88,14 @@ export type OnboardingMapProps = {
   /** 지도 오른쪽 아래(현위치 버튼) */
   corner?: ReactNode;
   className?: string;
+  /** 처음 지도 중심(저장된 좌표). 없으면 기본 중심. 핀은 만들지 않는다 */
+  initialCenter?: LatLng;
+  /** 지도 이름(스크린 리더). 기본은 회사 위치 */
+  mapLabel?: string;
+  /** 핀 이름. 기본은 회사 핀 */
+  pinTitle?: string;
+  /** true면 시트가 지도 아래를 덮지 않는 칸(지도 피커)이라 아래 여백을 두지 않는다 */
+  standalone?: boolean;
 };
 
 export function OnboardingMap({
@@ -99,6 +107,10 @@ export function OnboardingMap({
   registerMover,
   corner,
   className,
+  initialCenter,
+  mapLabel,
+  pinTitle,
+  standalone = false,
 }: OnboardingMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapInstance | null>(null);
@@ -116,6 +128,8 @@ export function OnboardingMap({
 
   // 콜백은 최신 값을 ref로 본다(지도 리스너를 다시 달지 않는다)
   const live = useRef({ interactive, onPinGesture });
+  // 처음 중심은 마운트 때 한 번만 쓴다(지도를 다시 만들지 않는다)
+  const startCenter = useRef(initialCenter ?? DEFAULT_MAP_CENTER);
   useEffect(() => {
     live.current = { interactive, onPinGesture };
   });
@@ -138,7 +152,7 @@ export function OnboardingMap({
         await provider.load();
         if (cancelled) return;
         map = provider.createMap(element, {
-          center: DEFAULT_MAP_CENTER,
+          center: startCenter.current,
           zoom: START_ZOOM,
         });
         mapRef.current = map;
@@ -213,7 +227,7 @@ export function OnboardingMap({
       position: pin,
       content: el,
       anchor: { x: 16, y: 46 },
-      title: copy.pinLabel,
+      title: pinTitle ?? copy.pinLabel,
       zIndex: 100,
       draggable: interactive,
       onDragStart: () => {
@@ -226,7 +240,7 @@ export function OnboardingMap({
       },
     });
     pinRef.current = { handle, el, draggable: interactive };
-  }, [pin, interactive, status]);
+  }, [pin, interactive, status, pinTitle]);
 
   // 걷는 거리 원 + 물러나기
   useEffect(() => {
@@ -304,14 +318,17 @@ export function OnboardingMap({
       {/* 모바일은 시트가 지도 아래 28px를 덮는다. 네이버 로고와 저작권 표시가 가리지 않게 지도를 그만큼 올린다 */}
       <section
         aria-label={commonCopy.tabs.map}
-        className="absolute inset-x-0 top-0 bottom-7 desktop:bottom-0"
+        className={cn(
+          "absolute inset-x-0 top-0",
+          standalone ? "bottom-0" : "bottom-7 desktop:bottom-0",
+        )}
       >
         <p id="ob-map-keys" className="sr-only">
           {copy.mapKeysHint}
         </p>
         <div
           role="application"
-          aria-label={copy.mapLabel}
+          aria-label={mapLabel ?? copy.mapLabel}
           aria-describedby={interactive ? "ob-map-keys" : undefined}
           aria-busy={status === "loading"}
           tabIndex={interactive && status === "ready" ? 0 : -1}

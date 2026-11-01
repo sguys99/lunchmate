@@ -556,7 +556,7 @@ basic-plan 8장 테이블 구성을 따른다. PRD 보완 사항:
 | `login_started` / `login_completed` | provider(kakao/google/naver), in_app_browser |
 | `feedback_prompt_shown` [PRD 추가] | visit_source(rec/poll/map/detail) |
 | `favorite_added` [PRD 추가] | place_id, source(rec/map/detail) |
-| `poll_candidate_added` [PRD 추가] | place_id, source(rec/map/detail/party) |
+| `poll_candidate_added` [PRD 추가] | place_id, source(rec/map/detail/party/favorite/history) (rec: 오늘 카드와 그 더 보기, 시트의 오늘 추천 묶음. favorite, history: 시트의 즐겨찾기, 최근 간 곳 묶음, D-15 안건 8) |
 | `place_names_resolved` [PRD 추가] | screen, total, unresolved, extra_calls (장소 이름 해석 집계, 좌표, place_id, 이름은 넣지 않음, T5.12a) |
 
 개인 식별 정보는 이벤트 속성에 넣지 않고, 위치 좌표는 보내지 않는다.

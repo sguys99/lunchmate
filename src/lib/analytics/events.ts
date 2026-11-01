@@ -63,14 +63,14 @@ export interface AnalyticsEventMap {
     screen: string;
   };
   deal_checked: { deal_id: string; answer: string };
-  poll_result_shared: { channel: "kakao" | "save" };
+  poll_result_shared: { channel: "kakao" | "save" | "share" };
   login_started: { provider: Provider; in_app_browser: boolean };
   login_completed: { provider: Provider; in_app_browser: boolean };
   feedback_prompt_shown: { visit_source: "rec" | "poll" | "map" | "detail" };
   favorite_added: { place_id: string; source: "rec" | "map" | "detail" };
   poll_candidate_added: {
     place_id: string;
-    source: "rec" | "map" | "detail" | "party";
+    source: "rec" | "map" | "detail" | "party" | "favorite" | "history";
   };
   /** 장소 이름 해석 집계(T5.12a). 개수만, place_id, 이름, 좌표는 넣지 않는다. */
   place_names_resolved: {

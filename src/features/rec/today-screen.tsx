@@ -14,7 +14,6 @@
 // 분석 이벤트(T5.39): recommendation_shown(같은 묶음 한 번), recommendation_reshuffled, card_swiped(대안을 큰 카드로),
 //   just_pick_clicked. directions_clicked와 favorite_added는 상세와 같은 흐름이 보낸다.
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   lazy,
@@ -28,7 +27,6 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { focusRing } from "@/components/ui/interaction";
 import { homeCopy } from "@/copy/home";
 import {
   notifyLoginSoon,
@@ -112,6 +110,12 @@ const LoginPromptSheet = lazy(() =>
   import("@/features/auth/login-prompt/use-login-prompt").then((m) => ({
     default: m.LoginPromptSheet,
   })),
+);
+/** 투표 시트 도우미(T7.11, T7.12). 누른 뒤에 받는다(홈 첫 로드 200KB 예산) */
+const pollEntry = () => import("@/features/poll/create/add-to-poll");
+/** 투표 만들기 시트 자리(T7.11, T7.12). 진입점이 보일 때만 비동기로 받는다(홈 첫 로드 밖) */
+const HomePollEntries = lazy(
+  () => import("@/features/poll/create/home-entries"),
 );
 /** "상세" 바텀시트(T5.20). 처음 누를 때 받는다(시트 진입점, 상세 문구, 빈 집계가 홈 첫 로드 밖) */
 const loadDetail = () => import("./today-detail");
@@ -350,6 +354,34 @@ export function TodayScreen({
     [engine, deck, placesById, meal, drawnAt],
   );
   const order = normalizeOrder(session.order, cards.length);
+
+  /* ---------- 같이 정하기 (T7.11, T7.12, REC-10, D-15) ---------- */
+
+  /** 진입 로직은 누른 뒤 받는 모듈(add-to-poll)에 있다. 여기서는 값만 넘긴다(홈 첫 로드 200KB 예산) */
+  const homePoll = {
+    meal,
+    cards,
+    offices: data.offices,
+    choice: session.choice,
+  };
+  /** 비로그인 진입: 로그인 유도 시트를 열고 돌아올 경로(D-15 안건 15) */
+  const needLogin = (next: string) => {
+    if (!loginOpen) {
+      notifyLoginSoon();
+      return;
+    }
+    setLogin({ open: true, next });
+  };
+  /** 카드 더 보기 "투표에 추가" (D-15 안건 9) */
+  const addCardToPoll = showEntries
+    ? (card: TodayCard) => {
+        if (!data.signedIn) {
+          promptSave();
+          return;
+        }
+        void pollEntry().then((m) => m.addHomeCard(card, meal));
+      }
+    : onAddToPoll;
   const heroIndex = order[0] ?? 0;
   const hero = cards[heroIndex];
   const key = deckKey(cards);
@@ -764,7 +796,7 @@ export function TodayScreen({
                   onBlocked={blockCard}
                   onRestored={restoreCard}
                   onLogin={promptSave}
-                  onAddToPoll={onAddToPoll}
+                  onAddToPoll={addCardToPoll}
                 />
               }
             />
@@ -810,7 +842,16 @@ export function TodayScreen({
             />
           ) : null}
 
-          {showEntries ? <Entries /> : null}
+          {showEntries ? (
+            <Suspense fallback={<div aria-hidden className="mt-4 min-h-11" />}>
+              <HomePollEntries
+                homePoll={homePoll}
+                signedIn={data.signedIn}
+                disabled={!online || cards.length < 2}
+                onNeedLogin={needLogin}
+              />
+            </Suspense>
+          ) : null}
         </div>
 
         <TodayActionBar
@@ -881,26 +922,5 @@ export function TodayScreen({
         </Suspense>
       ) : null}
     </div>
-  );
-}
-
-/** 친구랑 정하기, 회식 모드 (REC-10, T5.23). flags.pollEntry가 켜질 때(T7.35)만 보인다 */
-function Entries() {
-  const link = cn(
-    "inline-flex min-h-11 items-center rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground",
-    focusRing,
-  );
-  return (
-    <nav
-      aria-label={copy.actions.entriesLabel}
-      className="mt-4 flex items-center gap-5"
-    >
-      <Link href="/poll?start=friends" className={link}>
-        {copy.actions.pollWithFriends}
-      </Link>
-      <Link href="/poll?start=party" className={link}>
-        {copy.actions.party}
-      </Link>
-    </nav>
   );
 }
