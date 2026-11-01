@@ -60,7 +60,7 @@ export const authCopy = {
     },
     cancelled: {
       title: "로그인을 취소했습니다",
-      body: "준비되면 다시 로그인해 볼까요?",
+      body: "준비되면 다시 로그인해볼까요?",
     },
     error: {
       title: "로그인하지 못했습니다",
@@ -186,7 +186,7 @@ export const authCopy = {
       report: {
         eyebrow: "제보와 신고",
         title: "제보와 신고는 로그인 후 남길 수 있습니다",
-        body: "같은 내용이 여러 번 쌓이지 않게 누가 남겼는지만 확인합니다. 다른 분들께는 누가 남겼는지 알리지 않아요.",
+        body: "같은 내용이 여러 번 쌓이지 않게 누가 남겼는지만 확인합니다. 다른 사람에게는 알리지 않아요.",
       },
     },
     keepBrowsing: "계속 둘러보기",

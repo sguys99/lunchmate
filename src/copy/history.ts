@@ -110,8 +110,9 @@ export const historyCopy = {
     blockedOn: (date: string) => `${date}에 뺌`,
     more: "더 보기",
     favoritesEmpty:
-      "아직 즐겨찾기한 곳이 없습니다. 상세에서 별을 눌러 모아 볼까요?",
-    blocklistEmpty: "다시 안 갈 곳이 없습니다.",
+      "아직 즐겨찾기한 곳이 없습니다. 상세에서 별을 눌러 모아볼까요?",
+    blocklistEmpty:
+      '다시 안 갈 곳이 없습니다. 카드에서 "다시 안 갈래요"를 누르면 여기 모입니다.',
   },
 
   /** 후기 탭 (HIS-03, FB-07) */
@@ -135,7 +136,7 @@ export const historyCopy = {
     price: (won: string) => `1인 ${won}`,
     noText: "글 없이 평가만 남겼습니다.",
     more: "더 보기",
-    empty: "아직 남긴 후기가 없습니다. 다녀온 곳에 한 줄 남겨 볼까요?",
+    empty: "아직 남긴 후기가 없습니다. 다녀온 곳에 한 줄 남겨볼까요?",
   },
 
   /** 4상태 */
@@ -159,7 +160,7 @@ export const historyCopy = {
         "다음 날 한 탭으로 어땠는지 남깁니다.",
         "남긴 평가로 다음 추천이 조금씩 나아집니다.",
       ],
-      ask: "첫 점심을 기록해 볼까요?",
+      ask: "첫 점심을 기록해볼까요?",
       cta: "오늘 추천 보기",
     },
     /** 로그인 꺼짐 (D-12 안건 12, AUTH-07) */

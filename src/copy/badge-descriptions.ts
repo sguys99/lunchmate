@@ -9,7 +9,7 @@ export const badgeDescriptions = {
   estimate: "제보된 가격이 없어 같은 종류 식당 기준으로 추정했습니다.",
   report: reportNotice,
   deal: reportNotice,
-  waiting: "최근 30분 안에 들어온 제보만 보여줍니다.",
+  waiting: "최근 30분 안에 들어온 제보만 보여 줍니다.",
   avoidWarning:
     "참여자 중 이 식당 음식을 피하는 분이 있지만, 누구인지는 알리지 않습니다.",
 } as const satisfies Record<PlaceBadgeKind, string>;

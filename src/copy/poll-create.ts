@@ -16,7 +16,7 @@ export const pollCreateCopy = {
     added: (title: string) => `${title} 투표에 넣었습니다.`,
     addFailed: "후보를 넣지 못했습니다. 잠시 후 다시 시도해 주세요.",
     alreadyIn: "이미 그 투표의 후보입니다.",
-    noOffice: "회사 위치를 먼저 정해 주세요. 나 탭 설정에서 바꿀 수 있습니다.",
+    noOffice: "회사 위치를 먼저 정해 주세요. 나 탭 설정에서 정할 수 있습니다.",
     needTwo: "추천이 두 곳 이상 있어야 투표를 만들 수 있습니다.",
   },
 
@@ -41,7 +41,8 @@ export const pollCreateCopy = {
       "회식 모드에서 고른 후보로 만들었습니다. 줄을 눌러 바꿀 수 있습니다.",
     undo: "만들기 취소",
     undone: "투표방을 지웠습니다. 오늘 만들 수 있는 개수에서도 빠집니다.",
-    undoFailed: "이미 링크를 보낸 투표는 투표방에서 취소할 수 있습니다.",
+    undoFailed:
+      "링크를 보낸 투표라 여기서는 취소할 수 없습니다. 투표방에서 취소해 주세요.",
     creating: "투표방을 만드는 중입니다",
     rows: {
       title: "제목",
@@ -84,7 +85,8 @@ export const pollCreateCopy = {
     more: "더 보기",
     pickHint: "후보에 넣기",
     fromMap: "지도에서 고르기",
-    fromMapHint: "지도에서 식당을 누르고 더 보기의 투표에 추가로 넣어 보세요.",
+    fromMapHint:
+      '지도에서 식당을 누르고 더 보기에서 "투표에 추가"를 눌러보세요.',
     walk: (min: number) => `도보 ${min}분`,
     loading: "후보를 불러오는 중입니다",
     nothingToAdd: "더 넣을 오늘 추천, 즐겨찾기, 최근 간 곳이 없습니다.",
@@ -108,9 +110,10 @@ export const pollCreateCopy = {
     dayLabel: (offset: number) =>
       offset === 1 ? "내일" : offset === 2 ? "모레" : `${offset}일 뒤`,
     customLabel: "마감 시각",
-    customTooSoon: "지금부터 10분 뒤 이후로 골라 주세요.",
-    customPartyRange: "지금부터 10분 뒤에서 7일 안으로 골라 주세요.",
-    lateNote: (hhmm: string) => `${hhmm}이 지나 1시간 뒤를 대신 보여 줍니다.`,
+    customTooSoon: "10분 뒤보다 늦은 시각을 골라 주세요.",
+    customPartyRange: "10분 뒤부터 7일 안에서 골라 주세요.",
+    lateNote: (hhmm: string) =>
+      `지금은 ${hhmm} 이후라 1시간 뒤를 대신 보여 줍니다.`,
   },
 
   mode: {
@@ -171,7 +174,7 @@ export const pollCreateCopy = {
     },
     limit: {
       title: "오늘 만들 수 있는 투표를 모두 만들었습니다",
-      body: "투표방은 하루 10개까지 만들 수 있습니다. 내일 다시 만들 수 있습니다.",
+      body: "투표방은 하루 10개까지입니다. 내일 다시 만들어 주세요.",
       goList: "진행 중인 투표 보기",
     },
     offline: {
@@ -191,15 +194,16 @@ export const pollCreateCopy = {
     banned: "쓸 수 없는 표현이 있습니다. 제목을 바꿔 주세요.",
     limit: "오늘 만들 수 있는 투표를 모두 만들었습니다.",
     deadline:
-      "마감은 지금부터 1분 뒤 이후, 점심과 저녁은 24시간, 회식은 7일 안으로 정할 수 있습니다.",
+      "마감은 1분 뒤부터 정할 수 있습니다. 점심과 저녁은 24시간, 회식은 7일 안입니다.",
     not_found: "투표방을 찾지 못했습니다.",
     closed: "이미 마감한 투표라 고칠 수 없습니다.",
-    shared: "이미 링크를 보낸 투표는 투표방에서 취소할 수 있습니다.",
+    shared:
+      "링크를 보낸 투표라 여기서는 취소할 수 없습니다. 투표방에서 취소해 주세요.",
     full: "후보는 5곳까지입니다.",
     min: "후보는 2곳 아래로 줄일 수 없습니다.",
     exists: "이미 넣은 후보입니다.",
     multi_votes: "이미 표가 있어 방식을 바꿀 수 없습니다.",
-    no_office: "회사 위치를 먼저 정해 주세요. 나 탭 설정에서 바꿀 수 있습니다.",
+    no_office: "회사 위치를 먼저 정해 주세요. 나 탭 설정에서 정할 수 있습니다.",
     suspended: "이용이 제한된 계정이라 투표를 만들 수 없습니다.",
     save: "반영하지 못했습니다. 잠시 후 다시 시도해 주세요.",
   } satisfies Record<PollWriteError, string>,
@@ -211,12 +215,12 @@ export const pollCreateCopy = {
     open: "진행 중",
     past: "지난 투표",
     partyLink: "회식 후보 찾기",
-    newHint: "오늘 화면의 친구랑 정하기로 투표를 만들어 보세요.",
+    newHint: '오늘 화면의 "친구랑 정하기"로 투표를 만들어보세요.',
     goToday: "오늘 추천 보기",
     loading: "투표 목록을 불러오는 중입니다",
     empty: {
       title: "아직 투표가 없습니다",
-      body: "오늘 추천 세 곳으로 바로 투표를 만들어 친구에게 보내 보세요.",
+      body: "오늘 추천 세 곳으로 바로 투표를 만들어 친구에게 보내보세요.",
     },
     pastEmpty: "지난 투표가 없습니다.",
     error: {
@@ -225,8 +229,8 @@ export const pollCreateCopy = {
       retry: "다시 불러오기",
     },
     offline: {
-      title: "연결되면 투표 목록을 불러옵니다",
-      body: "인터넷 연결을 확인해 주세요.",
+      title: "인터넷에 연결되어 있지 않습니다",
+      body: "연결되면 투표 목록을 불러옵니다.",
     },
     kind: { lunch: "점심", dinner: "저녁", party: "회식" },
     host: "내가 연 투표",

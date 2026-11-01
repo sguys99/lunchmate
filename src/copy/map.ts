@@ -18,7 +18,7 @@ export const mapCopy = {
     },
     load: {
       title: "지도를 불러오지 못했습니다",
-      body: "네트워크 연결을 확인한 뒤 다시 시도해 주세요.",
+      body: "연결을 확인한 뒤 다시 시도해 주세요.",
     },
   },
   smoke: {
@@ -51,8 +51,8 @@ export const mapCopy = {
   hidden: {
     short: (n: number) => `${n}곳 숨김`,
     linkLabel: (n: number) =>
-      `기피 음식과 다시 안 갈 곳 ${n}곳을 숨겼습니다. 나 탭 설정에서 바꿀 수 있습니다.`,
-    guestLabel: (n: number) => `기피 음식 ${n}곳을 숨겼습니다.`,
+      `못 먹는 음식이나 다시 안 갈 곳이라 ${n}곳을 숨겼습니다. 나 탭 설정에서 바꿀 수 있습니다.`,
+    guestLabel: (n: number) => `못 먹는 음식이 있는 ${n}곳을 숨겼습니다.`,
   },
   sortHint: "가까운 순",
 
@@ -111,16 +111,16 @@ export const mapCopy = {
     locating: "현위치를 찾는 중입니다",
     empty: {
       title: (minutes: number) => `도보 ${minutes}분 안에 식당이 없습니다`,
-      body: (minutes: number) => `${minutes}분까지 넓혀 볼까요?`,
+      body: (minutes: number) => `${minutes}분까지 넓혀볼까요?`,
       bodyMax: "지도를 옮긴 뒤 이 지역에서 다시 찾아 주세요.",
       action: (minutes: number) => `${minutes}분까지 넓히기`,
       filteredTitle: "고른 조건에 맞는 식당이 없습니다",
-      filteredBody: "필터를 하나 풀어 볼까요?",
+      filteredBody: "필터를 하나 풀어볼까요?",
       filteredAction: "필터 모두 풀기",
     },
     mapError: {
       title: "지도를 불러오지 못해 목록으로 보여 드립니다",
-      body: "식당 정보는 그대로 볼 수 있습니다. 잠시 뒤 지도를 다시 불러와 주세요.",
+      body: "식당 정보는 그대로 볼 수 있습니다. 잠시 후 지도를 다시 불러와 주세요.",
       retry: "지도 다시 불러오기",
       pane: "지도를 불러오지 못했습니다",
     },
@@ -145,7 +145,7 @@ export const mapCopy = {
       /** 로그인이 닫힌 환경(flags.auth 꺼짐): 회사 위치를 저장할 수 없어 저장 제안을 뺀다 */
       deniedBrowse:
         "위치 권한을 허용하면 현위치 주변을 보여 드립니다. 브라우저 설정에서 위치를 허용해 주세요.",
-      unavailableBrowse: "현위치를 찾지 못했습니다. 잠시 뒤 다시 찾아 주세요.",
+      unavailableBrowse: "현위치를 찾지 못했습니다. 잠시 후 다시 찾아 주세요.",
       retry: "현위치 다시 찾기",
       addOffice: "회사 위치 추가",
       saveOffice: "회사 위치 저장",

@@ -87,7 +87,7 @@ export const onboardingCopy = {
     nearby: (count: number) => `이 거리 안의 식당 약 ${count}곳`,
     nearbyAtLeast: (count: number) => `이 거리 안의 식당 ${count}곳 이상`,
     nearbyLoading: "근처 식당 수를 세는 중입니다",
-    nearbyError: "근처 식당 수를 지금은 셀 수 없습니다.",
+    nearbyError: "근처 식당 수를 세지 못했습니다. 그대로 넘어가도 괜찮아요.",
     nearbyEmpty: {
       title: "이 거리 안에는 식당이 없습니다",
       body: (minutes: number) => `${minutes}분까지 넓혀볼까요?`,

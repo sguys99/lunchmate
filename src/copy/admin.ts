@@ -16,7 +16,7 @@ export const adminCopy = {
     signedInAs: (nick: string) => `${nick} 님, 관리자`,
     navLabel: "관리 메뉴",
     loading: "관리 목록을 불러오는 중입니다",
-    refresh: "새로 고침",
+    refresh: "새로고침",
   },
 
   sections: {
@@ -61,7 +61,7 @@ export const adminCopy = {
   },
 
   review: {
-    rating: { up: "좋았어요", down: "아쉬웠어요" },
+    rating: { up: "좋았어요", down: "별로였어요" },
     noBody: "글 없이 평가만 남긴 후기입니다.",
     privateNow:
       "작성자가 신고 뒤 나만 보기로 바꿔 글을 볼 수 없습니다. 지금은 다른 분들께 보이지 않습니다.",
@@ -161,7 +161,7 @@ export const adminCopy = {
   closures: {
     kinds: { gone: "아예 닫았어요", moved: "옮겼어요", today: "오늘만 쉬어요" },
     unspecified: (n: number) => `종류를 고르지 않은 제보 ${n}건이 더 있습니다.`,
-    todayNote: "오늘만 쉬어요는 폐업 수에 세지 않습니다.",
+    todayNote: '"오늘만 쉬어요"는 폐업 수에 세지 않습니다.',
     excludedHelp:
       "서로 다른 세 분 이상이 알려 추천에서 빼고 있습니다. 폐업을 확인할지 영업 중으로 둘지 골라 주세요.",
     openHelp: "아직 추천에 나옵니다. 세 분이 알리면 자동으로 뺍니다.",
@@ -241,22 +241,21 @@ export const adminCopy = {
   states: {
     errorTitle: "관리 목록을 불러오지 못했습니다",
     errorBody:
-      "잠시 뒤 다시 시도해 주세요. 처리한 내용은 그대로 저장되어 있습니다.",
-    offlineTitle: "오프라인입니다",
+      "잠시 후 다시 시도해 주세요. 처리한 내용은 그대로 저장되어 있습니다.",
+    offlineTitle: "인터넷에 연결되어 있지 않습니다",
     offlineBody: "마지막으로 받은 목록입니다. 연결되면 처리할 수 있습니다.",
   },
 
   /** 처리 실패 (서버 액션 결과 코드) */
   errors: {
     forbidden: "관리자만 할 수 있습니다. 다시 로그인해 주세요.",
-    unavailable: "이미 다른 처리가 반영된 항목입니다. 목록을 새로 고쳤습니다.",
-    conflict:
-      "같은 식당에 같은 종류의 새 할인 정보가 있어 되살릴 수 없습니다.",
+    unavailable: "이미 다른 처리가 반영된 항목입니다. 목록을 새로고침했습니다.",
+    conflict: "같은 식당에 같은 종류의 새 할인 정보가 있어 되살릴 수 없습니다.",
     undo_unavailable:
       "그 뒤에 다른 처리가 있거나 이미 되돌린 항목이라 되돌릴 수 없습니다.",
     admin_target: "관리자 계정은 정지할 수 없습니다.",
     invalid: "보낼 수 없는 값이 있습니다. 다시 골라 주세요.",
-    save: "반영하지 못했습니다. 잠시 뒤 다시 시도해 주세요.",
+    save: "반영하지 못했습니다. 잠시 후 다시 시도해 주세요.",
   },
 } as const;
 

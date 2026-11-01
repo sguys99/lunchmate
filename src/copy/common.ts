@@ -66,7 +66,7 @@ export const commonCopy = {
     },
     error: {
       title: "정보를 불러오지 못했습니다",
-      body: "잠시 뒤 아래 버튼으로 다시 시도할 수 있습니다.",
+      body: "잠시 후 아래 버튼으로 다시 시도할 수 있습니다.",
       action: actions.retry,
     },
     offline: {
@@ -89,7 +89,7 @@ export const commonCopy = {
    */
   errorPage: {
     title: "화면을 표시하지 못했습니다",
-    body: "다시 시도해도 같다면 오늘 추천에서 새로 시작해 볼까요?",
+    body: "다시 시도해도 같다면 오늘 추천에서 새로 시작해볼까요?",
     retry: actions.retry,
     home: "오늘 추천으로",
     reference: (digest: string) => `참고 번호 ${digest}`,
@@ -109,7 +109,7 @@ export const commonCopy = {
     linkCopied: "링크를 복사했습니다",
     copyFailed: "복사하지 못했습니다. 주소창의 링크를 직접 복사해 주세요.",
     /** 토스트 설명. 다시 시도 버튼이 아래가 아니라 오른쪽에 붙으므로 states.error.body("아래 버튼")를 쓰지 않는다 */
-    retryLater: "잠시 뒤 다시 시도할 수 있습니다.",
+    retryLater: "잠시 후 다시 시도할 수 있습니다.",
   },
 
   /** 숫자 단위 라벨. 숫자 포매팅 자체는 src/lib/format이 맡는다 */

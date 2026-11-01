@@ -100,7 +100,7 @@ export const homeCopy = {
       deniedBrowse:
         "위치 권한을 허용하면 현위치로 추천합니다. 브라우저 설정에서 위치를 허용해 주세요.",
       unavailableBrowse:
-        "현위치를 확인하지 못했습니다. 잠시 뒤 다시 찾아 주세요.",
+        "현위치를 확인하지 못했습니다. 잠시 후 다시 찾아 주세요.",
       retry: "현위치 다시 찾기",
     },
 
@@ -143,7 +143,7 @@ export const homeCopy = {
       widen: (to: number) => `도보 ${to}분까지 넓혀볼까요?`,
       widenAction: (to: number) => `${to}분까지 넓히기`,
       /** 가장 넓은 도보 거리에서도 0곳일 때 */
-      maxedBody: "못 먹는 음식이나 예산 조건을 바꿔 볼까요?",
+      maxedBody: "못 먹는 음식이나 예산 조건을 바꿔볼까요?",
       editSettings: "조건 바꾸기",
       widened: (to: number) => `도보 ${to}분까지 넓혀 다시 추천했습니다.`,
       budgetRelaxed: "예산 조건을 풀고 다시 추천했습니다.",
@@ -172,7 +172,7 @@ export const homeCopy = {
     single: {
       eyebrow: "오늘의 한 곳",
       alternatives: "또는 이 두 곳",
-      alternativesOne: "또는 이 곳",
+      alternativesOne: "또는 이곳",
       /** 대안 카드 버튼의 보이지 않는 끝말. 이름은 보이는 글자 + 이 말(axe label-content-name-mismatch, T3.5) */
       swapHint: "크게 보기",
       swapped: (name: string) => `오늘의 한 곳을 바꿨습니다. ${name}입니다.`,

@@ -23,12 +23,12 @@ export function withObject(word: string): string {
 
 function likedPlaceLine(lastUpAt: Date, now: Date): string {
   const days = kstDayDiff(lastUpAt, now);
-  const t = copy.likedPlace;
-  if (days <= 0) return t.today;
-  if (days === 1) return t.yesterday;
-  if (days < 7) return t.recent;
-  if (days < 14) return t.lastWeek;
-  return t.older;
+  const { when, line } = copy.likedPlace;
+  if (days <= 0) return line(when.today);
+  if (days === 1) return line(when.yesterday);
+  if (days < 7) return line(when.recent);
+  if (days < 14) return line(when.lastWeek);
+  return line(when.older);
 }
 
 function lineOf(kind: ReasonKind, pick: RecoPick, now: Date): string | null {

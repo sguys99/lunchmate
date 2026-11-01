@@ -366,7 +366,7 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
         timeout: 20_000,
       });
       await page.context().setOffline(true);
-      await expect(page.getByText("오프라인입니다.")).toBeVisible();
+      await expect(page.getByText("인터넷에 연결되어 있지 않습니다.")).toBeVisible();
       const primary = page
         .getByRole("main")
         .getByRole("button", { name: /숨김 확정|숨기기/ });

@@ -28,12 +28,16 @@ export const recCopy = {
   why: {
     title: "왜 추천했나요?",
     distance: (minutes: number) => `도보 약 ${minutes}분 거리라 가깝습니다.`,
+    /** 문장은 하나, 때만 바꾼다. 예: "최근 이 집에 👍를 남겼습니다." */
     likedPlace: {
-      today: "오늘 이 집에 👍를 남겼습니다.",
-      yesterday: "어제 이 집에 👍를 남겼습니다.",
-      recent: "최근 이 집에 👍를 남겼습니다.",
-      lastWeek: "지난주 이 집에 👍를 남겼습니다.",
-      older: "예전에 이 집에 👍를 남겼습니다.",
+      when: {
+        today: "오늘",
+        yesterday: "어제",
+        recent: "최근",
+        lastWeek: "지난주",
+        older: "예전에",
+      },
+      line: (when: string) => `${when} 이 집에 👍를 남겼습니다.`,
     },
     craving: (labelWithParticle: string) =>
       `요즘 땡긴다고 고른 ${labelWithParticle} 먼저 찾았습니다.`,
@@ -48,7 +52,7 @@ export const recCopy = {
   },
   /** 기피 음식 판정 한계 (D-07 안건 4, T5.6). 못 먹는 음식 설정 화면과 상세에서 쓴다 */
   avoidLimit:
-    "못 먹는 음식은 식당 이름과 업종으로만 거릅니다. 메뉴 재료까지는 확인하지 못하니 알레르기가 있다면 주문 전에 꼭 확인해 주세요.",
+    "못 먹는 음식은 식당 이름과 업종으로만 거릅니다. 메뉴 재료까지는 보지 못하니, 알레르기가 있다면 주문 전에 꼭 확인해 주세요.",
   /**
    * 오늘(홈) 큰 카드 더 보기 메뉴 (REC-08, T5.20). 메뉴 항목은 명사형 라벨, 결과와 오류는 습니다체.
    * 메뉴는 누른 뒤에 받는 묶음이라 홈 첫 로드 문구(home.ts)와 나눠 둔다.

@@ -158,7 +158,7 @@ export const reportCopy = {
     // 중복 (DEAL-04, D-13 안건 2, 3)
     dupTitle: "이미 제보된 정보가 있습니다",
     dupBody: (type: string) =>
-      `이 식당에는 ${type} 제보가 이미 있습니다. 같은 내용이면 아직 해요로 확인할까요?`,
+      `이 식당에는 ${type} 제보가 이미 있습니다. 같은 내용이면 "아직 해요"로 확인할까요?`,
     dupConfirm: "아직 해요로 확인",
     dupNew: "다른 내용이라 새로 남기기",
     dupMerged:
@@ -167,7 +167,7 @@ export const reportCopy = {
     // 결과
     doneTitle: "할인 정보를 남겼습니다",
     doneBody: (until: string) => `${until} 상세에 보입니다.`,
-    mergedTitle: "기존 제보에 아직 해요로 더했습니다",
+    mergedTitle: '기존 제보에 "아직 해요"를 더했습니다',
     mergedBody: "확인이 쌓일수록 다른 분들이 믿고 볼 수 있습니다.",
   },
 
@@ -191,7 +191,7 @@ export const reportCopy = {
       `${time}에 알렸습니다. 30분 동안 다른 분들께 보입니다.`,
     undo: "취소",
     undone: "웨이팅 제보를 취소했습니다.",
-    peakNote: "줄 길어요는 점심 피크에 추천 순서를 조금 낮춥니다.",
+    peakNote: '"줄 길어요"는 점심 피크에 추천 순서를 조금 낮춥니다.',
     clock: (hour: number, minute: number) => `${hour}시 ${minute}분`,
   },
 
@@ -222,16 +222,16 @@ export const reportCopy = {
     qReason: "어떤 문제인가요?",
     reasonLabel: "신고 사유",
     reviewHints: {
-      spam: "가게 홍보나 같은 글 반복",
-      abuse: "사람이나 가게를 깎아내리는 말",
-      privacy: "이름, 연락처처럼 누군지 알 수 있는 정보",
+      spam: "식당 홍보나 같은 글 반복",
+      abuse: "사람이나 식당을 깎아내리는 말",
+      privacy: "이름, 연락처처럼 누구인지 알 수 있는 정보",
       false: "사실과 다른 내용",
       other: "위에 없는 문제",
     },
     dealHints: {
-      ad_false: "가게 홍보 목적이거나 사실과 다른 할인",
-      abuse: "사람이나 가게를 깎아내리는 말",
-      privacy: "이름, 연락처처럼 누군지 알 수 있는 정보",
+      ad_false: "식당 홍보 목적이거나 사실과 다른 할인",
+      abuse: "사람이나 식당을 깎아내리는 말",
+      privacy: "이름, 연락처처럼 누구인지 알 수 있는 정보",
       other: "위에 없는 문제",
     },
     etcLabel: "무엇이 문제인지 (선택)",

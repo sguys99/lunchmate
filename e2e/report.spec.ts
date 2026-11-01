@@ -442,7 +442,7 @@ test.describe("제보와 신고: 웨이팅, 정보 제보, 후기 신고", () =>
       const { detail, placeId, name } = await openHeroDetail(page);
       await openNow(detail);
       await expect(
-        detail.getByText("줄 길어요는 점심 피크에 추천 순서를 조금 낮춥니다."),
+        detail.getByText('"줄 길어요"는 점심 피크에 추천 순서를 조금 낮춥니다.'),
       ).toBeVisible();
       await detail.getByRole("button", { name: "줄 길어요" }).click();
       const line = detail.getByText(
