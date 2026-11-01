@@ -24,7 +24,7 @@
 | --- | --- |
 | 프레임워크 | Next.js 16.x (App Router, Turbopack 기본, 조사 시점 16.4.3) + React 19 + TypeScript strict (T0.27, 2026-10-28) |
 | UI | Tailwind CSS v4 + shadcn/ui **base 계열 스타일(`base-vega`, Base UI 기반, radix 계열 아님)** + Lucide + Motion(`motion/react`, `m` + `LazyMotion`), 폰트 Pretendard Variable(본문, 숫자) + 마루 부리(제목 세리프, G1 2026-10-28) |
-| 동적 컴포넌트 | Sonner, NumberFlow, canvas-confetti(동적 import), 바텀시트는 Base UI Drawer(예비: Motion 직접 구현, Vaul은 미유지로 제외, T0.27), Embla(시안 결과에 따라), Magic UI 등 복사형 효과. 용도·로딩 방식은 `docs/tasks.md` 2.4절 |
+| 동적 컴포넌트 | Sonner, NumberFlow, 바텀시트는 Base UI Drawer(예비: Motion 직접 구현, Vaul은 미유지로 제외, T0.27), Embla(시안 결과에 따라), Magic UI 등 복사형 효과. 확정 축하는 색종이 없이(DESIGN.md 7장, D-14). 용도·로딩 방식은 `docs/tasks.md` 2.4절 |
 | 상태 | TanStack Query(서버 데이터·세션 메모리 캐시) + Zustand(UI·설정 상태) |
 | 인증·DB | Supabase **클라우드 개발 프로젝트 1개**(로컬 Docker 없음). Auth(구글은 내장 provider, 카카오·네이버는 **커스텀 OIDC provider** `custom:kakao`·`custom:naver`, T0.14·T0.20), Postgres + RLS, Realtime, pg_cron |
 | 지도·장소 | 네이버 Web Dynamic Map(표시), 카카오 로컬 API JS SDK(음식점 FD6), 길찾기 `nmap://` |
