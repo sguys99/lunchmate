@@ -1008,6 +1008,7 @@ export type Database = {
         }[]
       }
       poll_preview: { Args: { p_code: string }; Returns: Json }
+      purge_old_polls_now: { Args: never; Returns: number }
       register_deal: {
         Args: {
           p_content: string

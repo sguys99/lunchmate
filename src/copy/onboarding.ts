@@ -99,7 +99,8 @@ export const onboardingCopy = {
     title: "못 먹는 음식이 있나요?",
     body: "고른 음식은 추천에서 뺍니다. 다른 사람에게는 보이지 않습니다.",
     foods: "음식 종류",
-    allergies: "알레르기",
+    /** 재료 칩 묶음 제목. 이유(알레르기, 취향, 종교)는 묻지 않는다 (D-28, 민감정보로 읽히지 않게) */
+    allergies: "재료",
     custom: "직접 입력",
     customPlaceholder: "예: 고수, 오이",
     customHint: "입력한 말이 식당 이름이나 업종에 들어가면 뺍니다.",
