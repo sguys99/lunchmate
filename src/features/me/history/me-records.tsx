@@ -4,6 +4,7 @@
 // - 세 탭 기록 / 장소 / 후기. tablist, 좌우 화살표로 이동, 활성 탭만 tabIndex 0. 밑줄 막대는 transform으로 base.
 //   고른 탭은 주소 ?tab=에 남겨 뒤로 가기로 돌아와도 같은 탭이다(replaceState라 기록은 쌓지 않는다).
 // - 데스크톱 우측 지도(@map/me)에 기본 사무실과 보이는 줄의 핀을 넘긴다(me-map-store).
+// - 베타 기간(betaFeedback 플래그)에는 머리 아래 "베타 의견 보내기" 줄(T9.4, D-23). 시트는 누른 뒤에 받는다.
 // - 오프라인이면 받아 둔 기록을 그대로 두고 위 안내 한 줄, 쓰기 버튼은 aria-disabled + 누르면 토스트.
 import { Settings } from "lucide-react";
 import Link from "next/link";
@@ -18,6 +19,7 @@ import {
 } from "react";
 import { focusRing } from "@/components/ui/interaction";
 import { historyCopy as copy } from "@/copy/history";
+import { BetaFeedbackEntry } from "@/features/beta-feedback/entry";
 import { useOnlineStatus } from "@/lib/network";
 import { cn } from "@/lib/utils";
 import { DetailEntryProvider, type OfficeAnchor } from "./detail-entry";
@@ -34,6 +36,7 @@ export function MeRecords({
   budget,
   nowIso,
   initialTab,
+  betaFeedback = false,
 }: {
   nickname: string | null;
   office: OfficeAnchor | null;
@@ -41,6 +44,8 @@ export function MeRecords({
   /** 서버가 본 지금(ISO). 주 묶음과 14일 판정 기준을 서버 HTML과 맞춘다 */
   nowIso: string;
   initialTab: MeTab;
+  /** 베타 의견 보내기 줄(T9.4, betaFeedback 플래그, 서버 판정) */
+  betaFeedback?: boolean;
 }) {
   const now = useMemo(() => new Date(nowIso), [nowIso]);
   const online = useOnlineStatus();
@@ -78,6 +83,7 @@ export function MeRecords({
           <Settings aria-hidden className="size-[1.375rem]" strokeWidth={1.5} />
         </Link>
       </header>
+      {betaFeedback ? <BetaFeedbackEntry /> : null}
       <Tabs
         initial={initialTab}
         render={(tab) =>

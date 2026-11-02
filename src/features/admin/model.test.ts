@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { adminCopy } from "@/copy/admin";
 import {
+  betaFeedbackRowSchema,
   decideItemInput,
+  filterBetaFeedback,
   hiddenKeyOfLog,
   logRowSchema,
   mapAdminError,
@@ -304,5 +306,41 @@ describe("큐 규칙", () => {
     expect(formatKstDateTime("2026-10-31T15:30:00+00:00")).toBe(
       "11월 1일 00:30",
     );
+  });
+});
+
+describe("베타 의견 (T9.4)", () => {
+  const base = {
+    id: UUID,
+    author_no: 3,
+    category: "bug",
+    body: "득표 바가 비어 보였습니다.",
+    route: "/poll/[code]",
+    app_version: "0.1.0",
+    algo_version: "2026-11-01.1",
+    device: "ios",
+    in_app: true,
+    standalone: false,
+    created_at: "2026-11-02T03:00:00+00:00",
+  };
+  it("함수 행을 화면 모양으로. 닉네임, 사용자 id 열은 없다", () => {
+    const r = betaFeedbackRowSchema.parse(base);
+    expect(r).toMatchObject({ authorNo: 3, category: "bug", inApp: true });
+    expect(Object.keys(r)).not.toContain("userId");
+    expect(betaFeedbackRowSchema.safeParse({ ...base, category: null }).success).toBe(true);
+    expect(betaFeedbackRowSchema.safeParse({ ...base, device: "other" }).success).toBe(false);
+  });
+  it("종류 필터: 전체, 종류, 종류 없음", () => {
+    const items = [
+      betaFeedbackRowSchema.parse(base),
+      betaFeedbackRowSchema.parse({ ...base, id: "b", category: "good" }),
+      betaFeedbackRowSchema.parse({ ...base, id: "c", category: null }),
+    ];
+    expect(filterBetaFeedback(items, "all")).toHaveLength(3);
+    expect(filterBetaFeedback(items, "good").map((i) => i.id)).toEqual(["b"]);
+    expect(filterBetaFeedback(items, "none").map((i) => i.id)).toEqual(["c"]);
+  });
+  it("베타 의견 구역은 검토 대기 수가 없다(읽음 처리 없음)", () => {
+    expect(sectionCounts(undefined).beta).toBeNull();
   });
 });

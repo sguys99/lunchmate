@@ -1,4 +1,4 @@
-// 베타 의견에 함께 보내는 "지금 보던 화면" 경로 (T9.4 시안, 실제 구현 때 src/features/beta-feedback로 옮긴다).
+// 베타 의견에 함께 보내는 "지금 보던 화면" 경로 (T9.4, D-23). 브라우저(시트에 보이는 값)와 서버 액션(저장 전 한 번 더)이 같이 쓴다.
 //
 // 개인정보 원칙(CLAUDE.md 7장)
 // - 쿼리와 해시는 통째로 버린다(redirect, tab 같은 값에 무엇이 실릴지 모른다).
@@ -25,7 +25,6 @@ const STATIC_ROUTES = new Set([
   "/me/display",
   "/me/offices",
   "/me/offices/new",
-  "/me/beta-feedback",
   "/location",
   "/login",
   "/privacy",

@@ -1,6 +1,6 @@
 // 베타 환영 페이지 시안 문구 (T9.3, /design-lab/beta/<a|b|c>, D-22). 실제 화면은 /beta.
 // 문체: 상태, 설명, 방법 안내, 오류는 습니다체. 초대, 제안, 질문은 해요체. 버튼, 칩, 라벨은 명사형(비율 제외).
-// 시안을 고른 뒤(T9.3) 실제 구현 때 src/copy/beta.ts로 옮긴다. 이 파일은 디자인 랩만 읽는다(홈 첫 로드 밖, T8.11).
+// T9.3 구현 뒤(D-23) 실제 문구는 src/copy/beta.ts. 이 파일은 남긴 확인 화면 A만 읽는다(B, C 문구는 지웠다).
 import { authCopy } from "./auth";
 import { siteCopy } from "./common";
 
@@ -9,16 +9,13 @@ const menuItems = authCopy.inapp.menuItems;
 
 export const betaLabCopy = {
   names: {
-    a: "베타 환영 시안 A 기기별 단계 목록",
-    b: "베타 환영 시안 B 세 장 넘기기",
-    c: "베타 환영 시안 C 초대장",
+    a: "베타 환영 시안 A 기기별 단계 목록 (선택안)",
   },
   index: {
     title: "베타 환영 페이지 시안 (T9.3)",
     body: "카카오톡 초대 링크로 처음 여는 /beta 화면입니다. 기기는 ?device= 로 바꿔 볼 수 있습니다.",
   },
 
-  brand: siteCopy.name,
   eyebrow: "베타 초대",
   /** 서비스 한 줄 (siteCopy.tagline과 같은 말) */
   tagline: siteCopy.tagline,
@@ -71,17 +68,12 @@ export const betaLabCopy = {
     title: "의견 보내기",
     body: '나 탭 맨 위 "베타 의견 보내기"에서 언제든 보낼 수 있습니다. 불편한 점일수록 큰 도움이 됩니다.',
     short: '써 보다가 불편하면 나 탭의 "베타 의견 보내기"로 알려 주세요.',
-    pathLabel: "나 탭, 베타 의견 보내기",
   },
 
   /** 주 버튼 */
   cta: {
     login: "로그인하고 시작",
     stayInApp: "카카오톡에서 바로 시작",
-    next: "다음",
-    prev: "이전",
-    skip: "건너뛰기",
-    continueDesktop: "바로 시작",
   },
 
   /** 4상태 */
@@ -103,37 +95,12 @@ export const betaLabCopy = {
     },
   },
 
-  /** B안 카드 */
+  /** 그림 이름 */
   cards: {
-    label: "베타 안내",
-    position: (n: number, total: number) => `${n} / ${total}`,
-    positionLabel: (n: number, total: number) => `${total}장 중 ${n}번째`,
-    what: {
-      title: "런치메이트는",
-      body: "오늘 갈 만한 식당 세 곳을 이유와 함께 보여 드립니다. 고르면 길찾기까지 한 번에 이어집니다.",
-      sample: ["도보 약 4분", "지난주 좋았던 국밥", "1인 9천 원대"],
-    },
-    install: { title: "홈 화면에 두기" },
-    feedback: { title: "의견 보내기" },
     diagramShare: '공유 버튼 위치 그림. 공유 메뉴에서 "홈 화면에 추가"를 고릅니다.',
     shareItem: "홈 화면에 추가",
     diagramMe: '나 탭 그림. 맨 위 "베타 의견 보내기" 줄을 누릅니다.',
     meRow: "베타 의견 보내기",
-  },
-
-  /** C안 초대장 */
-  letter: {
-    date: "2026년 11월",
-    title: "점심 고민, 이제 10초면 됩니다",
-    paragraphs: [
-      "매일 점심마다 뭐 먹을지 몇 분씩 고민하셨다면, 런치메이트가 그 시간을 줄여 드립니다. 회사 근처에서 갈 만한 세 곳을 이유와 함께 골라 드립니다.",
-      "정식 출시 전에 함께 일하는 분들께 먼저 보여 드립니다. 점심마다 편하게 써 보고 솔직한 의견을 들려주세요.",
-    ],
-    sign: "런치메이트 드림",
-    installSection: "홈 화면에 두는 방법",
-    feedbackSection: "의견 보내는 방법",
-    inAppNotice:
-      "카카오톡 안에서 열었습니다. 홈 화면에 두려면 외부 브라우저로 열어 주세요.",
   },
 
   /** 데스크톱 오른쪽 칸 (A) */

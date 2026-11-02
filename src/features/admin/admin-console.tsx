@@ -15,6 +15,7 @@ import {
 } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Chip, ChipGroup } from "@/components/ui/chip";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/lazy-toaster";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,12 +29,16 @@ import {
   decideClosureAction,
   decideItemAction,
   loadAdminSnapshotAction,
+  loadBetaFeedbackAction,
   searchUsersAction,
   setSuspensionAction,
   undoAction,
 } from "./actions";
 import {
   ADMIN_SECTIONS,
+  BETA_FEEDBACK_CATEGORIES,
+  BETA_FEEDBACK_PAGE,
+  filterBetaFeedback,
   formatKstDate,
   formatKstDateTime,
   hiddenKeyOfLog,
@@ -48,6 +53,8 @@ import {
   type AdminSection,
   type AdminSnapshot,
   type AdminUser,
+  type BetaFeedbackFilter,
+  type BetaFeedbackItem,
   type ClosureItem,
   type LogEntry,
   type ReportedItem,
@@ -361,7 +368,9 @@ export function AdminConsole({ adminNickname }: { adminNickname: string }) {
       {!online ? <OfflineBanner /> : null}
       <div className="mx-auto grid w-full max-w-6xl flex-1 gap-10 px-4 pt-8 pb-16 desktop:grid-cols-[1fr_20rem] desktop:gap-14 desktop:px-10 desktop:pt-12">
         <main className="flex min-w-0 flex-col">
-          {c.query.isPending ? (
+          {section === "beta" ? (
+            <BetaFeedbackSection />
+          ) : c.query.isPending ? (
             <CardSkeleton />
           ) : !data ? (
             <>
@@ -395,7 +404,7 @@ export function AdminConsole({ adminNickname }: { adminNickname: string }) {
             </section>
           )}
         </main>
-        {section !== "log" && data ? (
+        {section !== "log" && section !== "beta" && data ? (
           <aside aria-label={copy.log.today} className="min-w-0">
             <details className="group desktop:hidden">
               <summary className="flex min-h-11 cursor-pointer items-center justify-between border-t border-border pt-3 type-label">
@@ -1262,6 +1271,115 @@ function LogList({
         </li>
       ))}
     </ul>
+  );
+}
+
+/* ---------- 베타 의견 (T9.4) ---------- */
+
+const BETA_QUERY_KEY = ["admin", "beta-feedback"] as const;
+const BETA_FILTERS: readonly BetaFeedbackFilter[] = [
+  "all",
+  ...BETA_FEEDBACK_CATEGORIES,
+  "none",
+];
+
+/**
+ * D-19 C 문법의 목록: 최신순, 종류 필터(칩), 읽음 처리 없음(D-23 안건 14). 데이터는 admin_beta_feedback 보안 함수로만,
+ * TanStack Query 세션 메모리에만 둔다. 작성자는 익명 번호(참여자 n), 화면은 경로 틀만.
+ */
+function BetaFeedbackSection() {
+  const query = useQuery({
+    queryKey: BETA_QUERY_KEY,
+    queryFn: async (): Promise<BetaFeedbackItem[]> => {
+      const r = await loadBetaFeedbackAction();
+      if (!r.ok) throw new AdminLoadError(r.error);
+      return r.items;
+    },
+    staleTime: 30_000,
+    retry: 1,
+  });
+  const [filter, setFilter] = useState<BetaFeedbackFilter>("all");
+  const b = copy.beta;
+
+  if (query.isPending) return <CardSkeleton />;
+  if (!query.data)
+    return (
+      <>
+        <h1 className="sr-only">{b.title}</h1>
+        <ErrorState
+          title={b.errorTitle}
+          body={b.errorBody}
+          action={{ onClick: () => void query.refetch() }}
+        />
+      </>
+    );
+  const all = query.data;
+  const items = filterBetaFeedback(all, filter);
+  return (
+    <section className="flex flex-col gap-5">
+      <div className="flex items-baseline justify-between gap-4">
+        <h1 className="type-title">{b.title}</h1>
+        <p className="type-caption text-muted-foreground tabular-nums">
+          {b.count(items.length)}
+        </p>
+      </div>
+      <ChipGroup
+        aria-label={b.filterLabel}
+        value={[filter]}
+        onValueChange={(v: unknown[]) => {
+          const next = v[0];
+          setFilter(
+            (BETA_FILTERS as readonly unknown[]).includes(next)
+              ? (next as BetaFeedbackFilter)
+              : "all",
+          );
+        }}
+      >
+        {BETA_FILTERS.map((f) => (
+          <Chip key={f} value={f}>
+            {b.filters[f]}
+          </Chip>
+        ))}
+      </ChipGroup>
+      {items.length === 0 ? (
+        <EmptyState
+          title={all.length === 0 ? b.empty : b.emptyFiltered}
+          body={b.emptyBody}
+          className="py-10"
+        />
+      ) : (
+        <ul className="flex flex-col divide-y divide-border border-y border-border">
+          {items.map((i) => (
+            <li key={i.id} className="flex flex-col gap-2 py-4">
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1 type-caption text-muted-foreground tabular-nums">
+                <span className="type-label text-foreground">
+                  {i.category ? b.filters[i.category] : b.filters.none}
+                </span>
+                <span>{b.author(i.authorNo)}</span>
+                <span>{formatKstDateTime(i.at)}</span>
+              </p>
+              <p className="type-body break-keep whitespace-pre-line">{i.body}</p>
+              <p className="flex flex-wrap gap-x-3 gap-y-1 type-caption break-all text-muted-foreground">
+                <span>{i.route ?? b.noRoute}</span>
+                <span>
+                  {b.devices[i.device]}
+                  {i.inApp ? `, ${b.inApp}` : ""}
+                  {i.standalone ? `, ${b.standalone}` : ""}
+                </span>
+                <span>{b.app(i.appVersion)}</span>
+                <span>{b.algo(i.algoVersion)}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+      {all.length >= BETA_FEEDBACK_PAGE ? (
+        <p className="type-caption text-muted-foreground">
+          {b.capped(BETA_FEEDBACK_PAGE)}
+        </p>
+      ) : null}
+      <p className="type-caption text-muted-foreground">{b.retention}</p>
+    </section>
   );
 }
 

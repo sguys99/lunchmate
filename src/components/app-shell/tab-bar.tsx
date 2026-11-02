@@ -12,11 +12,12 @@
 // - 데스크톱(화면 컨테이너 1024px 이상)에서도 같은 막대를 좌 리스트 칸 아래에 둔다(AppShell).
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { MouseEvent } from "react";
+import { useEffect, type MouseEvent } from "react";
 import { commonCopy } from "@/copy/common";
 import { focusRing } from "@/components/ui/interaction";
 import { useMotionPreference } from "@/lib/motion/preference";
 import { cn } from "@/lib/utils";
+import { rememberRoute } from "@/features/beta-feedback/last-route";
 import { APP_TABS, matchTab, type AppTabId } from "./tabs";
 
 export type TabBarViewProps = {
@@ -102,5 +103,7 @@ export function TabBarView({
 /** 앱 화면용 하단 탭. 현재 경로로 활성 탭을 정한다. */
 export function BottomTabBar({ className }: { className?: string }) {
   const pathname = usePathname();
+  // 베타 의견의 "지금 보던 화면"(T9.4): 나 탭 직전 경로를 이 탭 메모리에만 적는다
+  useEffect(() => rememberRoute(pathname), [pathname]);
   return <TabBarView activeId={matchTab(pathname)} className={className} />;
 }

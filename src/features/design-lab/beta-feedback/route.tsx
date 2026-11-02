@@ -4,14 +4,13 @@
 import { Suspense } from "react";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
 import { BetaFeedbackA } from "./a/beta-feedback-a";
-import { BetaFeedbackB } from "./b/beta-feedback-b";
-import { BetaFeedbackC } from "./c/beta-feedback-c";
 import { parseBetaFeedbackParams } from "./params";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-export type BetaFeedbackVariant = "a" | "b" | "c";
+// T9.4 구현 뒤 선택안 A만 확인 화면으로 남겼다(D-23). B, C는 캡처와 비교 문서(g9-comparison-beta.md)에만 있다.
+export type BetaFeedbackVariant = "a";
 
-const VARIANTS = { a: BetaFeedbackA, b: BetaFeedbackB, c: BetaFeedbackC } as const;
+const VARIANTS = { a: BetaFeedbackA } as const;
 
 async function Screen({
   variant,

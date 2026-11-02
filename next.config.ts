@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
@@ -6,9 +7,16 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 const swVersion =
   process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || Date.now().toString(36);
 
+// 앱 버전(T9.4 베타 의견에 함께 보내는 값, src/lib/app-version): package.json version
+const appVersion = (
+  JSON.parse(readFileSync(`${process.cwd()}/package.json`, "utf8")) as {
+    version?: string;
+  }
+).version;
+
 const nextConfig: NextConfig = {
   /* config options here */
-  env: { LM_SW_VERSION: swVersion },
+  env: { LM_SW_VERSION: swVersion, LM_APP_VERSION: appVersion ?? "0.0.0" },
   cacheComponents: true,
   partialPrefetching: true,
   // design-lab 화면은 루트 DESIGN.md 프런트매터를 서버에서 읽는다(getScreenTokens, T1.14, T1.20).

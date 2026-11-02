@@ -11,7 +11,13 @@ import type {
 } from "@/copy/admin";
 import { getKstParts, isSameKstDay } from "@/lib/time";
 
-export const ADMIN_SECTIONS = ["reviews", "closures", "users", "log"] as const;
+export const ADMIN_SECTIONS = [
+  "reviews",
+  "closures",
+  "users",
+  "log",
+  "beta",
+] as const;
 export type AdminSection = (typeof ADMIN_SECTIONS)[number];
 
 export const REVIEW_REASONS = [
@@ -249,6 +255,57 @@ export const decideRowSchema = z.object({
   target_id: z.string(),
 });
 
+/** 베타 의견 (T9.4, admin_beta_feedback). 작성자는 익명 번호만, 화면 경로는 경로 틀만 */
+export const BETA_FEEDBACK_CATEGORIES = [
+  "bug",
+  "inconvenient",
+  "good",
+  "idea",
+] as const;
+export type BetaFeedbackCategory = (typeof BETA_FEEDBACK_CATEGORIES)[number];
+
+export const betaFeedbackRowSchema = z
+  .object({
+    id: z.string(),
+    author_no: int,
+    category: z.enum(BETA_FEEDBACK_CATEGORIES).nullable(),
+    body: z.string(),
+    route: z.string().nullable(),
+    app_version: z.string(),
+    algo_version: z.string(),
+    device: z.enum(["ios", "android", "desktop"]),
+    in_app: z.boolean(),
+    standalone: z.boolean(),
+    created_at: ts,
+  })
+  .transform((r) => ({
+    id: r.id,
+    authorNo: r.author_no,
+    category: r.category,
+    body: r.body,
+    route: r.route,
+    appVersion: r.app_version,
+    algoVersion: r.algo_version,
+    device: r.device,
+    inApp: r.in_app,
+    standalone: r.standalone,
+    at: r.created_at,
+  }));
+export type BetaFeedbackItem = z.output<typeof betaFeedbackRowSchema>;
+/** 한 번에 받는 최대 수(함수 상한과 같다) */
+export const BETA_FEEDBACK_PAGE = 200;
+
+/** 종류 필터. all이면 전부, none은 종류를 고르지 않은 의견 */
+export type BetaFeedbackFilter = "all" | BetaFeedbackCategory | "none";
+export function filterBetaFeedback(
+  items: readonly BetaFeedbackItem[],
+  filter: BetaFeedbackFilter,
+): BetaFeedbackItem[] {
+  if (filter === "all") return [...items];
+  if (filter === "none") return items.filter((i) => i.category === null);
+  return items.filter((i) => i.category === filter);
+}
+
 export type AdminSnapshot = {
   items: ReportedItem[];
   closures: ClosureItem[];
@@ -402,6 +459,8 @@ export function sectionCounts(
     closures: s ? s.closures.length : null,
     users: s ? s.users.filter((u) => u.kind === "candidate").length : null,
     log: null,
+    // 읽음 처리가 없어 검토 대기 수를 두지 않는다(D-23 안건 14)
+    beta: null,
   };
 }
 

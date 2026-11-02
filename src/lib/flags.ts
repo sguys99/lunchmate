@@ -50,7 +50,7 @@ export const FLAGS = {
     default: false,
     source: { type: "const", value: true },
     owner:
-      "T4.6 (해제: T4.11, T4.12 완료 후. 해제할 때 pollEntry의 productionOff도 함께 지운다, T7.35)",
+      "T4.6 (해제: T4.11, T4.12 완료 후. 해제할 때 pollEntry, adminConsole, betaFeedback의 productionOff도 함께 지운다, T7.35, T9.4)",
     productionOff: true,
   },
   pollEntry: {
@@ -70,10 +70,12 @@ export const FLAGS = {
     productionOff: true,
   },
   betaFeedback: {
-    description: "나 탭의 베타 전용 피드백 버튼.",
+    description:
+      "나 탭 머리 아래의 베타 의견 보내기 줄과 시트(T9.4, D-23). 마이그레이션 20261102120000(beta_feedback) 적용 전에는 보내기가 실패 안내로 끝난다. 로그인 사용자에게만 보이므로 auth와 같은 규칙으로 연다: auth의 productionOff를 지울 때 이 플래그의 productionOff도 함께 지운다. 베타가 끝나면(T9.13) 값을 false로. 서버에서 판정해 props로 내려준다.",
     default: false,
-    source: { type: "const", value: false },
-    owner: "T9.4",
+    source: { type: "const", value: true },
+    owner: "T9.4 (해제: auth 해제와 함께, 끄기: T9.13 베타 종료)",
+    productionOff: true,
   },
   userPlaceMemo: {
     description:

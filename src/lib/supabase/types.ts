@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      beta_feedback: {
+        Row: {
+          algo_version: string
+          app_version: string
+          body: string
+          category: string | null
+          created_at: string
+          device: string
+          id: string
+          in_app: boolean
+          route: string | null
+          standalone: boolean
+          user_id: string
+        }
+        Insert: {
+          algo_version: string
+          app_version: string
+          body: string
+          category?: string | null
+          created_at?: string
+          device: string
+          id?: string
+          in_app?: boolean
+          route?: string | null
+          standalone?: boolean
+          user_id?: string
+        }
+        Update: {
+          algo_version?: string
+          app_version?: string
+          body?: string
+          category?: string | null
+          created_at?: string
+          device?: string
+          id?: string
+          in_app?: boolean
+          route?: string | null
+          standalone?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       blocklist: {
         Row: {
           created_at: string
@@ -726,6 +768,22 @@ export type Database = {
       add_poll_candidate: {
         Args: { p_place_id: string; p_place_url?: string; p_poll_id: string }
         Returns: string
+      }
+      admin_beta_feedback: {
+        Args: { p_before?: string; p_limit?: number }
+        Returns: {
+          algo_version: string
+          app_version: string
+          author_no: number
+          body: string
+          category: string
+          created_at: string
+          device: string
+          id: string
+          in_app: boolean
+          route: string
+          standalone: boolean
+        }[]
       }
       admin_clear_user: { Args: { p_user_id: string }; Returns: string }
       admin_closures: {

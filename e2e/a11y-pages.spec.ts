@@ -59,6 +59,7 @@ test.describe("실제 화면: 공개", () => {
   for (const [path, name] of [
     ["/", "landing"],
     ["/login", "login"],
+    ["/beta", "beta"],
     ["/terms", "terms"],
     ["/privacy", "privacy"],
     ["/location", "location"],

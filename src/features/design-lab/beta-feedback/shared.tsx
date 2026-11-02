@@ -30,7 +30,7 @@ import {
 import { useDesignPortalContainer } from "@/features/design-lab/system/design-scope";
 import { cn } from "@/lib/utils";
 import { BETA_CATEGORIES, type BetaCategory, type BetaFeedbackParams } from "./params";
-import { sanitizeRoute } from "./route-path";
+import { sanitizeRoute } from "@/features/beta-feedback/route-path";
 
 const copy = betaFeedbackLabCopy;
 

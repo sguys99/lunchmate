@@ -4,14 +4,13 @@
 import { Suspense } from "react";
 import { DesignScope } from "@/features/design-lab/system/design-scope";
 import { BetaA } from "./a/beta-a";
-import { BetaB } from "./b/beta-b";
-import { BetaC } from "./c/beta-c";
 import { parseBetaParams } from "./params";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-export type BetaVariant = "a" | "b" | "c";
+// T9.3 구현 뒤 선택안 A만 확인 화면으로 남겼다(D-23, 실제 화면은 A + C의 큰 제목). B, C는 캡처와 비교 문서에만 있다.
+export type BetaVariant = "a";
 
-const VARIANTS = { a: BetaA, b: BetaB, c: BetaC } as const;
+const VARIANTS = { a: BetaA } as const;
 
 async function Screen({
   variant,

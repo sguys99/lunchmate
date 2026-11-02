@@ -24,6 +24,37 @@ export const adminCopy = {
     closures: "폐업 제보",
     users: "사용자",
     log: "처리 이력",
+    beta: "베타 의견",
+  },
+
+  /** 베타 의견 구역 (T9.4, D-23 안건 14). 읽음 처리 없음, 작성자는 익명 번호 */
+  beta: {
+    title: "베타 의견",
+    filterLabel: "의견 종류",
+    filters: {
+      all: "전체",
+      bug: "버그",
+      inconvenient: "불편해요",
+      good: "좋아요",
+      idea: "제안",
+      none: "종류 없음",
+    },
+    count: (n: number) => `${n}건`,
+    author: (n: number) => `참여자 ${n}`,
+    noRoute: "화면 안 보냄",
+    devices: { ios: "아이폰", android: "안드로이드", desktop: "컴퓨터" },
+    inApp: "앱 안 브라우저",
+    standalone: "홈 화면 앱",
+    app: (v: string) => `앱 ${v}`,
+    algo: (v: string) => `추천 ${v}`,
+    empty: "아직 받은 의견이 없습니다.",
+    emptyFiltered: "이 종류의 의견이 없습니다.",
+    emptyBody: "새 의견이 들어오면 이 자리에 최신순으로 보입니다.",
+    capped: (n: number) => `최근 ${n}건만 보입니다.`,
+    retention:
+      "베타 의견은 베타가 끝나고 6개월 뒤 지웁니다. 보낸 사람이 탈퇴하면 바로 지웁니다.",
+    errorTitle: "베타 의견을 불러오지 못했습니다",
+    errorBody: "잠시 후 다시 시도해 주세요.",
   },
 
   status: {

@@ -3,11 +3,13 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { BETA_FEEDBACK_DAILY, betaFeedbackCopy } from "@/copy/beta";
 import { DAILY_LIMITS, moderationCopy } from "@/copy/moderation";
 import { pollCreateCopy } from "@/copy/poll-create";
 
-/** PRD 정본 수치 (MOD-05, DEAL-04, T5.14 방문 20) */
+/** PRD 정본 수치 (MOD-05, DEAL-04, T5.14 방문 20). 베타 의견 10은 D-23 안건 12(PRD 밖 베타 운영 값) */
 const PRD = { reviews: 20, reports: 30, deals: 10, polls: 10, visits: 20 };
+const BETA_FEEDBACK = 10;
 
 const dir = join(process.cwd(), "supabase", "migrations");
 const migrations = readdirSync(dir)
@@ -36,7 +38,13 @@ describe("하루 한도: PRD = DB = 문구", () => {
       reports: PRD.reports,
       deals: PRD.deals,
       polls: PRD.polls,
+      beta_feedback: BETA_FEEDBACK,
     });
+  });
+
+  it("베타 의견 하루 10번 문구 (T9.4)", () => {
+    expect(BETA_FEEDBACK_DAILY).toBe(BETA_FEEDBACK);
+    expect(betaFeedbackCopy.states.limit).toContain(`${BETA_FEEDBACK}번`);
   });
 
   it("방문 기록 20 (visits 트리거)", () => {

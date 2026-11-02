@@ -5,6 +5,8 @@
 import * as z from "zod";
 import { isEnabled } from "@/lib/flags";
 import {
+  BETA_FEEDBACK_PAGE,
+  betaFeedbackRowSchema,
   closureRowSchema,
   decideClosureInput,
   decideItemInput,
@@ -20,6 +22,7 @@ import {
   type AdminResult,
   type AdminSnapshot,
   type AdminUser,
+  type BetaFeedbackItem,
   type DecideClosureInput,
   type DecideItemInput,
   type SetSuspensionInput,
@@ -69,6 +72,22 @@ export async function loadAdminSnapshotAction(): Promise<
     });
   if (!parsed.success) return { ok: false, error: "save" };
   return { ok: true, snapshot: parsed.data };
+}
+
+/** 베타 의견 최신순 (T9.4). admin_beta_feedback 보안 함수로만 읽는다. 세션 메모리에만 둔다 */
+export async function loadBetaFeedbackAction(): Promise<
+  AdminResult<{ items: BetaFeedbackItem[] }>
+> {
+  const s = await session();
+  if (isFail(s)) return s;
+  const r = await callAdminRpc(s.supabase, "admin_beta_feedback", {
+    p_limit: BETA_FEEDBACK_PAGE,
+  });
+  const failed = mapAdminError(r.error);
+  if (failed) return { ok: false, error: failed };
+  const parsed = z.array(betaFeedbackRowSchema).safeParse(r.data);
+  if (!parsed.success) return { ok: false, error: "save" };
+  return { ok: true, items: parsed.data };
 }
 
 /** 후기, 할인 숨김 확정 또는 복구(문제없음). includeAuthor면 같은 작성자의 다른 검토 대기 글도 숨긴다 */

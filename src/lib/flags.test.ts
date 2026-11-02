@@ -67,8 +67,21 @@ describe("evaluateFlag", () => {
     expect(evaluateFlag(FLAGS.pollEntry, ctx({ inBrowser: true }))).toBe(false);
     expect(FLAGS.pollEntry.productionOff).toBe(FLAGS.auth.productionOff);
   });
+  it("betaFeedback은 개발과 Preview에서 켜지고, 프로덕션과 브라우저에서는 auth처럼 꺼진다 (T9.4)", () => {
+    expect(evaluateFlag(FLAGS.betaFeedback, ctx())).toBe(true);
+    expect(
+      evaluateFlag(FLAGS.betaFeedback, ctx({ vercelEnv: "preview" })),
+    ).toBe(true);
+    expect(
+      evaluateFlag(FLAGS.betaFeedback, ctx({ vercelEnv: "production" })),
+    ).toBe(false);
+    expect(evaluateFlag(FLAGS.betaFeedback, ctx({ inBrowser: true }))).toBe(
+      false,
+    );
+    expect(FLAGS.betaFeedback.productionOff).toBe(FLAGS.auth.productionOff);
+  });
   it("앞으로의 플래그는 모두 기본 false", () => {
-    for (const key of ["betaFeedback", "userPlaceMemo"] as const) {
+    for (const key of ["userPlaceMemo"] as const) {
       expect(evaluateFlag(FLAGS[key], ctx())).toBe(false);
     }
   });
