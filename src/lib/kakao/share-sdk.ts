@@ -1,5 +1,8 @@
 // 카카오톡 공유용 Kakao JavaScript SDK 로더 (T7.13, T7.20, POLL-03, POLL-09S).
-// 지도 SDK(sdk-loader.ts, window.kakao)와 다른 스크립트다(window.Kakao). 공유 버튼을 누른 뒤에만 받는다(홈, 투표방 첫 로드 무영향).
+// 지도 SDK(sdk-loader.ts, window.kakao)와 다른 스크립트다(window.Kakao). 공유 화면이 뜰 때 미리 받는다(preloadKakaoShare,
+// 홈과 투표방 첫 로드 무영향). 미리 받아 두면 누를 때 peekKakaoShare()로 바로 sendDefault를 불러 탭 안에서 카카오톡을 연다(T9.10).
+// 주의: SDK 2.x는 Kakao.init() 전에는 Kakao.Share 같은 모듈이 없다(VERSION, init, isInitialized, cleanup, isInAppBrowser만 있음).
+// 그래서 init을 먼저 하고 Share를 확인한다. 순서를 바꾸면 항상 "쓸 수 없음"으로 실패한다(T9.10에서 고친 원인).
 // 출처 (2026-11-01 확인):
 // - 설치와 초기화: https://developers.kakao.com/docs/ko/javascript/getting-started
 //   (t1.kakaocdn.net/kakao_js_sdk/<버전>/kakao.min.js, integrity 필수, crossorigin anonymous, Kakao.init, Kakao.isInitialized,
@@ -112,8 +115,13 @@ export function loadKakaoShare(): Promise<KakaoShareApi> {
       }
     }
     const K = window.Kakao;
-    if (!K?.Share) throw new KakaoShareUnavailableError();
+    if (!K) throw new KakaoShareUnavailableError("카카오 SDK가 없습니다.");
     if (!K.isInitialized()) K.init(key);
+    if (!K.Share)
+      throw new KakaoShareUnavailableError(
+        "초기화 뒤에도 Kakao.Share가 없습니다.",
+      );
+    ready = K.Share;
     return K.Share;
   })().catch((e: unknown) => {
     pending = undefined;
@@ -122,9 +130,22 @@ export function loadKakaoShare(): Promise<KakaoShareApi> {
   return pending;
 }
 
+let ready: KakaoShareApi | undefined;
+
+/** 이미 받아 초기화한 공유 API. 없으면 undefined(동기, 탭 안에서 바로 부를 때) */
+export function peekKakaoShare(): KakaoShareApi | undefined {
+  return ready;
+}
+
+/** 공유 화면이 뜰 때 미리 받는다. 실패는 삼키고, 누를 때 loadKakaoShare가 다시 시도한다 */
+export function preloadKakaoShare(): void {
+  loadKakaoShare().catch(() => undefined);
+}
+
 /** 테스트 전용 */
 export function resetKakaoShareForTest(): void {
   pending = undefined;
+  ready = undefined;
   if (typeof window !== "undefined") delete window.Kakao;
   if (typeof document !== "undefined")
     document

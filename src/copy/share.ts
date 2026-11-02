@@ -73,7 +73,6 @@ export const shareCopy = {
   invite: {
     copied: "링크를 복사했습니다.",
     copyFailed: "링크를 복사하지 못했습니다. 주소를 길게 눌러 복사해 주세요.",
-    kakaoFailed: "카카오톡을 열지 못했습니다. 링크 복사로 보내 주세요.",
     shareFailed: "공유 창을 열지 못했습니다. 링크 복사로 보내 주세요.",
     /** Web Share 공유 본문 */
     shareText: (title: string, deadline: string) =>

@@ -49,6 +49,11 @@ import type { UserPinnedLatLng } from "@/features/onboarding/pin";
 import { isCategorySlug } from "@/features/place/categories";
 import { kakaoCategorySlug } from "@/features/rec/kakao-category";
 import { pollRoomHref, pollTabHref } from "@/features/poll/routes";
+import {
+  loadShareInvite,
+  peekShareInvite,
+  preloadShareInvite,
+} from "@/features/poll/share/load-share-invite";
 import type { InviteChannel, ShareOutcome } from "@/features/poll/share/types";
 import { track } from "@/lib/analytics/track";
 import { absoluteUrl } from "@/lib/env/site";
@@ -597,8 +602,8 @@ export default function CreateDrawer({
     const at = closesAt;
     let outcome: ShareOutcome = "failed";
     try {
-      const { shareInvite } =
-        await import("@/features/poll/share/share-invite");
+      // 미리 받아 둔 모듈이면 await 없이 불러 탭 안에서 카카오톡이나 공유 창을 연다(T9.10)
+      const { shareInvite } = peekShareInvite() ?? (await loadShareInvite());
       outcome = await shareInvite({
         code: poll.code,
         title: savedTitle,
@@ -611,6 +616,7 @@ export default function CreateDrawer({
       outcome = "failed";
     }
     if (outcome === "failed") {
+      // 카카오 실패 안내는 바닥의 안쪽 알림 하나로만 한다(shareInvite는 kakao 실패에 토스트를 띄우지 않는다)
       if (channel === "kakao") setShareFailed(true);
       return;
     }
@@ -624,6 +630,12 @@ export default function CreateDrawer({
       void markPollSharedAction({ pollId: poll.pollId });
     }
   };
+
+  // "만들었어요"가 뜨면 공유 모듈과 카카오 SDK를 미리 받는다(누를 때 기다리지 않게, T9.10)
+  const shareReady = phase === "created";
+  useEffect(() => {
+    if (shareReady) preloadShareInvite({ kakao: true });
+  }, [shareReady]);
 
   /* ---------- 그리기 ---------- */
 

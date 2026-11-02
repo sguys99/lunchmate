@@ -7,6 +7,7 @@ vi.mock("@sentry/nextjs", () => ({ captureException }));
 vi.mock("@/lib/analytics/sentry-client", () => ({ initSentryClient }));
 
 import { errorDigest, reportError } from "./report-error";
+import { sanitizeHandledError } from "./report-handled";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -52,5 +53,22 @@ describe("reportError (T2.18)", () => {
       throw new Error("sdk");
     });
     await expect(reportError(new Error("x"))).resolves.toBeUndefined();
+  });
+});
+
+describe("sanitizeHandledError (T9.10)", () => {
+  it("이름과 메시지만 남기고 주소와 초대 코드를 지운다", () => {
+    const e = new TypeError(
+      "bad https://lunchmate-kr.vercel.app/poll/abcdefghij12?x=1 and /poll/zzzzzzzzzz9 kakaolink://send?a=b",
+    );
+    const out = sanitizeHandledError("share.kakao", e);
+    expect(out.name).toBe("TypeError");
+    expect(out.message).toBe("[share.kakao] bad <url> and /poll/<code> <url>");
+    expect(out.message).not.toMatch(/abcdefghij12|zzzzzzzzzz9|vercel/);
+  });
+
+  it("오류 객체가 아니어도 문자열 이름으로 만든다", () => {
+    expect(sanitizeHandledError("c", "boom").name).toBe("StringError");
+    expect(sanitizeHandledError("c", { a: 1 }).message).toBe("[c] ");
   });
 });

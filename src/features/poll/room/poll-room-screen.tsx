@@ -15,6 +15,11 @@ import { useOnlineStatus } from "@/lib/network";
 import { MotionProvider, useMotionReduced } from "@/lib/motion";
 import { formatPriceBand, withRo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import {
+  loadShareInvite,
+  peekShareInvite,
+  preloadShareInvite,
+} from "../share/load-share-invite";
 import { pollTabHref } from "../routes";
 import { markPollSharedAction } from "./actions";
 import type { PollErrorCode } from "./errors";
@@ -305,10 +310,11 @@ function TopBar({
   onAfterCancel: () => void;
   onAskCancel?: () => void;
 }) {
+  // 공유 모듈을 미리 받아 두고 누를 때 await 없이 불러 공유 창이 탭 안에서 열리게 한다(T9.10, iOS 사용자 활성화)
+  useEffect(() => preloadShareInvite({ kakao: false }), []);
   const share = useCallback(
     async (channel: "share" | "copy") => {
-      const { shareInvite } =
-        await import("@/features/poll/share/share-invite");
+      const { shareInvite } = peekShareInvite() ?? (await loadShareInvite());
       const useChannel =
         channel === "share" &&
         typeof navigator !== "undefined" &&

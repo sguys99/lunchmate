@@ -4,6 +4,7 @@
 // - 시트가 열리면 이미지를 그린다(그리기 모듈 result-image.ts도 이때 동적 import). 서버와 CDN에 보관하지 않는다(T0.16-4).
 // - 올리브 면 버튼은 시트 안 "카카오톡으로 보내기" 하나. 저장과 공유(Web Share 파일, 미지원이면 숨김)는 테두리 두 칸.
 // - 카카오톡: Kakao.Share.uploadImage(이미지가 카카오 서버에 100일 남음, D-17 안건 9) → sendDefault 피드(결과 링크).
+//   SDK는 시트가 열릴 때 미리 받고(preloadKakaoShare), 실패는 이름과 메시지만 Sentry에 남긴다(T9.10).
 // - 결과 안내는 role="status" 한 줄. 그리기 실패는 다시 만들기, 오프라인이면 카카오톡만 aria-disabled.
 import { Download, RotateCcw, Share2, WifiOff, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -27,6 +28,12 @@ import { CategoryIllustration } from "@/features/place/illustrations";
 import { pollResultHref } from "@/features/poll/routes";
 import { track } from "@/lib/analytics/track";
 import { absoluteUrl } from "@/lib/env/site";
+import { reportHandledError } from "@/lib/errors/report-handled";
+import {
+  loadKakaoShare,
+  peekKakaoShare,
+  preloadKakaoShare,
+} from "@/lib/kakao/share-sdk";
 import { useOnlineStatus } from "@/lib/network";
 import { cn } from "@/lib/utils";
 import type { ResultShareSheetProps } from "./types";
@@ -113,6 +120,11 @@ export function ResultShareSheet({
     };
   }, [open, attempt, name, title, votesOf, category, voters, votes]);
 
+  // 시트가 열리면 카카오 SDK를 미리 받는다(누를 때 SDK를 기다리지 않게, T9.10)
+  useEffect(() => {
+    if (open) preloadKakaoShare();
+  }, [open]);
+
   const ready = Boolean(made) && !failed;
   const shareable = canShareFile(made?.blob ?? null);
 
@@ -121,8 +133,7 @@ export function ResultShareSheet({
     setSending(true);
     setStatus(t.sending);
     try {
-      const { loadKakaoShare } = await import("@/lib/kakao/share-sdk");
-      const kakao = await loadKakaoShare();
+      const kakao = peekKakaoShare() ?? (await loadKakaoShare());
       const file = new File([made.blob], t.fileName, { type: "image/png" });
       const up = await kakao.uploadImage({ file: [file] });
       const link = {
@@ -143,7 +154,8 @@ export function ResultShareSheet({
       });
       setStatus("");
       track({ name: "poll_result_shared", properties: { channel: "kakao" } });
-    } catch {
+    } catch (e) {
+      reportHandledError("share.result.kakao", e);
       setStatus(t.kakaoFailed);
     } finally {
       setSending(false);
@@ -169,8 +181,10 @@ export function ResultShareSheet({
       await navigator.share({ files: [file], title: alt });
       track({ name: "poll_result_shared", properties: { channel: "share" } });
     } catch (e) {
-      if (!(e instanceof DOMException && e.name === "AbortError"))
+      if (!(e instanceof DOMException && e.name === "AbortError")) {
+        reportHandledError("share.result.webshare", e);
         setStatus(t.shareFailed);
+      }
     }
   }, [made, alt]);
 
