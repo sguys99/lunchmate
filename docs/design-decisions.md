@@ -641,3 +641,9 @@
 - launchd 주 1회 자동 백업은 macOS 개인정보 보호(데스크톱 폴더 접근 차단)로 돌지 않아 **없앰**. 대신 **`pnpm db:push` 직전에 Claude가 `pnpm db:backup`** (CLAUDE.md 7.1). DB를 바꾸는 주체가 Claude뿐인 베타 기간의 주된 위험(잘못된 마이그레이션)을 막는다
 - 첫 덤프 2026-11-02 15:04 `~/lunchmate-backups/2026-11-02_1504`(roles, schema 33.9 KB, data 20.3 KB). Docker 런타임은 Colima. Supabase Pro 전환은 T10.6, T10.7에서 다시 본다
 - D-21의 "launchd 주 1회"를 대체
+
+### D-25. T9.10 홈 한 화면 압축 (⛔ 선택)
+
+- 날짜: 2026-11-02. 실기기(iPhone)에서 홈이 한 화면에 다 보이지 않는다는 사용자 지적. 비교 자료 `docs/design/g9-comparison-home-compact.md`, 캡처 `docs/design/shots/2026-11-02/design-lab-home-compact-*`, `prod-today-current__*`
+- 선택: **A 간격 줄이기 + B의 두 줄 대안 목록.** 제목과 날짜 한 줄, 상세와 더 보기는 카드 윗줄, 이유는 바로 한 줄(펼침 유지), 친구랑 정하기와 회식 모드는 대안 제목 줄, 숫자 3칸 격자와 하단 행동 줄(길찾기 위치 0.81) 유지, 대안 두 곳은 테두리 하나 안 두 줄 목록(이름 한 줄 전체 폭)
+- 조건: 390x664, 360x640에서 긴 이름과 짧은 이름 모두 스크롤 0, /today 번들 200 KB 이하. D-05(G3 홈 D1)의 카드 배치를 이 범위에서 갱신
