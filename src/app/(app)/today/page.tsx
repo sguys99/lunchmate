@@ -9,6 +9,7 @@ import { loadToday } from "@/features/rec/load-today";
 import { TodayScreen } from "@/features/rec/today-screen";
 import { TodaySkeleton } from "@/features/rec/today-skeleton";
 import { isEnabled } from "@/lib/flags";
+import { KakaoSdkPreload } from "@/lib/kakao/sdk-preload";
 
 export const metadata: Metadata = { title: homeCopy.today.metaTitle };
 
@@ -20,7 +21,14 @@ async function Today({
   searchParams: Promise<SearchParams>;
 }) {
   const data = await loadToday(await searchParams);
-  return <TodayScreen data={data} showEntries={isEnabled("pollEntry")} />;
+  return (
+    <>
+      {/* 카카오 SDK를 첫 로드 JS와 나란히 받는다(AC-REC-4). 정적 껍데기가 아니라 여기(요청 시점 부분)에 두어
+          하단 탭과 링크의 /today 미리 받기(정적 껍데기만)가 다른 화면에서 SDK를 받게 하지 않는다 */}
+      <KakaoSdkPreload />
+      <TodayScreen data={data} showEntries={isEnabled("pollEntry")} />
+    </>
+  );
 }
 
 export default function Page(props: { searchParams: Promise<SearchParams> }) {

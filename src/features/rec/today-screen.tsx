@@ -78,7 +78,7 @@ import {
 } from "./today-cards";
 import { noticeText, TodayHeader } from "./today-header";
 import { ShortNote } from "./today-states-light";
-import { placeStatsQuery } from "./stats-query";
+import { placeStatsQuery, preloadPlaceStats } from "./stats-query";
 import { RELAXED_BUDGET_KRW, useTodaySession } from "./today-store";
 import { preloadDirections, useCardDirections } from "./use-card-directions";
 import { useReducedMotion } from "./use-reduced-motion";
@@ -215,9 +215,10 @@ export function TodayScreen({
     patch({ here, choice: next.choice, notice: next.notice, order: [0, 1, 2] });
   }, [patch, data.offices]);
 
-  // 카카오 검색 모듈과 SDK를 측위와 나란히 미리 받는다(T5.41, AC-REC-4). 검색 자체는 기준점이 정해진 뒤 쿼리가 한다
+  // 카카오 검색 모듈과 SDK, 집계 읽기 청크를 측위와 나란히 미리 받는다(T5.41, AC-REC-4). 검색 자체는 기준점이 정해진 뒤 쿼리가 한다
   useEffect(() => {
     prefetchKakaoSearch();
+    preloadPlaceStats();
   }, []);
 
   // 처음 현위치가 기준이면(사무실 없음) 한 번 찾는다

@@ -9,6 +9,11 @@ import { queryOptions } from "@tanstack/react-query";
 
 const load = () => import("./stats-load");
 
+/** 읽기 본체 청크를 미리 받는다(AC-REC-4). 카카오 결과가 온 뒤 청크 받기와 집계 요청이 차례로 이어지지 않게 화면 진입 때 부른다 */
+export function preloadPlaceStats(): void {
+  void load().catch(() => {});
+}
+
 /** 후보 집합 키: 중복을 빼고 정렬해 잇는다(stats-load statsBatches와 같은 순서) */
 export function placeStatsKey(ids: readonly string[]): string {
   return [...new Set(ids)].sort().join(",");
