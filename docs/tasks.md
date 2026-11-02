@@ -631,7 +631,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 ### 9단계. 클로즈드 베타 (1주 이상)
 
-- [ ] T9.0 G8 조건 해소: 실기기 핵심 묶음(g8-device-matrix S1~S4), 관리자 지정, `NEXT_PUBLIC_CONTACT_EMAIL`, PostHog/Sentry IP 폐기(monitoring.md), launchd 백업 첫 덤프, `pnpm test:cleanup --yes` (G8 조건부 통과, 11/02)
+- [ ] T9.0 (11/02 진행: 관리자 지정 완료(구글 계정), 문의 이메일 등록 완료(.env.local, Vercel Production/Preview), PostHog/Sentry IP 폐기와 스크러버 완료(monitoring.md 4장 결과, 처리방침 1년/30일 반영), 백업은 D-24로 변경(첫 덤프 완료, 자동 예약 대신 db:push 전 백업), test:cleanup --yes 완료(테스트 투표방 89개). 남음: 실기기 S1~S4, T9.2 플래그 공개 뒤) G8 조건 해소: 실기기 핵심 묶음(g8-device-matrix S1~S4), 관리자 지정, `NEXT_PUBLIC_CONTACT_EMAIL`, PostHog/Sentry IP 폐기(monitoring.md), launchd 백업 첫 덤프, `pnpm test:cleanup --yes` (G8 조건부 통과, 11/02)
 - [ ] ❓ T9.1 베타 시작일과 참여자 범위 확정 (PRD Q7). 11/02 사용자 결정(D-22): 기본안, T9.0과 플래그 공개, 실기기 핵심 묶음이 끝난 다음 주 월요일, 서울 근무 동료 20명 내외. 날짜는 조건이 끝날 때 확정
 - [ ] T9.2 ~~자체 도메인 구매와 연결~~ → **프로덕션 플래그 공개** (11/02 사용자 결정 D-22: 베타는 `lunchmate-kr.vercel.app` 유지, 자체 도메인은 T10.0에서 재검토). T9.0의 관리자 지정, 문의 주소, 분석 도구 개인정보 설정 뒤 auth, pollEntry, adminConsole의 `productionOff`를 함께 지우고 배포, auth-off 반대 확인 E2E, 그 주소에서 실기기 S1~S4
 - [x] T9.3 (11/02 완료, `/beta` 공개 경로(auth 플래그와 함께, noindex, 사이트맵 제외), 서버 UA 기기 판정, 인앱 주 버튼 외부 브라우저 + 실패 시 메뉴 그림과 링크 복사, standalone 설치 마침, 데스크톱 2단, `e2e/beta.spec.ts` axe 0. 카카오톡 초대 문구 문서는 T9.5 때) 베타 안내문, 설치 방법, 피드백 받을 채널 (문구 규칙 적용). 11/02 결정(D-22): 설치 방법은 앱 안 환영 페이지 `/beta`(시안 3안 ⛔ 선택 완료 D-23: A + C 제목, 인앱 주 버튼 외부 브라우저), 초대 문구는 문서

@@ -131,6 +131,7 @@ docs/                    basic-plan, prd, tasks, design-decisions, research-note
 
 ### 7.1 클라우드 개발 DB 주의
 - 로컬 DB가 없으므로 **`pnpm db:push` 전에 마이그레이션 내용을 보여주고 승인받는다.**
+- `pnpm db:push` 직전에 `pnpm db:backup`으로 백업을 받는다(Docker는 Colima: `colima start`). 주간 자동 백업은 두지 않는다(D-24, 2026-11-02).
 - 데이터 삭제·컬럼 삭제·이름 변경 같은 파괴적 변경, `supabase db reset`은 사용자 명시 요청 없이 하지 않는다.
 - 테스트 데이터는 `test_` 접두 닉네임의 테스트 계정으로만 만들고, 테스트 후 정리 스크립트로 지운다.
 - RLS 테스트는 anon 키 + 테스트 사용자 세션으로 한다. service role 키로 테스트하면 RLS가 우회되어 의미가 없다.
