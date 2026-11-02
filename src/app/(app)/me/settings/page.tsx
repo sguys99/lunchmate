@@ -1,5 +1,5 @@
 // 나 탭 설정 /me/settings (T4.27에서 /me 첫 화면이던 것을 T6.13에서 옮김, D-12 안건 1, 5, PRD SET-01~05, AUTH-05).
-// 설정(사무실, 예산과 거리, 못 먹는 음식, 요즘 이게 땡겨요, 화면), 계정, 문의와 정책(T8.6 문의하기, T8.14 위치정보 처리 안내) 세 묶음. 들어오는 곳은 /me 머리줄 톱니와 기록 탭 맨 아래 "설정" 줄.
+// 설정(사무실, 예산과 거리, 못 먹는 음식, 요즘 이게 땡겨요, 화면), 계정, 관리(관리자만, T9.10), 문의와 정책(T8.6 문의하기, T8.14 위치정보 처리 안내) 묶음. 들어오는 곳은 /me 머리줄 톱니와 기록 탭 맨 아래 "설정" 줄.
 // - 로그인 필요 경로(proxy). flags.auth가 꺼진 환경에서는 "곧 열립니다" 안내(coming-soon.tsx). 세션과 설정은 요청 시점 값이라 Suspense 안에서 읽는다.
 // - 화면 설정(테마, 모션, 진동)은 "화면" 줄 → /me/display. 줄 값은 이 기기 저장소 값이라 클라이언트 조각(DisplaySummary)이 그린다.
 import type { Metadata } from "next";
@@ -17,6 +17,7 @@ import {
   loadProfile,
   requireMeSession,
 } from "@/features/me/load";
+import { showsAdminEntry } from "@/features/me/admin-entry";
 import { resolveDefaultOffice } from "@/features/me/offices";
 import {
   SettingsLinkRow,
@@ -112,6 +113,13 @@ async function Settings() {
         <SettingsLinkRow href="/me/account" label={rows.account} />
         <SignOutRow />
       </SettingsSection>
+
+      {/* 관리자만(T9.10): role은 서버에서 읽고, /admin 레이아웃과 admin_* 보안 함수가 다시 확인한다 */}
+      {showsAdminEntry(profile, isEnabled("adminConsole")) ? (
+        <SettingsSection title={meCopy.sections.admin}>
+          <SettingsLinkRow href="/admin" label={rows.admin} />
+        </SettingsSection>
+      ) : null}
 
       <SettingsSection title={meCopy.sections.legal}>
         <SettingsLinkRow href="/me/contact" label={rows.contact} />

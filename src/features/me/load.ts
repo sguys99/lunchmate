@@ -30,7 +30,12 @@ export async function requireMeSession(next: string): Promise<MeSession> {
   return { supabase, userId };
 }
 
-export type ProfileData = { nickname: string | null; provider: string | null };
+export type ProfileData = {
+  nickname: string | null;
+  provider: string | null;
+  /** 서버에서만 읽는 본인 역할(T9.10). 관리자 화면 줄을 보일지 서버가 정한다 */
+  role: "user" | "admin";
+};
 
 export async function loadProfile({
   supabase,
@@ -38,11 +43,11 @@ export async function loadProfile({
 }: MeSession): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("nickname, provider")
+    .select("nickname, provider, role")
     .eq("user_id", userId)
     .maybeSingle();
   if (error || !data) return null;
-  return data;
+  return { ...data, role: data.role === "admin" ? "admin" : "user" };
 }
 
 export async function loadOffices({

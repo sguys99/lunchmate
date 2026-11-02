@@ -11,6 +11,7 @@ export const meCopy = {
     settings: "설정",
     display: "화면",
     account: "계정",
+    admin: "관리",
     legal: "문의와 정책",
   },
 
@@ -23,6 +24,7 @@ export const meCopy = {
     name: "이름",
     account: "계정 관리",
     signOut: "로그아웃",
+    admin: "관리자 화면",
     contact: "문의하기",
     terms: "이용약관",
     privacy: "개인정보 처리방침",

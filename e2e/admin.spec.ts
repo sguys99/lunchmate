@@ -134,7 +134,11 @@ async function seed() {
     const c = await rest(env!, "place_reports", {
       method: "POST",
       token: r.token,
-      body: { place_id: closedPlace, kind: "closed", detail: { closed: "gone" } },
+      body: {
+        place_id: closedPlace,
+        kind: "closed",
+        detail: { closed: "gone" },
+      },
     });
     expect(c.error).toBeNull();
   }
@@ -205,9 +209,9 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
     try {
       await page.goto("/admin");
       await expect(page.getByText("런치메이트 관리")).toBeVisible();
-      await expect(
-        page.getByRole("tab", { name: /신고된 후기/ }),
-      ).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole("tab", { name: /신고된 후기/ })).toBeVisible({
+        timeout: 20_000,
+      });
 
       // 1. 자동 숨김된 이 실행의 글
       await seek(page, data.bodies.first);
@@ -219,36 +223,46 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
 
       // 2. 숨김 확정 → 사유 단계(가장 많은 사유를 미리 고름) → 토스트 되돌리기
       await main.getByRole("button", { name: "숨김 확정" }).click();
-      await expect(main.getByRole("radio", { name: /광고, 스팸/ })).toBeChecked();
-      await expect(main.getByRole("radio", { name: /광고, 스팸/ })).toBeFocused();
+      await expect(
+        main.getByRole("radio", { name: /광고, 스팸/ }),
+      ).toBeChecked();
+      await expect(
+        main.getByRole("radio", { name: /광고, 스팸/ }),
+      ).toBeFocused();
       await expect(
         main.getByText("같은 작성자의 다른 신고 글 2건도 함께 숨기기"),
       ).toBeVisible();
       await shot(page, "reason");
       await axe(page);
-      await page.getByRole("button", { name: "광고, 스팸 사유로 숨기기" }).click();
+      await page
+        .getByRole("button", { name: "광고, 스팸 사유로 숨기기" })
+        .click();
       const done = page.getByText("숨김을 확정했습니다.");
       await expect(done).toBeVisible();
-      await expect.poll(() => hiddenReason(data.author, data.reviews.rv1)).toBe(
-        "admin",
-      );
+      await expect
+        .poll(() => hiddenReason(data.author, data.reviews.rv1))
+        .toBe("admin");
       await page
         .locator("[data-sonner-toast]")
         .filter({ has: done })
         .getByRole("button", { name: "되돌리기" })
         .click();
       await expect(page.getByText("되돌렸습니다.")).toBeVisible();
-      await expect.poll(() => hiddenReason(data.author, data.reviews.rv1)).toBe(
-        "reports",
-      );
+      await expect
+        .poll(() => hiddenReason(data.author, data.reviews.rv1))
+        .toBe("reports");
 
       // 3. 같은 작성자 일괄 숨김(B 조각, 확인 상자). 비공개로 바뀐 글은 글 없이 표시된다
       await page.reload();
       await seek(page, data.bodies.first);
       await expect(main.getByText(data.bodies.secret)).toHaveCount(0);
       await main.getByRole("button", { name: "숨김 확정" }).click();
-      await main.getByText("같은 작성자의 다른 신고 글 2건도 함께 숨기기").click();
-      await page.getByRole("button", { name: "광고, 스팸 사유로 숨기기" }).click();
+      await main
+        .getByText("같은 작성자의 다른 신고 글 2건도 함께 숨기기")
+        .click();
+      await page
+        .getByRole("button", { name: "광고, 스팸 사유로 숨기기" })
+        .click();
       const dialog = page.getByRole("dialog");
       await expect(dialog.getByText("3건을 함께 숨길까요?")).toBeVisible();
       await expect(dialog.getByRole("button", { name: "취소" })).toBeFocused();
@@ -273,7 +287,10 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
       await axe(page);
       await main.getByRole("button", { name: "폐업 확인" }).click();
       await shot(page, "closed-confirm");
-      await page.getByRole("dialog").getByRole("button", { name: "폐업 확인" }).click();
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: "폐업 확인" })
+        .click();
       await expect(page.getByText(/폐업으로 확인했습니다/)).toBeVisible();
       const stats = await rpc<{ closed: boolean }[]>(env!, "place_stats", {
         p_place_ids: [data.closedPlace],
@@ -320,7 +337,9 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
       await page.getByRole("tab", { name: /처리 이력/ }).click();
       await expect(main.getByText("사용자 정지").first()).toBeVisible();
       await expect(main.getByText("폐업 확인").first()).toBeVisible();
-      await expect(main.getByText("처리 이력은 1년 동안 보관합니다.")).toBeVisible();
+      await expect(
+        main.getByText("처리 이력은 1년 동안 보관합니다."),
+      ).toBeVisible();
       await shot(page, "log");
       await axe(page);
     } finally {
@@ -345,14 +364,18 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
       );
       await page.goto("/admin");
       await expect(
-        page.getByRole("status").filter({ hasText: "관리 목록을 불러오는 중입니다" }),
+        page
+          .getByRole("status")
+          .filter({ hasText: "관리 목록을 불러오는 중입니다" }),
       ).toBeAttached({ timeout: 20_000 });
       await shot(page, "loading");
 
       // 오류: 목록 요청이 실패하면(한 번 다시 시도한 뒤) 다시 시도 버튼
       mode = "fail";
       await page.reload();
-      await expect(page.getByText("관리 목록을 불러오지 못했습니다")).toBeVisible({
+      await expect(
+        page.getByText("관리 목록을 불러오지 못했습니다"),
+      ).toBeVisible({
         timeout: 30_000,
       });
       await shot(page, "error");
@@ -362,11 +385,15 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
       mode = "pass";
       await page.getByRole("button", { name: "다시 시도" }).click();
       await expect(page.getByRole("tab", { name: /처리 이력/ })).toBeVisible();
-      await expect(page.getByText("관리 목록을 불러오지 못했습니다")).toHaveCount(0, {
+      await expect(
+        page.getByText("관리 목록을 불러오지 못했습니다"),
+      ).toHaveCount(0, {
         timeout: 20_000,
       });
       await page.context().setOffline(true);
-      await expect(page.getByText("인터넷에 연결되어 있지 않습니다.")).toBeVisible();
+      await expect(
+        page.getByText("인터넷에 연결되어 있지 않습니다."),
+      ).toBeVisible();
       const primary = page
         .getByRole("main")
         .getByRole("button", { name: /숨김 확정|숨기기/ });
@@ -378,13 +405,44 @@ test.describe("관리자 화면 (T8.5, MOD-06)", () => {
     }
   });
 
-  test("비관리자와 비로그인은 /admin을 볼 수 없다", async ({ page, baseURL }) => {
+  test("나 탭 설정: 관리자에게만 관리자 화면 줄이 보이고 /admin으로 간다 (T9.10)", async ({
+    page,
+    baseURL,
+  }) => {
+    const admin = await signInAdmin(page, baseURL!);
+    try {
+      await page.goto("/me/settings");
+      const row = page.getByRole("link", { name: /관리자 화면/ });
+      await expect(row).toBeVisible({ timeout: 20_000 });
+      await expect(row).toHaveAttribute("href", "/admin");
+      await row.click();
+      await expect(page).toHaveURL(/\/admin$/);
+      await expect(page.getByText("런치메이트 관리").first()).toBeVisible({
+        timeout: 20_000,
+      });
+    } finally {
+      await admin.cleanup();
+    }
+  });
+
+  test("비관리자와 비로그인은 /admin을 볼 수 없다", async ({
+    page,
+    baseURL,
+  }) => {
     const signed = await signInContext(page.context(), env!, baseURL!, "nadm");
     try {
       await adminPatch(env!, "profiles", `user_id=eq.${signed.user.id}`, {
         terms_agreed_at: new Date().toISOString(),
         birth_confirmed_at: new Date().toISOString(),
       });
+      // 나 탭 설정에 관리자 화면 줄이 없다(T9.10, 서버 role 판정)
+      await page.goto("/me/settings");
+      await expect(
+        page.getByRole("heading", { name: "문의와 정책" }),
+      ).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole("link", { name: /관리자 화면/ })).toHaveCount(
+        0,
+      );
       await page.goto("/admin");
       await expect(page.getByText("찾는 페이지가 없습니다")).toBeVisible({
         timeout: 20_000,
