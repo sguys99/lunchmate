@@ -153,7 +153,7 @@ export default function CardMenu({
       },
     },
   ];
-  // 노출은 부르는 쪽이 정한다: 서버가 판정한 pollEntry가 켜질 때만 onAddToPoll을 넘긴다(T7.35, 브라우저 판정은 productionOff로 늘 꺼짐)
+  // 노출은 부르는 쪽이 정한다: 서버가 판정한 pollEntry가 켜질 때만 onAddToPoll을 넘긴다(T7.35, 2026-11-02 T9.2부터 프로덕션도 켜짐)
   if (onAddToPoll) {
     actions.push({
       key: "poll",

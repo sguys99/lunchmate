@@ -158,7 +158,7 @@ export function TodayScreen({
   const [login, setLogin] = useState<{ open: boolean; next: string } | null>(
     null,
   );
-  // 로그인이 닫힌 환경(프로덕션, flags.auth)에서는 시트 대신 "곧 열립니다" 토스트(gate.tsx)
+  // 로그인이 닫힌 환경(flags.auth 꺼짐)에서는 시트 대신 "곧 열립니다" 토스트(gate.tsx)
   const loginOpen = useLoginOpen();
   const promptSave = () => {
     if (!loginOpen) {

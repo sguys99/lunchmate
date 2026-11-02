@@ -47,7 +47,7 @@ async function Route() {
 }
 
 export default function Page() {
-  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
+  // 로그인이 꺼진 환경에서는 404 대신 "곧 열립니다" 안내(5단계 마무리)
   if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <Suspense

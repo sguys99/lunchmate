@@ -60,7 +60,7 @@ tasks.md에서 다음 미완료 작업부터 진행해줘. 시작 전에 관련 
 | 6 | 피드백, 후기, 기록, 제보 | 1.5주 | ⛔ 시안 + G6 | 완료 (11/01, 피드백 B + C + A, 나 탭 A + C, 제보 C + B, 실기기 확인 남음) | 33/33 |
 | 7 | 투표, 회식 | 1.5주 | ⛔ 시안 + G7 | 완료 (11/01 T7.5, 투표방 A + C + B, 투표 만들기 C + B + A, 회식 C + B, 공유 OG A + 이미지 B, 7.1 데이터, 7.2 투표, 7.3 회식 완료, 7.4 점검 완료, 프로덕션 공개는 auth와 함께, 실기기 확인 남음) | 35/36 |
 | 8 | 다듬기: PWA, 모션, 접근성, 성능, 관리자 | 1주 | G8 | 완료 (11/02 G8 조건부 통과, 아이콘 A 샌드 track, 관리자 C + B + A, 홈 199 KB, Lighthouse 홈 86, 실제 기기 확인은 T9.0) | 23/23 |
-| 9 | 클로즈드 베타 | 1주 이상 | G9 | 진행 중 (11/02 시작, 도메인 vercel.app 유지, 프로덕션 플래그 먼저 공개) | 2/14 |
+| 9 | 클로즈드 베타 | 1주 이상 | G9 | 진행 중 (11/02 시작, 도메인 vercel.app 유지, 프로덕션 플래그 공개 완료) | 3/14 |
 | 10 | 공개 출시 준비 | 1주 | G10 | 대기 | 0/15 |
 
 **전체 예상: 약 11~12주** (하루 1~2시간 Claude Code 작업 기준). PRD 초기 추정(6.5~7주)보다 늘어난 이유는 디자인 시스템 단계, 화면별 3안 이상 시안, 공통 기반, 다듬기 단계를 별도로 잡았기 때문입니다. 하루 4시간 이상 작업하면 약 6~7주로 줄어듭니다.
@@ -633,7 +633,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 
 - [ ] T9.0 (11/02 진행: 관리자 지정 완료(구글 계정), 문의 이메일 등록 완료(.env.local, Vercel Production/Preview), PostHog/Sentry IP 폐기와 스크러버 완료(monitoring.md 4장 결과, 처리방침 1년/30일 반영), 백업은 D-24로 변경(첫 덤프 완료, 자동 예약 대신 db:push 전 백업), test:cleanup --yes 완료(테스트 투표방 89개). 남음: 실기기 S1~S4, T9.2 플래그 공개 뒤) G8 조건 해소: 실기기 핵심 묶음(g8-device-matrix S1~S4), 관리자 지정, `NEXT_PUBLIC_CONTACT_EMAIL`, PostHog/Sentry IP 폐기(monitoring.md), launchd 백업 첫 덤프, `pnpm test:cleanup --yes` (G8 조건부 통과, 11/02)
 - [ ] ❓ T9.1 베타 시작일과 참여자 범위 확정 (PRD Q7). 11/02 사용자 결정(D-22): 기본안, T9.0과 플래그 공개, 실기기 핵심 묶음이 끝난 다음 주 월요일, 서울 근무 동료 20명 내외. 날짜는 조건이 끝날 때 확정
-- [ ] T9.2 ~~자체 도메인 구매와 연결~~ → **프로덕션 플래그 공개** (11/02 사용자 결정 D-22: 베타는 `lunchmate-kr.vercel.app` 유지, 자체 도메인은 T10.0에서 재검토). T9.0의 관리자 지정, 문의 주소, 분석 도구 개인정보 설정 뒤 auth, pollEntry, adminConsole의 `productionOff`를 함께 지우고 배포, auth-off 반대 확인 E2E, 그 주소에서 실기기 S1~S4
+- [x] T9.2 (11/02 완료, `flags.ts`에서 auth, pollEntry, adminConsole, betaFeedback의 `productionOff` 제거(designLab만 남음), auth-off E2E를 프로덕션 플래그 스모크 `e2e/prod-flags.spec.ts`(`pnpm test:e2e:prod-flags`)로 바꿈: 프로덕션 빌드에서 /login, /beta 200과 noindex, /poll, /me, /admin 비로그인은 로그인으로, /design-lab 404 16건 통과. 배포 뒤 lunchmate-kr.vercel.app 응답 확인. 실기기 S1~S4는 T9.0에 남음) ~~자체 도메인 구매와 연결~~ → **프로덕션 플래그 공개** (11/02 사용자 결정 D-22: 베타는 `lunchmate-kr.vercel.app` 유지, 자체 도메인은 T10.0에서 재검토). T9.0의 관리자 지정, 문의 주소, 분석 도구 개인정보 설정 뒤 auth, pollEntry, adminConsole의 `productionOff`를 함께 지우고 배포, auth-off 반대 확인 E2E, 그 주소에서 실기기 S1~S4
 - [x] T9.3 (11/02 완료, `/beta` 공개 경로(auth 플래그와 함께, noindex, 사이트맵 제외), 서버 UA 기기 판정, 인앱 주 버튼 외부 브라우저 + 실패 시 메뉴 그림과 링크 복사, standalone 설치 마침, 데스크톱 2단, `e2e/beta.spec.ts` axe 0. 카카오톡 초대 문구 문서는 T9.5 때) 베타 안내문, 설치 방법, 피드백 받을 채널 (문구 규칙 적용). 11/02 결정(D-22): 설치 방법은 앱 안 환영 페이지 `/beta`(시안 3안 ⛔ 선택 완료 D-23: A + C 제목, 인앱 주 버튼 외부 브라우저), 초대 문구는 문서
 - [x] T9.4 (11/02 완료, 마이그레이션 `20261102120000_t9_4_beta_feedback.sql`(사용자 승인 후 적용: `beta_feedback`, 본인 쓰기와 읽기, 하루 10건, 정지 차단, `admin_beta_feedback` 익명 번호, 베타 종료일 `private.beta_settings.ended_on` 기준 6개월 뒤 정리 크론), RLS 158건 통과, 시트 + 관리자 E2E 25건 통과, 처리방침 초안에 항목 추가, `betaFeedback` 플래그는 auth와 함께 프로덕션 공개, /today 199.3 KB) 베타 전용 피드백 버튼 (나 탭, 기능 플래그). 11/02 결정(D-22): 앱 안 시트 + DB 저장(`beta_feedback`, RLS 3역할 테스트), 관리자 읽기. 시안 3안 ⛔ 선택 완료 D-23: A 시트 + B 예시 문구와 첨부 기본값, 안건 모두 기본안
 - [ ] T9.5 베타 참여자 20명 내외 초대

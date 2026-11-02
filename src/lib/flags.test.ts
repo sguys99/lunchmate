@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { FLAGS, evaluateFlag, isEnabled, type FlagContext } from "./flags";
+import {
+  FLAGS,
+  evaluateFlag,
+  isEnabled,
+  type FlagContext,
+  type FlagDefinition,
+} from "./flags";
 import { resetClientEnvCache } from "./env/client";
 
 const ctx = (over: Partial<FlagContext> = {}): FlagContext => ({
@@ -51,34 +57,25 @@ describe("evaluateFlag", () => {
     // 서버에서 판정해 내려 주므로 브라우저 값은 쓰지 않지만, productionOff가 없어 같은 값이다
     expect(evaluateFlag(FLAGS.appShell, ctx({ inBrowser: true }))).toBe(true);
   });
-  it("auth는 여전히 Production에서 꺼진다 (appShell 해제와 무관)", () => {
-    expect(evaluateFlag(FLAGS.auth, ctx({ vercelEnv: "production" }))).toBe(
-      false,
-    );
+  it("auth, pollEntry, adminConsole, betaFeedback은 개발, Preview, Production 모두 켜진다 (T9.2, 2026-11-02 해제)", () => {
+    for (const key of [
+      "auth",
+      "pollEntry",
+      "adminConsole",
+      "betaFeedback",
+    ] as const) {
+      const def: FlagDefinition = FLAGS[key];
+      expect(def.productionOff).toBeUndefined();
+      expect(evaluateFlag(def, ctx())).toBe(true);
+      expect(evaluateFlag(def, ctx({ vercelEnv: "preview" }))).toBe(true);
+      expect(evaluateFlag(def, ctx({ vercelEnv: "production" }))).toBe(true);
+    }
   });
-  it("pollEntry는 개발과 Preview에서 켜지고, 프로덕션과 브라우저에서는 auth처럼 꺼진다 (T7.35)", () => {
-    expect(evaluateFlag(FLAGS.pollEntry, ctx())).toBe(true);
-    expect(evaluateFlag(FLAGS.pollEntry, ctx({ vercelEnv: "preview" }))).toBe(
-      true,
-    );
-    expect(
-      evaluateFlag(FLAGS.pollEntry, ctx({ vercelEnv: "production" })),
-    ).toBe(false);
-    expect(evaluateFlag(FLAGS.pollEntry, ctx({ inBrowser: true }))).toBe(false);
-    expect(FLAGS.pollEntry.productionOff).toBe(FLAGS.auth.productionOff);
-  });
-  it("betaFeedback은 개발과 Preview에서 켜지고, 프로덕션과 브라우저에서는 auth처럼 꺼진다 (T9.4)", () => {
-    expect(evaluateFlag(FLAGS.betaFeedback, ctx())).toBe(true);
-    expect(
-      evaluateFlag(FLAGS.betaFeedback, ctx({ vercelEnv: "preview" })),
-    ).toBe(true);
-    expect(
-      evaluateFlag(FLAGS.betaFeedback, ctx({ vercelEnv: "production" })),
-    ).toBe(false);
-    expect(evaluateFlag(FLAGS.betaFeedback, ctx({ inBrowser: true }))).toBe(
-      false,
-    );
-    expect(FLAGS.betaFeedback.productionOff).toBe(FLAGS.auth.productionOff);
+  it("productionOff가 남은 플래그는 designLab뿐이다", () => {
+    const off = Object.entries(FLAGS)
+      .filter(([, def]) => (def as FlagDefinition).productionOff)
+      .map(([key]) => key);
+    expect(off).toEqual(["designLab"]);
   });
   it("앞으로의 플래그는 모두 기본 false", () => {
     for (const key of ["userPlaceMemo"] as const) {
@@ -111,12 +108,16 @@ describe("isEnabled", () => {
     resetClientEnvCache();
     expect(isEnabled("designLab")).toBe(false);
   });
-  it("프로덕션 조합(VERCEL_ENV=production): appShell 켜짐 + auth 꺼짐 (5단계 마무리)", () => {
-    // 이 조합에서 /poll, /me는 곧 열립니다 안내, 로그인 유도는 토스트(app/(app)/coming-soon.tsx, login-prompt/gate.tsx)
+  it("프로덕션 조합(VERCEL_ENV=production): 앱, 로그인, 투표, 관리자, 베타 의견 켜짐, 디자인 랩 꺼짐 (T9.2)", () => {
+    vi.stubEnv("NEXT_PUBLIC_DESIGN_LAB", "true");
     vi.stubEnv("VERCEL_ENV", "production");
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://lunchmate.kr");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://lunchmate-kr.vercel.app");
     resetClientEnvCache();
     expect(isEnabled("appShell")).toBe(true);
-    expect(isEnabled("auth")).toBe(false);
+    expect(isEnabled("auth")).toBe(true);
+    expect(isEnabled("pollEntry")).toBe(true);
+    expect(isEnabled("adminConsole")).toBe(true);
+    expect(isEnabled("betaFeedback")).toBe(true);
+    expect(isEnabled("designLab")).toBe(false);
   });
 });

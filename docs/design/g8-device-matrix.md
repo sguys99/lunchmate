@@ -8,20 +8,21 @@
 
 ### 0.1 어느 주소에서 보나 (플래그)
 
-플래그 정의는 `src/lib/flags.ts`. `productionOff: true`인 플래그는 **Vercel Production(`VERCEL_ENV=production`)에서만** 꺼지고, Preview 배포와 dev 서버에서는 켜진다. 브라우저 판정은 항상 꺼짐이라 화면은 서버가 판정한 값을 받는다.
+플래그 정의는 `src/lib/flags.ts`. `productionOff: true`인 플래그는 **Vercel Production(`VERCEL_ENV=production`)에서만** 꺼지고, Preview 배포와 dev 서버에서는 켜진다. 2026-11-02 T9.2(D-22)에서 auth, pollEntry, adminConsole, betaFeedback의 `productionOff`를 지웠다. 지금 `productionOff`가 남은 플래그는 designLab 하나다.
 
 | 플래그 | 지금 값 | 프로덕션 `https://lunchmate-kr.vercel.app` | Preview 배포 | 이 매트릭스에서 |
 | --- | --- | --- | --- | --- |
 | `appShell` | const true | 켜짐 | 켜짐 | 오늘, 지도 둘러보기 |
-| `auth` | const true, productionOff | **꺼짐**(`/login` 404, 나 탭 "곧 열립니다") | 켜짐 | 로그인, 약관 동의, 온보딩, 나 탭, 문의 화면 |
-| `pollEntry` | const true, productionOff | **꺼짐**(홈 진입점 없음, 투표방 404) | 켜짐 | 투표, 회식, 공유 |
-| `adminConsole` | const true, productionOff | **꺼짐** | 켜짐 | `/admin` |
+| `auth` | const true | 켜짐(11/02 T9.2) | 켜짐 | 로그인, 약관 동의, 온보딩, 나 탭, 문의 화면 |
+| `pollEntry` | const true | 켜짐(11/02 T9.2) | 켜짐 | 투표, 회식, 공유 |
+| `adminConsole` | const true | 켜짐(11/02 T9.2, 관리자 role이 아니면 404) | 켜짐 | `/admin` |
+| `betaFeedback` | const true | 켜짐(11/02 T9.2) | 켜짐 | 나 탭 베타 의견 |
 | `designLab` | env `NEXT_PUBLIC_DESIGN_LAB`, productionOff | 꺼짐 | env가 true일 때만 | 쓰지 않음(Preview에서도 false 권장) |
 
-- 그래서 **로그인이 필요한 항목은 Preview 고정 별칭 주소에서** 본다(g4-qa.md 7장 방법 C). 로그인이 없는 항목(랜딩, 오늘과 지도 둘러보기, 길찾기, 설치, 오프라인, 서비스 워커, 성능)은 프로덕션 주소에서 봐도 된다.
-- 플래그 상태 확인법: 그 주소에서 `/login`을 연다. 로그인 버튼 3개가 보이면 auth 켜짐, 404면 꺼짐. `/poll`이 "곧 열립니다"면 pollEntry 꺼짐.
+- 그래서 **모든 항목을 프로덕션 주소 `https://lunchmate-kr.vercel.app`에서** 본다(D-22, 0.2 Preview 고정 주소 준비는 건너뜀). 이전에는 로그인이 필요한 항목을 Preview 고정 별칭 주소에서 보려 했다(g4-qa.md 7장 방법 C).
+- 플래그 상태 확인법: 그 주소에서 `/login`을 연다. 로그인 버튼 3개가 보이면 auth 켜짐, 404면 꺼짐. 비로그인으로 `/poll`을 열어 로그인 화면으로 가면 pollEntry 켜짐, "곧 열립니다"면 꺼짐. 로컬 확인은 `pnpm test:e2e:prod-flags`(프로덕션 빌드 서버, `e2e/prod-flags.spec.ts`).
 - 서비스 워커는 `NODE_ENV=production` 빌드(Preview, Production 모두)에서만 등록된다(`src/lib/sw/register-script.ts`). dev 서버로는 G 묶음을 확인할 수 없다.
-- 플래그를 프로덕션에서 여는 일(auth, pollEntry, adminConsole의 `productionOff`를 함께 지우기)은 이 매트릭스의 로그인 묶음을 통과한 뒤 사용자 결정으로 한다(g8-qa.md 5장 blocker 2).
+- 플래그를 프로덕션에서 여는 일은 사용자 결정 D-22("프로덕션 먼저 열기")에 따라 2026-11-02 T9.2에서 했다(g8-qa.md 5장 blocker 2 해소). 이 매트릭스의 로그인 묶음은 그 주소에서 확인한다.
 
 ### 0.2 Preview 고정 주소 준비 (한 번만, g4-qa.md 7장 C 요약)
 

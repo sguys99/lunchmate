@@ -1,6 +1,6 @@
 // 나 탭 설정 /me/settings (T4.27에서 /me 첫 화면이던 것을 T6.13에서 옮김, D-12 안건 1, 5, PRD SET-01~05, AUTH-05).
 // 설정(사무실, 예산과 거리, 못 먹는 음식, 요즘 이게 땡겨요, 화면), 계정, 문의와 정책(T8.6 문의하기, T8.14 위치정보 처리 안내) 세 묶음. 들어오는 곳은 /me 머리줄 톱니와 기록 탭 맨 아래 "설정" 줄.
-// - 로그인 필요 경로(proxy). flags.auth가 꺼진 환경(프로덕션)에서는 "곧 열립니다" 안내(coming-soon.tsx). 세션과 설정은 요청 시점 값이라 Suspense 안에서 읽는다.
+// - 로그인 필요 경로(proxy). flags.auth가 꺼진 환경에서는 "곧 열립니다" 안내(coming-soon.tsx). 세션과 설정은 요청 시점 값이라 Suspense 안에서 읽는다.
 // - 화면 설정(테마, 모션, 진동)은 "화면" 줄 → /me/display. 줄 값은 이 기기 저장소 값이라 클라이언트 조각(DisplaySummary)이 그린다.
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -124,7 +124,7 @@ async function Settings() {
 }
 
 export default function Page() {
-  // 로그인이 꺼진 환경(프로덕션)에서는 404 대신 "곧 열립니다" 안내(5단계 마무리). 화면 설정은 /me가 펼쳐 둔다
+  // 로그인이 꺼진 환경에서는 404 대신 "곧 열립니다" 안내(5단계 마무리). 화면 설정은 /me가 펼쳐 둔다
   if (!isEnabled("auth")) return <ComingSoon kind="me" />;
   return (
     <PageColumn>

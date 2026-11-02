@@ -1,4 +1,4 @@
-// /terms 자리 (T4.11, PRD AUTH-02). 최종 전문 전 초안이라 flags.auth가 꺼진 환경(프로덕션)에서는 404.
+// /terms 자리 (T4.11, PRD AUTH-02). 최종 전문 전 초안이라 flags.auth가 꺼진 환경에서는 404.
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { legalCopy } from "@/copy/legal";

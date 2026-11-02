@@ -218,7 +218,7 @@ function OfflineNote({ className }: { className?: string }) {
   );
 }
 
-/** 플래그가 꺼진 환경(프로덕션)의 안내. 오프라인 안내와 같은 말투(아이콘 + 글자) */
+/** 플래그가 꺼진 환경의 안내. 오프라인 안내와 같은 말투(아이콘 + 글자) */
 function ComingSoon({ className }: { className?: string }) {
   return (
     <section

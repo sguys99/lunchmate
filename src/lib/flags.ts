@@ -46,36 +46,32 @@ export const FLAGS = {
   },
   auth: {
     description:
-      "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 초안 /terms와 /privacy, 계정 /me/account, proxy의 경로 보호와 약관 확인. 약관 최종 전문과 실기기 확인(T4.14) 전까지 프로덕션에서 숨김.",
+      "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 초안 /terms와 /privacy, 계정 /me/account, proxy의 경로 보호와 약관 확인. 2026-11-02 T9.2에서 프로덕션에도 공개(D-22, 주소는 lunchmate-kr.vercel.app 유지). 끄면 나 탭과 로그인 유도가 \"곧 열립니다\" 안내로 돌아간다.",
     default: false,
     source: { type: "const", value: true },
     owner:
-      "T4.6 (해제: T4.11, T4.12 완료 후. 해제할 때 pollEntry, adminConsole, betaFeedback의 productionOff도 함께 지운다, T7.35, T9.4)",
-    productionOff: true,
+      "T4.6 (해제: 2026-11-02 T9.2, pollEntry, adminConsole, betaFeedback과 함께 productionOff 제거)",
   },
   pollEntry: {
     description:
-      "홈과 상세의 투표 관련 진입점과 투표 화면 (친구랑 정하기, 회식 모드, 투표에 추가, 투표 탭, 투표방). 2026-11-01 T7.35에서 개발과 Preview는 켬. 투표는 로그인이 필요하므로 프로덕션은 auth와 함께 연다(사용자 결정): auth의 productionOff를 지울 때 이 플래그의 productionOff도 함께 지운다. 서버에서 판정해 props로 내려준다(브라우저 판정은 늘 꺼짐).",
+      "홈과 상세의 투표 관련 진입점과 투표 화면 (친구랑 정하기, 회식 모드, 투표에 추가, 투표 탭, 투표방). 2026-11-01 T7.35에서 개발과 Preview는 켬, 2026-11-02 T9.2에서 auth와 함께 프로덕션에도 공개(D-22). 서버에서 판정해 props로 내려준다.",
     default: false,
     source: { type: "const", value: true },
-    owner: "T5.20, T5.23 (해제 T7.35, 프로덕션은 auth 해제와 함께)",
-    productionOff: true,
+    owner: "T5.20, T5.23 (해제 T7.35, 프로덕션 2026-11-02 T9.2)",
   },
   adminConsole: {
     description:
-      "관리자 화면 /admin (MOD-06, T8.5). 마이그레이션 20261101180000(admin_* 함수) 적용 전에는 목록이 오류 상태로 보인다. 로그인 묶음과 함께 프로덕션에 연다: auth의 productionOff를 지울 때 이 플래그의 productionOff도 함께 지운다. 관리자 role 확인은 레이아웃과 DB 함수가 따로 한다.",
+      "관리자 화면 /admin (MOD-06, T8.5). 마이그레이션 20261101180000(admin_* 함수) 적용 전에는 목록이 오류 상태로 보인다. 2026-11-02 T9.2에서 로그인 묶음과 함께 프로덕션에 공개(D-22). 관리자 role 확인은 레이아웃과 DB 함수가 따로 하므로 관리자가 아니면 들어올 수 없다.",
     default: false,
     source: { type: "const", value: true },
-    owner: "T8.5 (해제: auth 해제와 함께)",
-    productionOff: true,
+    owner: "T8.5 (해제: 2026-11-02 T9.2)",
   },
   betaFeedback: {
     description:
-      "나 탭 머리 아래의 베타 의견 보내기 줄과 시트(T9.4, D-23). 마이그레이션 20261102120000(beta_feedback) 적용 전에는 보내기가 실패 안내로 끝난다. 로그인 사용자에게만 보이므로 auth와 같은 규칙으로 연다: auth의 productionOff를 지울 때 이 플래그의 productionOff도 함께 지운다. 베타가 끝나면(T9.13) 값을 false로. 서버에서 판정해 props로 내려준다.",
+      "나 탭 머리 아래의 베타 의견 보내기 줄과 시트(T9.4, D-23). 마이그레이션 20261102120000(beta_feedback) 적용 전에는 보내기가 실패 안내로 끝난다. 로그인 사용자에게만 보인다. 2026-11-02 T9.2에서 auth와 함께 프로덕션에 공개(D-22). 베타가 끝나면(T9.13) 값을 false로. 서버에서 판정해 props로 내려준다.",
     default: false,
     source: { type: "const", value: true },
-    owner: "T9.4 (해제: auth 해제와 함께, 끄기: T9.13 베타 종료)",
-    productionOff: true,
+    owner: "T9.4 (해제: 2026-11-02 T9.2, 끄기: T9.13 베타 종료)",
   },
   userPlaceMemo: {
     description:

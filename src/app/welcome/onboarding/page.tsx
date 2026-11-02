@@ -3,7 +3,7 @@
 // - 로그인 필요 경로(proxy, /welcome). 세션이 없으면 로그인으로, 약관 전이면 약관으로, 이미 사무실이 있으면 next로.
 // - 둘러보기에서 고른 값(T4.20)은 next 쿼리에서 읽는다(features/onboarding/guest-handoff.ts).
 // - 지도 SDK는 이 화면에서만 동적으로 불러온다. 카카오 SDK는 검색과 근처 식당 수를 셀 때만 받는다.
-// - flags.auth가 꺼진 환경(프로덕션)에서는 404.
+// - flags.auth가 꺼진 환경에서는 404.
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
