@@ -60,9 +60,30 @@ function room(over: Partial<PollRoom["poll"]> = {}): PollRoom {
       c("s", null, 4, "suggested"),
     ],
     members: [
-      { id: "m1", nickname: "방장", isHost: true, isMe: false, hasVoted: true },
-      { id: "m2", nickname: "나", isHost: false, isMe: true, hasVoted: false },
-      { id: "m3", nickname: null, isHost: false, isMe: false, hasVoted: true },
+      {
+        id: "m1",
+        nickname: "방장",
+        avatarUrl: null,
+        isHost: true,
+        isMe: false,
+        hasVoted: true,
+      },
+      {
+        id: "m2",
+        nickname: "나",
+        avatarUrl: null,
+        isHost: false,
+        isMe: true,
+        hasVoted: false,
+      },
+      {
+        id: "m3",
+        nickname: null,
+        avatarUrl: null,
+        isHost: false,
+        isMe: false,
+        hasVoted: true,
+      },
     ],
     myVotes: [],
     voterCount: 2,
@@ -280,18 +301,42 @@ describe("파서 (서버)", () => {
       voter_count: 1,
     };
     expect(memberUserIds(raw)).toEqual(["u1"]);
-    const r = parseRoom(raw, new Map([["u1", "점심탐험가"]]))!;
+    const photo = "https://lh3.googleusercontent.com/a/test=s96-c";
+    const r = parseRoom(
+      raw,
+      new Map([["u1", { nickname: "점심탐험가", avatarUrl: photo }]]),
+    )!;
     expect(r.members).toEqual([
       {
         id: "m1",
         nickname: "점심탐험가",
+        avatarUrl: photo,
         isHost: true,
         isMe: true,
         hasVoted: true,
       },
-      { id: "m2", nickname: null, isHost: false, isMe: false, hasVoted: false },
+      {
+        id: "m2",
+        nickname: null,
+        avatarUrl: null,
+        isHost: false,
+        isMe: false,
+        hasVoted: false,
+      },
     ]);
     expect(JSON.stringify(r)).not.toContain("u1");
     expect(r.poll.code).toBe("abcdefghjkmn");
+
+    // 허용 CDN(profiles_avatar_url_host)이 아닌 사진 주소는 내보내지 않는다(T9.10)
+    const other = parseRoom(
+      raw,
+      new Map([
+        [
+          "u1",
+          { nickname: "점심탐험가", avatarUrl: "https://evil.example/a.png" },
+        ],
+      ]),
+    )!;
+    expect(other.members[0]!.avatarUrl).toBeNull();
   });
 });

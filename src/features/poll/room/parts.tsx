@@ -10,7 +10,7 @@ import { PlaceBadges } from "@/components/badges/place-badges";
 import type { PlaceBadge } from "@/components/badges/pick-badges";
 import { RollingNumber } from "@/components/numbers";
 import { useSecondClock } from "@/components/numbers/use-second-clock";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonClass as rawButtonClass } from "@/components/ui/button-classes";
 import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -203,6 +203,7 @@ export function initialsFor(
 /**
  * 참여 줄 (C에서, 무기명): 얼굴(겹침) + "7명 중 6명 골랐습니다". 투표한 사람 얼굴 오른쪽 아래 작은 체크 원.
  * 체크는 투표했는지만 알린다. 어디에 찍었는지는 누구에게도 보이지 않는다(D-14 안건 1).
+ * 얼굴은 공개 프로필 사진(T9.10), 없거나 받는 중이거나 실패하면 이니셜. 줄 전체 이름이 인원을 읽으므로 사진은 alt="".
  */
 export function ParticipantsRow({
   members,
@@ -229,6 +230,7 @@ export function ParticipantsRow({
           {shown.map((m) => (
             <span key={m.id} className="relative">
               <Avatar className="ring-2 ring-background">
+                {m.avatarUrl ? <AvatarImage src={m.avatarUrl} alt="" /> : null}
                 <AvatarFallback className="type-caption">
                   {initials.get(m.id)}
                 </AvatarFallback>

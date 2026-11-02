@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { PageColumn } from "@/components/app-shell";
 import { historyCopy } from "@/copy/history";
 import { meCopy } from "@/copy/me";
+import { cleanAvatarUrl } from "@/features/auth/naver-profile";
 import { MeAuthOff } from "@/features/me/history/auth-off";
 import { HistorySkeleton } from "@/features/me/history/history-panel";
 import { MeRecords } from "@/features/me/history/me-records";
@@ -44,6 +45,7 @@ async function Records({
   return (
     <MeRecords
       nickname={profile?.nickname ?? null}
+      avatarUrl={cleanAvatarUrl(profile?.avatar_url) ?? null}
       office={
         office
           ? {
@@ -67,7 +69,7 @@ function RecordsFallback() {
   return (
     <>
       <header className="flex flex-col gap-2">
-        <span aria-hidden className="h-4" />
+        <span aria-hidden className="h-6" />
         <h1 className="type-title break-keep text-foreground">
           {historyCopy.title}
         </h1>

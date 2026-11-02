@@ -1,6 +1,7 @@
 "use client";
 // 나 탭 첫 화면 /me (T6.13, HIS-01~03, D-12 A 기록 일지 + C 이번 달 숫자, DESIGN.md 5장 "나 탭").
 // - 머리: caption 인사 + 제목 "나"(세리프), 오른쪽 톱니 아이콘 버튼(이름 "설정") → /me/settings.
+//   인사 앞 작은 얼굴(24px, T9.10): 프로필 사진, 없거나 받는 중이거나 실패하면 이니셜. 닉네임이 바로 읽히므로 alt="".
 // - 세 탭 기록 / 장소 / 후기. tablist, 좌우 화살표로 이동, 활성 탭만 tabIndex 0. 밑줄 막대는 transform으로 base.
 //   고른 탭은 주소 ?tab=에 남겨 뒤로 가기로 돌아와도 같은 탭이다(replaceState라 기록은 쌓지 않는다).
 // - 데스크톱 우측 지도(@map/me)에 기본 사무실과 보이는 줄의 핀을 넘긴다(me-map-store).
@@ -17,6 +18,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { focusRing } from "@/components/ui/interaction";
 import { historyCopy as copy } from "@/copy/history";
 import { BetaFeedbackEntry } from "@/features/beta-feedback/entry";
@@ -32,6 +34,7 @@ import { ReviewsPanel } from "./reviews-panel";
 
 export function MeRecords({
   nickname,
+  avatarUrl = null,
   office,
   budget,
   nowIso,
@@ -39,6 +42,8 @@ export function MeRecords({
   betaFeedback = false,
 }: {
   nickname: string | null;
+  /** 본인 프로필 사진(허용 CDN만, T9.10) */
+  avatarUrl?: string | null;
   office: OfficeAnchor | null;
   budget: { lunch: number; dinner: number };
   /** 서버가 본 지금(ISO). 주 묶음과 14일 판정 기준을 서버 HTML과 맞춘다 */
@@ -67,8 +72,12 @@ export function MeRecords({
       <header className="flex items-end justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">
           {nickname ? (
-            <p className="truncate type-caption text-muted-foreground">
-              {copy.greeting(nickname)}
+            <p className="flex min-w-0 items-center gap-2 type-caption text-muted-foreground">
+              <Avatar size="sm" aria-hidden>
+                {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
+                <AvatarFallback>{Array.from(nickname)[0]}</AvatarFallback>
+              </Avatar>
+              <span className="truncate">{copy.greeting(nickname)}</span>
             </p>
           ) : null}
           <h1 className="type-title break-keep text-foreground">

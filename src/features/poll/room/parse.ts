@@ -2,6 +2,7 @@
 // (브라우저 번들에 zod를 넣지 않게 model.ts와 나눴다, tasks 2.4절).
 import "server-only";
 import * as z from "zod";
+import { cleanAvatarUrl } from "@/features/auth/naver-profile";
 import type { PollPreview, PollRoom } from "./model";
 
 const kindSchema = z.enum(["lunch", "dinner", "party"]);
@@ -108,10 +109,16 @@ const roomSchema = z.object({
   voter_count: z.number(),
 });
 
-/** get_poll 결과 → PollRoom. user_id는 닉네임을 찾는 데만 쓰고 브라우저로 보내지 않는다 */
+/** public_profiles 한 줄에서 화면에 쓰는 값(닉네임, 사진) */
+export type MemberProfile = {
+  readonly nickname: string | null;
+  readonly avatarUrl: string | null;
+};
+
+/** get_poll 결과 → PollRoom. user_id는 공개 프로필을 찾는 데만 쓰고 브라우저로 보내지 않는다 */
 export function parseRoom(
   raw: unknown,
-  nicknames: ReadonlyMap<string, string>,
+  profiles: ReadonlyMap<string, MemberProfile>,
 ): PollRoom | null {
   const r = roomSchema.safeParse(raw);
   if (!r.success) return null;
@@ -145,13 +152,18 @@ export function parseRoom(
       suggestedByMe: c.suggested_by_me,
       votes: c.votes,
     })),
-    members: members.map((m) => ({
-      id: m.id,
-      nickname: m.user_id ? (nicknames.get(m.user_id) ?? null) : null,
-      isHost: m.is_host,
-      isMe: m.is_me,
-      hasVoted: m.has_voted,
-    })),
+    members: members.map((m) => {
+      const profile = m.user_id ? profiles.get(m.user_id) : undefined;
+      return {
+        id: m.id,
+        nickname: profile?.nickname ?? null,
+        // DB 제약(profiles_avatar_url_host)과 같은 규칙으로 한 번 더 거른다
+        avatarUrl: cleanAvatarUrl(profile?.avatarUrl) ?? null,
+        isHost: m.is_host,
+        isMe: m.is_me,
+        hasVoted: m.has_voted,
+      };
+    }),
     myVotes: my_votes,
     voterCount: voter_count,
   };

@@ -391,4 +391,95 @@ test.describe("투표방 (실제 DB)", () => {
     await host.context.close();
     await a.context.close();
   });
+
+  test("T9.10: 참여자 얼굴과 나 탭 머리에 프로필 사진, 받지 못하면 이니셜", async ({
+    browser,
+    baseURL,
+  }) => {
+    test.setTimeout(90_000);
+    const host = await member(browser, baseURL!, "pv");
+    const friend = await member(browser, baseURL!, "pw");
+    cleanups.push(host.cleanup, friend.cleanup);
+    // 허용 CDN(profiles_avatar_url_host) 주소를 본인 세션으로 넣는다. 사진은 가로채 1px PNG로 돌려준다(외부 요청 없음).
+    // 친구 사진은 404로 돌려 실패 대체(이니셜)를 본다.
+    const OK = "https://lh3.googleusercontent.com/a/test_ok=s96-c";
+    const BROKEN = "https://lh3.googleusercontent.com/a/test_broken=s96-c";
+    for (const [who, url] of [
+      [host, OK],
+      [friend, BROKEN],
+    ] as const) {
+      const r = await rest(env!, `profiles?user_id=eq.${who.userId}`, {
+        method: "PATCH",
+        token: who.token,
+        body: { avatar_url: url },
+      });
+      expect(r.status).toBe(200);
+    }
+    const PNG = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "base64",
+    );
+    const referers: (string | undefined)[] = [];
+    for (const ctx of [host.context, friend.context]) {
+      await ctx.route("https://lh3.googleusercontent.com/**", (route) => {
+        referers.push(route.request().headers()["referer"]);
+        return route.request().url().includes("test_ok")
+          ? route.fulfill({ status: 200, contentType: "image/png", body: PNG })
+          : route.fulfill({ status: 404, body: "" });
+      });
+    }
+
+    const poll = await createPoll(host.token);
+    await friend.page.goto(`/poll/${poll.invite_code}`);
+    await expect(row(friend.page, NAMES[0]!)).toBeVisible({ timeout: 20_000 });
+
+    // 친구 화면: 방장 사진은 이미지로, 친구 본인은 사진을 받지 못해 이니셜(같은 32px 자리)
+    const faces = friend.page.locator("[data-slot=avatar]");
+    await expect(faces).toHaveCount(2);
+    const hostImg = friend.page.locator(
+      `[data-slot=avatar-image][src="${OK}"]`,
+    );
+    await expect(hostImg).toBeVisible({ timeout: 10_000 });
+    await expect(hostImg).toHaveAttribute("alt", "");
+    await expect(hostImg).toHaveAttribute("referrerpolicy", "no-referrer");
+    await expect(friend.page.locator(`img[src="${BROKEN}"]`)).toHaveCount(0);
+    await expect(
+      friend.page.locator("[data-slot=avatar-fallback]"),
+    ).toHaveCount(1);
+    for (const box of [
+      await faces.nth(0).boundingBox(),
+      await faces.nth(1).boundingBox(),
+    ]) {
+      expect(Math.round(box!.width)).toBe(32);
+      expect(Math.round(box!.height)).toBe(32);
+    }
+    await expectNoA11yViolations(friend.page);
+
+    // 방장 화면도 친구가 참여한 뒤 두 얼굴
+    await host.page.goto(`/poll/${poll.invite_code}`);
+    await expect(row(host.page, NAMES[0]!)).toBeVisible({ timeout: 20_000 });
+    await expect(
+      host.page.locator(`[data-slot=avatar-image][src="${OK}"]`),
+    ).toBeVisible({ timeout: 10_000 });
+    await shot(host.page, "avatars");
+
+    // 나 탭 머리: 인사 앞 24px 얼굴
+    await host.page.goto("/me");
+    const meImg = host.page.locator(`header [data-slot=avatar-image]`);
+    await expect(meImg).toBeVisible({ timeout: 20_000 });
+    await expect(meImg).toHaveAttribute("src", OK);
+    const meBox = await host.page
+      .locator("header [data-slot=avatar]")
+      .boundingBox();
+    expect(Math.round(meBox!.width)).toBe(24);
+    await expect(host.page.getByText("test_pv님")).toBeVisible();
+    await expectNoA11yViolations(host.page);
+
+    // 사진 요청에 Referer를 싣지 않는다
+    expect(referers.length).toBeGreaterThan(0);
+    expect(referers.every((r) => !r)).toBe(true);
+
+    await host.context.close();
+    await friend.context.close();
+  });
 });

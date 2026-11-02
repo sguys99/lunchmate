@@ -29,6 +29,8 @@ export type RoomMember = {
   readonly id: string;
   /** 공개 프로필 닉네임. 탈퇴한 익명 참여자는 null */
   readonly nickname: string | null;
+  /** 공개 프로필 사진(허용 CDN만, T9.10). 없거나 탈퇴했으면 null이고 이니셜을 보인다 */
+  readonly avatarUrl: string | null;
   readonly isHost: boolean;
   readonly isMe: boolean;
   readonly hasVoted: boolean;

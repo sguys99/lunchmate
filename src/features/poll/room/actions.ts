@@ -1,7 +1,7 @@
 "use server";
 // 투표방 서버 액션 (T7.15~T7.19, T7.22, POLL-05~13). 사용자 세션(publishable 키 + 쿠키)으로 보안 함수만 부른다.
 // - 쓰기는 전부 Postgres 보안 함수(20261101140000_t7_6_polls.sql)가 판정한다. 여기서는 입력 형식만 zod로 다시 본다.
-// - 응답에서 다른 사람의 user_id는 닉네임으로 바꾸고 내보내지 않는다(parse.ts). 표는 무기명(D-14 안건 1).
+// - 응답에서 다른 사람의 user_id는 공개 프로필(닉네임, 사진)로 바꾸고 내보내지 않는다(parse.ts, T9.10). 표는 무기명(D-14 안건 1).
 // - 요청에 좌표와 현위치는 없다. 기피 확인만 후보 이름과 업종을 판정용으로 보내고 DB는 저장하지 않는다(POLL-13).
 import * as z from "zod";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/lib/supabase/server";
 import { mapPollError, type PollFailure, type PollResult } from "./errors";
 import type { PollRoom } from "./model";
-import { memberUserIds, parseRoom } from "./parse";
+import { memberUserIds, parseRoom, type MemberProfile } from "./parse";
 
 const uuid = z.string().uuid();
 const code = z.string().regex(/^[2-9a-hjkmnp-z]{12}$/);
@@ -33,18 +33,23 @@ const fail = (error: PollFailure["error"]): PollFailure => ({
   error,
 });
 
-async function nicknamesFor(
+/** 참여자 공개 프로필(닉네임, 사진). public_profiles 뷰만 읽는다(CLAUDE.md 13장) */
+async function profilesFor(
   supabase: ServerSupabase,
   ids: readonly string[],
-): Promise<Map<string, string>> {
+): Promise<Map<string, MemberProfile>> {
   if (ids.length === 0) return new Map();
   const { data } = await supabase
     .from("public_profiles")
-    .select("user_id, nickname")
+    .select("user_id, nickname, avatar_url")
     .in("user_id", [...new Set(ids)]);
-  const map = new Map<string, string>();
+  const map = new Map<string, MemberProfile>();
   for (const row of data ?? []) {
-    if (row.user_id && row.nickname) map.set(row.user_id, row.nickname);
+    if (!row.user_id) continue;
+    map.set(row.user_id, {
+      nickname: row.nickname ?? null,
+      avatarUrl: row.avatar_url ?? null,
+    });
   }
   return map;
 }
@@ -78,8 +83,8 @@ export async function pollRoomAction(
     });
     const failed = mapPollError(error);
     if (failed) return failed;
-    const names = await nicknamesFor(supabase, memberUserIds(data));
-    const room = parseRoom(data, names);
+    const profiles = await profilesFor(supabase, memberUserIds(data));
+    const room = parseRoom(data, profiles);
     if (!room) return fail("save");
     return { ok: true, room };
   });

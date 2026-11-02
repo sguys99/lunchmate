@@ -32,6 +32,8 @@ export async function requireMeSession(next: string): Promise<MeSession> {
 
 export type ProfileData = {
   nickname: string | null;
+  /** 프로필 사진(허용 CDN만, profiles_avatar_url_host). 나 탭 머리 얼굴(T9.10) */
+  avatar_url: string | null;
   provider: string | null;
   /** 서버에서만 읽는 본인 역할(T9.10). 관리자 화면 줄을 보일지 서버가 정한다 */
   role: "user" | "admin";
@@ -43,7 +45,7 @@ export async function loadProfile({
 }: MeSession): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("nickname, provider, role")
+    .select("nickname, avatar_url, provider, role")
     .eq("user_id", userId)
     .maybeSingle();
   if (error || !data) return null;
