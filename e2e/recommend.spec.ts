@@ -183,6 +183,63 @@ test.describe("비로그인 둘러보기: 추천 → 길찾기", () => {
   });
 });
 
+test.describe("현위치를 못 받을 때 스켈레톤에 멈추지 않는다 (T9.10)", () => {
+  test.beforeEach(async ({ page }) => {
+    await mockRecommendSdks(page);
+  });
+
+  test("권한 창에 답이 없어 측위 콜백이 오지 않으면 상한 뒤 위치 안내와 다시 찾기", async ({
+    page,
+  }) => {
+    test.setTimeout(40_000);
+    // iOS Chrome, 인앱 브라우저처럼 권한 창이 뜨지 않거나 답하지 않은 채 남은 상태
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "geolocation", {
+        configurable: true,
+        value: {
+          getCurrentPosition: () => {},
+          watchPosition: () => 0,
+          clearWatch: () => {},
+        },
+      });
+    });
+    await page.goto("/today");
+    await expect(page.locator('[data-slot="loading-region"]')).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "위치를 알 수 없어 추천하지 못했습니다",
+      }),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('[data-slot="loading-region"]')).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "현위치 다시 찾기" }),
+    ).toBeVisible();
+  });
+
+  test("권한 거부는 바로 위치 안내", async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "geolocation", {
+        configurable: true,
+        value: {
+          getCurrentPosition: (
+            _ok: unknown,
+            fail: (e: { code: number; message: string }) => void,
+          ) => setTimeout(() => fail({ code: 1, message: "denied" }), 50),
+          watchPosition: () => 0,
+          clearWatch: () => {},
+        },
+      });
+    });
+    await page.goto("/today");
+    await expect(
+      page.getByRole("heading", {
+        name: "위치를 알 수 없어 추천하지 못했습니다",
+      }),
+    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/위치 권한을 허용하면/)).toBeVisible();
+  });
+});
+
 test.describe("로그인 사용자: 기본 사무실 기준 추천 → 길찾기 → 방문 후보", () => {
   test.skip(!env, "RUN_DB_E2E=1과 Supabase 값(.env.local)이 있어야 실행합니다");
 

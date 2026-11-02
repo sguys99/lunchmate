@@ -10,6 +10,7 @@ import {
   fromPlaceDoc,
   followingPages,
   fromRestaurantDoc,
+  KAKAO_PAGE_TIMEOUT_MS,
   kakaoPlaceUrl,
   mergeLocationResults,
   nearbyRestaurants,
@@ -41,6 +42,8 @@ function installFakeKakao(opts: {
   failTimes?: number;
   /** 페이지별 응답 지연(ms). 없으면 바로 응답 */
   pageDelay?: Record<number, number>;
+  /** 콜백을 아예 부르지 않는다(T9.10) */
+  silent?: boolean;
 }) {
   let failures = opts.failTimes ?? 0;
   const categorySearch = vi.fn();
@@ -67,6 +70,7 @@ function installFakeKakao(opts: {
             o: unknown,
           ) => {
             categorySearch(code, o);
+            if (opts.silent) return;
             if (failures > 0) {
               failures -= 1;
               cb([], "ERROR", {
@@ -224,6 +228,20 @@ describe("카카오 로컬 래퍼", () => {
       searchRestaurants({ lat: 37.5, lng: 127 }, 515),
     ).rejects.toThrow();
     expect(twice.categorySearch).toHaveBeenCalledTimes(2);
+  });
+
+  it("콜백이 오지 않으면 페이지 상한 뒤 1회 재시도하고 던진다 (T9.10)", async () => {
+    vi.useFakeTimers();
+    try {
+      const fake = installFakeKakao({ category: [doc(1)], silent: true });
+      const p = searchRestaurants({ lat: 37.5, lng: 127 }, 515);
+      const settled = expect(p).rejects.toThrow();
+      await vi.advanceTimersByTimeAsync(KAKAO_PAGE_TIMEOUT_MS * 2 + 2_000);
+      await settled;
+      expect(fake.categorySearch).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("사각 영역 검색은 rect 문자열과 기준점 거리순으로 부른다 (T5.12a)", async () => {

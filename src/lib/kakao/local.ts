@@ -76,6 +76,11 @@ export const LOCATION_RESULT_LIMIT = 3;
 export const KAKAO_MAX_RADIUS = 20_000;
 /** 음식점 카테고리 그룹 코드 */
 export const FOOD_CATEGORY = "FD6";
+/**
+ * categorySearch 한 페이지의 응답 상한(T9.10). SDK 콜백이 오지 않으면(탭 전환 중 끊긴 요청 등) 실패로 보고
+ * 재시도 1회 뒤 오류 안내로 넘긴다. 홈 스켈레톤이 끝없이 남지 않게 한다.
+ */
+export const KAKAO_PAGE_TIMEOUT_MS = 8_000;
 
 function toPosition(x: string, y: string): LatLng | null {
   const lng = Number(x);
@@ -251,9 +256,14 @@ function categoryPage(area: CategoryArea, page: number): Promise<CategoryPage> {
     page,
   };
   return new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new KakaoSearchError()),
+      KAKAO_PAGE_TIMEOUT_MS,
+    );
     places.categorySearch(
       FOOD_CATEGORY,
       (result, status, pagination) => {
+        clearTimeout(timer);
         if (status === "ZERO_RESULT") {
           resolve({ docs: [], totalCount: 0, hasNextPage: false });
           return;
