@@ -46,7 +46,7 @@ export const FLAGS = {
   },
   auth: {
     description:
-      "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 초안 /terms와 /privacy, 계정 /me/account, proxy의 경로 보호와 약관 확인. 2026-11-02 T9.2에서 프로덕션에도 공개(D-22, 주소는 lunchmate-kr.vercel.app 유지). 끄면 나 탭과 로그인 유도가 \"곧 열립니다\" 안내로 돌아간다.",
+      "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 3종 /terms, /privacy, /location(T10.3 최종본), 계정 /me/account, proxy의 경로 보호와 약관 확인. 2026-11-02 T9.2에서 프로덕션에도 공개(D-22, 주소는 lunchmate-kr.vercel.app 유지). 끄면 나 탭과 로그인 유도가 \"곧 열립니다\" 안내로 돌아간다.",
     default: false,
     source: { type: "const", value: true },
     owner:

@@ -100,6 +100,26 @@ describe("submitTerms (서버 재검증)", () => {
     expect(d.recordConsent).not.toHaveBeenCalled();
   });
 
+  it.each(["age", "service", "privacy"] as const)(
+    "%s 하나만 빠져도 거부하고 저장하지 않는다(만 14세 확인 포함, AUTH-06)",
+    async (id) => {
+      const d = deps();
+      const r = await submitTerms({ ...full, [id]: undefined }, d);
+      expect(r).toEqual({ ok: false, error: "invalid", next: "/poll/abc" });
+      expect(d.currentUserId).not.toHaveBeenCalled();
+      expect(d.recordConsent).not.toHaveBeenCalled();
+    },
+  );
+
+  it("만 14세 확인을 체크 해제 값(off, 빈 문자열)으로 보내도 거부한다", async () => {
+    for (const age of ["off", "", "false"]) {
+      const d = deps();
+      const r = await submitTerms({ ...full, age }, d);
+      expect(r.ok, age).toBe(false);
+      expect(d.recordConsent).not.toHaveBeenCalled();
+    }
+  });
+
   it("on 이외의 값은 거부한다", async () => {
     const r = await submitTerms({ ...full, age: "true" }, deps());
     expect(r.ok).toBe(false);

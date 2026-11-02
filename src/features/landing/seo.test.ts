@@ -41,9 +41,21 @@ describe("robotsFor", () => {
 });
 
 describe("sitemapFor", () => {
-  it("랜딩만 넣는다(약관 초안은 noindex)", () => {
+  it("랜딩과 약관 3종을 넣는다(T10.3 최종본부터 색인 허용)", () => {
     const urls = sitemapFor(BASE).map((e) => e.url);
-    expect(urls).toEqual([`${BASE}/`]);
+    expect(urls).toEqual([
+      `${BASE}/`,
+      `${BASE}/terms`,
+      `${BASE}/privacy`,
+      `${BASE}/location`,
+    ]);
     for (const u of urls) expect(blocked(new URL(u).pathname)).toBe(false);
+  });
+
+  it("베타 환영 페이지와 앱 경로는 넣지 않는다", () => {
+    const paths = sitemapFor(BASE).map((e) => new URL(e.url).pathname);
+    for (const p of ["/beta", "/today", "/map", "/login"]) {
+      expect(paths, p).not.toContain(p);
+    }
   });
 });

@@ -17,7 +17,9 @@ test.skip(
 test("/login: 로그인 화면이 열린다(404 아님), noindex", async ({ page }) => {
   const res = await page.goto("/login");
   expect(res?.status()).toBe(200);
-  await expect(page.locator('form[action="/auth/sign-in"]').first()).toBeAttached();
+  await expect(
+    page.locator('form[action="/auth/sign-in"]').first(),
+  ).toBeAttached();
   await expect(
     page.getByRole("button", { name: "Google 계정으로 로그인" }),
   ).toBeVisible();
@@ -54,6 +56,30 @@ for (const path of ["/poll", "/poll/party", "/me", "/admin"]) {
     await expect(page.getByText("곧 열립니다")).toHaveCount(0);
   });
 }
+
+for (const path of ["/terms", "/privacy", "/location"]) {
+  test(`${path}: 약관 최종본이 열리고 색인을 막지 않는다 (T10.3)`, async ({
+    page,
+  }) => {
+    const res = await page.goto(path);
+    expect(res?.status()).toBe(200);
+    await expect(
+      page.getByText("2026년 11월 16일 시행", { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText("확정 전 초안")).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  });
+}
+
+test("/sitemap.xml: 랜딩과 약관 3종", async ({ request }) => {
+  const res = await request.get("/sitemap.xml");
+  expect(res.status()).toBe(200);
+  const xml = await res.text();
+  for (const path of ["/terms", "/privacy", "/location"]) {
+    expect(xml, path).toMatch(new RegExp(`<loc>[^<]*${path}</loc>`));
+  }
+  expect(xml).not.toMatch(/\/beta<\/loc>/);
+});
 
 test("/design-lab: 프로덕션에서는 404", async ({ page }) => {
   for (const path of ["/design-lab", "/design-lab/beta/a"]) {

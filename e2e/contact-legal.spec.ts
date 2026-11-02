@@ -1,4 +1,4 @@
-// 문의하기(T8.6, MOD-07)와 약관 문서(T8.14, APP-05) E2E.
+// 문의하기(T8.6, MOD-07)와 약관 문서(T8.14 초안 → T10.3 최종본, APP-05) E2E.
 //
 // 실행: PLAYWRIGHT_BASE_URL=http://localhost:3102 pnpm exec playwright test --project=mobile --project=desktop e2e/contact-legal.spec.ts
 // - 약관 문서는 로그인 없이 연다(flags.auth가 켜진 개발 환경).
@@ -28,19 +28,26 @@ const DOCS = [
   { path: "/location", title: "위치정보 처리 안내", slug: "location" },
 ] as const;
 
-test.describe("약관 문서 (T8.14)", () => {
+test.describe("약관 문서 (T8.14, T10.3)", () => {
   for (const doc of DOCS) {
-    test(`${doc.path} 초안 표시, 문의 연락처, 접근성`, async ({ page }) => {
+    test(`${doc.path} 시행일 표시, 초안 띠 없음, 색인 허용, 문의 연락처, 접근성`, async ({
+      page,
+    }) => {
       for (const scheme of ["light", "dark"] as const) {
         await page.emulateMedia({ colorScheme: scheme });
         await page.goto(doc.path);
         await expect(
           page.getByRole("heading", { level: 1, name: doc.title }),
         ).toBeVisible();
-        await expect(page.getByText("확정 전 초안")).toBeVisible();
         await expect(
-          page.getByText("초안 0.1판", { exact: false }),
+          page.getByText("2026년 11월 16일 시행", { exact: true }),
         ).toBeVisible();
+        await expect(
+          page.getByText("2026년 11월 16일부터 시행합니다", { exact: false }),
+        ).toBeVisible();
+        await expect(page.getByText("확정 전 초안")).toHaveCount(0);
+        await expect(page.getByText("초안", { exact: false })).toHaveCount(0);
+        await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
         // 문의 이메일 줄(주소 또는 준비 중 문구)
         await expect(page.getByText("문의 이메일").last()).toBeVisible();
         const text = await page.locator("main").innerText();
@@ -50,6 +57,28 @@ test.describe("약관 문서 (T8.14)", () => {
       }
     });
   }
+
+  test("개인정보 처리방침에 보호책임자 실명과 연락처가 있다 (법 제30조 제1항 제6호)", async ({
+    page,
+  }) => {
+    await page.goto("/privacy");
+    const section = page.locator("section", {
+      has: page.getByRole("heading", { name: "14. 개인정보 보호책임자" }),
+    });
+    await expect(
+      section.getByText("개인정보 보호책임자: 유기홍(운영자)"),
+    ).toBeVisible();
+    await expect(section.getByText("문의 이메일")).toBeVisible();
+  });
+
+  test("사이트맵에 약관 3종이 있다", async ({ request }) => {
+    const res = await request.get("/sitemap.xml");
+    expect(res.status()).toBe(200);
+    const xml = await res.text();
+    for (const doc of DOCS) {
+      expect(xml, doc.path).toMatch(new RegExp(`<loc>[^<]*${doc.path}</loc>`));
+    }
+  });
 
   test("개인정보 처리방침에서 위치정보 처리 안내로 간다", async ({ page }) => {
     await page.goto("/privacy");

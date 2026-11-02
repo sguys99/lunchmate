@@ -1,5 +1,5 @@
 // 약관 문서 화면 틀 (T4.11, T8.14). /terms, /privacy, /location이 쓰는 서버 컴포넌트. 문구는 src/copy/legal.ts.
-// 최종 시행 전이라 맨 위에 "확정 전 초안" 고지를 둔다. 약관 동의 화면의 "보기"가 새 창으로 연다.
+// 머리 caption에 시행일(T10.3 최종본, D-27)을 둔다. 약관 동의 화면의 "보기"가 새 창으로 연다.
 // 절마다 문단(body), 목록(items), 덧붙임(after), 문의 이메일(contact), 다른 문서 링크(link)를 순서대로 그린다.
 // 문의 이메일은 환경변수 값(src/lib/contact)을 서버에서 읽는다. 비어 있으면 준비 중 문구.
 import Link from "next/link";
@@ -18,10 +18,6 @@ export function LegalDocumentView({ doc }: { doc: LegalDocument }) {
         <p className="type-caption text-muted-foreground">{doc.updated}</p>
         <h1 className="type-title text-balance break-keep">{doc.title}</h1>
       </header>
-      <aside className="flex flex-col gap-1 border-y border-border py-4">
-        <p className="type-label">{legalCopy.pendingLabel}</p>
-        <p className={paragraph}>{legalCopy.pending}</p>
-      </aside>
       <div className="flex flex-col gap-8">
         {doc.sections.map((s) => (
           <section key={s.heading} className="flex flex-col gap-2">

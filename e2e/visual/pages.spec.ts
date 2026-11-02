@@ -20,7 +20,7 @@ const THEMES: Theme[] = ["light", "dark"];
 const FIXED_TIME = new Date("2026-11-02T03:00:00.000Z");
 
 // fullPage: 관리자 C는 아래 고정 처리 줄이 전체 페이지 캡처에서 중간에 찍히므로 첫 화면(뷰포트)만 찍는다.
-// 약관 3종의 문의 이메일 줄은 NEXT_PUBLIC_CONTACT_EMAIL에 따라 바뀐다. 지금 기준은 값이 없는 "준비하고 있습니다" 상태다.
+// 약관 3종(T10.3 최종본, 2026-11-16 시행)의 문의 이메일 줄은 NEXT_PUBLIC_CONTACT_EMAIL에 따라 바뀐다. 지금 기준은 .env.local에 값이 있는 상태다.
 const PAGES = [
   { name: "admin-c", path: "/design-lab/admin/c?state=ready", fullPage: false },
   { name: "app-icon-a", path: "/design-lab/app-icon/a", fullPage: true },

@@ -36,6 +36,7 @@ type ProfileRow = {
   role: string;
   status: string;
   terms_agreed_at: string | null;
+  birth_confirmed_at: string | null;
 };
 type OfficeRow = {
   id: string;
@@ -153,6 +154,41 @@ describe.skipIf(!ready)(
           },
         );
         expect(undo.data?.[0]?.terms_agreed_at).toBe(agreedAt);
+      });
+
+      it("만 14세 확인 시각도 서버 시각으로 한 번만 기록되고 되돌리거나 바꿀 수 없다 (AUTH-06, T10.3)", async () => {
+        const set = await rest<ProfileRow[]>(e, `profiles?user_id=eq.${a.id}`, {
+          method: "PATCH",
+          token: a.token,
+          body: { birth_confirmed_at: "2000-01-01T00:00:00Z" },
+        });
+        const confirmedAt = set.data?.[0]?.birth_confirmed_at;
+        expect(confirmedAt).toBeTruthy();
+        expect(
+          Date.now() - new Date(confirmedAt as string).getTime(),
+        ).toBeLessThan(5 * 60_000);
+
+        for (const value of [null, "2030-01-01T00:00:00Z"]) {
+          const again = await rest<ProfileRow[]>(
+            e,
+            `profiles?user_id=eq.${a.id}`,
+            {
+              method: "PATCH",
+              token: a.token,
+              body: { birth_confirmed_at: value },
+            },
+          );
+          expect(again.data?.[0]?.birth_confirmed_at).toBe(confirmedAt);
+        }
+      });
+
+      it("타인은 A의 만 14세 확인 시각을 쓰지 못한다(0행)", async () => {
+        const r = await rest(e, `profiles?user_id=eq.${a.id}`, {
+          method: "PATCH",
+          token: b.token,
+          body: { birth_confirmed_at: new Date().toISOString() },
+        });
+        expect(r.data).toEqual([]);
       });
 
       it("타인은 A의 닉네임을 바꾸지 못한다(0행)", async () => {
