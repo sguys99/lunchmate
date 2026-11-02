@@ -3,6 +3,7 @@ import { recommend } from "@/lib/reco/recommend";
 import { seededRng } from "@/lib/reco/pick-one";
 import { makeCandidate, makeInput, NOW } from "@/lib/reco/test-fixtures";
 import { cardBadges, priceNumber, toCard, toCards } from "./card-model";
+import { heroNameSize, nameWidthUnits } from "./hero-name";
 
 const place = {
   placeUrl: "https://place.map.kakao.com/a",
@@ -63,5 +64,25 @@ describe("카드 표시 값 (REC-06)", () => {
 
   it("카카오 값이 없는 곳은 묶음에서 뺀다", () => {
     expect(toCards([pickOf()], new Map(), "lunch", NOW)).toEqual([]);
+  });
+});
+
+describe("heroNameSize (T9.10, 큰 카드 이름과 그림 겹침)", () => {
+  it("한글 1, 영문과 숫자 0.6, 띄어쓰기 0.3으로 폭을 어림한다", () => {
+    expect(nameWidthUnits("소담")).toBe(2);
+    expect(nameWidthUnits("테스트식당6")).toBe(5.6);
+    expect(nameWidthUnits(" 파리바게뜨 양재역점 ")).toBe(9.3);
+  });
+
+  it("짧은 이름은 큰 그림(lg), 중간은 md, 긴 이름은 sm", () => {
+    expect(heroNameSize("소담")).toBe("lg");
+    expect(heroNameSize("명동교자")).toBe("lg");
+    expect(heroNameSize("테스트식당6")).toBe("md");
+    expect(heroNameSize("곰작골나주곰탕")).toBe("md");
+    expect(heroNameSize("파리바게뜨 양재역점")).toBe("sm");
+    expect(heroNameSize("이광진식겁라면 ○○ 도곡점")).toBe("sm");
+    expect(heroNameSize("이광진식겁라면 떡볶이 앤 김밥 도곡점 본점 2호")).toBe(
+      "sm",
+    );
   });
 });

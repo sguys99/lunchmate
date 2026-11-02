@@ -10,6 +10,9 @@
 //   막대는 네 칸에 모두 두고 활성 칸만 불투명하게 한다. 첫 렌더는 그대로 보인다(전환은 값이 바뀔 때만).
 //   축소 모드: OS 설정은 motion-reduce:, 앱 설정(MotionProvider preference="reduce")은 data-reduced로 즉시 바꾼다.
 // - 데스크톱(화면 컨테이너 1024px 이상)에서도 같은 막대를 좌 리스트 칸 아래에 둔다(AppShell).
+// - 앱 화면(dock, T9.10): 모바일은 position: fixed로 화면 아래에 고정하고, 같은 높이의 빈 자리를 문서 흐름에 남긴다.
+//   sticky 막대는 iOS Safari에서 문서 끝 고무줄 튕김(rubber-band)과 주소 막대 접힘 때 내용과 함께 끌려 올라가 흔들렸다.
+//   데스크톱은 좌 리스트 칸 아래 sticky 그대로다. 디자인 랩 미리보기(여러 개가 한 화면)는 dock 없이 sticky다.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, type MouseEvent } from "react";
@@ -30,6 +33,8 @@ export type TabBarViewProps = {
   preview?: boolean;
   /** nav 랜드마크 이름. 기본 commonCopy.tabBarLabel. 한 화면에 미리보기가 여럿일 때만 바꾼다 */
   label?: string;
+  /** 앱 화면: 모바일에서 화면 아래 고정(fixed) + 문서 흐름에 같은 높이 빈 자리. 데스크톱은 sticky */
+  dock?: boolean;
   className?: string;
 };
 
@@ -42,15 +47,17 @@ export function TabBarView({
   activeId,
   preview,
   label = commonCopy.tabBarLabel,
+  dock,
   className,
 }: TabBarViewProps) {
   const reduced = useMotionPreference() === "reduce";
-  return (
+  const nav = (
     <nav
       aria-label={label}
       data-slot="bottom-tab-bar"
       className={cn(
         "sticky bottom-0 z-10 shrink-0 border-t border-border bg-background pb-[env(safe-area-inset-bottom,0px)]",
+        dock && "fixed inset-x-0 desktop:sticky",
         className,
       )}
     >
@@ -98,6 +105,18 @@ export function TabBarView({
       </ul>
     </nav>
   );
+  if (!dock) return nav;
+  return (
+    <>
+      {/* 고정 탭이 가리는 만큼 문서 끝에 남기는 빈 자리. 배경이 없어 지도 화면은 이 아래까지 그대로 보인다 */}
+      <div
+        aria-hidden
+        data-slot="tab-bar-space"
+        className="h-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] shrink-0 desktop:hidden"
+      />
+      {nav}
+    </>
+  );
 }
 
 /** 앱 화면용 하단 탭. 현재 경로로 활성 탭을 정한다. */
@@ -105,5 +124,7 @@ export function BottomTabBar({ className }: { className?: string }) {
   const pathname = usePathname();
   // 베타 의견의 "지금 보던 화면"(T9.4): 나 탭 직전 경로를 이 탭 메모리에만 적는다
   useEffect(() => rememberRoute(pathname), [pathname]);
-  return <TabBarView activeId={matchTab(pathname)} className={className} />;
+  return (
+    <TabBarView activeId={matchTab(pathname)} dock className={className} />
+  );
 }

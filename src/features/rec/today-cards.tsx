@@ -32,6 +32,7 @@ import {
   NumberValue,
 } from "./card-bits";
 import type { TodayCard } from "./card-model";
+import { heroNameSize, type HeroNameSize } from "./hero-name";
 import type { JustPick } from "./just-pick";
 
 const copy = homeCopy.today;
@@ -53,6 +54,27 @@ const HERO_PAD = "p-6 @max-[23.75rem]/screen:p-5";
 /** 그림 아래쪽 여백(바닥선 y 78 / 96 아래)은 이유 줄과 겹쳐도 되므로 음수 아래 여백으로 행 높이에서 뺀다 */
 const HERO_ART =
   "-mt-3 -mr-4 -mb-6 shrink-0 @max-[23.75rem]/screen:-mr-3 @max-[23.75rem]/screen:-mb-3 @max-[23.75rem]/screen:size-28 desktop:size-32 desktop:-mb-5";
+
+/**
+ * 이름 길이별 그림 크기와 이름 글자(T9.10). 이름 칸은 남은 폭을 모두 쓰고 그림은 그 옆 칸에만 있어 둘이 겹치지 않는다.
+ * 그래도 넘치는 이름(25자 이상)은 두 줄에서 줄임표로 자르고, 전체 이름은 제목 글자(접근성 이름)와 title로 남긴다.
+ */
+const HERO_NAME: Record<
+  HeroNameSize,
+  { art: number; artClass: string; nameClass: string }
+> = {
+  lg: { art: 152, artClass: HERO_ART, nameClass: "type-title" },
+  md: {
+    art: 112,
+    artClass: "-mt-2 -mr-3 -mb-4 size-28 shrink-0",
+    nameClass: "type-title",
+  },
+  sm: {
+    art: 80,
+    artClass: "-mt-1 -mr-2 size-20 shrink-0",
+    nameClass: "type-heading",
+  },
+};
 
 const textButton = cn(
   "inline-flex h-6 shrink-0 items-center rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground",
@@ -89,6 +111,7 @@ export function TodayHero({
   const [open, setOpen] = useState(false);
   const whyId = useId();
   const nameId = useId();
+  const size = HERO_NAME[heroNameSize(card.name)];
   return (
     <article
       ref={heroRef}
@@ -109,17 +132,29 @@ export function TodayHero({
         style={reveal(0)}
         className="flex items-start justify-between gap-3"
       >
-        <div className="flex min-w-0 flex-col pt-1">
+        <div className="flex min-w-0 flex-1 flex-col pt-1">
           <span className="type-caption text-muted-foreground">
             {copy.single.eyebrow}
             <span className="sr-only">, {order}</span>
           </span>
           <CategoryCaption category={card.category} className="mt-4" />
-          <h2 id={nameId} className="mt-1 type-title text-balance break-keep">
+          {/* break-keep은 낱말 단위로 줄을 바꾸고, 칸보다 긴 낱말만 wrap-anywhere로 끊는다(긴 낱말이 그림 밑으로 넘치지 않게) */}
+          <h2
+            id={nameId}
+            title={card.name}
+            className={cn(
+              "mt-1 line-clamp-2 text-balance wrap-anywhere break-keep",
+              size.nameClass,
+            )}
+          >
             {card.name}
           </h2>
         </div>
-        <CardArt slug={card.category} size={152} className={HERO_ART} />
+        <CardArt
+          slug={card.category}
+          size={size.art}
+          className={size.artClass}
+        />
       </div>
 
       <div data-reveal style={reveal(1)} className="mt-2 flex flex-col">
@@ -227,7 +262,9 @@ export function AltTile({
           variant="icon"
           className="-ml-0.5 shrink-0"
         />
-        <span className="truncate type-label">{card.name}</span>
+        <span title={card.name} className="truncate type-label">
+          {card.name}
+        </span>
       </span>
       <span className="flex min-w-0 items-baseline gap-2.5 whitespace-nowrap">
         <span className="sr-only">{copy.numbers.walk}</span>
@@ -259,8 +296,10 @@ export function AltTile({
 /* ---------- 하단 고정 줄 ---------- */
 
 /**
- * 하단 탭 바로 위에 붙는 줄. 내용이 짧으면 칸 맨 아래(mt-auto), 길면 스크롤해도 엄지 자리에 남는다.
+ * 하단 탭 바로 위에 붙는 줄. 모바일은 화면 아래 고정(fixed, 탭 바로 위), 데스크톱은 리스트 칸 안 sticky.
  * 모바일은 화면 끝까지(위 선이 탭 바 선과 나란히), 데스크톱은 리스트 내용 폭.
+ * 모바일에서 sticky를 쓰지 않는 이유(T9.10): iOS Safari에서 문서 끝 고무줄 튕김과 주소 막대 접힘 때 sticky 줄이
+ * 내용과 함께 끌려 올라가 흔들렸다. 고정 줄이 가리는 높이(위 선 1 + 위아래 12 + 버튼 48)는 문서 흐름의 빈 자리로 남긴다.
  */
 export function BottomDock({
   children,
@@ -272,16 +311,25 @@ export function BottomDock({
   className?: string;
 }) {
   return (
-    <div
-      role="group"
-      aria-label={label}
-      className={cn(
-        "sticky bottom-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] z-[5] -mx-(--lm-layout-gutter) mt-auto border-t border-border bg-background px-(--lm-layout-gutter) py-3 desktop:bottom-(--lm-layout-tab-bar-height) desktop:mx-0 desktop:px-0",
-        className,
-      )}
-    >
-      {children}
-    </div>
+    <>
+      <div
+        aria-hidden
+        data-slot="dock-space"
+        className="mt-auto h-[calc(3rem+1.5rem+1px)] shrink-0 desktop:hidden"
+      />
+      <div
+        role="group"
+        aria-label={label}
+        className={cn(
+          "fixed inset-x-0 bottom-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] z-[5] mt-auto border-t border-border bg-background px-(--lm-layout-gutter) py-3 desktop:sticky desktop:bottom-(--lm-layout-tab-bar-height) desktop:px-0",
+          className,
+        )}
+      >
+        <div className="mx-auto w-full max-w-[calc(var(--lm-layout-max-width)-2*var(--lm-layout-gutter))] desktop:max-w-none">
+          {children}
+        </div>
+      </div>
+    </>
   );
 }
 

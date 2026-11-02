@@ -42,7 +42,7 @@ export default function AppLayout({
             map={map}
             tabBar={
               // usePathname을 읽는 클라이언트 경계. 경로를 모르는 순간에는 활성 없는 같은 막대를 보여 준다.
-              <Suspense fallback={<TabBarView activeId={null} />}>
+              <Suspense fallback={<TabBarView activeId={null} dock />}>
                 <BottomTabBar />
               </Suspense>
             }

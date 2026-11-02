@@ -283,6 +283,15 @@
 }
 
 /*
+ * 앱 화면(오늘, 지도, 투표, 나)은 문서 끝 고무줄 튕김을 끈다(T9.10). iOS Safari에서 튕김이 하단 고정 줄과 탭을
+ * 내용과 따로 놀게 해 "덜렁거림"으로 느껴졌다. 랜딩과 약관은 브라우저 기본(당겨서 새로고침 포함)을 그대로 둔다.
+ */
+html:has([data-slot="app-shell"]),
+html:has([data-slot="app-shell"]) body {
+  overscroll-behavior-y: none;
+}
+
+/*
  * type-<step>: 타입 스케일 한 단계를 서체까지 한 번에 적용 (FORMAT.md 2.6). 예: type-title, type-numeric-lg
  * numeric-* 단계는 tabular-nums(와 시안의 slashed zero)를 함께 켠다.
  */
