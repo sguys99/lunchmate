@@ -1,7 +1,7 @@
 "use client";
 // 오늘(홈) 머리 (T5.15 끼니, T5.16 기준 위치, G3 D1, DESIGN.md 5장 "오늘(홈) 화면" 머리).
 // 1행 기준 위치 칩(왼쪽, 높이 40, 터치 44) + 끼니 토글(오른쪽, 글자 두 개, 선택 쪽만 foreground + 1px 밑줄).
-// 2행 날짜와 끼니 caption, 3행 제목 "오늘의 추천" title 세리프. 행 사이 24(데스크톱 16), 날짜와 제목 사이 6.
+// 2행 제목 "오늘의 추천" heading 세리프 + 오른쪽 날짜와 끼니 caption(D-25, 한 화면 압축). 행 사이 12.
 // 기준 위치 칩을 누르면 바로 아래에 고르기 목록(사무실들 + 현위치)이 열린다. Base UI를 쓰지 않는 가벼운 목록이다
 // (홈 첫 로드 예산). Esc, 바깥 누르기로 닫고, 열리면 고른 항목에 포커스, 닫히면 칩으로 포커스를 돌려준다.
 // 올리브 면 버튼은 쓰지 않는다. 화면의 주 버튼은 하단 행동 줄의 "길찾기" 하나다(CLAUDE.md 6.3).
@@ -327,22 +327,19 @@ export function TodayHeader({
   notice?: string | null;
 }) {
   return (
-    <header className="flex flex-col gap-6 desktop:gap-4">
+    <header className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <LocationChip {...menu} />
         <MealToggle meal={meal} onChange={onMeal} className="-mr-2 shrink-0" />
       </div>
-      <div className="flex flex-col gap-1.5">
+      {/* 제목과 날짜 한 줄(D-25): 한 화면(390x664)에 홈 전체가 들어가게 제목을 heading 크기로 */}
+      <div className="flex items-baseline justify-between gap-3">
+        <h1 className="type-heading">{copy.title}</h1>
         <p className="type-caption text-muted-foreground">
           {dateLine(now)} {copy.meal[meal]}
         </p>
-        <h1 className="type-title">{copy.title}</h1>
-        {notice ? (
-          <div className="mt-2.5">
-            <HeaderNotice text={notice} />
-          </div>
-        ) : null}
       </div>
+      {notice ? <HeaderNotice text={notice} /> : null}
     </header>
   );
 }

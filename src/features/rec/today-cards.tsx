@@ -1,14 +1,20 @@
 "use client";
 // 오늘(홈) 카드 (T5.17, T5.19, T5.25, G3 D1, DESIGN.md 5장 "오늘(홈) 화면").
-// - "오늘의 한 곳" 큰 카드 1장 + 대안 작은 카드 2장 + 하단 고정 행동 줄. 넘기기가 없다(스와이프 대체 버튼이 필요 없다).
-// - 큰 카드: 이름 30 → 이유 16 → 배지 → 숫자 18. 버튼은 "왜 추천했나요?"(펼치기), "상세" 글자 버튼과 그 옆 더 보기
-//   아이콘(즐겨찾기, 다시 안 갈래요, 투표에 추가, T5.20)뿐이고 길찾기는 하단 줄.
-//   일러스트 152px(카드 폭의 약 44%)는 이 큰 카드 한정 예외(G3 안건 6). 이유 문장에서 도보 분은 뺐다(card-model).
-// - 대안 카드: 아이콘 28 + 식당명, 도보와 만족. 누르면 큰 카드와 자리를 바꾼다(today-screen이 교환 모션과 포커스 이동).
+// - "오늘의 한 곳" 큰 카드 1장 + 대안 두 줄 목록 + 하단 고정 행동 줄. 넘기기가 없다(스와이프 대체 버튼이 필요 없다).
+// - D-25(T9.10 한 화면 압축, 시안 A + B 대안 목록): 390x664, 360x640에서 홈 전체가 스크롤 없이 보이게 줄였다.
+// - 큰 카드: 윗줄(오늘의 한 곳, 업종 | 상세, 더 보기) → 이름 + 그림 80 → 이유 한 줄(누르면 "왜 추천했나요?"
+//   펼침) → 배지(있을 때만) → 숫자 3칸. 이름은 아주 짧을 때(hero-name lg)만 30, 나머지는 22로 두 줄까지(그림 행 높이 안). 길찾기는 하단 줄. 이유 문장에서 도보 분은 뺐다(card-model).
+// - 대안 목록: 아이콘 28 + 식당명(한 줄 전체 폭), 도보와 👍, 화살표. 누르면 큰 카드와 자리를 바꾼다(today-screen이 교환 모션과 포커스 이동).
 // - 카드 순서 낭독: 큰 카드와 대안에 "3곳 중 1번째"를 스크린 리더 글자로 붙인다.
 // 모션은 today.css(Motion 없음, D-04). data-reveal 순번: 윗줄 0, 이유 1, 배지 2, 숫자 3, 대안 3, 4(T8.8 사용자 결정 P2).
 import { EmojiText } from "@/components/a11y/emoji-text";
-import { ChevronDown, Dices, RotateCcw, ThumbsUp } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Dices,
+  RotateCcw,
+  ThumbsUp,
+} from "lucide-react";
 import {
   useId,
   useState,
@@ -18,7 +24,7 @@ import {
 } from "react";
 import { LoadingRegion, SkeletonLine } from "@/components/states/loading";
 import { buttonClass } from "@/components/ui/button-classes";
-import { focusRing, hitArea44, pressMotion } from "@/components/ui/interaction";
+import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { Skeleton } from "@/components/ui/skeleton";
 import { homeCopy } from "@/copy/home";
 import { cn } from "@/lib/utils";
@@ -32,7 +38,7 @@ import {
   NumberValue,
 } from "./card-bits";
 import type { TodayCard } from "./card-model";
-import { heroNameSize, type HeroNameSize } from "./hero-name";
+import { heroNameSize } from "./hero-name";
 import type { JustPick } from "./just-pick";
 
 const copy = homeCopy.today;
@@ -50,31 +56,9 @@ function reveal(index: number): CSSProperties {
   return { "--reveal": index } as CSSProperties;
 }
 
-const HERO_PAD = "p-6 @max-[23.75rem]/screen:p-5";
-/** 그림 아래쪽 여백(바닥선 y 78 / 96 아래)은 이유 줄과 겹쳐도 되므로 음수 아래 여백으로 행 높이에서 뺀다 */
-const HERO_ART =
-  "-mt-3 -mr-4 -mb-6 shrink-0 @max-[23.75rem]/screen:-mr-3 @max-[23.75rem]/screen:-mb-3 @max-[23.75rem]/screen:size-28 desktop:size-32 desktop:-mb-5";
-
-/**
- * 이름 길이별 그림 크기와 이름 글자(T9.10). 이름 칸은 남은 폭을 모두 쓰고 그림은 그 옆 칸에만 있어 둘이 겹치지 않는다.
- * 그래도 넘치는 이름(25자 이상)은 두 줄에서 줄임표로 자르고, 전체 이름은 제목 글자(접근성 이름)와 title로 남긴다.
- */
-const HERO_NAME: Record<
-  HeroNameSize,
-  { art: number; artClass: string; nameClass: string }
-> = {
-  lg: { art: 152, artClass: HERO_ART, nameClass: "type-title" },
-  md: {
-    art: 112,
-    artClass: "-mt-2 -mr-3 -mb-4 size-28 shrink-0",
-    nameClass: "type-title",
-  },
-  sm: {
-    art: 80,
-    artClass: "-mt-1 -mr-2 size-20 shrink-0",
-    nameClass: "type-heading",
-  },
-};
+const HERO_PAD = "p-5";
+/** 이름 옆 그림 80px(D-25 한 화면 압축). 그림 아래쪽 빈 곳은 이유 줄과 겹쳐도 되므로 음수 아래 여백으로 행 높이에서 뺀다 */
+const HERO_ART = "-mt-2 -mr-2 -mb-3 size-20 shrink-0";
 
 const textButton = cn(
   "inline-flex h-6 shrink-0 items-center rounded-sm px-0.5 type-caption text-muted-foreground underline decoration-border underline-offset-3 hover:text-foreground active:text-foreground",
@@ -111,7 +95,6 @@ export function TodayHero({
   const [open, setOpen] = useState(false);
   const whyId = useId();
   const nameId = useId();
-  const size = HERO_NAME[heroNameSize(card.name)];
   return (
     <article
       ref={heroRef}
@@ -127,61 +110,80 @@ export function TodayHero({
         spot === "dim" && "opacity-40",
       )}
     >
+      {/* 윗줄: "오늘의 한 곳" + 업종, 오른쪽 상세와 더 보기(D-25) */}
       <div
         data-reveal
         style={reveal(0)}
-        className="flex items-start justify-between gap-3"
+        className="flex items-center justify-between gap-3"
       >
-        <div className="flex min-w-0 flex-1 flex-col pt-1">
-          <span className="type-caption text-muted-foreground">
-            {copy.single.eyebrow}
-            <span className="sr-only">, {order}</span>
-          </span>
-          <CategoryCaption category={card.category} className="mt-4" />
-          {/* break-keep은 낱말 단위로 줄을 바꾸고, 칸보다 긴 낱말만 wrap-anywhere로 끊는다(긴 낱말이 그림 밑으로 넘치지 않게) */}
-          <h2
-            id={nameId}
-            title={card.name}
-            className={cn(
-              "mt-1 line-clamp-2 text-balance wrap-anywhere break-keep",
-              size.nameClass,
-            )}
+        <p className="flex min-w-0 items-baseline gap-2 type-caption text-muted-foreground">
+          {copy.single.eyebrow}
+          <span className="sr-only">, {order}</span>
+          <CategoryCaption category={card.category} />
+        </p>
+        <div className="flex shrink-0 items-center gap-5">
+          <button
+            type="button"
+            aria-label={copy.actions.detailOf(card.name)}
+            aria-haspopup="dialog"
+            onPointerEnter={onDetailIntent}
+            onFocus={onDetailIntent}
+            onClick={() => onDetail?.(card)}
+            className={textButton}
           >
-            {card.name}
-          </h2>
+            {copy.actions.detail}
+          </button>
+          {more}
         </div>
-        <CardArt
-          slug={card.category}
-          size={size.art}
-          className={size.artClass}
-        />
+      </div>
+      <div
+        data-reveal
+        style={reveal(0)}
+        className="mt-2 flex items-start gap-3"
+      >
+        {/* break-keep은 낱말 단위로 줄을 바꾸고, 칸보다 긴 낱말만 wrap-anywhere로 끊는다(긴 낱말이 그림 밑으로 넘치지 않게) */}
+        <h2
+          id={nameId}
+          title={card.name}
+          className={cn(
+            "line-clamp-2 min-w-0 flex-1 text-balance wrap-anywhere break-keep",
+            heroNameSize(card.name) === "lg" ? "type-title" : "type-heading",
+          )}
+        >
+          {card.name}
+        </h2>
+        <CardArt slug={card.category} size={80} className={HERO_ART} />
       </div>
 
-      <div data-reveal style={reveal(1)} className="mt-2 flex flex-col">
-        <p className="line-clamp-2 type-body text-pretty text-foreground">
-          <EmojiText text={card.reason} />
-        </p>
+      {/* 이유 한 줄이 곧 "왜 추천했나요?" 펼치기(D-25) */}
+      <div data-reveal style={reveal(1)} className="mt-1 flex flex-col">
         <button
           type="button"
           aria-expanded={open}
           aria-controls={whyId}
           onClick={() => setOpen((v) => !v)}
-          className={cn(textButton, "mt-1.5 gap-1 self-start")}
+          className={cn(
+            "-mx-1 flex min-h-11 items-center gap-1.5 rounded-sm px-1 text-left",
+            focusRing,
+          )}
         >
-          {copy.actions.why}
+          <span className="line-clamp-1 type-body text-foreground">
+            <EmojiText text={card.reason} />
+          </span>
           <ChevronDown
             aria-hidden
             className={cn(
-              "size-3.5 transition-transform duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
+              "size-4 shrink-0 text-muted-foreground transition-transform duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
               open && "rotate-180",
             )}
             strokeWidth={1.5}
           />
+          <span className="sr-only">, {copy.actions.why}</span>
         </button>
         {open ? (
           <ul
             id={whyId}
-            className="lm-today-why mt-3 flex flex-col gap-1.5 border-l border-border pl-3"
+            className="lm-today-why mt-1 mb-1 flex flex-col gap-1.5 border-l border-border pl-3"
           >
             {why.map((line) => (
               <li
@@ -197,38 +199,27 @@ export function TodayHero({
         )}
       </div>
 
-      <div
-        data-reveal
-        style={reveal(2)}
-        className="mt-3 flex min-h-6 items-start justify-between gap-3"
-      >
-        <CardBadges card={card} />
-        <div className="ml-auto flex shrink-0 items-center gap-5">
-          <button
-            type="button"
-            aria-label={copy.actions.detailOf(card.name)}
-            aria-haspopup="dialog"
-            onPointerEnter={onDetailIntent}
-            onFocus={onDetailIntent}
-            onClick={() => onDetail?.(card)}
-            className={textButton}
-          >
-            {copy.actions.detail}
-          </button>
-          {more}
+      {card.badges.length > 0 ? (
+        <div data-reveal style={reveal(2)} className="mt-1">
+          <CardBadges card={card} />
         </div>
-      </div>
+      ) : null}
 
-      <div data-reveal style={reveal(3)} className="mt-5">
+      <div data-reveal style={reveal(3)} className="mt-3">
         <NumberGrid card={card} />
       </div>
     </article>
   );
 }
 
-/* ---------- 대안 카드 ---------- */
+/* ---------- 대안 목록 ---------- */
 
-export function AltTile({
+/** 대안 두 곳: 테두리 하나 안 두 줄 목록(D-25, 시안 B). 줄은 AltRow */
+export const ALT_LIST =
+  "flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card";
+
+/** 대안 한 줄: 아이콘 28 + 이름(한 줄 전체 폭), 오른쪽 도보와 👍, 화살표. 누르면 큰 카드와 자리를 바꾼다 */
+export function AltRow({
   card,
   spot,
   order,
@@ -244,37 +235,28 @@ export function AltTile({
       type="button"
       onClick={onPromote}
       className={cn(
-        // pressMotion을 먼저 두고 전환 속성을 뒤에서 덮는다: 눌림 scale과 R1의 테두리, 흐림(opacity)을 함께 전환한다(T8.7)
-        pressMotion,
-        "flex min-h-18 w-full min-w-0 flex-col justify-center gap-1 rounded-card border bg-card px-3 py-2.5 text-left transition-[border-color,opacity,scale] ease-standard hover:border-input active:border-input",
+        "flex min-h-12 w-full items-center gap-3 px-4 py-1.5 text-left transition-[opacity,box-shadow] ease-standard hover:bg-muted/40 focus-visible:-outline-offset-2 active:bg-muted/40",
         spot
           ? "duration-(--lm-duration-fast)"
           : "duration-(--lm-duration-base)",
-        spot === "on" ? "border-primary" : "border-border",
+        spot === "on" && "ring-1 ring-primary ring-inset",
         spot === "dim" && "opacity-40",
         focusRing,
       )}
     >
-      <span className="flex min-w-0 items-center gap-2">
-        <CardArt
-          slug={card.category}
-          size={28}
-          variant="icon"
-          className="-ml-0.5 shrink-0"
-        />
-        <span title={card.name} className="truncate type-label">
-          {card.name}
-        </span>
+      <CardArt
+        slug={card.category}
+        size={28}
+        variant="icon"
+        className="shrink-0"
+      />
+      <span title={card.name} className="min-w-0 flex-1 truncate type-label">
+        {card.name}
       </span>
-      <span className="flex min-w-0 items-baseline gap-2.5 whitespace-nowrap">
+      <span className="flex shrink-0 items-baseline gap-2.5 whitespace-nowrap">
         <span className="sr-only">{copy.numbers.walk}</span>
         <NumberValue cell={card.walk} />
-        <span aria-hidden className="h-3 w-px self-center bg-border" />
-        {card.thumbs.value === null ? (
-          <span className="truncate type-caption text-muted-foreground">
-            {homeCopy.thumbsUpEmpty}
-          </span>
-        ) : (
+        {card.thumbs.value === null ? null : (
           <span className="inline-flex items-baseline gap-1">
             <ThumbsUp
               aria-hidden
@@ -286,6 +268,11 @@ export function AltTile({
           </span>
         )}
       </span>
+      <ChevronRight
+        aria-hidden
+        className="size-4 shrink-0 text-muted-foreground"
+        strokeWidth={1.5}
+      />
       <span className="sr-only">
         , {order}, {copy.single.swapHint}
       </span>
@@ -418,40 +405,29 @@ export function TodayPicksSkeleton({
           HERO_PAD,
         )}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-col pt-1">
-            <SkeletonLine type="caption" className="w-16" />
-            <SkeletonLine
-              type="caption"
-              lineClassName="mt-4"
-              className="w-10"
-            />
-            <SkeletonLine type="title" lineClassName="mt-1" className="w-32" />
-          </div>
-          <ArtCircle className={cn("size-[9.5rem]", HERO_ART)} />
+        <div className="flex h-6 items-center justify-between">
+          <SkeletonLine type="caption" className="w-24" />
+          <SkeletonLine type="caption" className="w-12" />
         </div>
-        <SkeletonLine type="body" lineClassName="mt-2" className="w-3/5" />
-        <SkeletonLine type="caption" lineClassName="mt-1.5" className="w-20" />
-        <div className="mt-3 flex min-h-6 justify-between">
-          <span />
-          <SkeletonLine type="caption" className="w-6" />
+        <div className="mt-2 flex items-start gap-3">
+          <SkeletonLine type="title" className="w-36" />
+          <ArtCircle className={cn("ml-auto", HERO_ART)} />
         </div>
-        <NumberGridSkeleton className="mt-5" />
+        <div className="mt-1 flex min-h-11 flex-col justify-center">
+          <SkeletonLine type="body" className="w-3/5" />
+        </div>
+        <NumberGridSkeleton className="mt-3" />
       </div>
-      <SkeletonLine type="caption" lineClassName="mt-5" className="w-20" />
-      <div aria-hidden className="mt-2 grid grid-cols-2 gap-2">
-        {["w-20", "w-16"].map((w) => (
-          <div
-            key={w}
-            className="flex min-h-18 flex-col justify-center gap-1 rounded-card border border-border bg-card px-3 py-2.5"
-          >
-            <div className="flex items-center gap-2">
-              <ArtCircle className="-ml-0.5 size-7" />
-              <SkeletonLine type="label" className={w} />
-            </div>
-            <div className="flex min-h-[1.35rem] items-end">
-              <Skeleton className="mb-0.5 h-3.5 w-16 rounded-badge" />
-            </div>
+      <div className="mt-3 flex h-6 items-center justify-between">
+        <SkeletonLine type="caption" className="w-20" />
+        <SkeletonLine type="caption" className="w-36" />
+      </div>
+      <div aria-hidden className={cn("mt-2", ALT_LIST)}>
+        {["w-32", "w-24"].map((w) => (
+          <div key={w} className="flex min-h-12 items-center gap-3 px-4 py-1.5">
+            <ArtCircle className="size-7 shrink-0" />
+            <SkeletonLine type="label" className={w} />
+            <Skeleton className="ml-auto h-3.5 w-12 rounded-badge" />
           </div>
         ))}
       </div>

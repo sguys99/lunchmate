@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { focusRing } from "@/components/ui/interaction";
+import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { homeCopy } from "@/copy/home";
 import { partyHref } from "@/features/poll/routes";
 import { cn } from "@/lib/utils";
@@ -14,8 +14,19 @@ import PollCreateHost from "./host";
 
 const copy = homeCopy.today.actions;
 
+const linkBase =
+  "items-center rounded-sm text-muted-foreground underline decoration-border hover:text-foreground active:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60";
+/** 따로 한 줄(대안이 없을 때) */
 const link = cn(
-  "inline-flex min-h-11 items-center rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground active:text-foreground aria-disabled:pointer-events-none aria-disabled:opacity-60",
+  linkBase,
+  "inline-flex min-h-11 type-label underline-offset-4",
+  focusRing,
+);
+/** 대안 제목 줄 오른쪽 작은 글자(D-25). 글자 높이 24, 터치 영역 44 */
+const linkInline = cn(
+  linkBase,
+  "inline-flex h-6 type-caption underline-offset-3",
+  hitArea44,
   focusRing,
 );
 
@@ -24,6 +35,7 @@ export default function HomePollEntries({
   signedIn,
   disabled,
   onNeedLogin,
+  inline,
 }: {
   homePoll: HomePollInput;
   signedIn: boolean;
@@ -31,7 +43,10 @@ export default function HomePollEntries({
   disabled: boolean;
   /** 비로그인: 로그인 유도 시트를 열고 돌아올 경로 */
   onNeedLogin: (next: string) => void;
+  /** 대안 제목 줄 오른쪽에 붙는 작은 글자 모양(D-25) */
+  inline?: boolean;
 }) {
+  const a = inline ? linkInline : link;
   const router = useRouter();
 
   /** 친구랑 정하기: 오늘 카드 3장으로 바로 만든다(POLL-02, 2탭). 비로그인은 로그인 뒤 확인 한 번(안건 15) */
@@ -58,18 +73,20 @@ export default function HomePollEntries({
     <>
       <nav
         aria-label={copy.entriesLabel}
-        className="mt-4 flex items-center gap-5"
+        className={
+          inline ? "flex items-center gap-4" : "mt-4 flex items-center gap-5"
+        }
       >
         <button
           type="button"
           aria-haspopup="dialog"
           aria-disabled={disabled || undefined}
           onClick={disabled ? undefined : startFriends}
-          className={link}
+          className={a}
         >
           {copy.pollWithFriends}
         </button>
-        <Link href={partyHref} className={link}>
+        <Link href={partyHref} className={a}>
           {copy.party}
         </Link>
       </nav>

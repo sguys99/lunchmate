@@ -56,7 +56,7 @@ async function cardNames(page: Page): Promise<string[]> {
   const deck = page.locator(".lm-today-deck");
   const hero = await deck.locator("article h2").innerText();
   const alts = await deck
-    .locator("#today-alt + ul li button span.type-label")
+    .locator('[aria-labelledby="today-alt"] ul li button span.type-label')
     .allInnerTexts();
   return [hero.trim(), ...alts.map((s) => s.trim())];
 }
@@ -64,7 +64,9 @@ async function cardNames(page: Page): Promise<string[]> {
 async function expectThreeCards(page: Page) {
   const deck = page.locator(".lm-today-deck");
   await expect(deck.locator("article h2")).toBeVisible({ timeout: 20_000 });
-  await expect(deck.locator("#today-alt + ul li")).toHaveCount(2);
+  await expect(deck.locator('[aria-labelledby="today-alt"] ul li')).toHaveCount(
+    2,
+  );
   await expect(page.locator('[data-slot="loading-region"]')).toHaveCount(0);
   const names = await cardNames(page);
   expect(names).toHaveLength(3);

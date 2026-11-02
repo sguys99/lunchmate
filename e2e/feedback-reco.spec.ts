@@ -126,11 +126,13 @@ async function setup(
 async function deckNames(page: Page): Promise<string[]> {
   const deck = page.locator(".lm-today-deck");
   await expect(deck.locator("article h2")).toBeVisible({ timeout: 20_000 });
-  await expect(deck.locator("#today-alt + ul li")).toHaveCount(2);
+  await expect(deck.locator('[aria-labelledby="today-alt"] ul li')).toHaveCount(
+    2,
+  );
   await expect(page.locator('[data-slot="loading-region"]')).toHaveCount(0);
   const hero = (await deck.locator("article h2").innerText()).trim();
   const alts = await deck
-    .locator("#today-alt + ul li button span.type-label")
+    .locator('[aria-labelledby="today-alt"] ul li button span.type-label')
     .allInnerTexts();
   const names = [hero, ...alts.map((s) => s.trim())];
   expect(names).toHaveLength(3);

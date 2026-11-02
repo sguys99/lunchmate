@@ -7,8 +7,8 @@ import { ActionBarSkeleton, TodayPicksSkeleton } from "./today-cards";
 
 export function TodaySkeleton() {
   return (
-    <div className="mx-auto flex w-full max-w-(--lm-layout-max-width) flex-1 flex-col px-(--lm-layout-gutter) pt-5 desktop:max-w-(--lm-layout-desktop-list-max-width) desktop:px-10 desktop:pt-8">
-      <div aria-hidden className="flex flex-col gap-6 desktop:gap-4">
+    <div className="mx-auto flex w-full max-w-(--lm-layout-max-width) flex-1 flex-col px-(--lm-layout-gutter) pt-3 desktop:max-w-(--lm-layout-desktop-list-max-width) desktop:px-10 desktop:pt-8">
+      <div aria-hidden className="flex flex-col gap-3">
         <div className="flex h-11 items-center justify-between gap-3">
           <Skeleton className="h-10 w-28 rounded-chip" />
           <div className="flex gap-3 pr-2">
@@ -16,14 +16,14 @@ export function TodaySkeleton() {
             <SkeletonLine type="label" className="w-7" />
           </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <SkeletonLine type="caption" className="w-36" />
-          <SkeletonLine type="title" className="w-36" />
+        <div className="flex items-baseline justify-between gap-3">
+          <SkeletonLine type="heading" className="w-28" />
+          <SkeletonLine type="caption" className="w-32" />
         </div>
       </div>
       <TodayPicksSkeleton
         label={homeCopy.states.loading.label}
-        className="mt-5 desktop:mt-4"
+        className="mt-3"
       />
       <ActionBarSkeleton />
     </div>

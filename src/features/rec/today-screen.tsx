@@ -69,7 +69,8 @@ import { deckKey, JustPickLayer, useJustPick } from "./just-pick";
 import type { TodayData } from "./load-today";
 import {
   ActionBarSkeleton,
-  AltTile,
+  ALT_LIST,
+  AltRow,
   spotOf,
   TodayActionBar,
   TodayHero,
@@ -705,6 +706,24 @@ export function TodayScreen({
       ? base.state.status
       : null;
 
+  /** 친구랑 정하기, 회식 모드(지연 로딩). inline: 대안 제목 줄 오른쪽 작은 글자(D-25), 아니면 따로 한 줄 */
+  const pollEntries = (inline: boolean) =>
+    showEntries ? (
+      <Suspense
+        fallback={
+          <span aria-hidden className={inline ? "h-6" : "mt-4 min-h-11"} />
+        }
+      >
+        <HomePollEntries
+          homePoll={homePoll}
+          signedIn={data.signedIn}
+          disabled={!online || cards.length < 2}
+          onNeedLogin={needLogin}
+          inline={inline}
+        />
+      </Suspense>
+    ) : null;
+
   let body: ReactNode;
   /** 카드나 스켈레톤이 하단 행동 줄을 쓰는가(아래 여백을 줄이 맡는다) */
   let docked = false;
@@ -745,7 +764,7 @@ export function TodayScreen({
           label={
             locating ? copy.location.locating : homeCopy.states.loading.label
           }
-          className="mt-5 desktop:mt-4"
+          className="mt-3"
         />
         <ActionBarSkeleton />
       </>
@@ -779,7 +798,7 @@ export function TodayScreen({
           key={`${session.draw.round}:${key}`}
           data-phase={phase}
           onAnimationEnd={onDeckAnimationEnd}
-          className="lm-today-deck mt-5 flex flex-col pb-6 desktop:mt-4"
+          className="lm-today-deck mt-3 flex flex-col pb-2"
         >
           <div
             data-swap={swap?.phase}
@@ -810,13 +829,20 @@ export function TodayScreen({
           </div>
 
           {alts.length > 0 ? (
-            <section aria-labelledby="today-alt" className="mt-5 desktop:mt-4">
-              <h2 id="today-alt" className="type-caption text-muted-foreground">
-                {alts.length > 1
-                  ? copy.single.alternatives
-                  : copy.single.alternativesOne}
-              </h2>
-              <ul className="mt-2 grid grid-cols-2 gap-2">
+            <section aria-labelledby="today-alt" className="mt-3">
+              {/* 제목 줄 오른쪽에 같이 정하기 두 진입점(D-25) */}
+              <div className="flex min-h-6 items-center justify-between gap-3">
+                <h2
+                  id="today-alt"
+                  className="type-caption text-muted-foreground"
+                >
+                  {alts.length > 1
+                    ? copy.single.alternatives
+                    : copy.single.alternativesOne}
+                </h2>
+                {pollEntries(true)}
+              </div>
+              <ul className={cn("mt-2", ALT_LIST)}>
                 {alts.map((idx, i) => {
                   const card = cards[idx];
                   if (!card) return null;
@@ -825,9 +851,8 @@ export function TodayScreen({
                       key={card.id}
                       data-reveal
                       style={{ "--reveal": 3 + i } as CSSProperties}
-                      className="flex min-w-0"
                     >
-                      <AltTile
+                      <AltRow
                         card={card}
                         spot={spotOf(pick, idx)}
                         order={copy.single.order(i + 2, cards.length)}
@@ -845,20 +870,11 @@ export function TodayScreen({
               shortage={shortage}
               onWiden={widen}
               onRelaxBudget={relaxBudget}
-              className="mt-5"
+              className="mt-4"
             />
           ) : null}
 
-          {showEntries ? (
-            <Suspense fallback={<div aria-hidden className="mt-4 min-h-11" />}>
-              <HomePollEntries
-                homePoll={homePoll}
-                signedIn={data.signedIn}
-                disabled={!online || cards.length < 2}
-                onNeedLogin={needLogin}
-              />
-            </Suspense>
-          ) : null}
+          {alts.length > 0 ? null : pollEntries(false)}
         </div>
 
         <TodayActionBar
@@ -886,7 +902,7 @@ export function TodayScreen({
   return (
     <div
       className={cn(
-        "mx-auto flex w-full max-w-(--lm-layout-max-width) flex-1 flex-col px-(--lm-layout-gutter) pt-5 desktop:max-w-(--lm-layout-desktop-list-max-width) desktop:px-10 desktop:pt-8",
+        "mx-auto flex w-full max-w-(--lm-layout-max-width) flex-1 flex-col px-(--lm-layout-gutter) pt-3 desktop:max-w-(--lm-layout-desktop-list-max-width) desktop:px-10 desktop:pt-8",
         docked ? "pb-0" : "pb-8 desktop:pb-12",
       )}
     >
@@ -899,12 +915,12 @@ export function TodayScreen({
         anchor={center}
         anchorPending={locating}
         directedToday={session.directedOn === kstDateKey(now)}
-        className="mt-5 desktop:mt-4"
+        className="mt-3"
       />
       {/* 탭이 열린 채 끊김: 세션 메모리의 결과를 "연결 전 결과"로 표시(T8.3, APP-02). 기기에는 저장하지 않는다 */}
       {showStale ? (
         <Suspense fallback={null}>
-          <StaleNote className="mt-5 desktop:mt-4" />
+          <StaleNote className="mt-3" />
         </Suspense>
       ) : null}
       <p aria-live="polite" className="sr-only">

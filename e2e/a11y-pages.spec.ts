@@ -121,6 +121,7 @@ test.describe("실제 화면: 둘러보기 추천과 지도", () => {
     // 대안 카드 이름은 "도보 N 분"으로 읽힌다(숫자만 읽히면 무슨 분인지 모른다)
     const alts = page
       .getByRole("region", { name: "또는 이 두 곳" })
+      .getByRole("list")
       .getByRole("button");
     await expect(alts).toHaveCount(2);
     await expect(alts.first()).toHaveAccessibleName(/도보 \d+ 분/);
