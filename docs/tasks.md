@@ -660,8 +660,8 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [x] T10.5 (11/02 완료, `docs/launch-ops.md` 2장: 관리자 지정/해제 SQL, 하루 5분 루틴, 신고 사유별 판단, 정지 단계 기본안(없음, 7일, 30일, 해제 때까지), 이의 제기 3영업일, 처리 기록과 월간 요약 SQL) 관리자 계정과 신고 처리 절차 문서
 - [x] T10.6 (11/02 완료, `docs/launch-ops.md` 3장: 팀은 이미 Pro(9/26부터), 30일 8.72달러로 월 크레딧 안. D-28: Pro 유지, 예산 30달러 + 자동 멈춤 유지(콘솔은 사용자), Supabase Pro 전환 조건 기록) Vercel 플랜 검토 (수익화 전 Pro 전환 조건 기록)
 - [ ] T10.7 Supabase 운영 프로젝트 분리 여부 결정과 마이그레이션 적용
-- [ ] T10.8 (11/02 진행: `docs/design/g10-qa.md`, 자동 검사 전부와 E2E 3종(온보딩 4, 추천 10, 투표 24) 통과, RLS 174, a11y 496, visual 28, P0 AC 20개 중 통과 17. 남은 것: AC-REC-4 Regular 3G 카드 mobile 5.01초(기준 5초), AC-AUTH-3 실제 소셜 계정 탈퇴 뒤 재가입 실기기, Android 인앱 3건) 모든 P0 AC와 E2E 3종 통과
-- [ ] T10.9 Lighthouse 재측정
+- [ ] T10.8 (11/02 진행: `docs/design/g10-qa.md`, 자동 검사 전부와 E2E 3종(온보딩 4, 추천 10, 투표 24) 통과, RLS 174, a11y 496, visual 28, P0 AC 20개 중 통과 17. AC-REC-4는 T10.9에서 4.50초로 해소. 남은 것: AC-AUTH-3 실제 소셜 계정 탈퇴 뒤 재가입 실기기, Android 인앱 3건) 모든 P0 AC와 E2E 3종 통과
+- [x] T10.9 (11/02 완료, `docs/design/g10-lighthouse.md` 모바일 3회 중앙값: 프로덕션 / 99, /today 88, /login 99, /terms 100, /offline 100, /map 89, 접근성 모두 96 이상. D-21의 /map 배포 후 재검토는 프로덕션 89로 충족. AC-REC-4 원인 9ac5118(집계 대기) 이분 측정, 카카오 SDK preload와 집계 청크 미리 받기로 Regular 3G 카드 4.99에서 4.50초, Fast 4G LCP 2.96에서 2.39초, 번들 변화 0. [실기기] 3G 체감) Lighthouse 재측정
 - [ ] T10.10 (11/02 진행: 프로덕션에서 Sentry, PostHog 수집, release와 environment, 좌표 스크러버, IP와 GeoIP 차단 확인, 테스트 이벤트 1건(environment t10_10_test). 찾은 문제 수정: Sentry SDK 11 `dataCollection`(infer_ip never), PostHog URL 속성의 초대 코드 가림. 남은 것: 사용자 대시보드 확인(monitoring.md 9.2, 이슈 생성과 알림 메일), SENTRY_AUTH_TOKEN 소스맵) 오류 모니터링과 알림 동작 확인
 - [x] T10.11 (11/02 완료, 랜딩 OG 시안 4안 ⛔ 선택 D-29: **B 큰 그릇**(`g10-comparison-og-landing.md`), og:title과 twitter title "런치메이트", 랜딩 JSON-LD WebApplication(가격, 평점 없음), 약관 3종 canonical과 OG 메타, 구글과 네이버 소유 확인 메타(서버 환경변수, 비면 생략), robots와 sitemap 프로덕션 응답 확인, launch-ops 4장 검색 등록 단계. / 178.8 KB, /today 199.7 KB. [실기기] 카카오톡 말풍선과 캐시 갱신) 랜딩 SEO, OG, 사이트맵, robots
 - [ ] T10.12 PRD 14.2절 출시 체크리스트 전체 체크
