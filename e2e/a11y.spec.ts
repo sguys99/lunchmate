@@ -113,7 +113,7 @@ for (const theme of ["light", "dark"] as GalleryTheme[]) {
       await expectNoA11yViolations(page);
     });
     // 실제 랜딩 / (T4.28). 디자인 랩 없이도 돈다. 개발 환경은 appShell, auth 플래그가 켜져 체험과 로그인이 보인다(프로덕션은 appShell만 켜져 체험만).
-    // 네이버 로그인 버튼은 네이버 가이드 색(초록 면 + 흰 글자, 대비 약 2.3:1)을 그대로 쓴다.
+    // 네이버 로그인 버튼은 네이버 가이드 색(녹색 #03A94D 면 + 흰 글자, 대비 3.09:1, T10.4a 2026-11-02 재확인)을 그대로 쓴다.
     // 브랜드 예외로 기록(G3 안건 7, DESIGN.md 5장 소셜 로그인 버튼)하고 대비 검사에서만 뺀다.
     test("랜딩 /", async ({ page }) => {
       await openLabRoute(page, "/");

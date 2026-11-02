@@ -74,8 +74,9 @@ export const APP_COLOR_KEYS = [
 /**
  * 소셜 로그인 브랜드 색 (T3.4). 각 사 버튼 가이드가 정한 값을 그대로 옮긴다(앱 톤에 맞춰 바꾸지 않는다).
  * - 카카오: 컨테이너 #FEE500, 심볼 #000000, 레이블 #000000 85% (developers.kakao.com 카카오 로그인 디자인 가이드)
- * - 네이버: 네이버 그린 #03C75A, 흰 N과 흰 글자 (네이버 로그인 BI 가이드)
- * - 구글: Light #FFFFFF / #747775 테두리 / #1F1F1F 글자, Dark #131314 / #8E918F / #E3E3E3, 표준 G 로고 4색
+ * - 네이버: 라이트 #03A94D(가이드 지정 녹색), 다크 #05AC4F(공식 Dark 에셋), 흰 N과 흰 글자 (네이버 로그인 버튼 사용 가이드, T10.4a 2026-11-02)
+ * - 구글: Light #FFFFFF / #747775 테두리 / #1F1F1F 글자, Dark #131314 / #8E918F / #E3E3E3. G 로고는 공식 그라데이션 에셋 이미지(public/brand/google-g.png)라 색 토큰이 없다.
+ *   logo-surface는 버튼 밖 작은 표시(ProviderMark)에서 G를 흰 면 위에 두는 데만 쓴다
  *   (developers.google.com/identity/branding-guidelines)
  * 선택 항목이다. 시안 파일(docs/design/candidates)은 없어도 된다.
  */
@@ -88,10 +89,6 @@ export const BRAND_COLOR_KEYS = [
   "brand-google",
   "brand-google-foreground",
   "brand-google-border",
-  "brand-google-blue",
-  "brand-google-red",
-  "brand-google-yellow",
-  "brand-google-green",
   "brand-google-logo-surface",
 ] as const;
 

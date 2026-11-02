@@ -13,7 +13,7 @@ import type { ReactNode } from "react";
 import { authCopy } from "@/copy/auth";
 import type { InAppGuide } from "@/lib/inapp";
 import { cn } from "@/lib/utils";
-import { GoogleSymbol, KakaoSymbol, NaverSymbol } from "./brand-symbols";
+import { GoogleMark, KakaoSymbol, NaverSymbol } from "./brand-symbols";
 import type { LoginProvider } from "./providers";
 
 const copy = authCopy;
@@ -162,7 +162,7 @@ export function ProviderMark({
 }) {
   if (provider === "google") {
     return (
-      <GoogleSymbol className={cn("size-5 [&_svg]:size-3.5", className)} />
+      <GoogleMark className={className} />
     );
   }
   return (

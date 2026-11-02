@@ -24,7 +24,7 @@ import {
 } from "@/copy/design-lab-auth";
 import { MOCK_HOME_TODAY } from "@/features/design-lab/mock";
 import {
-  GoogleSymbol,
+  GoogleMark,
   KakaoSymbol,
   NaverSymbol,
 } from "@/features/auth/brand-symbols";
@@ -275,7 +275,7 @@ export function ProviderMark({
 }) {
   if (provider === "google") {
     return (
-      <GoogleSymbol className={cn("size-5 [&_svg]:size-3.5", className)} />
+      <GoogleMark className={className} />
     );
   }
   return (

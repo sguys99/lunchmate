@@ -63,20 +63,16 @@ color:
       skeleton: "oklch(0.925 0.012 78)"
       skeleton-highlight: "oklch(0.948 0.01 80)"
       overlay: "oklch(0.24 0.01 70 / 32%)"
-    # 소셜 로그인 버튼 브랜드 색 (T3.4). 각 사 가이드 값 그대로, 로그인 버튼에만 쓴다. DESIGN.md 5장 "소셜 로그인 버튼"
+    # 소셜 로그인 버튼 브랜드 색 (T3.4, T10.4a 공식 가이드 재확인 2026-11-02). 각 사 가이드 값 그대로, 로그인 버튼에만 쓴다. DESIGN.md 5장 "소셜 로그인 버튼"
     brand:
       brand-kakao: "oklch(0.9139 0.1909 101.37)"
       brand-kakao-foreground: "oklch(0 0 0 / 85%)"
       brand-kakao-symbol: "oklch(0 0 0)"
-      brand-naver: "oklch(0.725 0.2014 149.53)"
+      brand-naver: "oklch(0.6424 0.1769 149.85)"
       brand-naver-foreground: "oklch(1 0 0)"
       brand-google: "oklch(1 0 0)"
       brand-google-foreground: "oklch(0.2393 0 0)"
       brand-google-border: "oklch(0.566 0.0047 157.09)"
-      brand-google-blue: "oklch(0.6304 0.18 259.96)"
-      brand-google-red: "oklch(0.6257 0.2058 29.08)"
-      brand-google-yellow: "oklch(0.8304 0.1698 83.99)"
-      brand-google-green: "oklch(0.6475 0.1603 148.5)"
       brand-google-logo-surface: "oklch(1 0 0)"
     category:
       hansik: { surface: "oklch(0.93 0.021 50)", ink: "oklch(0.43 0.068 50)" }
@@ -140,20 +136,16 @@ color:
       skeleton: "oklch(0.265 0.008 70)"
       skeleton-highlight: "oklch(0.3 0.009 70)"
       overlay: "oklch(0.1 0.005 70 / 60%)"
-    # 소셜 로그인 버튼 브랜드 색 (T3.4). 각 사 가이드 값 그대로, 로그인 버튼에만 쓴다. DESIGN.md 5장 "소셜 로그인 버튼"
+    # 소셜 로그인 버튼 브랜드 색 (T3.4, T10.4a 공식 가이드 재확인 2026-11-02). 각 사 가이드 값 그대로, 로그인 버튼에만 쓴다. DESIGN.md 5장 "소셜 로그인 버튼"
     brand:
       brand-kakao: "oklch(0.9139 0.1909 101.37)"
       brand-kakao-foreground: "oklch(0 0 0 / 85%)"
       brand-kakao-symbol: "oklch(0 0 0)"
-      brand-naver: "oklch(0.725 0.2014 149.53)"
+      brand-naver: "oklch(0.651 0.1786 149.91)"
       brand-naver-foreground: "oklch(1 0 0)"
       brand-google: "oklch(0.1872 0.002 286.2)"
       brand-google-foreground: "oklch(0.9158 0 0)"
       brand-google-border: "oklch(0.6535 0.0046 157.12)"
-      brand-google-blue: "oklch(0.6304 0.18 259.96)"
-      brand-google-red: "oklch(0.6257 0.2058 29.08)"
-      brand-google-yellow: "oklch(0.8304 0.1698 83.99)"
-      brand-google-green: "oklch(0.6475 0.1603 148.5)"
       brand-google-logo-surface: "oklch(1 0 0)"
     category:
       hansik: { surface: "oklch(0.285 0.026 50)", ink: "oklch(0.85 0.055 50)" }
@@ -458,11 +450,14 @@ layout:
 ### 득표 바
 - 트랙 `vote-bar-track` 높이 8px 알약, 채움 1위만 `vote-bar`(올리브), 나머지 후보는 `muted-foreground` 30% 대신 `chart-3`을 씁니다. 득표 수는 바 밖 오른쪽에 numeric-md, 1위는 `foreground`, 나머지는 `muted-foreground`. 길이 변화는 `bar` 스프링(감쇠비 1.1).
 
-### 소셜 로그인 버튼 (T3.4)
+### 소셜 로그인 버튼 (T3.4, T10.4a 공식 에셋 2026-11-02)
 - 카카오, 네이버, 구글 버튼은 각 사 가이드의 색과 심볼을 그대로 씁니다(프런트매터 `color.*.brand`, Tailwind `bg-brand-kakao` 등). 앱 포인트 컬러 규칙(한 화면 primary 1개)과 별개로 세지 않습니다.
-- 모양: 높이 48, 라운드 12px(카카오 가이드 값, `rounded-md`), 심볼 왼쪽, 레이블 가운데. 레이블은 각 사 가이드 문구 "카카오 로그인", "네이버 로그인", "Google 계정으로 로그인"을 씁니다(근거와 출처는 `docs/copy-guide.md` 4.6). 심볼 SVG는 시안에서 가이드 형태를 따라 다시 그린 것이라 출시 전 각 사 공식 에셋으로 바꿉니다.
-- 구글은 라이트에서 Light 테마(흰 면, 회색 테두리), 다크에서 Dark 테마(#131314 면)를 따르고 G 로고 4색은 바꾸지 않습니다.
-- 접근성 위험: 네이버 그린 위 흰 글자는 대비 약 2.3:1로 4.5:1에 못 미칩니다. 브랜드 가이드 값이라 대비 쌍 검사에서 뺐고, 버튼에 `aria-label`로 이름을 주며 레이블 크기를 15px 500으로 둡니다. 브랜드 예외로 기록합니다(G3 안건 7, 2026-10-30). **4단계 로그인 구현 전 네이버 로그인 BI 원문(https://developers.naver.com/docs/login/bi/bi.md)을 확인하고, 대비가 더 높은 공식 유형(예: 흰 면 또는 어두운 면 버튼)이 있으면 그 유형으로 교체합니다**([확인 필요]).
+- 모양: 높이 48, 라운드 12px(카카오 가이드 값, `rounded-md`), 심볼 왼쪽, 레이블 버튼 가운데. 심볼 칸은 왼쪽 17px의 24px 칸(가운데 x=29)으로 세 버튼이 같은 세로줄에 놓입니다. 레이블은 각 사 가이드 문구 "카카오 로그인", "네이버 로그인", "Google 계정으로 로그인"(근거와 출처는 `docs/copy-guide.md` 4.6), 서체는 system-ui 15px 500.
+- **심볼은 각 사 공식 에셋입니다(T10.4a)**. 코드 `src/features/auth/brand-symbols.tsx`, 출처와 날짜는 `docs/research-notes.md` "T10.4a 로그인 버튼 공식 에셋".
+  - 카카오: 리소스 다운로드 완성형 SVG의 말풍선 path 그대로, #000000, 13.5px(완성형 에셋의 컨테이너 대 심볼 비율). 컨테이너 #FEE500, 레이블 #000000 85%.
+  - 네이버: 공식 Illustrator 애셋(NAVER_login_KR.ai)의 N 로고 벡터, 흰색 18px, 로고 왼쪽 여백 20px(가이드 왼쪽 정렬 규칙). 면은 가이드 지정 녹색 라이트 #03A94D, 다크는 공식 Dark 에셋의 #05AC4F.
+  - 구글: 공식 그라데이션 "G"(signin-assets.zip) 이미지 `public/brand/google-g.png`, 24px(버튼 40 기준 G 20을 48에 맞춘 1.2배). 라이트는 Light 테마(흰 면, #747775 테두리, #1F1F1F 글자), 다크는 Dark 테마(#131314 면, #8E918F 테두리, #E3E3E3 글자)이며 공식 Dark 에셋처럼 G를 면 위에 바로 둡니다. 버튼 밖 작은 표시(`ProviderMark`)에서만 G를 흰 원 위에 둡니다.
+- 접근성 위험(브랜드 예외, G3 안건 7 → T10.4a 재검토): 네이버 녹색 위 흰 글자 대비는 라이트 3.09:1, 다크 2.99:1로 4.5:1에 못 미칩니다(예전 #03C75A는 2.25:1). 네이버 가이드(2026-11-02 확인)는 녹색 면 + 흰 로고, 흰 레이블을 권장하고 "타사 로그인 버튼이 컬러일 경우 흰색 배경 버튼 사용을 지양"한다고 적어 두어, 카카오 노란 버튼과 함께 쓰는 이 화면에서는 흰 면 유형으로 바꾸지 않습니다. 대비 쌍 검사와 axe에서 `[data-provider="naver"]`만 빼고, 버튼 이름은 보이는 레이블 그대로 둡니다.
 
 ### 배지 (G3 calm 확정, D-05 안건 1)
 - 모양: 라운드 8px(`badge: sm`), 높이 24, 좌우 8px, 아이콘 14px(선 1.75), 1px 테두리 + caption 글자, 면 없음. 배지 사이 8px.

@@ -687,3 +687,28 @@ const loadMax = () => import("./features-max").then((r) => r.default)
 - 세 겹 판정(`scripts/test-cleanup/policy.mjs`, 테스트 있음): 닉네임 test_(프로필, 없으면 가입 메타데이터) + 이메일 test_rls_@RLS_TEST_EMAIL_DOMAIN(기본 example.com, 하네스와 E2E 헬퍼만 만드는 모양) + email provider만. 셋 다 맞으면 삭제, 일부만 맞으면 "확인 필요"로 보이기만 한다. 실제 사용자는 소셜 로그인이고 이메일을 받지 않으므로 닉네임을 test_로 지어도 지워지지 않는다.
 - 사용자 삭제는 Auth Admin API, 딸린 데이터는 on delete cascade(T6.27). 방장 없는 test_ 제목 투표방을 이어서 지운다. 출력에는 id 앞 8자와 닉네임만, 이메일과 키는 찍지 않는다.
 - 2026-11-01 드라이런: Auth 사용자 3명 가운데 삭제 대상 0명, 확인 필요 0명, 방장 없는 테스트 투표방 38개(E2E 잔여). 삭제는 실행하지 않았다.
+
+## 10단계 출시 준비
+
+### T10.4a 로그인 버튼 공식 에셋
+
+2026-11-02 확인. 규칙은 DESIGN.md 5장 "소셜 로그인 버튼", 코드는 `src/features/auth/brand-symbols.tsx`, `brand-button.tsx`.
+
+- **네이버** (네이버 로그인 버튼 사용 가이드 https://developers.naver.com/docs/login/bi/bi.md, 에셋 https://developers.naver.com/inc/devcenter/downloads/bi/NAVER_login_KR.zip, zip 안 파일 날짜 2025-12-04)
+  - 지정 컬러 변경 불가. 권장: 배경 #03A94D(RGB 3/169/77), 로고와 레이블 #FFFFFF. 흰 배경 유형은 로고 #03A94D. "타사 로그인 버튼이 컬러일 경우 흰색 배경 버튼 사용 지양", "타사 버튼과 함께 쓸 때 크기 줄이기 지양".
+  - 형태: 아이콘형과 완성형, 완성형 권장. N 로고는 형태 변경, 다른 형태와 조합 금지, 아이콘형 18px, 완성형 16px 이상. 텍스트는 로고 높이보다 작게.
+  - 가로 폭 조정: 로고와 레이블 가운데 정렬(간격 8px) 또는 로고만 왼쪽 정렬(왼쪽 여백 20px, 레이블은 나머지 영역 가운데).
+  - 문구: 네이버 로그인 목적에 맞으면 변경 가능(예: "네이버로 3초만에 시작하기", "네이버로 간편가입"). 공식 에셋 문구는 "네이버 로그인".
+  - 에셋은 Figma, AI, PNG(H48, H56 x Light/Dark x green/white x wide/center/narrow/icon)뿐이고 SVG가 없다. PNG(4배) 실측: Light green 배경 #03A94D, Dark green 배경 #05AC4F, Dark white 배경 #1F1F1F, 모서리 약 8px, H48 wide의 N 로고 18x18 왼쪽 20px, 레이블은 버튼 가운데. N 벡터는 가이드의 Illustrator 애셋(NAVER_login_KR.ai)에서 꺼낸 path(20 단위 상자 `M0 0H6.146L13.561 10.706V0H20V20H13.855L6.44 9.298V20H0Z`)를 그대로 쓰고, PNG 픽셀 실측(72 격자 22.27, 48.87, 38.45)과 0.2 단위 안에서 맞는지 대조했다.
+  - 대비: 흰 글자 대 #03A94D 3.09:1, 대 #05AC4F 2.99:1(예전 #03C75A 2.25:1). 브랜드 예외 유지(design-decisions D-05 안건 7 재검토).
+- **카카오** (카카오 로그인 디자인 가이드 https://developers.kakao.com/docs/latest/ko/kakaologin/design-guide, 리소스 https://developers.kakao.com/tool/resource/login)
+  - 컨테이너 #FEE500, 심볼 #000000, 레이블 #000000 85%. 규정 밖 색 금지. 레이블 완성형 "카카오 로그인", 축약형 "로그인". OS 기본 시스템 서체.
+  - 심볼(말풍선) 형태, 비율, 색 변경 금지, 심볼 없이 구성 금지. 컨테이너 radius 12px. 가로 확장 시 심볼과 레이블 영역 유지, 심볼은 왼쪽 정렬 또는 레이블과 가운데 정렬. 레이블 세로 길이는 컨테이너 1/3 이하.
+  - 리소스 페이지의 완성형 미리보기 SVG(login-complete-ko.svg, 224x46)에서 심볼 path를 그대로 가져왔다(그 파일의 심볼 색은 #191919, 모서리 rx 8이지만 문서 규정인 #000000, 12px를 따른다). 심볼 크기는 이 에셋 비율(46 대 12.96)로 48 버튼에서 13.5px.
+- **구글** (Sign in with Google Branding Guidelines https://developers.google.com/identity/branding-guidelines, 에셋 https://developers.google.com/static/identity/images/signin-assets.zip, zip 안 파일 날짜 2026-04-15)
+  - 문구 권장 "Sign in with Google", "Sign up with Google", "Continue with Google", 현지화 권장 → "Google 계정으로 로그인"(GIS 버튼 한국어 문구). "Google" 한 단어만 쓰기 금지.
+  - Light: 면 #FFFFFF, 테두리 #747775 1px, 글자 #1F1F1F. Dark: #131314, #8E918F, #E3E3E3. Neutral: #F2F2F2, 테두리 없음. 글꼴 Google Sans Medium 14/20(우리는 세 버튼 공통 system-ui, 글꼴 파일 추가 없이).
+  - G 로고는 표준 색(그라데이션 "super G") 그대로, 크기와 색 변경 금지, 단색 G와 옛 G 금지, 라이트, 다크, 뉴트럴 면 위에만. 버튼 크기는 비율 유지하며 조정 가능. 여백(Android, Web) G 왼쪽 12px, G 오른쪽 10px.
+  - 2026 에셋의 G는 4색 단색 조각이 아니라 원뿔 그라데이션과 흐림 필터라 토큰 색으로 옮길 수 없다. Light와 Dark SVG의 G 부분은 같고, Dark 에셋은 G를 #131314 위에 바로 둔다(흰 원 없음). 배경과 테두리 path만 뺀 SVG를 Chromium으로 96px 투명 PNG로 래스터화해 `public/brand/google-g.png`(약 8KB)에 두었다(공식 @4x PNG와 평균 차이 1.3/255). 쓰지 않게 된 `brand-google-blue/red/yellow/green` 토큰은 지웠다.
+- 다운로드는 스크래치 폴더에서 이미지와 SVG만 꺼내 썼고 저장소에는 결과물(경로 데이터와 PNG 1개)만 넣었다.
+- 네이버 사전 검수(https://developers.naver.com/docs/login/verify/verify.md): 개발자센터 > Application > 내 애플리케이션 > "네이버 로그인 검수 상태" 탭에서 자료 첨부 후 검수 요청, 결과는 2~3 영업일 안에 메일. 확인 항목은 서비스 콘텐츠, 로그인 적용 형태(버튼이 보이는 화면부터 가입 완료까지 단계별 캡처를 하나로 묶어 첨부, 별도 비밀번호 요구 시 반려), 이용자 식별자 외 제공 정보 활용처(선택한 항목이 보이는 화면 캡처, 쓰지 않으면 권한 회수), 업종별 추가 서류(해당 없으면 "없음"), 애플리케이션 이름과 로고(네이버 연상 금지).
