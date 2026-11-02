@@ -10,7 +10,7 @@
 //
 // 결정성
 // - 묶음은 drawDeck(입력, seed)이고 seed는 today-store randomSeed() = floor(Math.random() × 2^31)이다.
-//   첫 스크립트로 Math.random을 상수로 바꿔 seed를 고정한다(앱 코드에 테스트 훅을 두지 않는다).
+//   첫 스크립트로 randomSeed의 floor(난수 × 2^31) 결과만 바꿔 seed를 고정한다(앱 코드에 테스트 훅을 두지 않는다, dev와 next start 모두).
 //   같은 후보, 같은 설정, 같은 기록이면 새로 고쳐도 같은 묶음이다(기준 묶음을 두 번 읽어 먼저 확인한다).
 // - 아래 seed는 가짜 45곳 + 기본 설정(점심 1만, 저녁 2만, 도보 10분)에서 엔진(src/features/rec/deck.ts)을 직접 돌려 골랐다.
 //   하루 중 어느 시각이든, 점심과 저녁 모두 같은 결과임을 확인했다(감쇠가 시각에 따라 조금 달라도 순위가 바뀌지 않는 폭).
@@ -44,19 +44,26 @@ function kstDate(days: number): string {
 }
 
 /**
- * seed가 정확히 나오도록 randomSeed()가 부를 때만 Math.random을 상수로(randomSeed = floor(r × 2^31)).
- * 다른 호출(서버 액션, SDK 내부 id 등)은 원래 난수를 쓴다. 모든 호출을 상수로 두면 답 버튼 저장이 멈춘다.
- * dev 서버(E2E 대상)는 함수 이름을 지우지 않아 호출 스택에 randomSeed가 남는다.
+ * randomSeed()(today-store.ts) = Math.floor(Math.random() × 2^31)의 결과만 seed로 바꾼다.
+ * Math.random은 그대로 난수를 내고(모든 호출을 상수로 두면 답 버튼 저장이 멈춘다), 방금 나온 난수 × 2^31을
+ * Math.floor가 받을 때만 seed를 돌려준다. 2^31 곱은 정확해서 같은 값이면 바로 그 호출이다.
+ * 함수 이름(호출 스택)으로 고르지 않는다. 프로덕션 빌드는 randomSeed를 인라인하고 이름을 지워
+ * 스택 검사로는 seed가 고정되지 않았다(next start에서 기준 묶음이 새로 고칠 때마다 달라짐, T9.10).
  */
 async function fixSeed(page: Page, seed: number) {
-  await page.addInitScript(
-    (r) => {
-      const real = Math.random.bind(Math);
-      Math.random = () =>
-        (new Error().stack ?? "").includes("randomSeed") ? r : real();
-    },
-    (seed + 0.5) / 2 ** 31,
-  );
+  await page.addInitScript((s) => {
+    const realRandom = Math.random.bind(Math);
+    const realFloor = Math.floor.bind(Math);
+    let last = Number.NaN;
+    Math.random = () => (last = realRandom());
+    Math.floor = (x: number) => {
+      if (x === last * 2 ** 31) {
+        last = Number.NaN;
+        return s;
+      }
+      return realFloor(x);
+    };
+  }, seed);
 }
 
 async function setup(
