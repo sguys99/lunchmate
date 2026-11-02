@@ -5,7 +5,7 @@
 // - 쿠키가 있으면 createServerClient 직후 getClaims()로 토큰을 검증하고(필요하면 갱신), setAll이 마지막으로 만든 응답을
 //   그대로 돌려준다. 다른 응답(리다이렉트)을 돌려줄 때는 쿠키와 캐시 헤더를 옮겨 싣는다(안 하면 다음 요청에서 로그아웃).
 // - 약관 동의 확인(T4.11): 로그인 사용자가 앱 경로(isTermsGatedPath)에 오면 동의 확인 쿠키(lm_terms = 사용자 id)를 본다.
-//   없으면 profiles.terms_agreed_at을 한 번 읽어, 동의했으면 쿠키를 적고 통과, 아니면 /welcome/terms?next=<지금 경로>.
+//   없으면 profiles.terms_agreed_at, birth_confirmed_at을 한 번 읽어, 둘 다 있으면(hasCompletedConsent) 쿠키를 적고 통과, 아니면 /welcome/terms?next=<지금 경로>.
 //   비로그인 요청은 위에서 이미 끝나므로 DB를 부르지 않고, 로그인 사용자도 세션마다 처음 한 번만 부른다.
 //   읽기에 실패하면 통과시킨다(가용성 우선, 약관 화면과 쓰기 기능이 다시 확인).
 // - flags.auth가 꺼진 환경에서는 아무것도 하지 않는다. 그때 오늘과 지도는 둘러보기, 투표와 나는 "곧 열립니다" 안내다(app/(app)/coming-soon.tsx).
@@ -23,9 +23,11 @@ import {
   type ProxyDecision,
 } from "@/features/auth/routes";
 import {
+  hasCompletedConsent,
   TERMS_COOKIE,
   termsCookieMatches,
   termsCookieOptions,
+  type ConsentRow,
 } from "@/features/auth/terms-cookie";
 import { isEnabled } from "@/lib/flags";
 import { clientEnv } from "@/lib/env/client";
@@ -108,17 +110,17 @@ export async function proxy(request: NextRequest) {
   ) {
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("terms_agreed_at")
+      .select("terms_agreed_at, birth_confirmed_at")
       .eq("user_id", sub)
-      .maybeSingle<{ terms_agreed_at: string | null }>();
-    if (!error && profile && !profile.terms_agreed_at) {
+      .maybeSingle<ConsentRow>();
+    if (!error && profile && !hasCompletedConsent(profile)) {
       return redirectTo(
         request,
         { type: "redirect", location: termsUrl(`${pathname}${search}`) },
         response,
       );
     }
-    if (!error && profile?.terms_agreed_at) {
+    if (!error && hasCompletedConsent(profile)) {
       response.cookies.set(
         TERMS_COOKIE,
         sub,

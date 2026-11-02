@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import { onboardingCopy } from "@/copy/onboarding";
 import { sanitizeNext } from "@/features/auth/redirect";
 import { loginUrl, termsUrl } from "@/features/auth/routes";
+import { hasCompletedConsent } from "@/features/auth/terms";
 import { readGuestHandoff } from "@/features/onboarding/guest-handoff";
 import {
   OnboardingScreen,
@@ -47,7 +48,7 @@ async function Route({
   const [{ data: profile }, offices] = await Promise.all([
     supabase
       .from("profiles")
-      .select("terms_agreed_at")
+      .select("terms_agreed_at, birth_confirmed_at")
       .eq("user_id", userId)
       .maybeSingle(),
     supabase
@@ -56,7 +57,7 @@ async function Route({
       .eq("user_id", userId),
   ]);
   // 약관 전이면 약관부터(약관 뒤 다시 여기로 온다)
-  if (profile && !profile.terms_agreed_at) redirect(termsUrl(next));
+  if (profile && !hasCompletedConsent(profile)) redirect(termsUrl(next));
   if (!offices.error && (offices.count ?? 0) > 0) redirect(next);
 
   const handoff = readGuestHandoff(next);

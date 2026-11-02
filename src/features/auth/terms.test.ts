@@ -6,6 +6,7 @@ import {
   canSubmit,
   EMPTY_CONSENT,
   FULL_CONSENT,
+  hasCompletedConsent,
   missingRequired,
   setItem,
   TERM_ITEMS,
@@ -148,5 +149,29 @@ describe("submitTerms (서버 재검증)", () => {
     expect(
       await submitTerms({ ...full, next: "//evil.example" }, deps()),
     ).toEqual({ ok: true, location: "/today" });
+  });
+});
+
+describe("동의 완료 판정 (T10.3 후속, AUTH-02, AUTH-06)", () => {
+  const at = "2026-11-02T00:00:00Z";
+  it("약관 동의와 만 14세 확인이 둘 다 있어야 완료", () => {
+    expect(
+      hasCompletedConsent({ terms_agreed_at: at, birth_confirmed_at: at }),
+    ).toBe(true);
+  });
+  it("한쪽이라도 비어 있으면 미완료 (약관 화면으로)", () => {
+    expect(
+      hasCompletedConsent({ terms_agreed_at: at, birth_confirmed_at: null }),
+    ).toBe(false);
+    expect(
+      hasCompletedConsent({ terms_agreed_at: null, birth_confirmed_at: at }),
+    ).toBe(false);
+    expect(
+      hasCompletedConsent({ terms_agreed_at: null, birth_confirmed_at: null }),
+    ).toBe(false);
+  });
+  it("프로필이 없으면 미완료", () => {
+    expect(hasCompletedConsent(null)).toBe(false);
+    expect(hasCompletedConsent(undefined)).toBe(false);
   });
 });

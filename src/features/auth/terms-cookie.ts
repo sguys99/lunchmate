@@ -21,3 +21,20 @@ export function termsCookieMatches(
 ): boolean {
   return typeof value === "string" && value.length > 0 && value === userId;
 }
+
+/**
+ * 약관 동의를 마쳤는가 (T10.3 후속, AUTH-02, AUTH-06). 약관 동의(terms_agreed_at)와 만 14세 확인(birth_confirmed_at)이
+ * 둘 다 있어야 마친 것으로 본다. 동의 서버 액션은 두 열을 한 번에 쓰므로 한쪽만 있는 행은 비정상이고, 그때는 약관 화면을
+ * 다시 보여 준다(다시 동의하면 비어 있는 쪽만 채워진다, DB 트리거는 이미 있는 시각을 바꾸지 않는다).
+ * proxy가 가볍게 가져오도록 이 파일에 둔다(terms.ts가 다시 내보낸다). proxy, /auth/callback, 약관 화면, 온보딩 화면이 모두 이 함수로 판정해야 서로 다른 판정으로 오가는 고리가 생기지 않는다.
+ */
+export type ConsentRow = {
+  terms_agreed_at: string | null;
+  birth_confirmed_at: string | null;
+};
+
+export function hasCompletedConsent(
+  profile: ConsentRow | null | undefined,
+): boolean {
+  return Boolean(profile?.terms_agreed_at && profile.birth_confirmed_at);
+}

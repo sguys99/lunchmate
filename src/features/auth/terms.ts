@@ -97,3 +97,5 @@ export function afterTermsLocation(input: {
   }
   return input.next;
 }
+
+export { hasCompletedConsent, type ConsentRow } from "./terms-cookie";

@@ -6,9 +6,9 @@
 //    실패는 무시(온보딩에서 닉네임 입력). 토큰은 이 함수 밖으로 나가지 않고 로그도 남기지 않는다.
 // 3a. 저장된 닉네임에 금칙어가 있으면(카카오, 구글 첫 닉네임은 가입 트리거가 제공자 이름으로 바로 채워 필터를 거치지 않는다,
 //    T6.17 후속, MOD-04) 중립 닉네임("점심손님 1234")으로 바꾼다. 바꾸지 못해도 로그인은 그대로 진행한다.
-// 4. 약관 동의 전(terms_agreed_at null)이면 약관 화면으로(약관 뒤 온보딩 연결은 terms.ts).
+// 4. 약관 동의 전(terms_agreed_at 또는 birth_confirmed_at null, hasCompletedConsent)이면 약관 화면으로(약관 뒤 온보딩 연결은 terms.ts).
 // 5. 동의했지만 사무실이 없으면(온보딩을 마치지 않음, T4.16) 온보딩으로 next를 이어 보낸다. 확인에 실패하면 next로.
-import { afterTermsLocation } from "./terms";
+import { afterTermsLocation, hasCompletedConsent } from "./terms";
 import { loginUrl, TERMS_PATH } from "./routes";
 import type { ProfilePatch } from "./naver-profile";
 
@@ -29,6 +29,7 @@ export type ProfileRow = {
   nickname: string | null;
   avatar_url: string | null;
   terms_agreed_at: string | null;
+  birth_confirmed_at: string | null;
 };
 
 export type CompleteSignInDeps = {
@@ -145,7 +146,7 @@ export async function completeSignIn(
   }
 
   // 프로필을 못 읽었으면 약관 화면이 다시 확인한다(그쪽이 로그인 필요 경로라 안전).
-  const needsTerms = !profile?.terms_agreed_at;
+  const needsTerms = !hasCompletedConsent(profile);
   let location = needsTerms ? termsUrl(next) : next;
   if (!needsTerms && deps.hasOffice) {
     const hasOffice = await deps.hasOffice(userId).catch(() => true);

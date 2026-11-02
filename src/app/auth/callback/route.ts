@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       async readProfile(userId) {
         const { data, error } = await supabase!
           .from("profiles")
-          .select("nickname, avatar_url, terms_agreed_at")
+          .select("nickname, avatar_url, terms_agreed_at, birth_confirmed_at")
           .eq("user_id", userId)
           .maybeSingle();
         return error ? null : data;

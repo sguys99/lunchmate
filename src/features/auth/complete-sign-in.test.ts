@@ -18,7 +18,12 @@ function deps(
   } = {},
 ) {
   const {
-    profile = { nickname: null, avatar_url: null, terms_agreed_at: null },
+    profile = {
+      nickname: null,
+      avatar_url: null,
+      terms_agreed_at: null,
+      birth_confirmed_at: null,
+    },
     provider = "custom:naver",
     ...rest
   } = over;
@@ -96,6 +101,7 @@ describe("completeSignIn: 네이버 프로필 1회 동기화 (T4.7)", () => {
         nickname: null,
         avatar_url: "https://x.pstatic.net/old.png",
         terms_agreed_at: null,
+        birth_confirmed_at: null,
       },
     });
     await completeSignIn(base, d);
@@ -138,6 +144,7 @@ describe("completeSignIn: 네이버 프로필 1회 동기화 (T4.7)", () => {
         nickname: "기존",
         avatar_url: null,
         terms_agreed_at: "2026-10-30T00:00:00Z",
+        birth_confirmed_at: "2026-10-30T00:00:00Z",
       },
     });
     const r = await completeSignIn(base, d);
@@ -192,11 +199,34 @@ describe("completeSignIn: 약관과 복귀 (T4.9)", () => {
           nickname: "a",
           avatar_url: null,
           terms_agreed_at: "2026-10-30T00:00:00Z",
+          birth_confirmed_at: "2026-10-30T00:00:00Z",
         },
       }),
     );
     expect(r.location).toBe("/today");
   });
+  it.each([
+    ["만 14세 확인만 비어 있으면", "2026-10-30T00:00:00Z", null],
+    ["약관 동의만 비어 있으면", null, "2026-10-30T00:00:00Z"],
+  ])(
+    "%s 약관 화면으로 (둘 다 있어야 동의 완료, T10.3 후속)",
+    async (_, terms, birth) => {
+      const r = await completeSignIn(
+        { ...base, next: "/today" },
+        deps({
+          provider: "google",
+          profile: {
+            nickname: "a",
+            avatar_url: null,
+            terms_agreed_at: terms,
+            birth_confirmed_at: birth,
+          },
+        }),
+      );
+      expect(r.location).toContain("/welcome/terms");
+      expect(r.outcome).toMatchObject({ needsTerms: true });
+    },
+  );
   it("프로필을 못 읽으면 약관 화면 (그쪽에서 다시 확인)", async () => {
     const r = await completeSignIn(
       base,
@@ -216,6 +246,7 @@ describe("온보딩 연결 고리 (T4.16)", () => {
     nickname: "기존",
     avatar_url: null,
     terms_agreed_at: "2026-10-30T00:00:00Z",
+    birth_confirmed_at: "2026-10-30T00:00:00Z",
   };
   it("동의했지만 사무실이 없으면 온보딩으로 next를 이어 보낸다", async () => {
     const d = deps({ profile: agreed, hasOffice: vi.fn(async () => false) });
@@ -247,7 +278,12 @@ describe("온보딩 연결 고리 (T4.16)", () => {
 describe("첫 로그인 닉네임 금칙어 대체 (T6.17 후속, MOD-04)", () => {
   const kakao = (nickname: string | null) => ({
     provider: "custom:kakao",
-    profile: { nickname, avatar_url: null, terms_agreed_at: null },
+    profile: {
+      nickname,
+      avatar_url: null,
+      terms_agreed_at: null,
+      birth_confirmed_at: null,
+    },
   });
   const screen = async () => {
     const { containsBannedContent } = await import("@/lib/moderation");
@@ -275,7 +311,10 @@ describe("첫 로그인 닉네임 금칙어 대체 (T6.17 후속, MOD-04)", () =
   });
 
   it("연락처, 링크가 든 닉네임도 바꾼다", async () => {
-    const d = deps({ ...kakao("오픈채팅 open.kakao.com/o/x"), ...(await screen()) });
+    const d = deps({
+      ...kakao("오픈채팅 open.kakao.com/o/x"),
+      ...(await screen()),
+    });
     await completeSignIn(base, d);
     expect(d.updateProfile).toHaveBeenCalledWith(USER, {
       nickname: "점심손님 5500",

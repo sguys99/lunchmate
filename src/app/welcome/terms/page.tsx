@@ -1,5 +1,5 @@
 // 첫 로그인 약관 동의 /welcome/terms (T4.11, PRD AUTH-02, AUTH-06, D-08). 화면은 features/auth/terms-screen.tsx.
-// 콜백(terms_agreed_at null)과 proxy(동의 전 사용자가 앱 경로에 오면)가 ?next=<하려던 경로>로 보낸다.
+// 콜백(terms_agreed_at 또는 birth_confirmed_at null)과 proxy(동의 전 사용자가 앱 경로에 오면)가 ?next=<하려던 경로>로 보낸다.
 // - 로그인 필요 경로(proxy). 세션이 없으면 로그인으로, 이미 동의했으면 next로 바로 보낸다.
 // - 쿼리와 세션은 요청 시점 값이라 Suspense 안에서 읽는다(cacheComponents). 기다리는 동안 스켈레톤.
 // - flags.auth가 꺼진 환경에서는 404.
@@ -11,7 +11,7 @@ import { authCopy } from "@/copy/auth";
 import { fromSupabaseProvider } from "@/features/auth/providers";
 import { sanitizeNext } from "@/features/auth/redirect";
 import { loginUrl } from "@/features/auth/routes";
-import { termsAction } from "@/features/auth/terms";
+import { hasCompletedConsent, termsAction } from "@/features/auth/terms";
 import { TermsScreen, TermsSkeleton } from "@/features/auth/terms-screen";
 import { isEnabled } from "@/lib/flags";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -42,10 +42,10 @@ async function Route({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("provider, terms_agreed_at")
+    .select("provider, terms_agreed_at, birth_confirmed_at")
     .eq("user_id", userId)
     .maybeSingle();
-  if (profile?.terms_agreed_at) redirect(next);
+  if (hasCompletedConsent(profile)) redirect(next);
 
   return (
     <TermsScreen
