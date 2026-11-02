@@ -181,7 +181,7 @@ docs/                    basic-plan, prd, tasks, design-decisions, research-note
 ## 12. 환경변수 (`.env.local`, Vercel에 동일 등록)
 
 ```
-NEXT_PUBLIC_SITE_URL            # 개발 중 *.vercel.app, 베타 시작 전(늦어도 공개 출시 전) 자체 도메인 (tasks T9.2, PRD 14.1)
+NEXT_PUBLIC_SITE_URL            # 개발 중과 베타는 https://lunchmate-kr.vercel.app, 자체 도메인은 출시 전 재검토 (tasks T10.0, D-22, PRD 14.1)
 NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY   # ANON_KEY 자리에 publishable 키(sb_publishable_), 아래 SERVICE_ROLE_KEY 자리에 secret 키(sb_secret_) (T0.10)
 SUPABASE_SERVICE_ROLE_KEY       # 서버 전용
 SUPABASE_PROJECT_REF            # db:push·db:types용 개발 프로젝트 ID
