@@ -68,6 +68,19 @@ for (const path of ["/terms", "/privacy", "/location"]) {
     ).toBeVisible();
     await expect(page.getByText("확정 전 초안")).toHaveCount(0);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+    // 메타(T10.11): 절대 canonical, 설명, og:image(랜딩 OG)
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      new RegExp(`^https?://[^/]+${path}$`),
+    );
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      "content",
+      /2026년 11월 16일부터 시행합니다\.$/,
+    );
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      "content",
+      /\/opengraph-image$/,
+    );
   });
 }
 

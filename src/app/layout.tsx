@@ -8,6 +8,7 @@ import { startupImageLinks } from "@/features/pwa/assets";
 import { installInitScript } from "@/features/pwa/install-script";
 import { themeColor } from "@/lib/design/theme-color.generated";
 import { siteUrl } from "@/lib/env/site";
+import { siteVerificationMeta } from "@/lib/env/verification";
 import { WEB_FONTS_INIT_SCRIPT } from "@/lib/fonts/web-fonts";
 import { swRegisterScript } from "@/lib/sw/register-script";
 import { UI_PREFS_INIT_SCRIPT } from "@/lib/ui-prefs/init-script";
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
   title: { default: siteCopy.name, template: siteCopy.titleTemplate },
   description: siteCopy.description,
   applicationName: siteCopy.name,
+  // 구글 Search Console, 네이버 서치어드바이저 소유 확인 메타(T10.11). 서버 환경변수가 비면 생략(docs/launch-ops.md 4장)
+  verification: siteVerificationMeta(),
   // 홈 화면 앱(T8.2, APP-01, D-18). 매니페스트는 src/app/manifest.ts, 아이콘은 파일 규칙(icon.svg, favicon.ico, apple-icon.png).
   // iOS 시작 이미지는 기기 크기마다 라이트/다크 한 장씩(features/pwa/assets.ts, `pnpm pwa:assets`). 상태 막대는 기본(밝은 바탕 검은 글자).
   appleWebApp: {

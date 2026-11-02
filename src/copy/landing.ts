@@ -108,7 +108,7 @@ export const landingCopy = {
   meta: {
     description:
       "회사 근처 점심을 10초 안에 정하는 앱입니다. 추천 3곳 중에서 고르거나 동료와 투표로 정합니다.",
-    ogTitle: "오늘 뭐 먹지, 10초 안에 정합니다",
+    // OG 이미지 제목과 alt는 서버 전용 landing-og.ts(클라이언트 번들 밖, T10.11)
   },
 
   homeLabel: `${brand} 처음 화면`,

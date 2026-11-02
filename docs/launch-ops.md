@@ -466,3 +466,72 @@ Pro를 유지할 때 다시 볼 조건
 - 일시 정지: https://supabase.com/docs/guides/platform/free-project-pausing
 - 요금: https://supabase.com/pricing
 - 한도 초과 제한: https://supabase.com/docs/guides/platform/billing-faq
+
+---
+
+## 4. T10.11 검색 등록 (구글 Search Console, 네이버 서치어드바이저)
+
+> 사용자가 콘솔에서 하는 일입니다. 코드 쪽은 준비돼 있습니다(2026-11-02): `robots.txt`, `sitemap.xml`(랜딩과 약관 3종), 페이지마다 canonical과 Open Graph, 랜딩 JSON-LD, 소유 확인 메타 자리.
+> 등록 주소는 `https://lunchmate-kr.vercel.app` 하나입니다(D-27). `vercel.app`의 하위 주소라 DNS를 고칠 수 없으므로 구글은 **URL 접두어 속성**만, 소유 확인은 **HTML 태그(메타)** 방식으로 합니다.
+
+### 4.0 소유 확인 방식 (정해 둔 것)
+
+- 두 서비스 모두 **HTML 태그**로 확인합니다. 파일 업로드(`public/`에 HTML 파일)는 쓰지 않습니다. 토큰이 저장소에 남고, 계정을 바꿀 때 코드를 고쳐야 하기 때문입니다.
+- 토큰은 **서버 환경변수**로 받습니다. 브라우저 번들에 들어갈 이유가 없어 `NEXT_PUBLIC_`을 붙이지 않습니다.
+
+| 환경변수 | 들어가는 메타 | 비었을 때 |
+| --- | --- | --- |
+| `GOOGLE_SITE_VERIFICATION` | `<meta name="google-site-verification" content="값">` | 메타를 넣지 않음 |
+| `NAVER_SITE_VERIFICATION` | `<meta name="naver-site-verification" content="값">` | 메타를 넣지 않음 |
+
+- 코드: `src/lib/env/verification.ts` → 루트 `src/app/layout.tsx`의 `metadata.verification`. 모든 페이지 `<head>`에 들어갑니다.
+- 값은 메타 태그의 `content` 따옴표 안 문자열만 넣습니다(태그 전체를 넣지 않음).
+- 루트 레이아웃 메타는 **빌드 때** 읽습니다. Vercel에서 값을 넣거나 바꾸면 **다시 배포**해야 반영됩니다.
+- 확인이 끝난 뒤에도 **환경변수를 지우지 않습니다.** 구글은 태그가 남아 있는지 주기적으로 확인하고, 없어지면 유예 기간 뒤 권한이 사라집니다. 네이버도 태그 방식은 주기적 재확인이 있다는 안내가 있습니다 **[콘솔에서 확인]**.
+
+### 4.1 구글 Search Console
+
+1. https://search.google.com/search-console 에 운영 구글 계정으로 들어갑니다.
+2. **속성 추가** → 오른쪽 **URL 접두어**를 고르고 `https://lunchmate-kr.vercel.app` 을 넣습니다(끝 슬래시 없이 넣어도 됩니다). 왼쪽 "도메인"은 DNS 확인이 필요해 쓸 수 없습니다.
+3. 확인 방법 목록에서 **HTML 태그**를 펼치고 `content="..."` 안 문자열만 복사합니다.
+4. Vercel → 프로젝트 → Settings → Environment Variables에서 `GOOGLE_SITE_VERIFICATION`을 **Production** 환경에 추가합니다(Sensitive 아님, 공개되는 값).
+5. Deployments → 최신 프로덕션 배포 → **Redeploy**.
+6. 배포가 끝나면 터미널에서 확인합니다: `curl -s https://lunchmate-kr.vercel.app/ | grep google-site-verification` 한 줄이 나와야 합니다.
+7. Search Console로 돌아가 **확인**을 누릅니다.
+8. 왼쪽 **Sitemaps** → `sitemap.xml` 입력 → 제출. 상태가 "성공"이고 발견된 URL이 4개(`/`, `/terms`, `/privacy`, `/location`)인지 봅니다.
+9. 상단 **URL 검사**에 `https://lunchmate-kr.vercel.app/` 를 넣고 **색인 생성 요청**을 누릅니다.
+10. 며칠 뒤 **페이지** 보고서에서 "색인이 생성됨"을 확인합니다. `/today`, `/beta` 등이 "noindex 태그로 제외됨"으로 보이는 것은 의도한 상태입니다.
+
+### 4.2 네이버 서치어드바이저
+
+1. https://searchadvisor.naver.com 에 운영 네이버 계정으로 들어가 **웹마스터 도구**를 엽니다.
+2. 사이트 등록 칸에 `https://lunchmate-kr.vercel.app` 을 넣고 추가합니다.
+3. 소유확인 방법에서 **HTML 태그**를 고르고 `content="..."` 안 문자열만 복사합니다.
+4. Vercel 환경변수 `NAVER_SITE_VERIFICATION`을 **Production**에 추가하고 다시 배포합니다(4.1의 4, 5단계와 같음. 구글과 같이 넣으면 배포는 한 번이면 됩니다).
+5. `curl -s https://lunchmate-kr.vercel.app/ | grep naver-site-verification` 로 한 줄이 나오는지 봅니다.
+6. 서치어드바이저로 돌아가 **소유확인**을 누르고 보안 문자를 넣습니다.
+7. 사이트를 고른 뒤 **요청 → 사이트맵 제출**에 `https://lunchmate-kr.vercel.app/sitemap.xml` 을 넣습니다.
+8. **검증 → robots.txt**에서 수집 가능 여부를 봅니다. `/`가 허용, `/poll`, `/login`, `/me`, `/admin`이 차단으로 나오면 정상입니다.
+9. **요청 → 웹 페이지 수집**에 `https://lunchmate-kr.vercel.app/` 를 넣어 수집을 요청합니다.
+10. 며칠 뒤 **리포트**에서 수집과 노출을 확인합니다.
+
+### 4.3 등록 뒤 확인 (링크 미리보기)
+
+- 카카오톡: https://developers.kakao.com/tool/debugger/sharing 에 `https://lunchmate-kr.vercel.app/` 를 넣어 제목 "오늘 뭐 먹지, 10초 안에 정합니다"와 2:1 이미지가 보이는지 봅니다. 예전 미리보기가 남아 있으면 같은 화면의 **캐시 초기화**를 누릅니다.
+- X(트위터) 카드 검증 도구는 없어졌습니다. 글쓰기 창에 주소를 붙여 큰 이미지 카드가 뜨는지만 봅니다(올리지 않아도 됨).
+- 랜딩 OG 이미지 주소는 빌드가 붙이는 해시(`/opengraph-image?<해시>`)가 있어 그림 코드를 바꾸면 주소도 바뀝니다. 약관 3종은 해시 없는 `/opengraph-image`를 쓰므로 그림을 바꿨다면 카카오 캐시 초기화를 한 번 합니다.
+
+### 4.4 기록표
+
+| 항목 | 날짜 | 결과 |
+| --- | --- | --- |
+| Vercel `GOOGLE_SITE_VERIFICATION` 등록과 재배포 | | |
+| Search Console 소유 확인, 사이트맵 제출(URL 4개) | | |
+| Vercel `NAVER_SITE_VERIFICATION` 등록과 재배포 | | |
+| 서치어드바이저 소유확인, 사이트맵 제출, robots.txt 검증 | | |
+| 카카오 공유 디버거 미리보기 | | |
+
+출처
+- 구글 HTML 태그 확인, 속성 종류, 태그 유지: https://support.google.com/webmasters/answer/9008080
+- 네이버 소유확인 메타 이름 `naver-site-verification`: 서치어드바이저 콘솔 안내(2차 자료 https://inblog.ai/ko/docs/seo-tutorial-domain-setup/registering-with-naver-search-advisor 로 대조, 메뉴 이름은 **[콘솔에서 확인]**)
+- Next.js `metadata.verification`: `node_modules/next/dist/docs/01-app/03-api-reference/04-functions/generate-metadata.md` "verification"
