@@ -12,6 +12,8 @@ import { partyLabCopy } from "@/copy/design-lab-party";
 import { shareLabCopy } from "@/copy/design-lab-share";
 import { appIconLabCopy } from "@/copy/design-lab-app-icon";
 import { adminLabCopy } from "@/copy/design-lab-admin";
+import { betaLabCopy } from "@/copy/design-lab-beta";
+import { betaFeedbackLabCopy } from "@/copy/design-lab-beta-feedback";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
@@ -86,6 +88,28 @@ export default function DesignLabPage() {
           ))}
         </div>
       </Section>
+
+      {/* 9단계 시안(T9.3, T9.4): 게이트 뒤 고른 안만 남긴다 */}
+      {(
+        [
+          ["beta", betaLabCopy],
+          ["beta-feedback", betaFeedbackLabCopy],
+        ] as const
+      ).map(([route, labCopy]) => (
+        <Section key={route} title={labCopy.index.title} body={labCopy.index.body}>
+          <div className="flex flex-wrap gap-4">
+            {Object.entries(labCopy.names).map(([id, name]) => (
+              <Link
+                key={id}
+                href={`/design-lab/${route}/${id}`}
+                className={linkClass}
+              >
+                {name}
+              </Link>
+            ))}
+          </div>
+        </Section>
+      ))}
 
       {/* 7단계 시안(T7.1~T7.4): 게이트 T7.5 뒤 고른 안만 남긴다(D-14~D-17) */}
       <Section title={copy.g7Title} body={copy.g7Body}>
