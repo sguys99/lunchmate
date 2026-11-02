@@ -301,6 +301,8 @@ ORDER BY version
 | Sentry 보관 기간 | Settings > Subscription(플랜 표) | 무료(Developer) 플랜은 오류 이벤트 30일(요금 페이지 기준, 콘솔에서 확정) | "수집일로부터 30일" |
 | Sentry 데이터 위치 | Settings > Organization > General > Data Storage Location | US/EU 확인 | 국외 이전 국가 |
 
+**설정 결과 (2026-11-02, 사용자, T9.0)**: PostHog 리전 US Cloud, 시간대 Asia/Seoul, Discard client IP data 켬, 내부 필터 `$host` does not contain `localhost` + 새 인사이트 기본 적용. 조직 기본값 항목은 화면에서 찾지 못해 건너뜀(프로젝트 1개라 프로젝트 설정으로 충분). GeoIP 변환은 목록에 없음(코드 `$geoip_disable`). 이벤트 보관 1년(무료 플랜 요금 페이지 기준, Settings의 Retention 항목은 Logs 제품용이라 손대지 않음). Sentry IP 저장 끔, Data Scrubber와 Default Scrubbers 켬, 추가 필드 7개, Inbound Filters 4개 켬(hydration 끔), 데이터 위치 US, 보관 30일(Developer 플랜). 처리방침 3절과 6절에 숫자로 반영.
+
 확정한 값은 `src/copy/legal.ts`의 "보관 기간이 지나면 삭제" 자리에 숫자로 넣는다(문구 담당 작업, 이 문서에서는 고치지 않음).
 
 ## 5. PostHog 콘솔 단계 (사용자)
