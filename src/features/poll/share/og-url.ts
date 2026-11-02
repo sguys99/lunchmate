@@ -6,8 +6,9 @@ import type { OgImageKind } from "./types";
 /**
  * 그림 버전. OG 그림 모양을 바꾸면 올린다. 버전 해시에 들어가 주소(?v=)가 바뀌어 카카오 스크랩 캐시와 하루 CDN 캐시가 새 그림을 읽는다.
  * 2: 왼쪽 위 기호 추가(T8.2, D-18 안건 6)
+ * 3: 랜딩 B 구도(왼쪽 제목과 숫자, 오른쪽 큰 그릇, D-30)
  */
-export const OG_ART_VERSION = "2";
+export const OG_ART_VERSION = "3";
 
 /** FNV-1a 32비트. 보안용이 아니라 캐시 버전용 */
 export function shortHash(text: string): string {
