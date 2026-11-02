@@ -111,7 +111,8 @@ async function seed() {
   const author = await user("aa");
   const reporters = [await user("r1"), await user("r2"), await user("r3")];
   const bodies = {
-    first: `test_광고글 오픈채팅 ${id}`,
+    // 실제 광고 낱말(오픈채팅 등)은 T10.3b 금칙어 DB 트리거가 막으므로 신고 대상 글은 평범한 문장으로 둔다
+    first: `test_첫번째글 ${id}`,
     second: `test_두번째글 ${id}`,
     secret: `test_비공개전환 ${id}`,
   };
