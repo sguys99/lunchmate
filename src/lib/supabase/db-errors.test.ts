@@ -28,6 +28,12 @@ describe("mapPgError", () => {
   ] as const)("%s → %s", (message, error) => {
     expect(mapPgError(err(message))).toEqual({ ok: false, error });
   });
+  it("banned_content(23514, T10.3b 트리거) → banned, check 위반(invalid)보다 먼저", () => {
+    expect(mapPgError(err("banned_content"))).toEqual({
+      ok: false,
+      error: "banned",
+    });
+  });
   it("not_authenticated(42501) → unauthenticated", () => {
     expect(mapPgError(err("not_authenticated", "42501"))).toEqual({
       ok: false,
@@ -45,7 +51,7 @@ describe("mapPgError", () => {
     ).toEqual({ ok: false, error: "duplicate" });
   });
   it("그 밖의 check 위반 → invalid, 모르는 오류 → save", () => {
-    expect(mapPgError(err("violates check constraint \"x\""))).toEqual({
+    expect(mapPgError(err('violates check constraint "x"'))).toEqual({
       ok: false,
       error: "invalid",
     });
@@ -53,7 +59,9 @@ describe("mapPgError", () => {
       ok: false,
       error: "save",
     });
-    expect(mapPgError(err("permission denied for table reviews", "42501"))).toEqual({
+    expect(
+      mapPgError(err("permission denied for table reviews", "42501")),
+    ).toEqual({
       ok: false,
       error: "save",
     });

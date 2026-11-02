@@ -14,8 +14,15 @@ describe("투표 쓰기 오류 (T7.11)", () => {
     ["poll_state_closed", "closed"],
     ["poll_candidates_count", "invalid"],
     ["not_authenticated", "unauthenticated"],
+    ["banned_content", "banned"],
   ])("%s → %s", (message, code) => {
     expect(mapPollError({ message, code: "P0001" })).toBe(code);
+  });
+
+  it("제목 금칙어 트리거(23514, T10.3b)는 invalid가 아니라 banned", () => {
+    expect(mapPollError({ message: "banned_content", code: "23514" })).toBe(
+      "banned",
+    );
   });
 
   it("오류가 없으면 null, 모르는 오류는 save", () => {

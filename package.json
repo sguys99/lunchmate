@@ -37,6 +37,7 @@
     "postbuild": "node scripts/check-client-secrets.mjs && node scripts/bundle-report.mjs",
     "check:secrets": "node scripts/check-client-secrets.mjs",
     "lint:copy": "node scripts/check-copy.ts",
+    "moderation:sql": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-banned-words-sql.ts",
     "tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-tokens.ts",
     "contrast": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/contrast-report.ts",
     "db:push": "supabase db push",

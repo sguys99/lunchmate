@@ -45,6 +45,8 @@ export function pollFail(error: PollWriteError): {
 
 const RULES: readonly [RegExp, PollWriteError][] = [
   [/\baccount_suspended\b/, "suspended"],
+  // T10.3b 금칙어 DB 안전망(제목). zod가 먼저 거르지만 DB만 거절해도 같은 "banned" 문구
+  [/\bbanned_content\b/, "banned"],
   [/\bpolls_daily_limit_exceeded\b/, "limit"],
   [/\bpoll_closes_at_range\b/, "deadline"],
   [/\bpoll_already_shared\b/, "shared"],

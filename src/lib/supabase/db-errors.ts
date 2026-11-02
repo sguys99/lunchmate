@@ -4,6 +4,8 @@
 //   report_target_unavailable, report_own_target, deal_not_open, not_authenticated, place_stats_too_many_ids
 // - 20261031120000(T5.14): visits_daily_limit_exceeded, visits_status_back_to_candidate
 // - 20261101180000(T8.5): account_suspended(정지된 계정의 쓰기, 공통 트리거 block_suspended_writer)
+// - 20261102200000(T10.3b): banned_content(금칙어 DB 안전망, 23514). 서버 액션 zod가 먼저 거르므로 보통 오지 않는다.
+//   목록이 어긋나 DB만 거절해도 zod와 같은 "banned" 문구가 나가게 check 위반(invalid)보다 먼저 본다.
 // 원문 message와 hint는 화면에 그대로 보내지 않는다. 문구는 src/copy/moderation.ts writeErrorCopy.
 
 /** 일일 한도 칸 (MOD-05, DEAL-04, T5.14 방문 20) */
@@ -59,6 +61,7 @@ export function mapPgError(error: PgErrorLike): WriteFailure | null {
   const msg = error.message ?? "";
   if (msg.includes("account_suspended"))
     return { ok: false, error: "suspended" };
+  if (/\bbanned_content\b/.test(msg)) return { ok: false, error: "banned" };
   const limit = LIMIT_RE.exec(msg);
   if (limit?.[1]) {
     return { ok: false, error: "limit", bucket: limit[1] as LimitBucket };
@@ -79,7 +82,11 @@ export function mapPgError(error: PgErrorLike): WriteFailure | null {
   // 23505 유일 키 위반: 같은 방문 후기, 같은 대상 신고, 같은 날 같은 제보
   if (error.code === "23505") return { ok: false, error: "duplicate" };
   // 23514 check 위반(위 이름 외) 또는 22P02 형식 오류: 입력이 규칙을 어김
-  if (error.code === "23514" || error.code === "22P02" || error.code === "23502")
+  if (
+    error.code === "23514" ||
+    error.code === "22P02" ||
+    error.code === "23502"
+  )
     return { ok: false, error: "invalid" };
   return { ok: false, error: "save" };
 }
