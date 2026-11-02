@@ -3,7 +3,8 @@
 // 초대 코드처럼 비밀에 가까운 동적 세그먼트는 패턴 이름으로 바꾼다. 초대 코드는 보유자만 투표방을 조회하는 열쇠라
 // 분석 도구에 남으면 안 된다(CLAUDE.md 7장).
 
-const SECRET_SEGMENTS: ReadonlyArray<readonly [prefix: string, label: string]> = [
+/** 다음 세그먼트가 비밀인 경로 접두와 대체 이름. PostHog 전송 직전 필터(posthog-config.ts)도 같은 규칙을 쓴다. */
+export const SECRET_SEGMENTS: ReadonlyArray<readonly [prefix: string, label: string]> = [
   ["poll", "[code]"],
 ];
 

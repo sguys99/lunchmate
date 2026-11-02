@@ -9,7 +9,11 @@ vi.mock("posthog-js", () => ({ default: posthogMock }));
 
 import type { AnalyticsEvent } from "./events";
 import { MAX_QUEUED_EVENTS, initPostHog, resetPostHogForTest } from "./posthog";
-import { posthogBeforeSend, posthogConfig } from "./posthog-config";
+import {
+  maskUrlValue,
+  posthogBeforeSend,
+  posthogConfig,
+} from "./posthog-config";
 import { FILTERED } from "./scrub";
 import { capturePageview, track } from "./track";
 import type { CaptureResult } from "posthog-js";
@@ -128,5 +132,102 @@ describe("posthogBeforeSend", () => {
   it("카드 순서 position(정수)은 남긴다", () => {
     const out = posthogBeforeSend(base({ position: 2 }));
     expect(out?.properties.position).toBe(2);
+  });
+});
+
+describe("posthogBeforeSend 초대 코드 가림 (T10.10)", () => {
+  const CODE = "Ab3xK9pQz2";
+  const ORIGIN = "https://lunchmate-kr.vercel.app";
+
+  // posthog-js 1.438이 자동으로 붙이는 URL, 경로 속성을 이벤트 종류별로 흉내 낸다.
+  const urlProps = (path: string) => ({
+    $current_url: `${ORIGIN}${path}?from=kakao#top`,
+    $pathname: path,
+    $host: "lunchmate-kr.vercel.app",
+    $referrer: `${ORIGIN}/login?next=%2Fpoll%2F${CODE}`,
+    $referring_domain: "lunchmate-kr.vercel.app",
+    $prev_pageview_pathname: `/poll/${CODE}`,
+    $session_entry_url: `${ORIGIN}/poll/${CODE}?utm_source=kakao`,
+    $session_entry_pathname: `/poll/${CODE}`,
+    $session_entry_referrer: "$direct",
+    $initial_person_info: { r: "$direct", u: `${ORIGIN}/poll/${CODE}` },
+  });
+
+  it.each(["$pageview", "$web_vitals", "$pageleave", "poll_joined", "$set"])(
+    "%s 이벤트의 어떤 속성에도 초대 코드가 남지 않는다",
+    (event) => {
+      const out = posthogBeforeSend({
+        uuid: "u",
+        event,
+        properties: {
+          ...urlProps(`/poll/${CODE}`),
+          $web_vitals_LCP_event: {
+            name: "LCP",
+            value: 1200,
+            $current_url: `${ORIGIN}/poll/${CODE}/result`,
+          },
+          note: `opened /poll/${CODE} from share`,
+        },
+        $set: { $current_url: `${ORIGIN}/poll/${CODE}` },
+        $set_once: {
+          $initial_current_url: `${ORIGIN}/poll/${CODE}?lat=37.5665`,
+          $initial_pathname: `/poll/${CODE}`,
+          $initial_referrer: `https://talk.kakao.com/poll/${CODE}`,
+          $initial_referring_domain: "talk.kakao.com",
+        },
+      } as CaptureResult);
+      const json = JSON.stringify(out);
+      expect(json).not.toContain(CODE);
+      expect(json).not.toMatch(/37\.\d/);
+
+      const p = out?.properties ?? {};
+      expect(p.$current_url).toBe(`${ORIGIN}/poll/[code]`);
+      expect(p.$pathname).toBe("/poll/[code]");
+      expect(p.$referrer).toBe(`${ORIGIN}/login`);
+      expect(p.$prev_pageview_pathname).toBe("/poll/[code]");
+      expect(p.$session_entry_url).toBe(`${ORIGIN}/poll/[code]`);
+      expect(p.$session_entry_referrer).toBe("$direct");
+      expect(p.$host).toBe("lunchmate-kr.vercel.app");
+      expect(p.$referring_domain).toBe("lunchmate-kr.vercel.app");
+      expect(p.$web_vitals_LCP_event).toMatchObject({
+        value: 1200,
+        $current_url: `${ORIGIN}/poll/[code]/result`,
+      });
+      expect(out?.$set_once).toMatchObject({
+        $initial_current_url: `${ORIGIN}/poll/[code]`,
+        $initial_pathname: "/poll/[code]",
+        $initial_referrer: "https://talk.kakao.com/poll/[code]",
+        $initial_referring_domain: "talk.kakao.com",
+      });
+    },
+  );
+
+  it("코드가 없는 경로는 그대로, 쿼리와 해시만 버린다", () => {
+    const out = posthogBeforeSend({
+      uuid: "u",
+      event: "$pageview",
+      properties: {
+        $current_url: `${ORIGIN}/today?q=국밥#card-2`,
+        $pathname: "/poll",
+        $referrer: "$direct",
+        card_id: "c1",
+      },
+    } as CaptureResult);
+    expect(out?.properties).toMatchObject({
+      $current_url: `${ORIGIN}/today`,
+      $pathname: "/poll",
+      $referrer: "$direct",
+      card_id: "c1",
+    });
+  });
+
+  it.each([
+    [`${ORIGIN}/poll/${CODE}`, `${ORIGIN}/poll/[code]`],
+    [`${ORIGIN}/poll/[code]`, `${ORIGIN}/poll/[code]`],
+    [`/poll/${CODE}/result?x=1`, "/poll/[code]/result"],
+    ["$direct", "$direct"],
+    ["", ""],
+  ])("maskUrlValue(%s) → %s", (input, expected) => {
+    expect(maskUrlValue(input)).toBe(expected);
   });
 });

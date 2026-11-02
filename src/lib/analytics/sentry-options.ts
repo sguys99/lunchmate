@@ -1,6 +1,12 @@
 // Sentry 공통 옵션. 브라우저, Node 서버, Edge가 같은 설정을 쓰도록 한 곳에 모은다(T2.21).
-// SDK를 import하지 않으므로 번들에 아무것도 끌어오지 않는다. 훅은 제네릭이라 각 이벤트 타입에 그대로 맞는다.
+// SDK 값은 import하지 않으므로(타입만) 번들에 아무것도 끌어오지 않는다. 훅은 제네릭이라 각 이벤트 타입에 그대로 맞는다.
+import type { init } from "@sentry/nextjs";
 import { scrubCoordinates } from "./scrub";
+
+/** SDK의 dataCollection 옵션 타입. @sentry/nextjs가 타입 이름을 내보내지 않아 init 인자에서 꺼낸다. */
+type DataCollection = NonNullable<
+  NonNullable<Parameters<typeof init>[0]>["dataCollection"]
+>;
 
 /** 트레이스 샘플링 비율. 무료 플랜 한도와 번들 영향을 고려해 낮게 둔다. */
 export const SENTRY_TRACES_SAMPLE_RATE = 0.1;
@@ -19,6 +25,37 @@ export const SENTRY_DENY_URLS: readonly RegExp[] = [
   /^(chrome|moz|safari|safari-web|ms-browser)-extension:\/\//i,
 ];
 
+/** IP, 사용자 식별 헤더로 쓰이는 키. URL 쿼리에 섞여도 값을 가린다(MIGRATION.md의 v10 기본값 재현 목록). */
+const IDENTITY_KEY_DENY = ["forwarded", "-ip", "remote-", "via", "-user"];
+
+/**
+ * SDK 자동 수집 범위(T10.10). SDK 11은 `sendDefaultPii`를 없애고 `dataCollection`으로 바꿨으며,
+ * 지정하지 않으면 기본값이 "수집 허용"이다(userInfo true로 IP 추론, 쿠키, 헤더, 요청과 응답 본문, DB 쿼리 데이터).
+ * 브라우저, Node, Edge 모두 이 값을 쓴다. 바꾸지 않는다.
+ * - userInfo false: user.* 자동 채움, 수집 서버의 IP 추론(infer_ip "never", 세션 ip_address "{{auto}}" 없음), 서버 span의 client.address를 끈다.
+ * - cookies false: 쿠키(Supabase 세션)를 모으지 않는다.
+ * - httpHeaders: 요청 헤더는 User-Agent만 남기고(Referer, X-Forwarded-For, Authorization 등은 버림), 응답 헤더는 모으지 않는다.
+ *   User-Agent는 처리방침의 "브라우저 정보"이며, 인앱 브라우저 오류 구분과 Sentry의 구형 브라우저, 크롤러 필터가 이 값을 쓴다.
+ *   브라우저 SDK가 모으는 헤더는 Referer와 User-Agent 둘뿐이라 Referer 속 경로(초대 코드)도 함께 빠진다.
+ * - httpBodies []: 요청과 응답 본문을 모으지 않는다(후기, 투표, 제보 입력).
+ * - urlQueryParams: 쿼리는 디버깅에 남기되 IP 계열 키는 가린다. 좌표 쿼리는 beforeSend 스크러버가 가린다.
+ * - 나머지(DB 쿼리 데이터, 큐, GraphQL, 생성형 AI, MCP)는 쓰지 않지만 기본값이 켜짐이라 명시해서 끈다.
+ * 출처: sentry-javascript MIGRATION.md "sendDefaultPii is replaced by dataCollection",
+ * @sentry/core 11.9.0 resolveDataCollectionOptions.js(기본값), @sentry/browser client.js(infer_ip 판정).
+ */
+export const SENTRY_DATA_COLLECTION: Readonly<DataCollection> = {
+  userInfo: false,
+  cookies: false,
+  httpHeaders: { request: { allow: ["user-agent"] }, response: false },
+  httpBodies: [],
+  urlQueryParams: { deny: IDENTITY_KEY_DENY },
+  databaseQueryData: false,
+  queues: false,
+  graphQL: { document: false, variables: false },
+  genAI: { inputs: false, outputs: false },
+  mcp: { inputs: false, outputs: false },
+};
+
 /**
  * 좌표가 섞였을 수 있는 모든 전송 경로에 같은 스크러버를 적용한다.
  * - beforeSend: 오류 이벤트. request(url, query_string, data, headers의 Referer), extra, contexts, tags,
@@ -31,8 +68,9 @@ export const SENTRY_DENY_URLS: readonly RegExp[] = [
 export function sentryBaseOptions(dsn: string) {
   return {
     dsn,
-    // IP, 쿠키, 사용자 헤더, 요청 body 같은 개인 식별 정보를 자동 수집하지 않는다. 바꾸지 않는다.
-    sendDefaultPii: false,
+    // IP, 쿠키, 헤더, 요청과 응답 본문 같은 개인 식별 정보를 자동 수집하지 않는다(SENTRY_DATA_COLLECTION).
+    // SDK 11에서 sendDefaultPii는 아무 효과가 없어 쓰지 않는다.
+    dataCollection: SENTRY_DATA_COLLECTION,
     tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
     ignoreErrors: [...SENTRY_IGNORE_ERRORS],
     denyUrls: [...SENTRY_DENY_URLS],

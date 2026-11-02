@@ -662,7 +662,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T10.7 Supabase 운영 프로젝트 분리 여부 결정과 마이그레이션 적용
 - [ ] T10.8 모든 P0 AC와 E2E 3종 통과
 - [ ] T10.9 Lighthouse 재측정
-- [ ] T10.10 오류 모니터링과 알림 동작 확인
+- [ ] T10.10 (11/02 진행: 프로덕션에서 Sentry, PostHog 수집, release와 environment, 좌표 스크러버, IP와 GeoIP 차단 확인, 테스트 이벤트 1건(environment t10_10_test). 찾은 문제 수정: Sentry SDK 11 `dataCollection`(infer_ip never), PostHog URL 속성의 초대 코드 가림. 남은 것: 사용자 대시보드 확인(monitoring.md 9.2, 이슈 생성과 알림 메일), SENTRY_AUTH_TOKEN 소스맵) 오류 모니터링과 알림 동작 확인
 - [x] T10.11 (11/02 완료, 랜딩 OG 시안 4안 ⛔ 선택 D-29: **B 큰 그릇**(`g10-comparison-og-landing.md`), og:title과 twitter title "런치메이트", 랜딩 JSON-LD WebApplication(가격, 평점 없음), 약관 3종 canonical과 OG 메타, 구글과 네이버 소유 확인 메타(서버 환경변수, 비면 생략), robots와 sitemap 프로덕션 응답 확인, launch-ops 4장 검색 등록 단계. / 178.8 KB, /today 199.7 KB. [실기기] 카카오톡 말풍선과 캐시 갱신) 랜딩 SEO, OG, 사이트맵, robots
 - [ ] T10.12 PRD 14.2절 출시 체크리스트 전체 체크
 - [x] T10.13 (11/02 완료, `docs/launch-announcement.md` 쓰임새 4개 x 2안(카카오톡 공유, 베타 참여자 감사, SNS, 앱 안 한 줄 후보), 금지 문자 0, 습니다체:해요체 약 76:24, 기능은 프로덕션 플래그로 확인. 공개일과 바뀐 점은 G10 뒤 채움, 앱 안 공지 자리는 만들지 않음) 출시 공지 문구 (문구 규칙 적용)

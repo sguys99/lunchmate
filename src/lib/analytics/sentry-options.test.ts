@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { NodeClient } from "@sentry/nextjs";
 import type { Breadcrumb, ErrorEvent } from "@sentry/nextjs";
 import { sentryBaseOptions } from "./sentry-options";
 import { FILTERED } from "./scrub";
@@ -7,8 +8,20 @@ const COORD_RE = /37\.\d{3}|126\.\d{3}|127\.\d{3}/;
 const options = sentryBaseOptions("https://k@o.ingest.sentry.io/1");
 
 describe("sentryBaseOptions", () => {
-  it("개인 식별 정보 자동 수집을 끄고 세 훅을 모두 건다", () => {
-    expect(options.sendDefaultPii).toBe(false);
+  it("개인 식별 정보 자동 수집을 dataCollection으로 끄고 세 훅을 모두 건다 (T10.10)", () => {
+    // SDK 11에서 무효인 옵션은 넣지 않는다
+    expect("sendDefaultPii" in options).toBe(false);
+    expect(options.dataCollection).toMatchObject({
+      userInfo: false,
+      cookies: false,
+      httpHeaders: { request: { allow: ["user-agent"] }, response: false },
+      httpBodies: [],
+      databaseQueryData: false,
+      queues: false,
+      graphQL: { document: false, variables: false },
+      genAI: { inputs: false, outputs: false },
+      mcp: { inputs: false, outputs: false },
+    });
     expect(options.beforeSend).toBeTypeOf("function");
     expect(options.beforeBreadcrumb).toBeTypeOf("function");
     expect(options.beforeSendSpan).toBeTypeOf("function");
@@ -37,6 +50,33 @@ describe("sentryBaseOptions", () => {
     expect(denied("https://lunchmate.vercel.app/_next/static/chunks/a.js")).toBe(
       false,
     );
+  });
+});
+
+describe("dataCollection이 SDK에 실제로 적용된다 (T10.10)", () => {
+  // 옵션 해석은 모든 런타임이 공유하는 core Client가 한다. 브라우저의 infer_ip "never"는
+  // docs/monitoring.md 9.3의 로컬 전송 가로채기 시험으로 확인했다(브라우저 빌드는 vitest에서 불러오지 않는다).
+  it("SDK 기본값(수집 허용) 대신 우리 값으로 풀린다", () => {
+    const client = new NodeClient({
+      ...options,
+      enabled: false,
+      transport: () => ({
+        send: () => Promise.resolve({}),
+        flush: () => Promise.resolve(true),
+      }),
+      stackParser: () => [],
+      integrations: [],
+    });
+    const resolved = client.getDataCollectionOptions();
+    expect(resolved.userInfo).toBe(false);
+    expect(resolved.cookies).toBe(false);
+    expect(resolved.httpHeaders).toEqual({
+      request: { allow: ["user-agent"] },
+      response: false,
+    });
+    expect(resolved.httpBodies).toEqual([]);
+    expect(resolved.databaseQueryData).toBe(false);
+    expect(resolved.queues).toBe(false);
   });
 });
 

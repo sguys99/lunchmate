@@ -280,7 +280,7 @@ ORDER BY version
 | Sentry 오류 이벤트 | `beforeSend` → `scrubCoordinates`(request url, query_string, data, headers, extra, contexts, tags, transaction, 브레드크럼, 예외 메시지) | `sentry-options.ts`, 테스트 있음 |
 | Sentry 브레드크럼 | `beforeBreadcrumb`(fetch url, navigation from/to, console) | 같음 |
 | Sentry span | `beforeSendSpan`(url.full, url.query) | 같음 |
-| Sentry IP, 쿠키 | `sendDefaultPii: false` | 같음 |
+| Sentry IP, 쿠키 | `dataCollection`(`SENTRY_DATA_COLLECTION`: userInfo, 쿠키, 본문 끔, 요청 헤더는 User-Agent만, T10.10. SDK 11에서 `sendDefaultPii`는 무효) | 같음 |
 | 세 런타임 | 브라우저(`sentry-client.ts`), Node(`sentry.server.config.ts`), Edge(`sentry.edge.config.ts`) 모두 `sentryBaseOptions` 사용 | |
 | PostHog 모든 이벤트 | `before_send` → 좌표 스크럽, 요소 정보 제거, `$geoip_disable` | `posthog.ts` |
 | PostHog 이벤트 속성 | 타입(금지 키 never) + `sanitizeEventProperties` | `events.ts` |
@@ -296,7 +296,7 @@ ORDER BY version
 | PostHog GeoIP | Data pipelines > Transformations > GeoIP | 꺼져 있는지 확인(코드에서 `$geoip_disable`로 이미 막음) | |
 | PostHog 보관 기간 | Settings > Organization > Billing(플랜) | 무료 플랜 1년(PostHog 요금 페이지 기준, 2026-11-01 확인). 콘솔 표시값으로 확정 | "수집일로부터 1년" |
 | PostHog 리전 | 가입 시 고른 US/EU | setup-guide 7장에 기록 | 국외 이전 국가 |
-| Sentry IP 저장 끄기 | Settings > Projects > (프로젝트) > **Security & Privacy** > "Prevent Storing of IP Addresses" | 켬. `sendDefaultPii: false`여도 서버 쪽에서 한 번 더 막는다 | "IP 주소는 저장하지 않음" |
+| Sentry IP 저장 끄기 | Settings > Projects > (프로젝트) > **Security & Privacy** > "Prevent Storing of IP Addresses" | 켬. SDK가 `infer_ip: "never"`를 보내도(`dataCollection.userInfo: false`, T10.10) 서버 쪽에서 한 번 더 막는다 | "IP 주소는 저장하지 않음" |
 | Sentry 서버 스크러빙 | 같은 화면 "Data Scrubber", "Use Default Scrubbers" | 둘 다 켬. Additional Sensitive Fields에 `lat`, `lng`, `latitude`, `longitude`, `x`, `y`, `provider_token` 추가 | |
 | Sentry 보관 기간 | Settings > Subscription(플랜 표) | 무료(Developer) 플랜은 오류 이벤트 30일(요금 페이지 기준, 콘솔에서 확정) | "수집일로부터 30일" |
 | Sentry 데이터 위치 | Settings > Organization > General > Data Storage Location | US/EU 확인 | 국외 이전 국가 |
@@ -411,3 +411,64 @@ SQL 인사이트는 **+ New insight** → **SQL** 탭 → 2장 SQL 붙여넣기 
 2. 표본 수(rec_sessions, sessions)가 20 미만인 날은 판단하지 않고 주간으로 본다.
 3. Sentry Issues: 새 이슈, 사용자 수 많은 순. KakaoTalk 브라우저 비중 확인.
 4. 이상 신호는 `docs/beta-retro.md`(T9.11) 메모에 날짜와 함께 적는다.
+
+## 9. T10.10 출시 전 동작 확인 (2026-11-02)
+
+> 요청은 "5장"이었으나 5장(PostHog 콘솔 단계)이 이미 있어 9장으로 붙였다. 프로덕션 `https://lunchmate-kr.vercel.app`(배포 커밋 `849051f`)을
+> curl과 로컬 Playwright(Chromium)로 열어 확인했다. 비밀값(DSN 키, 프로젝트 토큰)은 기록하지 않는다. 코드는 고치지 않았다(9.3은 보고만).
+
+### 9.1 확인 결과
+
+| 항목 | 방법 | 결과 |
+| --- | --- | --- |
+| Sentry 켜지는 조건 | 코드: `instrumentation-client.ts`(load 뒤 3초 + 유휴 시 동적 import), `sentry-client.ts`(`enabled: NODE_ENV === "production"`), Vercel Production 환경변수 이름(`vercel env ls`) | `NEXT_PUBLIC_SENTRY_DSN` 등록됨, 빌드 청크에 `*.ingest.us.sentry.io` DSN이 들어 있음. 브라우저에서 SDK 11.9.0 클라이언트 생성, `enabled: true` |
+| PostHog 켜지는 조건 | 코드: `scheduleAnalytics()`(첫 상호작용 또는 load 뒤 3초 + 유휴), `(app)`과 `/welcome` 레이아웃에서만 시작 | `NEXT_PUBLIC_POSTHOG_KEY`, `HOST` 등록됨. `/today`, `/poll/[code]`에서 `config.js` 로드 후 `us.i.posthog.com/e/`, `/i/v0/e/`로 전송. 랜딩 `/`와 약관 화면은 PostHog를 싣지 않음(의도대로) |
+| 브라우저 Sentry 요청 | Playwright 네트워크 목록(`/`, `/today`, `/poll/<임의 코드>`) | 페이지마다 `envelope` POST: session 1건(모든 방문), span(10% 샘플링된 방문만, pageload와 리소스, LCP). 응답 200 |
+| release, environment | 클라이언트 옵션과 envelope 헤더 | release = 커밋 SHA `849051fe...`(배포 커밋과 일치), environment = `production` |
+| 테스트 이벤트 1건 | 프로덕션 페이지의 SDK 클라이언트로 `captureEvent`. environment `t10_10_test`, 태그 `t10_10_test:true`, `task:T10.10`, fingerprint `t10_10_test`, 레벨 error | 수집 서버 200, event id `7e64d71c06de4c7982f60a2620c0b350`. environment가 production이 아니라 6.2 알림 규칙(Environment production)은 울리지 않는다 |
+| beforeSend 좌표 스크러버(실제 전송 본문) | 테스트 이벤트에 가짜 좌표(서울시청 공개 좌표)를 URL 쿼리, `extra.lat`, `extra.office_lng`, 문자열 "37.566535, 126.977969", `/map?lat=..&lng=..`로 섞음 | 전송 본문에서 모두 `[Filtered]`. 원문 숫자(`37.5665`, `126.97`) 0건. `request.url`도 `?lat=[Filtered]&lng=[Filtered]` |
+| Sentry IP | 전송 본문 | 이벤트에 `user.ip_address` 없음. 단 `sdk.settings.infer_ip: "auto"`, session `ip_address: "{{auto}}"`, span `ingest_settings.infer_ip: "auto"`로 **수집 서버가 접속 IP를 추론하도록 요청함**(9.3의 1). 저장은 4장 "Prevent Storing of IP Addresses"(T9.0 켬)로 막힌다 |
+| PostHog 좌표, IP | 전송 요청을 가로채 본문만 읽고 끊음(운영 데이터에 들어가지 않음). `/today?lat=..&lng=..`로 열기 | `$pageview`, `$web_vitals` 모두 `$geoip_disable: true`, `$ip` 속성 없음, 좌표 숫자 0건, 쿼리 좌표는 `[Filtered]`, `$elements` 없음. IP 폐기는 4장 콘솔 설정(Discard client IP data, T9.0)이 맡는다 |
+| PostHog 초대 코드 | 같은 방법, `/poll/<임의 코드>` | `$pageview`의 `$current_url`은 `/poll/[code]`로 가려지지만 `$pathname`에는 **코드 원문**, `$web_vitals`는 `$current_url`과 `$pathname` 모두 원문(9.3의 2) |
+| 소스맵 | `withSentryConfig` 설정, Vercel 환경변수, `.map` 요청 | `SENTRY_AUTH_TOKEN`이 Vercel에 없어 업로드 꺼짐(`sourcemaps.disable`). 공개 `.map`은 403(노출 없음). 프로덕션 스택은 압축된 파일명으로 보인다(9.3의 3) |
+| 서버(Node, Edge) Sentry | 코드: `instrumentation.ts` → `sentry.server.config.ts`, `sentry.edge.config.ts`, `onRequestError` | 같은 `sentryBaseOptions`(beforeSend 스크러버) 사용. 서버 오류를 일부러 내는 시험은 운영 영향 때문에 하지 않았다 |
+| 알림 메일 | Sentry, PostHog 대시보드 권한 없음 | 사용자 확인(9.2) |
+
+참고: PostHog는 헤드리스 브라우저(User-Agent와 `navigator.webdriver`)를 봇으로 보고 이벤트를 보내지 않는다. Playwright 자동 시험(e2e)이 PostHog 지표를 더럽히지 않는 이유이기도 하다.
+
+### 9.2 사용자 확인 단계
+
+Sentry
+
+1. https://sentry.io → **Issues** → 상단 Environment를 `t10_10_test`로 바꾸거나 검색창에 `t10_10_test:true` 입력.
+2. "T10.10 출시 전 동작 확인 테스트 이벤트" 이슈가 있는지 봅니다(event id `7e64d71c06de4c7982f60a2620c0b350`). 없으면 **Stats > Usage**에서 2026-11-02 Filtered, Dropped 이유를 확인해 Claude에게 알려 주십시오.
+3. 이벤트 화면에서 확인: Release가 `849051fe...`, **Additional Data**의 `lat`, `office_lng`, `note`, `url` 값이 `[Filtered]`, **User** 칸에 IP 주소가 없음.
+4. **Alerts** → 6.2의 "새 이슈" 규칙 열기 → 편집 화면 아래 **Send Test Notification** → 본인 메일함에 Sentry 테스트 알림이 오는지 확인(스팸함 포함). 나머지 규칙도 액션이 같은 메일인지 목록에서 확인합니다.
+5. 확인이 끝나면 테스트 이슈를 **Resolve** 또는 **Delete**(Environment가 달라 운영 화면에는 섞이지 않지만 정리합니다).
+
+PostHog
+
+6. https://us.posthog.com → **Activity**(또는 Events)에서 본인 휴대폰으로 `/today`를 연 뒤 1분 안에 `$pageview`가 들어오는지 확인합니다. 이벤트를 열어 `$ip`가 비어 있는지(Discard client IP data 동작) 확인합니다. 이 방문은 개발자 기기 방문이므로 0장 "테스트 계정" 규칙대로 날짜를 메모합니다.
+7. **Settings > Project > Web analytics**(또는 Autocapture 묶음)의 **Web vitals autocapture**가 켜져 있습니다(전송에서 `$web_vitals` 확인). 9.3의 2를 고치기 전까지 끌지 정합니다.
+8. 무료 할당량 80%, 100% 메일 수신자는 launch-ops 1.4의 3단계로 확인합니다.
+
+### 9.3 찾은 문제와 조치
+
+> 1, 2는 같은 날 별도 작업으로 고쳤다(아래 "조치"). 프로덕션 반영은 다음 배포부터이며, 배포 뒤 9.1의 PostHog 초대 코드 행과 Sentry IP 행을 다시 확인한다.
+
+1. **[중간] `sendDefaultPii: false`가 Sentry SDK 11에서 아무 효과가 없다.** SDK 11은 이 옵션을 없애고 `dataCollection`으로 바꿨고, 미지정 시 기본값이 허용 쪽이다(userInfo true로 IP 추론, 쿠키, 요청과 응답 헤더, 요청과 응답 본문 전부, DB 쿼리 데이터). `node_modules/@sentry/*` 11.9 빌드에 `sendDefaultPii`를 읽는 코드가 0건이고, 전송 본문에서 `infer_ip: "auto"`를 확인했다. 좌표는 beforeSend가 키와 패턴으로 가리고, 쿠키와 토큰은 SDK 민감 키 필터(`sb-`, `token`, `cookie` 등)가, IP 저장은 콘솔 설정이 막아 현재 실제 유출은 확인되지 않았다. 그래도 처리방침과 `sentry-options.ts` 주석의 전제가 틀렸다. 제안: `sentryBaseOptions`에 `dataCollection: { userInfo: false, cookies: false, httpBodies: [], databaseQueryData: false }`를 넣고 `sentry-options.test.ts`의 `sendDefaultPii` 단언을 이것으로 바꾼다. 출처: sentry-javascript MIGRATION.md "sendDefaultPii is replaced by dataCollection"(Context7, 2026-11-02 확인).
+   - **조치(2026-11-02)**: `sentry-options.ts`에서 `sendDefaultPii`를 지우고 `SENTRY_DATA_COLLECTION`을 `dataCollection`으로 넣었다. 브라우저, Node, Edge가 같은 `sentryBaseOptions`를 쓰므로 세 곳에 모두 적용된다. 값: `userInfo: false`(user.* 자동 채움, IP 추론, 서버 span의 `client.address` 끔), `cookies: false`, `httpHeaders: { request: { allow: ["user-agent"] }, response: false }`, `httpBodies: []`, `urlQueryParams: { deny: [IP 계열 키] }`, `databaseQueryData: false`, `queues`, `graphQL`, `genAI`, `mcp` 끔. 요청 헤더는 User-Agent 하나만 남겼다: 처리방침의 "브라우저 정보"이고, 인앱 브라우저 오류 구분과 Sentry 콘솔의 구형 브라우저, 크롤러 필터가 이 값을 쓴다. 브라우저 SDK가 모으는 헤더는 Referer와 User-Agent뿐이라 Referer는 빠진다.
+   - **확인**: `@sentry/core` 11.9.0 `resolveDataCollectionOptions.js`(기본값 전부 허용), `@sentry/browser` `client.js`(`infer_ip: userInfo ? "auto" : "never"`, userInfo가 참일 때만 세션에 `ip_address: "{{auto}}"`), `tracing/spans/envelope.js`(span `ingest_settings.infer_ip` 같은 판정). 단위 시험 `sentry-options.test.ts`는 옵션 값과 함께 실제 SDK Client(`NodeClient`)가 이 값으로 풀리는지 본다. 로컬 전송 가로채기(브라우저 SDK 11.9.0 + 이 옵션을 묶어 Chromium에서 오류 1건과 pageload span 전송, 수집 서버 요청은 가로채고 끊음): 조치 전 `infer_ip: "auto"`, 조치 뒤 이벤트 `sdk.settings`와 span `ingest_settings` 모두 `"never"`, `ip_address`, 쿠키 0건, User-Agent는 남음.
+2. **[중간] 투표 초대 코드 원문이 PostHog로 간다.** `capturePageview`는 `$current_url`만 `/poll/[code]`로 바꾸고, posthog-js가 자동으로 붙이는 `$pathname`(모든 이벤트)과 Web vitals 자동 수집 이벤트의 `$current_url`은 원문이다. 초대 코드는 방 조회 권한이라(CLAUDE.md 7장) 분석 도구에 남기지 않는 편이 맞고, 3장 표의 "초대 코드 가림"과도 어긋난다. 제안: `posthogBeforeSend`에서 `$current_url`, `$pathname`, `$referrer`, `$initial_*` 속성에 `pageviewPath` 규칙을 적용하고 테스트 추가. 임시로는 9.2의 7단계에서 Web vitals autocapture를 끄면 `$web_vitals` 경로는 막히지만 `$pathname`은 남는다. Sentry span의 `url.full`에도 같은 경로가 들어갈 수 있다(접근은 소유자뿐이라 낮음).
+   - **조치(2026-11-02)**: `posthogBeforeSend`가 이벤트 종류와 상관없이 `properties`, `$set`, `$set_once`를 깊이 훑는다. (1) 이름이 `url`, `pathname`, `referrer`, `href`로 끝나는 속성(`$current_url`, `$pathname`, `$referrer`, `$initial_current_url`, `$initial_pathname`, `$initial_referrer`, `$session_entry_url`, `$session_entry_pathname`, `$session_entry_referrer`, `$prev_pageview_pathname` 등, 중첩된 `$web_vitals_*_event` 안의 `$current_url` 포함)은 `pageviewPath` 규칙을 적용하고 **쿼리와 해시를 버린다**(절대 URL은 origin + 가린 경로, `$direct`는 그대로). (2) 그 밖의 모든 문자열도 `/poll/<코드>`와 퍼센트 인코딩된 `%2Fpoll%2F<코드>`를 `[code]`로 바꾼다(`$initial_person_info`의 `u`, 로그인 복귀 `next` 파라미터 등). 비밀 세그먼트 목록은 `pageview.ts`의 `SECRET_SEGMENTS` 하나를 함께 쓴다. `$host`, `$referring_domain`은 그대로.
+   - **확인**: `track.test.ts`의 "초대 코드 가림" 묶음이 `$pageview`, `$web_vitals`, `$pageleave`, 직접 보낸 이벤트, `$set` 다섯 종류에 대해 결과 JSON 전체에 코드 원문이 0건임을 단언한다. 9.2의 7단계(Web vitals autocapture 끄기)는 더 이상 필요 없다.
+   - **남은 것(낮음)**: Sentry 이벤트의 `request.url`과 span 이름, `url.full`에는 `/poll/<코드>`가 남는다(로컬 전송 가로채기로 확인). Sentry 접근은 소유자뿐이고 pageload 트랜잭션 이름은 `/poll/[code]`로 파라미터화된다. 막으려면 `scrub.ts`의 Sentry 훅에 같은 세그먼트 규칙을 더하면 된다(별도 판단).
+3. **[낮음] 소스맵 미업로드.** 프로덕션 오류 스택이 압축 코드로 보여 원인 파악이 늦다. 6.3의 `SENTRY_AUTH_TOKEN`(`org:ci`) Vercel Production 등록이 남아 있다.
+4. **[낮음] 캐시된 HTML에 서버 트레이스 메타가 박힌다.** `x-vercel-cache: HIT`인 `/today`, `/poll/[code]` HTML에 `sentry-trace`, `baggage`(`sentry-transaction=POST`, 고정 `sample_rand`)가 들어 있어 캐시 수명 동안 방문자들이 같은 trace id와 샘플링 결정을 공유한다. 오류 수집에는 영향이 없고 성능 지표 표본(6.2 LCP 알림)이 치우칠 수 있다.
+   - **판단(2026-11-02, 고치지 않음)**: trace id는 무작위 값이고 baggage에는 공개 키, release, environment, `sentry-transaction=POST`, `sample_rand`만 있어 개인 정보가 아니다. 오류 이벤트는 같은 trace에 묶일 뿐 따로 수집, 그룹화되므로 오류 수집에는 해가 없다. 메타는 `withSentryConfig`가 Next.js `experimental.clientTraceMetadata`에 `baggage`, `sentry-trace`를 넣어서 생긴다(`@sentry/nextjs` `getFinalConfigObjectUtils.js`). 간단한 해결 후보: `next.config.ts`에서 `withSentryConfig(...)` 결과의 `experimental.clientTraceMetadata`를 빈 배열로 덮어쓰면 캐시된 HTML에 메타가 실리지 않고, 브라우저는 pageload마다 새 trace를 시작한다(서버 렌더링 span과의 연결만 잃는다). LCP 알림 표본이 실제로 치우친 것이 보일 때 적용을 검토한다.
+5. **[참고] SDK 지연 로딩 트레이드오프.** Sentry와 PostHog 모두 load 뒤 약 3~7초에 시작하므로 그 전에 난 오류와 바로 떠난 방문은 잡히지 않는다(T8.10 결정, 의도된 동작).
+
+### 9.4 판단
+
+- 수집 경로(브라우저 Sentry, PostHog), release와 environment 태그, 좌표 스크러버, PostHog IP와 GeoIP 차단은 프로덕션에서 동작한다.
+- 남은 것: 9.2의 1~5(Sentry 이슈 생성과 알림 메일 수신), 6(PostHog 수신과 IP 폐기 확인). 9.3의 1, 2는 코드 수정 완료(배포 뒤 재확인), 3은 G10 전 사용자 작업.

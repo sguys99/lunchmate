@@ -14,7 +14,7 @@
 //   poll_members.user_id on delete set null(익명 참여자). 끝난 투표방은 closed_at + 90일에 삭제(lunchmate_purge_old_polls,
 //   후보, 참여자, 표는 cascade. visits는 polls와 외래 키가 없어 남는다).
 // - 분석과 오류: src/lib/analytics/posthog-config.ts(autocapture 끔, identify 없음, person_profiles identified_only, $geoip_disable,
-//   좌표 스크러버), sentry-options.ts(sendDefaultPii false, 좌표 스크러버). 호스트 us.i.posthog.com, ingest.us.sentry.io.
+//   좌표 스크러버), sentry-options.ts(dataCollection으로 사용자 정보, 쿠키, 본문 수집 끔, 좌표 스크러버, T10.10). 호스트 us.i.posthog.com, ingest.us.sentry.io.
 // - 리전: Supabase 서울 ap-northeast-2(docs/setup-guide.md, T0.10), Vercel 서버 함수 icn1(vercel.json).
 // 법정 기재 항목 근거: 개인정보 보호법 제30조 제1항, 제28조의8 제2항(국외 이전 공개 사항), 개인정보보호위원회
 // 「개인정보 처리방침 작성지침」(2025-04 개정본, 2026-04 개정 보도). 위치정보 부분은 T10.1 KISA 서면 확인 뒤 다시 본다.
