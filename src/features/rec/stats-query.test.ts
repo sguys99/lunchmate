@@ -1,6 +1,11 @@
+import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
+import type { PlaceStatsRow } from "./place-stats";
 
-vi.mock("./stats-source", () => ({ fetchPlaceStats: vi.fn() }));
+vi.mock("./stats-source", () => ({
+  fetchPlaceStats: vi.fn(),
+  fetchHomeStats: vi.fn(),
+}));
 
 const { statsBatches, PLACE_STATS_BATCH } = await import("./stats-load");
 const { placeStatsQuery } = await import("./stats-query");
@@ -44,6 +49,45 @@ describe("loadStatsRows", () => {
     const assertion = expect(p).rejects.toThrow("place_stats_timeout");
     await vi.advanceTimersByTimeAsync(STATS_TIMEOUT_MS + 1);
     await assertion;
+    vi.useRealTimers();
+  });
+});
+
+describe("loadHomeStats 카드 대기 상한", () => {
+  const row = { place_id: "1" } as unknown as PlaceStatsRow;
+
+  it("상한 안에 오면 받은 집계를 그대로 쓴다", async () => {
+    const { fetchHomeStats } = await import("./stats-source");
+    const { loadHomeStats } = await import("./stats-load");
+    vi.mocked(fetchHomeStats).mockResolvedValueOnce({
+      ok: true,
+      rows: [row],
+      memos: {},
+      menus: {},
+    });
+    await expect(loadHomeStats(["1"], false)).resolves.toMatchObject({
+      rows: [row],
+    });
+  });
+
+  it("상한을 넘기면 빈 집계(중립값)로 카드를 내고, 늦게 온 집계는 지도 캐시에만 넣는다", async () => {
+    vi.useFakeTimers();
+    const { fetchHomeStats } = await import("./stats-source");
+    const { loadHomeStats, HOME_STATS_WAIT_MS } = await import("./stats-load");
+    type Result = Awaited<ReturnType<typeof fetchHomeStats>>;
+    let arrive: (v: Result) => void = () => {};
+    vi.mocked(fetchHomeStats).mockReturnValueOnce(
+      new Promise<Result>((r) => {
+        arrive = r;
+      }),
+    );
+    const client = new QueryClient();
+    const p = loadHomeStats(["1"], false, client);
+    await vi.advanceTimersByTimeAsync(HOME_STATS_WAIT_MS + 1);
+    await expect(p).resolves.toEqual({ rows: [], memos: {}, menus: {} });
+    arrive({ ok: true, rows: [row], memos: {}, menus: {} });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(client.getQueryData(["placeStats", "1"])).toEqual([row]);
     vi.useRealTimers();
   });
 });

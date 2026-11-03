@@ -8,6 +8,14 @@ import type { PlaceStatsRow } from "./place-stats";
 export const PLACE_STATS_BATCH = 60;
 /** 요청 하나를 기다리는 최대 시간. 카드를 오래 막지 않는다 */
 export const STATS_TIMEOUT_MS = 2_500;
+/**
+ * 홈 카드가 집계를 기다리는 최대 시간(11/03 첫 로딩 측정). 평소 응답은 0.2초 안팎인데 서버가 식어 있으면 1.2초쯤 걸렸고,
+ * 실패하면 요청 상한 2.5초에 재시도까지 약 5.3초 동안 카드가 스켈레톤에 머물렀다.
+ * 넘기면 홈은 이 후보 집합을 빈 집계(중립값, 콜드 스타트)로 추천한다. 쿼리는 그 값으로 성공해 이번 세션 동안 유지되므로
+ * (staleTime Infinity) 늦게 온 집계로 카드가 눈앞에서 다시 뽑히지 않고, 탭을 오가도 같은 묶음이 나온다.
+ * 늦게 온 집계는 지도 캐시(placeStats 키)에만 넣는다. 그 세션의 홈 대표 메뉴와 메모 배지는 비어 있다.
+ */
+export const HOME_STATS_WAIT_MS = 800;
 
 /** 후보 id → 중복 없이 정렬한 묶음들(60곳씩). 같은 후보 집합이면 같은 결과 */
 export function statsBatches(ids: readonly string[]): string[][] {
@@ -56,11 +64,34 @@ export async function loadHomeStats(
   withMemos: boolean,
   /** 받은 집계를 같은 후보 집합의 지도 캐시(placeStats 키)에도 넣어 지도 탭이 다시 읽지 않게 한다 */
   client?: QueryClient,
-): Promise<{
+): Promise<HomeStatsRows> {
+  const full = readHomeStats(ids, withMemos, client);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const gaveUp = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), HOME_STATS_WAIT_MS);
+  });
+  try {
+    const first = await Promise.race([full, gaveUp]);
+    if (first) return first;
+  } finally {
+    clearTimeout(timer);
+  }
+  // 늦게 오면 지도 캐시만 채운다(readHomeStats 안). 실패는 조용히 버린다
+  full.catch(() => undefined);
+  return { rows: [], memos: {}, menus: {} };
+}
+
+type HomeStatsRows = {
   rows: PlaceStatsRow[];
   memos: Record<string, string>;
   menus: Record<string, CardMenu>;
-}> {
+};
+
+async function readHomeStats(
+  ids: readonly string[],
+  withMemos: boolean,
+  client?: QueryClient,
+): Promise<HomeStatsRows> {
   const batches = statsBatches(ids);
   const results = await Promise.all(
     batches.map((b) =>

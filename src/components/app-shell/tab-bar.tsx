@@ -16,7 +16,7 @@
 //   데스크톱은 좌 리스트 칸 아래 sticky 그대로다. 디자인 랩 미리보기(여러 개가 한 화면)는 dock 없이 sticky다.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, type MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { commonCopy } from "@/copy/common";
 import { focusRing } from "@/components/ui/interaction";
 import { useMotionPreference } from "@/lib/motion/preference";
@@ -36,6 +36,8 @@ export type TabBarViewProps = {
   label?: string;
   /** 앱 화면: 모바일에서 화면 아래 고정(fixed) + 문서 흐름에 같은 높이 빈 자리. 데스크톱은 sticky */
   dock?: boolean;
+  /** true면 아직 다른 탭을 미리 받지 않는다(첫 화면 요청과 회선을 나누지 않게, useDeferredPrefetch) */
+  deferPrefetch?: boolean;
   className?: string;
 };
 
@@ -52,6 +54,7 @@ export function TabBarView({
   preview,
   label = commonCopy.tabBarLabel,
   dock,
+  deferPrefetch,
   className,
 }: TabBarViewProps) {
   const reduced = useMotionPreference() === "reduce";
@@ -72,7 +75,7 @@ export function TabBarView({
             <li key={id} className="relative flex min-w-0">
               <Link
                 href={href}
-                prefetch={preview ? false : undefined}
+                prefetch={preview || deferPrefetch ? false : undefined}
                 onClick={preview ? preventNavigation : undefined}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
@@ -130,11 +133,39 @@ export function TabBarView({
 }
 
 /** 앱 화면용 하단 탭. 현재 경로로 활성 탭을 정한다. */
+/**
+ * 다른 탭 미리 받기를 첫 화면이 다 받아진 뒤(load, 카카오 SDK와 검색 스크립트 포함) 0.5초까지 미룬다(11/03 첫 로딩 측정).
+ * 바로 받으면 /map, /poll, /me와 그 로그인 이동까지 10건 가까운 요청이 홈의 카카오 검색, 집계 요청과 같은 회선을 나눠 썼다.
+ * 그 전에 탭을 눌러도 이동은 된다(미리 받지 않았을 뿐).
+ */
+function useDeferredPrefetch(): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let timer = 0;
+    const schedule = () => {
+      timer = window.setTimeout(() => setReady(true), 500);
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      window.clearTimeout(timer);
+    };
+  }, []);
+  return !ready;
+}
+
 export function BottomTabBar({ className }: { className?: string }) {
   const pathname = usePathname();
+  const deferPrefetch = useDeferredPrefetch();
   // 베타 의견의 "지금 보던 화면"(T9.4): 나 탭 직전 경로를 이 탭 메모리에만 적는다
   useEffect(() => rememberRoute(pathname), [pathname]);
   return (
-    <TabBarView activeId={matchTab(pathname)} dock className={className} />
+    <TabBarView
+      activeId={matchTab(pathname)}
+      dock
+      deferPrefetch={deferPrefetch}
+      className={className}
+    />
   );
 }
