@@ -608,7 +608,9 @@ export type Database = {
           craving_until: string | null
           created_at: string
           dinner_budget: number
+          liked_categories: string[]
           lunch_budget: number
+          taste_prompt_dismissed_at: string | null
           updated_at: string
           user_id: string
           walk_minutes: number
@@ -618,7 +620,9 @@ export type Database = {
           craving_until?: string | null
           created_at?: string
           dinner_budget?: number
+          liked_categories?: string[]
           lunch_budget?: number
+          taste_prompt_dismissed_at?: string | null
           updated_at?: string
           user_id: string
           walk_minutes?: number
@@ -628,7 +632,9 @@ export type Database = {
           craving_until?: string | null
           created_at?: string
           dinner_budget?: number
+          liked_categories?: string[]
           lunch_budget?: number
+          taste_prompt_dismissed_at?: string | null
           updated_at?: string
           user_id?: string
           walk_minutes?: number
