@@ -49,6 +49,11 @@
   animation: lm-today-fade-in var(--lm-duration-slow) var(--lm-ease-enter) both;
   animation-delay: calc(var(--reveal, 0) * var(--lm-stagger));
 }
+/* 이미 한 번 보인 묶음: 탭을 오가며 다시 보일 때 등장 페이드를 재생하지 않는다(today-screen onDeckAnimationEnd) */
+.lm-today-deck[data-played][data-phase="first"],
+.lm-today-deck[data-played][data-phase="entering"] [data-reveal] {
+  animation: none;
+}
 /* 교환: 큰 카드 자리 */
 .lm-today-hero[data-swap="out"] {
   animation: lm-today-fade-out var(--lm-duration-fast) var(--lm-ease-exit)

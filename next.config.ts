@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
   env: { LM_SW_VERSION: swVersion, LM_APP_VERSION: appVersion ?? "0.0.0" },
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // 탭을 오가며 돌아온 화면(오늘, 지도, 나)은 60초 동안 브라우저 메모리의 직전 화면을 그대로 쓴다.
+    // 기본값 0이면 탭을 누를 때마다 서버 데이터를 다시 받는 동안 스켈레톤이 떴다(로그인 상태 오늘 복귀 약 0.3~0.8초).
+    // 설정 저장(me/actions의 revalidatePath)은 이 캐시를 바로 비운다. 즐겨찾기, 다시 안 갈 곳처럼 다른 탭 서버 데이터에
+    // 들어가는 값은 최대 60초 늦게 반영될 수 있다. 카카오 장소 값은 서버 데이터에 없다(세션 메모리 캐시 그대로, CLAUDE.md 7장).
+    // 출처: node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/staleTimes.md
+    staleTimes: { dynamic: 60 },
+  },
   // design-lab 화면은 루트 DESIGN.md 프런트매터를 서버에서 읽는다(getScreenTokens, T1.14, T1.20).
   // 시안 B 일러스트 확인 페이지(T2.8까지 유지)는 보존된 b.DESIGN.md를 읽는다. 함수 번들에 문서가 들어가도록 명시한다.
   outputFileTracingIncludes: {

@@ -558,6 +558,19 @@ export function TodayScreen({
   }
 
   function onDeckAnimationEnd(e: AnimationEvent<HTMLDivElement>) {
+    // 등장 페이드(첫 화면, 다시 뽑기 순차 등장)가 모두 끝나면 data-played를 단다(today.css가 그 뒤 등장 애니메이션을 끈다).
+    // 다른 탭에 갔다 돌아오면 Next.js가 숨겨 둔 화면을 다시 보이는데(display: none → 보임), CSS 애니메이션은 이때 처음부터
+    // 다시 재생돼 이미 받은 카드가 0.3초 동안 투명했다가 나타났다. React 상태가 아니라 DOM 속성이라 다시 그리지 않는다.
+    // 묶음이 바뀌면(key) 새 요소라 속성 없이 다시 등장한다. 퇴장(leaving)은 이 속성과 무관하게 재생된다.
+    if (
+      e.animationName === "lm-today-fade-in" &&
+      shuffle !== "leaving" &&
+      e.currentTarget
+        .getAnimations?.({ subtree: true })
+        .every((a) => a.playState === "finished")
+    ) {
+      e.currentTarget.dataset.played = "";
+    }
     if (e.target !== e.currentTarget) return;
     if (shuffle === "leaving" && e.animationName === "lm-today-fade-out") {
       finishShuffle();

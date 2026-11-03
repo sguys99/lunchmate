@@ -3,14 +3,21 @@
 //   SDK 요청이 첫 로드 JS가 끝난 뒤로 밀려 카드가 늦었다. HTML 머리에 <link rel=preload as=script>를 두어 첫 로드 JS와
 //   나란히 받게 한다. 로더(sdk-loader.ts)가 같은 주소로 <script>를 넣으면 브라우저가 미리 받은 응답을 그대로 쓴다.
 // - 받는 스크립트, 시점이 앞당겨질 뿐 요청 대상과 횟수는 같다(홈은 진입하면 어차피 SDK를 받는다). 카카오 응답은 저장하지 않는다.
+// - sdk.js는 이어서 t1.kakaocdn.net에서 본체(kakao.js)와 services.js를 차례로 받는다. 그 연결(DNS, TLS)을 sdk.js와 나란히
+//   미리 열어 둔다(preconnect, 요청은 보내지 않는다). 휴대폰 회선에서 왕복 1~2번을 아낀다.
 // 출처 (2026-11-02 확인): React DOM preload(href, { as: "script" }) 문서(react.dev/reference/react-dom/preload),
 //   HTML preload 매칭 규칙(같은 URL, 같은 crossorigin 모드: 로더의 <script>는 crossorigin 없음, 힌트도 없음)
-import { preload } from "react-dom";
+import { preconnect, preload } from "react-dom";
 import { clientEnv } from "@/lib/env/client";
 import { buildKakaoSdkUrl } from "./sdk-loader";
 
+/** SDK 본체(kakao.js)와 services.js를 내려 주는 카카오 CDN */
+export const KAKAO_SDK_CDN_ORIGIN = "https://t1.kakaocdn.net";
+
 export function KakaoSdkPreload() {
   const appKey = clientEnv().NEXT_PUBLIC_KAKAO_JS_KEY?.trim();
-  if (appKey) preload(buildKakaoSdkUrl(appKey), { as: "script" });
+  if (!appKey) return null;
+  preload(buildKakaoSdkUrl(appKey), { as: "script" });
+  preconnect(KAKAO_SDK_CDN_ORIGIN);
   return null;
 }
