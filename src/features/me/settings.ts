@@ -1,4 +1,4 @@
-// 나 탭 설정 저장 검증과 흐름 (T4.23~T4.27, SET-01~05). 서버 액션(app/(app)/me/actions.ts)이 쓴다.
+// 나 탭 설정 저장 검증과 흐름 (T4.23~T4.27, T9.17, SET-01~06). 서버 액션(app/(app)/me/actions.ts)이 쓴다.
 // Supabase는 주입받아 테스트한다(settings.test.ts). 브라우저에서 import하지 않는다(zod를 화면 번들 밖에 둔다).
 //
 // 규칙
@@ -54,6 +54,9 @@ export const renameOfficeSchema = z.strictObject({ id, name: shortName });
 export const officeIdSchema = z.strictObject({ id });
 export const prefsSchema = finishOnboardingSchema.shape.prefs;
 export const avoidSchema = finishOnboardingSchema.shape.avoid;
+export const likedSchema = z.strictObject({
+  categories: finishOnboardingSchema.shape.liked,
+});
 export const cravingSchema = z.strictObject({
   categories: z.array(z.enum(CATEGORY_SLUGS)).max(MAX_CRAVINGS).refine(unique),
 });
@@ -79,6 +82,8 @@ export type SettingsDeps = {
   listAvoid: (userId: string) => Promise<StoredAvoid[]>;
   insertAvoid: (userId: string, rows: AvoidRow[]) => Promise<boolean>;
   deleteAvoid: (userId: string, ids: string[]) => Promise<boolean>;
+  /** 좋아하는 음식 저장(SET-06). 성공하면 true */
+  updateLiked: (userId: string, categories: string[]) => Promise<boolean>;
   readCravings: (userId: string) => Promise<string[]>;
   /** 저장 뒤 DB가 정한 만료 시각을 돌려준다. 실패면 undefined */
   updateCravings: (
@@ -267,4 +272,18 @@ export async function saveCravings(
   return saved
     ? { ok: true, until: saved.until }
     : { ok: false, error: "save" };
+}
+
+/** 좋아하는 음식 (SET-06, D-39). 온보딩과 같은 검사(11종, 5개, 중복 금지). 정렬과 중복 정리는 DB 트리거 */
+export async function saveLiked(
+  raw: unknown,
+  deps: Pick<SettingsDeps, "currentUserId" | "updateLiked">,
+): Promise<SettingsResult> {
+  const p = await prepare(likedSchema, raw, deps);
+  if (!p.ok) return p;
+  const ok = await safe(
+    deps.updateLiked(p.userId, [...p.input.categories]),
+    false,
+  );
+  return ok ? { ok: true } : { ok: false, error: "save" };
 }

@@ -15,6 +15,7 @@ import {
   setDefaultOffice,
   type SettingsDeps,
   type StoredAvoid,
+  saveLiked,
 } from "./settings";
 
 const USER = "11111111-1111-4111-8111-111111111111";
@@ -43,6 +44,7 @@ function deps(over: Partial<SettingsDeps> = {}): SettingsDeps {
     listAvoid: vi.fn(async () => []),
     insertAvoid: vi.fn(async () => true),
     deleteAvoid: vi.fn(async () => true),
+    updateLiked: vi.fn(async () => true),
     readCravings: vi.fn(async () => []),
     updateCravings: vi.fn(async (_u: string, c: string[]) => ({
       until: c.length ? "2026-11-06T01:00:00Z" : null,
@@ -372,5 +374,42 @@ describe("요즘 이게 땡겨요 (SET-05)", () => {
       until: null,
     });
     expect(d.readCravings).not.toHaveBeenCalled();
+  });
+});
+
+describe("좋아하는 음식 저장 (SET-06, T9.17)", () => {
+  it("11종 안에서 5개까지 저장한다", async () => {
+    const d = deps();
+    const r = await saveLiked({ categories: ["gukbap", "ilsik"] }, d);
+    expect(r).toEqual({ ok: true });
+    expect(d.updateLiked).toHaveBeenCalledWith(USER, ["gukbap", "ilsik"]);
+  });
+
+  it("빈 목록으로 모두 뺄 수 있다", async () => {
+    const d = deps();
+    expect(await saveLiked({ categories: [] }, d)).toEqual({ ok: true });
+    expect(d.updateLiked).toHaveBeenCalledWith(USER, []);
+  });
+
+  it.each([
+    ["6개", ["hansik", "jungsik", "ilsik", "yangsik", "bunsik", "gukbap"]],
+    ["술집", ["pub"]],
+    ["중복", ["ilsik", "ilsik"]],
+    ["모르는 값", ["pizza"]],
+  ])("%s는 저장하지 않는다", async (_, categories) => {
+    const d = deps();
+    expect(await saveLiked({ categories }, d)).toEqual({
+      ok: false,
+      error: "invalid",
+    });
+    expect(d.updateLiked).not.toHaveBeenCalled();
+  });
+
+  it("저장 실패는 save", async () => {
+    const d = deps({ updateLiked: async () => false });
+    expect(await saveLiked({ categories: ["ilsik"] }, d)).toEqual({
+      ok: false,
+      error: "save",
+    });
   });
 });

@@ -328,6 +328,52 @@ test.describe("나 탭", () => {
     }
   });
 
+  test("좋아하는 음식 저장, 5개까지 (SET-06, T9.17)", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    const { cleanup, token } = await setup(context, baseURL!, "me6");
+    try {
+      await page.goto("/me/settings");
+      await expect(
+        page.getByRole("link", { name: /좋아하는 음식/ }),
+      ).toContainText("고르지 않음");
+      await page.goto("/me/liked");
+      const save = page.getByRole("button", { name: "저장" });
+      await expect(save).toHaveAttribute("aria-disabled", "true");
+      for (const name of ["한식", "국밥", "일식", "분식", "샐러드"]) {
+        await page.getByRole("button", { name, exact: true }).click();
+      }
+      // 5개가 차면 나머지 타일은 비활성(aria-disabled)이고 안내 문장이 바뀐다
+      const meat = page.getByRole("button", { name: "고기", exact: true });
+      await expect(meat).toHaveAttribute("aria-disabled", "true");
+      await expect(meat).toHaveAttribute("aria-pressed", "false");
+      await expect(
+        page.getByText("5개를 모두 골랐습니다", { exact: false }).first(),
+      ).toBeVisible();
+      await shot(page, "me-liked");
+      await save.click();
+      await expect(
+        page.getByText("저장했습니다. 다음 추천부터 반영합니다"),
+      ).toBeVisible();
+      const prefs = await readOwn<{ liked_categories: string[] }[]>(
+        env!,
+        token,
+        "preferences?select=liked_categories",
+      );
+      expect(prefs[0]?.liked_categories).toEqual([
+        "bunsik",
+        "gukbap",
+        "hansik",
+        "ilsik",
+        "salad",
+      ]);
+    } finally {
+      await cleanup();
+    }
+  });
+
   test("기록: 주 묶음, 이번 달 숫자, 늦은 답, 장소 해제, 후기 삭제 (T6.13)", async ({
     page,
     context,

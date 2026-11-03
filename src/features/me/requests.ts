@@ -25,6 +25,8 @@ export type NicknameRequest = { nickname: string };
 export type PrefsRequest = Prefs;
 export type AvoidRequest = AvoidChoice;
 export type CravingRequest = { categories: CategorySlug[] };
+/** 좋아하는 음식 (SET-06, D-39). 11종 slug, 5개까지 */
+export type LikedRequest = { categories: string[] };
 
 /** 기본을 지웠을 때 새로 기본이 된 곳 이름(없으면 null) */
 export type DeleteOfficeResult = SettingsResult<{ promoted: string | null }>;

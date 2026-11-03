@@ -66,6 +66,8 @@ export async function loadOffices({
 export type PreferencesData = Prefs & {
   cravings: string[];
   cravingUntil: string | null;
+  /** 좋아하는 음식 slug (SET-06, D-39) */
+  liked: string[];
 };
 
 export async function loadPreferences({
@@ -75,7 +77,7 @@ export async function loadPreferences({
   const { data, error } = await supabase
     .from("preferences")
     .select(
-      "lunch_budget, dinner_budget, walk_minutes, craving_categories, craving_until",
+      "lunch_budget, dinner_budget, walk_minutes, craving_categories, craving_until, liked_categories",
     )
     .eq("user_id", userId)
     .maybeSingle();
@@ -86,6 +88,7 @@ export async function loadPreferences({
     walk: data.walk_minutes,
     cravings: data.craving_categories,
     cravingUntil: data.craving_until,
+    liked: data.liked_categories,
   };
 }
 

@@ -10,6 +10,7 @@ import { historyCopy } from "@/copy/history";
 import { meCopy } from "@/copy/me";
 import { cravingStatus, knownCravings } from "@/features/me/craving";
 import { DisplaySummary } from "@/features/me/display-summary";
+import { isLikedCategory } from "@/features/onboarding/constants";
 import {
   loadAvoid,
   loadOffices,
@@ -56,6 +57,7 @@ async function Settings() {
 
   const office = resolveDefaultOffice(offices);
   const cravings = knownCravings(prefs.cravings);
+  const liked = prefs.liked.filter(isLikedCategory);
   const craving = cravingStatus(cravings, prefs.cravingUntil, new Date());
   const avoidCount =
     avoid.foods.length + avoid.allergies.length + avoid.custom.length;
@@ -85,6 +87,15 @@ async function Settings() {
           href="/me/avoid"
           label={rows.avoid}
           value={avoidCount > 0 ? summary.avoid(avoidCount) : summary.avoidNone}
+        />
+        <SettingsLinkRow
+          href="/me/liked"
+          label={rows.liked}
+          value={
+            liked.length > 0
+              ? liked.map((s) => categoryLabel(s).split("/")[0]).join(", ")
+              : summary.likedNone
+          }
         />
         <SettingsLinkRow
           href="/me/craving"

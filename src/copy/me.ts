@@ -21,6 +21,7 @@ export const meCopy = {
     budget: "예산과 거리",
     avoid: "못 먹는 음식",
     craving: "요즘 이게 땡겨요",
+    liked: "좋아하는 음식",
     name: "이름",
     account: "계정 관리",
     signOut: "로그아웃",
@@ -40,6 +41,7 @@ export const meCopy = {
     avoid: (count: number) => `${count}개`,
     cravingNone: "고르지 않음",
     cravingExpired: "기간 끝남",
+    likedNone: "고르지 않음",
     nameNone: "이름 없음",
   },
 
@@ -183,6 +185,16 @@ export const meCopy = {
     clear: "모두 빼기",
     saved: "저장했습니다. 7일 동안 반영합니다",
     cleared: "고른 종류를 모두 뺐습니다",
+  },
+
+  /** 좋아하는 음식 /me/liked (T9.17, SET-06, D-39). 온보딩 넷째 단계와 같은 그림 타일 */
+  liked: {
+    metaTitle: "좋아하는 음식",
+    title: "좋아하는 음식",
+    body: "고른 음식은 추천에 조금 더 자주 나옵니다. 기간 없이 반영하고, 먹고 남긴 👍👎이 쌓이면 그쪽을 더 따릅니다.",
+    saved: "저장했습니다. 다음 추천부터 반영합니다",
+    cleared: "고른 음식을 모두 뺐습니다",
+    clear: "모두 빼기",
   },
 
   /** 공통 저장과 4상태 */

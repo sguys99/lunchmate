@@ -11,6 +11,7 @@ import {
   renameOffice,
   saveAvoid,
   saveCravings,
+  saveLiked,
   saveNickname,
   savePrefs,
   setDefaultOffice,
@@ -20,6 +21,7 @@ import type {
   AddOfficeRequest,
   AvoidRequest,
   CravingRequest,
+  LikedRequest,
   CravingResult,
   DeleteOfficeResult,
   NicknameRequest,
@@ -133,6 +135,14 @@ function depsFor(supabase: Supabase): SettingsDeps {
         .in("id", ids);
       return !error;
     },
+    async updateLiked(userId, categories) {
+      const { data, error } = await supabase
+        .from("preferences")
+        .update({ liked_categories: categories })
+        .eq("user_id", userId)
+        .select("user_id");
+      return !error && data?.length === 1;
+    },
     async readCravings(userId) {
       const { data, error } = await supabase
         .from("preferences")
@@ -212,4 +222,10 @@ export async function saveCravingsAction(
   input: CravingRequest,
 ): Promise<CravingResult> {
   return run((deps) => saveCravings(input, deps));
+}
+
+export async function saveLikedAction(
+  input: LikedRequest,
+): Promise<SettingsResult> {
+  return run((deps) => saveLiked(input, deps));
 }
