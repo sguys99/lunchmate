@@ -41,14 +41,36 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createServerSupabase();
   const admin = createAdminSupabase();
-  if (!supabase || !admin) return go(`${ACCOUNT_PATH}?error=delete`);
+  if (!supabase || !admin) {
+    console.error("[delete-account] supabase client missing", {
+      session: !!supabase,
+      admin: !!admin,
+    });
+    return go(`${ACCOUNT_PATH}?error=delete`);
+  }
 
   const result = await deleteAccount({
     async verifiedUserId() {
       const { data } = await supabase.auth.getUser();
       return data.user?.id ?? null;
     },
-    deleteUser: adminDeleter(admin),
+    async deleteUser(id) {
+      const r = await adminDeleter(admin)(id);
+      // 실패 원인만 Vercel 함수 로그에 남긴다(키, 사용자 id, 응답 본문은 남기지 않는다)
+      if (r.error) {
+        const e = r.error as {
+          name?: unknown;
+          status?: unknown;
+          code?: unknown;
+        };
+        console.error("[delete-account] admin deleteUser failed", {
+          name: e.name,
+          status: e.status,
+          code: e.code,
+        });
+      }
+      return r;
+    },
   });
 
   if (!result.ok) {
