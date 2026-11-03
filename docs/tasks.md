@@ -646,7 +646,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T9.12 Git 전략 재검토 (main 직접 푸시 → PR과 미리보기 배포)
 - [ ] T9.13 **G9 확인**: 2.3절 목표 대비 결과 검토, 출시 결정
 - [ ] T9.14 (11/03 시안 3안 → **A 선택(D-36)** → 구현: `src/features/swipe/`(판정 규칙, 첫 화면 뒤 지연 로드 제어기), `app-shell/swipe-main.tsx`(본문은 left로 밀어 오늘 행동 줄 fixed 유지), E2E `e2e/tab-swipe.spec.ts`. 시안 B, C 코드 삭제. 남은 일: 실기기 확인. 캡처와 비교 `docs/design/g9-comparison-swipe.md`) ⛔ 탭 사이 스와이프 이동(사용자 요청 11/03, 네 탭 모두). 선택 뒤 design-decisions 기록, 첫 로드 밖 지연 로드로 구현(홈 예산), 실기기 iOS Safari 가장자리 뒤로 가기와 충돌 확인
-- [ ] T9.15 (11/03 시안 3안: A 굵게와 넓은 막대 / B 아이콘 알약 / C 올리브 글자와 점, `src/app/design-lab/tab-bar/{a,b,c}`, 캡처 `design-lab-tab-bar-*` 60장, 비교 `docs/design/g9-comparison-tab-bar.md`) ⛔ 하단 탭 활성 표시 강화(사용자 지적 11/03: 지금 탭이 잘 구별되지 않음). 선택 뒤 design-decisions 기록, DESIGN.md 5장 "하단 탭" 갱신, `app-shell/tab-bar.tsx` 구현, 시안 코드 삭제
+- [ ] T9.15 (11/03 시안 3안 → **C 선택(D-38)**: A 굵게와 넓은 막대 / B 아이콘 알약 / C 올리브 글자와 점, `src/app/design-lab/tab-bar/{a,b,c}`, 캡처 `design-lab-tab-bar-*` 60장, 비교 `docs/design/g9-comparison-tab-bar.md`) ⛔ 하단 탭 활성 표시 강화(사용자 지적 11/03: 지금 탭이 잘 구별되지 않음). 선택 뒤 design-decisions 기록, DESIGN.md 5장 "하단 탭" 갱신, `app-shell/tab-bar.tsx` 구현, 시안 코드 삭제
 
 ---
 

@@ -767,3 +767,12 @@
 - 안건(비교 자료 2절): **모두 기본안.** 합치기는 원본 보존 + 식당별 합치기 표, 신고 단위는 메뉴 줄(장소 + 비교 키), 새 테이블 `menu_flags`(신고 하루 30건 합산), 서로 다른 3명이면 자동 숨김, 사유 4개 칩만, 처리 이력에 메뉴 처리 추가
 - 다음: T10.16f 마이그레이션 초안을 보여 드리고 승인 뒤 `db:backup` → `db:push`. 구현 뒤 시안 코드(`design-lab/admin-menu` 세 안)는 지우고 캡처와 비교 자료는 남김
 - **구현(2026-11-03)**: 마이그레이션 `20261103210000_t10_16f_menu_moderation.sql` 적용(사용자 승인, 백업 2026-11-03_1910). 비교 자료 안건 6과 다르게 처리 이력 값은 4개(menu_hide, menu_clear, menu_merge, menu_separate), 합치기 되돌리기는 기존 되돌리기가 맡음. `admin_log`는 target_menu_key 열이 늘어 다시 만듦. `/admin` "메뉴 제보" 구역(신고된 줄 다음 합치기 후보, H 숨기기, R 문제없음, M 합치기, J 건너뛰기), 상세 더 보기 "정보가 다른가요?"에 "메뉴가 달라요"(메뉴 고르기, 사유 고르기 2단계 시트, 메뉴가 하나면 1단계). 플래그 `menuReports` 안. 시안 코드(`design-lab/admin-menu`)는 지움, 캡처와 `g10-comparison-admin-menu.md`는 남김. 구현 캡처 `docs/design/shots/2026-11-03/menu-impl-{flag,admin-menu}__*`
+
+### D-38. T9.15 하단 탭 활성 표시 (⛔ 선택)
+
+- 날짜: 2026-11-03. 비교 자료 `docs/design/g9-comparison-tab-bar.md`, 캡처 `docs/design/shots/2026-11-03/design-lab-tab-bar-*`(60장), 웹 비교 페이지 https://claude.ai/artifact/P5fhnSz2M5We9MNoUSA46D
+- 문제(사용자 지적): 지금 탭이 잘 구별되지 않음. 활성/비활성 밝기 차이 작음(0.30 대 0.47), 같은 굵기, 경계선에 붙은 2x20px 막대
+- 비교한 시안: A 굵게와 넓은 막대 / B 아이콘 알약(primary 12% 면) / C 올리브 글자와 점
+- 선택: **C 올리브 글자와 점.** Claude 추천(B)과 다름. 면 없이 미니멀 톤을 지키는 쪽을 고름. "면 색으로 활성을 표시하지 않는다" 규칙은 그대로
+- 안건 2(B 라벨 색)는 C 선택으로 해당 없음
+- 다음: DESIGN.md 5장 "하단 탭"과 primary 쓰는 곳 목록 갱신, `app-shell/tab-bar.tsx` 구현(활성 아이콘과 라벨 primary, 선 2px, 라벨 semibold, 라벨 아래 4px 점, 비활성 아이콘 60%, 위쪽 막대 삭제), 테스트 갱신, 시안 코드(`design-lab/tab-bar`) 삭제
