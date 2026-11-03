@@ -34,6 +34,18 @@ const nextConfig: NextConfig = {
     // 투표 링크 미리보기 이미지의 서버 글꼴(KS X 1001 woff 두 개, T7.14, D-17 안건 4)
     "/api/og/poll/**": ["./src/features/poll/share/og-fonts/*.woff"],
   },
+  // 서버 함수에서 sharp(이미지 최적화용 네이티브 라이브러리, libvips 포함 약 18MB)를 뺀다(11/03 콜드 스타트 조사).
+  // next/image를 쓰지 않고(이미지 최적화 미사용), OG 이미지(next/og)는 sharp 없이 그린다. 그런데도 Next가 모든 페이지
+  // 추적에 넣어 하나로 묶인 함수(약 14MB)가 깨어날 때 받고 푸는 양을 늘렸다. next/image를 쓰게 되면 이 항목을 지운다.
+  // 출처: node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/output.md
+  outputFileTracingExcludes: {
+    "/**": [
+      "node_modules/sharp/**/*",
+      "node_modules/@img/**/*",
+      "node_modules/.pnpm/sharp@*/**/*",
+      "node_modules/.pnpm/@img+*/**/*",
+    ],
+  },
   // 웹 글꼴(목록 CSS와 woff2 조각)은 버전 경로라 내용이 바뀌지 않는다. 글꼴을 바꾸면 WEB_FONTS_VERSION과 폴더를 올린다
   // (src/lib/fonts/web-fonts.ts, scripts/fonts/build-font-subsets.py).
   async headers() {
