@@ -5,7 +5,7 @@
 //   저장하면 기존 나 탭 서버 액션(saveAvoidAction, saveLikedAction)으로 쓰고, 띠를 숨기고 홈을 다시 그린다(새 설정으로 추천).
 // - 닫기: 띠를 바로 숨기고 닫은 시각을 남긴다(dismissTastePromptAction). 실패해도 이번 화면에서는 숨긴 채 둔다.
 // - 모션은 CSS뿐(ob-rise 등장, 시트는 Sheet 기본 전환). 분석 이벤트는 새로 두지 않는다(D-39 계획).
-import { Ban, CloudOff, X } from "lucide-react";
+import { CloudOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -54,13 +54,8 @@ export default function TasteBand({ className }: { className?: string }) {
     <div className={className}>
       <section
         aria-label={copy.band.title}
-        className="ob-rise flex min-h-16 items-center gap-3 rounded-card border border-border bg-card py-2 pr-1 pl-4"
+        className="ob-rise flex min-h-16 items-center gap-2 rounded-card border border-border bg-card py-2 pr-1 pl-4"
       >
-        <Ban
-          aria-hidden
-          className="size-5 shrink-0 text-muted-foreground"
-          strokeWidth={1.5}
-        />
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="type-label break-keep">{copy.band.title}</p>
           <p className="type-caption break-keep text-muted-foreground">

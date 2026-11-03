@@ -1,6 +1,8 @@
 // 홈 취향 띠 E2E (T9.17, D-39): 설정을 건너뛴 사용자(못 먹는 음식, 좋아하는 음식 없음)에게 가입 7일 안 띠가 보이고,
 // 시트에서 못 먹는 음식 → 좋아하는 음식을 저장하면 띠가 사라지고 DB에 남는다. 닫기는 닫은 시각을 남긴다.
 // RUN_DB_E2E=1일 때만 동작한다(클라우드 개발 DB, test_ 계정, 끝나면 정리).
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { rest } from "../src/lib/supabase/rls/harness";
 import { expectNoA11yViolations } from "./helpers/axe";
@@ -9,6 +11,21 @@ import { loadDbE2eEnv, readOwn, signInContext } from "./helpers/session";
 
 const env = loadDbE2eEnv();
 const OFFICE = { lat: 37.5665, lng: 126.978 };
+/** TASTE_SHOTS=1이면 구현 캡처를 남긴다(TASTE_DARK=1이면 다크) */
+const SHOTS = process.env.TASTE_SHOTS === "1";
+const SHOT_DIR = join(process.cwd(), "docs/design/shots/t9-17-impl");
+test.use({ colorScheme: process.env.TASTE_DARK === "1" ? "dark" : "light" });
+
+async function shot(page: Page, name: string) {
+  if (!SHOTS) return;
+  mkdirSync(SHOT_DIR, { recursive: true });
+  const size = test.info().project.name === "mobile" ? "390" : "1280";
+  const scheme = process.env.TASTE_DARK === "1" ? "dark" : "light";
+  await page.waitForTimeout(450);
+  await page.screenshot({
+    path: join(SHOT_DIR, `taste-impl__${name}__${size}__${scheme}.png`),
+  });
+}
 
 /** 로그인 사용자 + 약관 + 사무실. 못 먹는 음식과 좋아하는 음식은 비어 있다(온보딩을 건너뛴 상태) */
 async function setup(
@@ -62,6 +79,7 @@ test.describe("홈 취향 띠 (T9.17)", () => {
     try {
       await page.goto("/today");
       await expect(tasteBand(page)).toBeVisible({ timeout: 15_000 });
+      await shot(page, "band");
       await tasteBand(page).getByRole("button", { name: "알려 주기" }).click();
 
       const sheet = page.getByRole("dialog");
@@ -69,11 +87,13 @@ test.describe("홈 취향 띠 (T9.17)", () => {
         sheet.getByRole("heading", { name: "못 먹는 음식이 있나요?" }),
       ).toBeVisible();
       await sheet.getByRole("button", { name: "회", exact: true }).click();
+      await shot(page, "sheet-avoid");
       await sheet.getByRole("button", { name: "다음" }).click();
       await expect(
         sheet.getByRole("heading", { name: "자주 끌리는 음식을 골라 주세요" }),
       ).toBeVisible();
       await sheet.getByRole("button", { name: "국밥", exact: true }).click();
+      await shot(page, "sheet-liked");
       await page.waitForTimeout(400);
       await expectNoA11yViolations(page, { include: '[role="dialog"]' });
       await sheet.getByRole("button", { name: "저장" }).click();

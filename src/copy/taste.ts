@@ -5,7 +5,7 @@ import { onboardingCopy } from "./onboarding";
 export const tasteCopy = {
   band: {
     title: "못 먹는 음식이 있나요?",
-    body: "못 먹는 음식과 좋아하는 음식을 알려 주시면 추천이 맞춰집니다.",
+    body: "좋아하는 음식도 함께 알려 주세요.",
     action: "알려 주기",
     close: "닫기",
   },
