@@ -62,6 +62,8 @@ export const recCopy = {
     favoriteOff: "즐겨찾기에서 빼기",
     block: "다시 안 갈래요",
     addToPoll: "투표에 추가",
+    /** 메뉴와 가격은 아직 앱 안에 없어 네이버 플레이스로 보낸다(메뉴 제보 전 임시, 2026-11-03) */
+    menu: "메뉴 보기",
     toasts: {
       blocked: "다시 추천하지 않습니다.",
       blockedUnfavorited: "즐겨찾기에서도 뺐습니다.",

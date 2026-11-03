@@ -7,10 +7,12 @@
 // - 다시 안 갈래요: 비로그인은 로그인 유도. 누르면 바로 카드를 빼고(onBlocked, 다음 후보로 교체) 서버에 넣는다.
 //   즐겨찾기에 있으면 서버가 즐겨찾기에서 빼고 넣는다. 토스트 "다시 추천하지 않습니다." + 되돌리기(빼고, 뺐던 즐겨찾기는 다시 담음).
 //   저장에 실패하면 카드를 되돌린다(onRestored).
+// - 메뉴 보기: 네이버 플레이스 이름 + 좌표 검색(상세의 "네이버 플레이스에서 보기"와 같은 링크). 메뉴와 가격 제보 전 임시.
 // - 투표에 추가: pollEntry 플래그가 켜지고 onAddToPoll이 있을 때만(7단계).
 // 서버로 가는 값은 place_id, place_url뿐이다(CLAUDE.md 7장).
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { Ban, Star, Vote } from "lucide-react";
+import { Ban, ExternalLink, Star, Vote } from "lucide-react";
+import { naverPlaceSearchUrl } from "@/lib/naver/directions";
 import { toast } from "@/components/ui/lazy-toaster";
 import { recCopy } from "@/copy/rec";
 import { placeCopy } from "@/copy/place";
@@ -151,6 +153,13 @@ export default function CardMenu({
           onLogin,
         });
       },
+    },
+    {
+      key: "menu",
+      label: copy.menu,
+      icon: ExternalLink,
+      href: naverPlaceSearchUrl(card.name, card.position),
+      external: true,
     },
   ];
   // 노출은 부르는 쪽이 정한다: 서버가 판정한 pollEntry가 켜질 때만 onAddToPoll을 넘긴다(T7.35, 2026-11-02 T9.2부터 프로덕션도 켜짐)
