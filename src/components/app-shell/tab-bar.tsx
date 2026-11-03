@@ -2,12 +2,13 @@
 // 하단 탭 (T2.6, DESIGN.md 5장 "하단 탭").
 //
 // - 높이 64(--lm-layout-tab-bar-height) + 하단 safe-area, 면 background, 위쪽 1px border.
-// - 활성: 아이콘과 라벨 foreground + 탭 위쪽 가장자리 2px x 20px primary 막대. 비활성: muted-foreground.
+// - 활성(D-38, T9.15): 아이콘과 라벨 primary, 아이콘 선 2px, 라벨 semibold, 라벨 아래 4px primary 점.
+//   비활성: 라벨 muted-foreground, 아이콘은 muted-foreground 60%(라벨이 함께 있어 장식, 글자 대비 4.5:1 유지).
 //   면 색으로 활성을 표시하지 않는다. 보조 기술에는 aria-current="page"로 알린다.
-// - 아이콘은 Lucide 1.5px 선, 22px. 라벨은 caption. 칸 전체가 링크라 터치 영역은 칸 폭 x 64px(44px 이상).
-// - 모션: 활성 막대만 fade 프리셋과 같은 값(나타날 때 base, standard / 사라질 때 fast, exit)으로 나타나고 사라진다.
-//   Motion 대신 CSS opacity 전환으로 그린다(T2.22): 홈 첫 로드에서 Motion domAnimation(약 37KB gzip)을 빼기 위해서다.
-//   막대는 네 칸에 모두 두고 활성 칸만 불투명하게 한다. 첫 렌더는 그대로 보인다(전환은 값이 바뀔 때만).
+// - 아이콘은 Lucide 22px. 라벨은 caption. 칸 전체가 링크라 터치 영역은 칸 폭 x 64px(44px 이상).
+// - 모션: 점은 fade 프리셋과 같은 값(나타날 때 base, standard / 사라질 때 fast, exit)으로 나타나고 사라지고, 글자색도 같은 값으로 바뀐다.
+//   Motion 대신 CSS 전환으로 그린다(T2.22): 홈 첫 로드에서 Motion domAnimation(약 37KB gzip)을 빼기 위해서다.
+//   점은 네 칸에 모두 두고 활성 칸만 불투명하게 한다. 첫 렌더는 그대로 보인다(전환은 값이 바뀔 때만).
 //   축소 모드: OS 설정은 motion-reduce:, 앱 설정(MotionProvider preference="reduce")은 data-reduced로 즉시 바꾼다.
 // - 데스크톱(화면 컨테이너 1024px 이상)에서도 같은 막대를 좌 리스트 칸 아래에 둔다(AppShell).
 // - 앱 화면(dock, T9.10): 모바일은 position: fixed로 화면 아래에 고정하고, 같은 높이의 빈 자리를 문서 흐름에 남긴다.
@@ -38,6 +39,9 @@ export type TabBarViewProps = {
   className?: string;
 };
 
+const ENTER = "duration-(--lm-duration-base) ease-standard";
+const LEAVE = "duration-(--lm-duration-fast) ease-exit";
+
 function preventNavigation(event: MouseEvent<HTMLAnchorElement>) {
   event.preventDefault();
 }
@@ -66,38 +70,44 @@ export function TabBarView({
           const isActive = id === activeId;
           return (
             <li key={id} className="relative flex min-w-0">
-              <span
-                aria-hidden
-                data-slot="tab-indicator"
-                data-active={isActive ? "" : undefined}
-                className={cn(
-                  "pointer-events-none absolute top-0 left-1/2 h-0.5 w-5 -translate-x-1/2 bg-primary transition-opacity motion-reduce:transition-none",
-                  isActive
-                    ? "opacity-100 duration-(--lm-duration-base) ease-standard"
-                    : "opacity-0 duration-(--lm-duration-fast) ease-exit",
-                  reduced && "transition-none",
-                )}
-              />
               <Link
                 href={href}
                 prefetch={preview ? false : undefined}
                 onClick={preview ? preventNavigation : undefined}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 type-caption whitespace-nowrap transition-colors duration-(--lm-duration-fast) ease-standard motion-reduce:transition-none",
+                  "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 type-caption whitespace-nowrap transition-colors motion-reduce:transition-none",
                   isActive
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground active:text-foreground",
+                    ? cn("font-semibold text-primary", ENTER)
+                    : cn(
+                        "text-muted-foreground hover:text-foreground active:text-foreground",
+                        LEAVE,
+                      ),
+                  reduced && "transition-none",
                   focusRing,
                   "focus-visible:-outline-offset-4",
                 )}
               >
                 <Icon
                   aria-hidden
-                  className="size-[1.375rem]"
-                  strokeWidth={1.5}
+                  className={cn("size-[1.375rem]", !isActive && "opacity-60")}
+                  strokeWidth={isActive ? 2 : 1.5}
                 />
-                {label}
+                <span className="flex flex-col items-center gap-[3px]">
+                  {label}
+                  <span
+                    aria-hidden
+                    data-slot="tab-indicator"
+                    data-active={isActive ? "" : undefined}
+                    className={cn(
+                      "size-1 rounded-full bg-primary transition-opacity motion-reduce:transition-none",
+                      isActive
+                        ? cn("opacity-100", ENTER)
+                        : cn("opacity-0", LEAVE),
+                      reduced && "transition-none",
+                    )}
+                  />
+                </span>
               </Link>
             </li>
           );

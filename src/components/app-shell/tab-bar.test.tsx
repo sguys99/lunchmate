@@ -28,7 +28,7 @@ describe("BottomTabBar", () => {
     ]);
   });
 
-  it("현재 경로의 탭만 aria-current=page, 활성 막대도 그 탭에만", () => {
+  it("현재 경로의 탭만 aria-current=page, 활성 점도 그 탭에만", () => {
     pathname.value = "/poll/AbCdEf1234";
     const { container } = render(<BottomTabBar />);
     const poll = screen.getByRole("link", { name: "투표" });
@@ -38,7 +38,7 @@ describe("BottomTabBar", () => {
         "aria-current",
       );
     }
-    // 막대는 네 칸에 모두 있고(CSS 페이드, T2.22) 활성 칸만 data-active
+    // 점은 네 칸에 모두 있고(CSS 페이드, T2.22, D-38) 활성 칸만 data-active
     expect(
       container.querySelectorAll("[data-slot=tab-indicator]"),
     ).toHaveLength(4);
@@ -47,7 +47,13 @@ describe("BottomTabBar", () => {
     );
     expect(bars).toHaveLength(1);
     expect(bars[0]).toHaveClass("opacity-100");
-    expect(poll.parentElement).toContainElement(bars[0] as HTMLElement);
+    expect(poll).toContainElement(bars[0] as HTMLElement);
+    // 활성은 올리브 글자와 굵기, 비활성 아이콘은 옅게 (D-38)
+    expect(poll).toHaveClass("text-primary", "font-semibold");
+    const map = screen.getByRole("link", { name: "지도" });
+    expect(map).toHaveClass("text-muted-foreground");
+    expect(map.querySelector("svg")).toHaveClass("opacity-60");
+    expect(poll.querySelector("svg")).not.toHaveClass("opacity-60");
   });
 
   it("탭 밖 경로면 활성 탭이 없다", () => {
@@ -77,7 +83,7 @@ describe("TabBarView", () => {
   });
 });
 
-describe("활성 막대 모션 (T2.22, CSS 전환)", () => {
+describe("활성 점 모션 (T2.22, CSS 전환)", () => {
   it("기본은 opacity 전환, 앱 설정이 줄이기면 전환 없음", async () => {
     const { MotionPreferenceContext } = await import("@/lib/motion/preference");
     const { container, rerender } = render(<TabBarView activeId="today" />);

@@ -776,3 +776,4 @@
 - 선택: **C 올리브 글자와 점.** Claude 추천(B)과 다름. 면 없이 미니멀 톤을 지키는 쪽을 고름. "면 색으로 활성을 표시하지 않는다" 규칙은 그대로
 - 안건 2(B 라벨 색)는 C 선택으로 해당 없음
 - 다음: DESIGN.md 5장 "하단 탭"과 primary 쓰는 곳 목록 갱신, `app-shell/tab-bar.tsx` 구현(활성 아이콘과 라벨 primary, 선 2px, 라벨 semibold, 라벨 아래 4px 점, 비활성 아이콘 60%, 위쪽 막대 삭제), 테스트 갱신, 시안 코드(`design-lab/tab-bar`) 삭제
+- **구현(2026-11-03)**: `src/components/app-shell/tab-bar.tsx`, DESIGN.md 5장 "하단 탭"과 primary 쓰는 곳 갱신, 테스트와 갤러리 시각 기준 갱신. 시안 코드(`design-lab/tab-bar`)는 지움, 캡처와 비교 자료는 남김. 구현 캡처 `docs/design/shots/t9-15-impl/2026-11-03/`
