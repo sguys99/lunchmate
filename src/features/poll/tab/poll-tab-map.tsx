@@ -10,19 +10,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { MapPane } from "@/components/app-shell";
-import { myOfficesAction, myPollsAction } from "@/features/poll/create/actions";
 import {
   myOfficesKey,
   myPollsKey,
   pollRoomKey,
 } from "@/features/poll/create/keys";
-import { pollRoomAction } from "@/features/poll/room/actions";
 import { approvedCandidates, leaders } from "@/features/poll/room/model";
 import { PollMapCanvas } from "@/features/poll/room/poll-map";
 import type { PollMapView } from "@/features/poll/room/poll-map-store";
 import { usePlaceNames } from "@/features/place/use-place-names";
 import { pickMapPoll } from "./map-pick";
 import { usePollTabMapFocus } from "./map-focus-store";
+import { read } from "@/lib/read";
 
 const DESKTOP_QUERY = "(min-width: 64rem)";
 /** 줄 위를 훑고 지나갈 때마다 방을 읽지 않게 잠깐 기다린다 */
@@ -67,7 +66,7 @@ function DesktopPollTabMap() {
 
   const polls = useQuery({
     queryKey: myPollsKey,
-    queryFn: () => myPollsAction(),
+    queryFn: () => read("myPollsAction"),
     staleTime: 15_000,
   });
   const list = polls.data?.signedIn ? polls.data.polls : null;
@@ -85,7 +84,7 @@ function DesktopPollTabMap() {
 function useOfficeView(enabled: boolean): PollMapView | null {
   const offices = useQuery({
     queryKey: myOfficesKey,
-    queryFn: () => myOfficesAction(),
+    queryFn: () => read("myOfficesAction"),
     staleTime: 5 * 60 * 1000,
     enabled,
   });
@@ -110,7 +109,7 @@ function usePollView(pollId: string | null): PollMapView | null {
   const room = useQuery({
     queryKey: pollRoomKey(pollId ?? ""),
     queryFn: async () => {
-      const r = await pollRoomAction(pollId ?? "");
+      const r = await read("pollRoomAction", pollId ?? "");
       if (!r.ok) throw new Error(r.error);
       return r.room;
     },

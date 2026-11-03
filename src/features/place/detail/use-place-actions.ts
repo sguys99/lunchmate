@@ -11,11 +11,12 @@ import { track } from "@/lib/analytics";
 import type { DirectionsOrigin } from "@/lib/naver/directions";
 import type { LatLng } from "@/lib/map/types";
 import type { Meal } from "@/lib/time";
-import { placeUserStateAction, setFavoriteAction } from "../actions";
+import { setFavoriteAction } from "../actions";
 import { startDirections, type DirectionsSource } from "../directions-flow";
 import type { DirectionsResult } from "../launch-directions";
 import type { PlaceUserState } from "../place-requests";
 import { placeUserStateKey } from "./user-state-key";
+import { read } from "@/lib/read";
 
 const copy = placeCopy;
 
@@ -27,7 +28,7 @@ export { placeUserStateKey };
 export function usePlaceUserState(placeId: string, enabled = true) {
   return useQuery<PlaceUserState>({
     queryKey: placeUserStateKey(placeId),
-    queryFn: () => placeUserStateAction({ placeId }),
+    queryFn: () => read("placeUserStateAction", { placeId }),
     enabled,
     staleTime: 60_000,
     retry: false,

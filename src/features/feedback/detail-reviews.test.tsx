@@ -10,11 +10,9 @@ import type { MyVisit } from "./feedback-target";
 import type { MyReview } from "./my-records";
 
 const myVisitsAction = vi.fn();
-vi.mock("./actions", () => ({
-  myVisitsAction: (input: unknown) => myVisitsAction(input),
-  myReviewsAction: vi.fn(),
-  myPlacesAction: vi.fn(),
-  myDailyLimitsAction: vi.fn(),
+vi.mock("@/lib/read", () => ({
+  read: (fn: string, input: unknown) =>
+    fn === "myVisitsAction" ? myVisitsAction(input) : undefined,
 }));
 
 const { MyReviewBlock, PublicReviews } = await import("./detail-reviews");

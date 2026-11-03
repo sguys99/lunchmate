@@ -9,7 +9,6 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { pollCreateCopy as copy } from "@/copy/poll-create";
-import { myPlacesAction, myVisitsAction } from "@/features/feedback/actions";
 import { isCategorySlug } from "@/features/place/categories";
 import { usePlaceNames } from "@/features/place/use-place-names";
 import { kakaoCategorySlug } from "@/features/rec/kakao-category";
@@ -20,6 +19,7 @@ import { addKstDays, kstDateKey } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { focusRing } from "@/components/ui/interaction";
 import { CANDIDATE_MAX, PickRow, PickSkeleton, type SheetPlace } from "./parts";
+import { read } from "@/lib/read";
 
 /** 그룹마다 처음 보이는 줄 수(나머지는 "더 보기") */
 const GROUP_LIMIT = 3;
@@ -52,12 +52,12 @@ export function CandidatePicker({
   const to = kstDateKey(today);
   const places = useQuery({
     queryKey: dbKeys.myPlaces,
-    queryFn: () => myPlacesAction(),
+    queryFn: () => read("myPlacesAction"),
     staleTime: 60_000,
   });
   const visits = useQuery({
     queryKey: dbKeys.myVisits(from, to),
-    queryFn: () => myVisitsAction({ from, to }),
+    queryFn: () => read("myVisitsAction", { from, to }),
     staleTime: 60_000,
   });
 

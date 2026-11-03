@@ -1,8 +1,8 @@
 // 오늘(홈) 후보 집계 읽기 본체 (T6.11). stats-query.ts의 queryFn이 동적으로 받는다(홈 첫 로드 밖).
 import type { CardMenu } from "@/features/menu/card-menu-pick";
 import type { QueryClient } from "@tanstack/react-query";
-import { fetchHomeStats, fetchPlaceStats } from "./stats-source";
 import type { PlaceStatsRow } from "./place-stats";
+import { read } from "@/lib/read";
 
 /** RPC 한 번에 보낼 수 있는 place_id 수(place_stats 입력 한도) */
 export const PLACE_STATS_BATCH = 60;
@@ -48,7 +48,9 @@ export async function loadStatsRows(
 ): Promise<PlaceStatsRow[]> {
   const batches = statsBatches(ids);
   const results = await Promise.all(
-    batches.map((b) => withTimeout(fetchPlaceStats(b), STATS_TIMEOUT_MS)),
+    batches.map((b) =>
+      withTimeout(read("fetchPlaceStats", b), STATS_TIMEOUT_MS),
+    ),
   );
   const rows: PlaceStatsRow[] = [];
   for (const r of results) {
@@ -95,7 +97,7 @@ async function readHomeStats(
   const batches = statsBatches(ids);
   const results = await Promise.all(
     batches.map((b) =>
-      withTimeout(fetchHomeStats(b, withMemos), STATS_TIMEOUT_MS),
+      withTimeout(read("fetchHomeStats", b, withMemos), STATS_TIMEOUT_MS),
     ),
   );
   const rows: PlaceStatsRow[] = [];

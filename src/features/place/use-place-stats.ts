@@ -7,7 +7,6 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { myVisitsAction } from "@/features/feedback/actions";
 import { dbKeys } from "@/lib/query/db-keys";
 import { addKstDays, kstDateKey } from "@/lib/time";
 import type { PlaceDetailStats } from "./detail-model";
@@ -16,11 +15,7 @@ import {
   type PlaceReviewsResult,
   type PlaceStats,
 } from "./place-stats-model";
-import {
-  placeDealsAction,
-  placeReviewsAction,
-  placeStatsAction,
-} from "./stats-actions";
+import { read } from "@/lib/read";
 
 /** 집계를 다시 부르지 않는 시간. 웨이팅이 30분만 유효하므로 짧게 둔다 */
 export const PLACE_STATS_STALE_MS = 60_000;
@@ -32,7 +27,7 @@ export function placeStatsQuery(placeIds: readonly string[]) {
   return queryOptions({
     queryKey: dbKeys.placeStats(ids),
     queryFn: async (): Promise<ReadonlyMap<string, PlaceStats>> => {
-      const rows = await placeStatsAction(ids);
+      const rows = await read("placeStatsAction", ids);
       return new Map(rows.map((r) => [r.placeId, r]));
     },
     staleTime: PLACE_STATS_STALE_MS,
@@ -49,7 +44,7 @@ export function usePlaceStats(placeIds: readonly string[], enabled = true) {
 export function placeDealsQuery(placeId: string) {
   return queryOptions({
     queryKey: dbKeys.placeDeals(placeId),
-    queryFn: () => placeDealsAction({ placeId }),
+    queryFn: () => read("placeDealsAction", { placeId }),
     staleTime: PLACE_STATS_STALE_MS,
   });
 }
@@ -63,7 +58,7 @@ export function usePlaceReviews(placeId: string, enabled = true) {
   return useInfiniteQuery({
     queryKey: dbKeys.placeReviews(placeId),
     queryFn: ({ pageParam }) =>
-      placeReviewsAction({ placeId, offset: pageParam }),
+      read("placeReviewsAction", { placeId, offset: pageParam }),
     initialPageParam: 0,
     getNextPageParam: (last: PlaceReviewsResult, pages) =>
       last.status === "ok" && last.hasMore
@@ -128,7 +123,7 @@ export function usePlaceDetailStats(
   }, [now]);
   const visits = useQuery({
     queryKey: dbKeys.myVisits(range.from, range.to, placeId),
-    queryFn: () => myVisitsAction({ ...range, placeId }),
+    queryFn: () => read("myVisitsAction", { ...range, placeId }),
     staleTime: PLACE_STATS_STALE_MS,
     enabled,
   });

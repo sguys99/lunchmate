@@ -44,7 +44,6 @@ import { dbKeys, invalidateAfterWrite } from "@/lib/query/db-keys";
 import type { WriteFailure } from "@/lib/supabase/write-result";
 import { kstDateKey } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { myOldestVisitAction } from "./actions";
 import { useDetailEntry, type OfficeAnchor } from "./detail-entry";
 import { useMeMap, type MeMapPin } from "./me-map-store";
 import {
@@ -73,6 +72,7 @@ import {
   type RowPlace,
 } from "./parts";
 import { useRecordNames } from "./use-record-names";
+import { read } from "@/lib/read";
 
 type Answer = "up" | "down" | "no";
 
@@ -97,7 +97,7 @@ export function HistoryPanel({
   const todayKey = kstDateKey(now);
   const oldest = useQuery({
     queryKey: oldestVisitKey,
-    queryFn: () => myOldestVisitAction(),
+    queryFn: () => read("myOldestVisitAction"),
     staleTime: 60_000,
   });
   const hist = useMyVisitHistory(now);

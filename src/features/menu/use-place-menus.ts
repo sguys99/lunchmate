@@ -4,8 +4,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { isEnabled } from "@/lib/flags";
 import { dbKeys } from "@/lib/query/db-keys";
-import { placeMenusAction } from "./actions";
 import type { MenuStat } from "./model";
+import { read } from "@/lib/read";
 
 export function menuReportsOn(): boolean {
   return isEnabled("menuReports");
@@ -14,7 +14,8 @@ export function menuReportsOn(): boolean {
 export function usePlaceMenus(placeId: string, enabled = true) {
   return useQuery<MenuStat[]>({
     queryKey: dbKeys.placeMenus(placeId),
-    queryFn: () => placeMenusAction([placeId]).then((r) => r[placeId] ?? []),
+    queryFn: () =>
+      read("placeMenusAction", [placeId]).then((r) => r[placeId] ?? []),
     enabled: enabled && menuReportsOn(),
     staleTime: 5 * 60_000,
     retry: 1,

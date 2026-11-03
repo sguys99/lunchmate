@@ -48,7 +48,6 @@ import type { WriteFailure } from "@/lib/supabase/write-result";
 import { kstDateKey } from "@/lib/time/kst";
 import { cn } from "@/lib/utils";
 import {
-  feedbackBandAction,
   markFeedbackPromptedAction,
   markNotVisitedAction,
   rateVisitAction,
@@ -63,6 +62,7 @@ import type { FeedbackBandProps } from "./band-slot";
 import type { MyVisit } from "./feedback-target";
 import { feedbackSubmittedProps, hasDetails, withRetry } from "./review-draft";
 import { useReviewSheet, type ReviewSheetConfig } from "./review-sheet";
+import { read } from "@/lib/read";
 
 const copy = feedbackCopy.band;
 
@@ -82,7 +82,7 @@ export default function FeedbackBand({
   // 날짜가 바뀌면 다시 묻는다. 키 접두가 내 방문(myVisitsAll)이라 쓰기 뒤 무효화에 함께 걸린다
   const visitsQuery = useQuery({
     queryKey: [...dbKeys.myVisitsAll, "band", todayKey],
-    queryFn: () => feedbackBandAction(),
+    queryFn: () => read("feedbackBandAction"),
     staleTime: 60_000,
   });
   const band = visitsQuery.data?.signedIn ? visitsQuery.data : null;

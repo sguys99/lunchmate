@@ -13,7 +13,7 @@ import { shortWon } from "@/features/feedback/review-draft";
 import { track } from "@/lib/analytics/track";
 import { dbKeys } from "@/lib/query/db-keys";
 import { cn } from "@/lib/utils";
-import { myReviewMenuAction, setReviewMenuAction } from "./actions";
+import { setReviewMenuAction } from "./actions";
 import {
   MENU_NAME_MAX,
   clampMenuPrice,
@@ -25,6 +25,7 @@ import {
 } from "./model";
 import type { MenuWriteResult } from "./requests";
 import { menuReportsOn, usePlaceMenus } from "./use-place-menus";
+import { read } from "@/lib/read";
 
 const copy = menuCopy;
 const TYPED = "__typed";
@@ -50,7 +51,7 @@ export function useMenuChoice(args: { placeId: string; reviewId: string | null; 
   const menus = usePlaceMenus(args.placeId, on);
   const mine = useQuery({
     queryKey: dbKeys.myReviewMenu(args.reviewId ?? ""),
-    queryFn: () => myReviewMenuAction(args.reviewId ?? ""),
+    queryFn: () => read("myReviewMenuAction", args.reviewId ?? ""),
     enabled: on && args.reviewId !== null,
     staleTime: 60_000,
     retry: false,

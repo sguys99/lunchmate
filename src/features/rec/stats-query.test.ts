@@ -2,10 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 import type { PlaceStatsRow } from "./place-stats";
 
-vi.mock("./stats-source", () => ({
-  fetchPlaceStats: vi.fn(),
-  fetchHomeStats: vi.fn(),
-}));
+vi.mock("@/lib/read", () => ({ read: vi.fn() }));
 
 const { statsBatches, PLACE_STATS_BATCH } = await import("./stats-load");
 const { placeStatsQuery } = await import("./stats-query");
@@ -31,9 +28,9 @@ describe("statsBatches", () => {
 
 describe("loadStatsRows", () => {
   it("묶음 결과를 합치고, 한 묶음이라도 실패하면 오류(화면은 중립값으로 계속)", async () => {
-    const { fetchPlaceStats } = await import("./stats-source");
+    const { read } = await import("@/lib/read");
     const { loadStatsRows } = await import("./stats-load");
-    const mock = vi.mocked(fetchPlaceStats);
+    const mock = vi.mocked(read);
     mock.mockResolvedValueOnce({ ok: true, rows: [] });
     await expect(loadStatsRows(["1"])).resolves.toEqual([]);
     mock.mockResolvedValueOnce({ ok: false });
@@ -42,9 +39,9 @@ describe("loadStatsRows", () => {
 
   it("응답이 늦으면 시간 초과로 실패한다", async () => {
     vi.useFakeTimers();
-    const { fetchPlaceStats } = await import("./stats-source");
+    const { read } = await import("@/lib/read");
     const { loadStatsRows, STATS_TIMEOUT_MS } = await import("./stats-load");
-    vi.mocked(fetchPlaceStats).mockReturnValueOnce(new Promise(() => {}));
+    vi.mocked(read).mockReturnValueOnce(new Promise(() => {}));
     const p = loadStatsRows(["1"]);
     const assertion = expect(p).rejects.toThrow("place_stats_timeout");
     await vi.advanceTimersByTimeAsync(STATS_TIMEOUT_MS + 1);
@@ -57,9 +54,9 @@ describe("loadHomeStats 카드 대기 상한", () => {
   const row = { place_id: "1" } as unknown as PlaceStatsRow;
 
   it("상한 안에 오면 받은 집계를 그대로 쓴다", async () => {
-    const { fetchHomeStats } = await import("./stats-source");
+    const { read } = await import("@/lib/read");
     const { loadHomeStats } = await import("./stats-load");
-    vi.mocked(fetchHomeStats).mockResolvedValueOnce({
+    vi.mocked(read).mockResolvedValueOnce({
       ok: true,
       rows: [row],
       memos: {},
@@ -72,13 +69,18 @@ describe("loadHomeStats 카드 대기 상한", () => {
 
   it("상한을 넘기면 빈 집계(중립값)로 카드를 내고, 늦게 온 집계는 지도 캐시에만 넣는다", async () => {
     vi.useFakeTimers();
-    const { fetchHomeStats } = await import("./stats-source");
+    const { read } = await import("@/lib/read");
     const { loadHomeStats, HOME_STATS_WAIT_MS } = await import("./stats-load");
-    type Result = Awaited<ReturnType<typeof fetchHomeStats>>;
+    type Result = {
+      ok: true;
+      rows: PlaceStatsRow[];
+      memos: Record<string, string>;
+      menus: Record<string, never>;
+    };
     let arrive: (v: Result) => void = () => {};
-    vi.mocked(fetchHomeStats).mockReturnValueOnce(
-      new Promise<Result>((r) => {
-        arrive = r;
+    vi.mocked(read).mockReturnValueOnce(
+      new Promise<never>((r) => {
+        arrive = r as unknown as (v: Result) => void;
       }),
     );
     const client = new QueryClient();

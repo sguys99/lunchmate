@@ -5,9 +5,9 @@
 // - 이름과 업종은 판정에만 보내고 서버는 저장하지 않는다. 쿼리 키에는 place_id만 넣는다.
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { avoidFlagsAction } from "./actions";
 import type { PollRoom, RoomCandidate } from "./model";
 import type { CandidatePlace } from "./use-candidate-places";
+import { read } from "@/lib/read";
 
 const MIN_MEMBERS = 3;
 
@@ -29,7 +29,7 @@ export function useAvoidFlags(
   const q = useQuery({
     queryKey: ["db", "poll", "avoid", room.poll.id, ids, enough] as const,
     queryFn: async () => {
-      const r = await avoidFlagsAction({
+      const r = await read("avoidFlagsAction", {
         pollId: room.poll.id,
         places: places.slice(0, 5).map((p) => ({
           placeId: p.placeId,

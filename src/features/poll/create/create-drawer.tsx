@@ -64,9 +64,6 @@ import {
   cancelUnsentPollAction,
   createPollAction,
   markPollSharedAction,
-  myOfficesAction,
-  myPollLimitAction,
-  myPollsAction,
   removePollCandidateAction,
   updatePollAction,
   updatePollAnchorAction,
@@ -122,6 +119,7 @@ import {
   TitleInput,
   type SheetPlace,
 } from "./parts";
+import { read } from "@/lib/read";
 
 export type CreateDrawerProps = {
   open: boolean;
@@ -319,7 +317,7 @@ export default function CreateDrawer({
         },
       }),
     );
-    void myPollLimitAction().then(
+    void read("myPollLimitAction").then(
       (r) => {
         if (r.signedIn) setRemaining(r.remaining);
       },
@@ -337,7 +335,7 @@ export default function CreateDrawer({
       if (!intent.confirm) void Promise.resolve().then(create);
       return;
     }
-    myPollsAction().then(
+    read("myPollsAction").then(
       (r) => {
         const mine = r.signedIn
           ? r.polls.filter((p) => p.isHost && p.status === "open")
@@ -389,7 +387,7 @@ export default function CreateDrawer({
   const [offices, setOffices] = useState<MyOffice[] | null>(null);
   useEffect(() => {
     let alive = true;
-    myOfficesAction().then(
+    read("myOfficesAction").then(
       (r) => {
         if (!alive || !r.signedIn) return;
         setOffices(r.offices);

@@ -31,7 +31,6 @@ import { anchorPickerCopy } from "@/copy/anchor-picker";
 import { partyCopy as copy } from "@/copy/party";
 import { AnchorPickerLazy } from "@/features/map/anchor-picker-lazy";
 import type { UserPinnedLatLng } from "@/features/onboarding/pin";
-import { placeStatsAction } from "@/features/place/stats-actions";
 import type { PlaceStats } from "@/features/place/place-stats-model";
 import { openPollCreate } from "@/features/poll/create/intent";
 import { pollTabHref } from "@/features/poll/routes";
@@ -77,6 +76,7 @@ import {
   staggerStyle,
 } from "./parts";
 import { COLD_SHARE, rankParty, unknownShare, type PartyPick } from "./rank";
+import { read } from "@/lib/read";
 
 type EditField = "people" | "budget" | "room" | "alcohol";
 type Phase = "boot" | "ask" | "results";
@@ -435,7 +435,7 @@ function useStats(ids: readonly string[]) {
   const key = [...ids].sort().join(",");
   return useQuery({
     queryKey: ["placeStats", "full", key] as const,
-    queryFn: () => placeStatsAction(ids),
+    queryFn: () => read("placeStatsAction", ids),
     enabled: ids.length > 0,
     retry: 1,
     retryDelay: 300,

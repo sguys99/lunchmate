@@ -10,7 +10,7 @@ import { focusRing } from "@/components/ui/interaction";
 import { memoCopy as copy } from "@/copy/memo";
 import { memoKeys } from "./keys";
 import { cn } from "@/lib/utils";
-import { myFavoriteMemosAction } from "./actions";
+import { read } from "@/lib/read";
 
 const kakaoLink = (placeId: string, placeUrl: string | null) =>
   placeUrl ?? `https://place.map.kakao.com/${placeId}`;
@@ -18,7 +18,7 @@ const kakaoLink = (placeId: string, placeUrl: string | null) =>
 export default function FavoriteMemos({ className }: { className?: string }) {
   const q = useQuery({
     queryKey: memoKeys.favorites,
-    queryFn: () => myFavoriteMemosAction(),
+    queryFn: () => read("myFavoriteMemosAction"),
     staleTime: 60_000,
     retry: 1,
   });

@@ -19,7 +19,7 @@ import {
 import { focusRing } from "@/components/ui/interaction";
 import { rowPress } from "@/components/ui/row-press";
 import { pollCreateCopy } from "@/copy/poll-create";
-import { myPollsAction, type MyPollRow } from "@/features/poll/create/actions";
+import { type MyPollRow } from "@/features/poll/create/actions";
 import { myPollsKey } from "@/features/poll/create/keys";
 import { partyHref, pollRoomHref } from "@/features/poll/routes";
 import { countdownUnits } from "@/lib/format/countdown-units";
@@ -29,6 +29,7 @@ import { useOnlineStatus } from "@/lib/network";
 import { getKstParts, kstDayDiff } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { usePollTabMapFocus } from "./map-focus-store";
+import { read } from "@/lib/read";
 
 const copy = pollCreateCopy.tab;
 
@@ -36,7 +37,7 @@ export function PollTab() {
   const online = useOnlineStatus();
   const q = useQuery({
     queryKey: myPollsKey,
-    queryFn: () => myPollsAction(),
+    queryFn: () => read("myPollsAction"),
     staleTime: 15_000,
   });
   const now = useNow();

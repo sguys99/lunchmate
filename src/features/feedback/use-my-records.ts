@@ -10,19 +10,18 @@ import { useMemo } from "react";
 import { dbKeys } from "@/lib/query/db-keys";
 import { addKstDays, kstDateKey } from "@/lib/time/kst";
 import {
-  myDailyLimitsAction,
-  myPlacesAction,
-  myReviewsAction,
-  myVisitsAction,
-} from "./actions";
-import { pickFeedbackTarget, type FeedbackTarget, type MyVisit } from "./feedback-target";
+  pickFeedbackTarget,
+  type FeedbackTarget,
+  type MyVisit,
+} from "./feedback-target";
+import { read } from "@/lib/read";
 
 const STALE_MS = 60_000;
 
 export function myVisitsQuery(range: { from: string; to: string }) {
   return queryOptions({
     queryKey: dbKeys.myVisits(range.from, range.to),
-    queryFn: () => myVisitsAction(range),
+    queryFn: () => read("myVisitsAction", range),
     staleTime: STALE_MS,
   });
 }
@@ -43,16 +42,14 @@ export function usePlaceVisits(placeId: string, enabled = true) {
   const todayKey = kstDateKey(new Date());
   const range = useMemo(
     () => ({
-      from: kstDateKey(
-        addKstDays(new Date(), -PLACE_VISIT_LOOKBACK_DAYS),
-      ),
+      from: kstDateKey(addKstDays(new Date(), -PLACE_VISIT_LOOKBACK_DAYS)),
       to: todayKey,
     }),
     [todayKey],
   );
   return useQuery({
     queryKey: dbKeys.myVisits(range.from, range.to, placeId),
-    queryFn: () => myVisitsAction({ ...range, placeId }),
+    queryFn: () => read("myVisitsAction", { ...range, placeId }),
     staleTime: STALE_MS,
     enabled,
   });
@@ -70,7 +67,7 @@ export function useMyVisitHistory(now: Date, enabled = true) {
       const from = kstDateKey(
         addKstDays(now, -(pageParam + 1) * HISTORY_PAGE_DAYS + 1),
       );
-      return myVisitsAction({ from, to });
+      return read("myVisitsAction", { from, to });
     },
     initialPageParam: 0,
     // 1년까지. 빈 쪽이 이어져도 "더 보기"는 화면이 정한다
@@ -86,7 +83,7 @@ export function useMyReviews(placeId?: string, enabled = true) {
   return useInfiniteQuery({
     queryKey: dbKeys.myReviews(placeId),
     queryFn: ({ pageParam }) =>
-      myReviewsAction({ offset: pageParam, limit: 20, placeId }),
+      read("myReviewsAction", { offset: pageParam, limit: 20, placeId }),
     initialPageParam: 0,
     getNextPageParam: (last, pages) =>
       last.signedIn && last.hasMore
@@ -101,7 +98,7 @@ export function useMyReviews(placeId?: string, enabled = true) {
 export function useMyPlaces(enabled = true) {
   return useQuery({
     queryKey: dbKeys.myPlaces,
-    queryFn: () => myPlacesAction(),
+    queryFn: () => read("myPlacesAction"),
     staleTime: STALE_MS,
     enabled,
   });
@@ -111,7 +108,7 @@ export function useMyPlaces(enabled = true) {
 export function useDailyLimits(enabled = true) {
   return useQuery({
     queryKey: dbKeys.dailyLimits,
-    queryFn: () => myDailyLimitsAction(),
+    queryFn: () => read("myDailyLimitsAction"),
     staleTime: 0,
     enabled,
   });
@@ -144,8 +141,7 @@ export function useFeedbackTarget(
   );
   const q = useMyVisits(range, enabled);
   const target = useMemo(
-    () =>
-      q.data?.signedIn ? pickFeedbackTarget(q.data.visits, now) : null,
+    () => (q.data?.signedIn ? pickFeedbackTarget(q.data.visits, now) : null),
     [q.data, now],
   );
   return {

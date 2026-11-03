@@ -17,7 +17,6 @@ import {
   closePollNowAction,
   castVoteAction,
   claimPollClosedReportAction,
-  pollRoomAction,
   resolveTieAction,
   reviewSuggestionAction,
 } from "./actions";
@@ -31,6 +30,7 @@ import {
   type RoomPhase,
 } from "./model";
 import type { LiveState, PollSubscription } from "./realtime";
+import { read } from "@/lib/read";
 
 export { pollRoomKey };
 
@@ -56,7 +56,7 @@ export function usePollRoom(pollId: string, online: boolean) {
   const query = useQuery({
     queryKey: key,
     queryFn: async () => {
-      const r = await pollRoomAction(pollId);
+      const r = await read("pollRoomAction", pollId);
       if (!r.ok) throw new PollLoadError(r.error);
       return r.room;
     },
