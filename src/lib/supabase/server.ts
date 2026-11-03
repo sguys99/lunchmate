@@ -8,6 +8,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { clientEnv } from "@/lib/env/client";
 import type { Database } from "./types";
 
@@ -24,11 +25,16 @@ export function supabaseConfig(): SupabaseConfig | null {
 
 /**
  * next/headers 쿠키에 묶인 서버 클라이언트. 연결 값이 없으면 null.
+ * 만들기 전에 connection()으로 요청 시점임을 밝힌다(11/03). supabase-js는 만들 때 세션을 읽으며 Date.now()를 부르는데,
+ * cookies()만 읽은 상태에서는 Cache Components의 런타임 사전 렌더링(partialPrefetching)이 그 값을 막아
+ * "unstable value Date.now() while prerendering" 오류가 났다(/beta, /poll/[code] 운영 로그). 서버 액션과 Route Handler에서는
+ * connection()이 바로 끝난다. after()와 "use cache" 안에서는 이 함수를 쓰지 않는다(connection()이 오류).
  * Route Handler에서는 쿠키 쓰기가 응답에 실리고, 서버 컴포넌트에서는 쓰기가 막혀 무시된다(갱신은 proxy가 맡는다).
  */
 export async function createServerSupabase() {
   const config = supabaseConfig();
   if (!config) return null;
+  await connection();
   const cookieStore = await cookies();
   return createServerClient<Database>(config.url, config.publishableKey, {
     cookies: {

@@ -44,9 +44,10 @@ test.describe("/beta 환영 페이지", () => {
     await expectNoA11yViolations(page);
   });
 
-  test("아이폰 Safari: 공유 그림 + 로그인하고 시작", async ({ page }) => {
+  test("아이폰 Safari: 공유 그림 없음 + 로그인하고 시작", async ({ page }) => {
     await page.goto("/beta?device=ios");
-    await expect(page.getByRole("img", { name: /공유 버튼 위치 그림/ })).toBeVisible();
+    // 아래 막대 가운데 공유 버튼 그림은 최신 iOS Safari와 달라 숨겼다(96be2c8, 실기기 캡처 11/03)
+    await expect(page.getByRole("img", { name: /공유 버튼 위치 그림/ })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "로그인하고 시작" })).toHaveAttribute(
       "href",
       "/login?next=%2Ftoday",
@@ -75,7 +76,8 @@ test.describe("/beta 환영 페이지", () => {
     await context.setOffline(true);
     await expect(page.getByRole("status").filter({ hasText: "인터넷에 연결되어 있지 않습니다" })).toBeVisible();
     await expect(page.getByRole("link", { name: "로그인하고 시작" })).toHaveAttribute("aria-disabled", "true");
-    await expect(page.getByRole("img", { name: /공유 버튼 위치 그림/ })).toBeVisible();
+    // 설치 방법(단계 목록)은 오프라인에도 그대로 보인다
+    await expect(page.locator("ol li").first()).toBeVisible();
     await context.setOffline(false);
   });
 
