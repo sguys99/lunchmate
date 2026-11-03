@@ -21,7 +21,7 @@ jobs:
       github.event.state == 'success' &&
       contains(github.event.branches.*.name, 'main')
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     env:
       SITE: https://lunchmate-kr.vercel.app
       SHA: ${{ github.event.sha }}
@@ -31,7 +31,7 @@ jobs:
         run: |
           want="sw.js?v=${SHA:0:12}"
           for i in $(seq 1 30); do
-            if curl -fsS -A "lunchmate-warmup" "$SITE/today" | grep -q "$want"; then
+            if curl -fsS -A "lunchmate-warmup" -o page.html "$SITE/today" && grep -q "$want" page.html; then
               echo "live=true" >> "$GITHUB_OUTPUT"; echo "운영 주소가 ${SHA:0:12}를 내보냅니다"; exit 0
             fi
             sleep 10
@@ -40,17 +40,18 @@ jobs:
 
       - name: 앱 화면 미리 깨우기
         if: steps.wait.outputs.live == 'true'
+        # 하나씩 차례로 부른다. 첫 판(11/03)은 12개를 동시에 보내 Vercel이 인스턴스를 더 띄웠고, 그 새 인스턴스들이 다시
+        # 콜드 스타트를 겪었다(2회차도 1~3초). 2분 동안 10초 간격으로 되풀이해 바이트코드 캐시가 쌓이게 한다.
         run: |
           paths="/today /map /poll /me / /login"
-          for round in 1 2 3; do
+          for round in $(seq 1 12); do
             echo "== ${round}회차"
             for p in $paths; do
-              # 화면 요청(HTML)과 탭 이동 때 쓰는 RSC 요청을 함께 부른다
+              # 화면 요청(HTML)과 탭 이동 때 쓰는 RSC 요청
               curl -s -o /dev/null -A "lunchmate-warmup" \
-                -w "  %{http_code} 첫바이트 %{time_starttransfer}s 완료 %{time_total}s  $p\n" "$SITE$p" &
+                -w "  %{http_code} 첫바이트 %{time_starttransfer}s 완료 %{time_total}s  $p\n" "$SITE$p"
               curl -s -o /dev/null -A "lunchmate-warmup" -H "RSC: 1" \
-                -w "  %{http_code} 첫바이트 %{time_starttransfer}s 완료 %{time_total}s  $p (RSC)\n" "$SITE$p" &
+                -w "  %{http_code} 첫바이트 %{time_starttransfer}s 완료 %{time_total}s  $p (RSC)\n" "$SITE$p"
             done
-            wait
-            sleep 2
+            sleep 10
           done
