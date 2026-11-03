@@ -30,7 +30,8 @@ function args(name) {
 const routes = args("route").length > 0 ? args("route") : DEFAULT_ROUTES;
 // 홈 예산은 200 KB(CLAUDE.md 9장). 7단계 next/og 런타임 비용(약 0.5 KB) 때문에 잠시 201 KB였다가
 // T8.11에서 홈 첫 로드를 줄여 200으로 되돌렸다(docs/design/bundle-log.md 2026-11-01).
-const budgetKb = Number(arg("budget", "200"));
+// T10.16 메뉴 제보 홈 카드(A 가격 칸에 대표 메뉴)로 201로 올렸다(사용자 결정 D-35, 2026-11-03).
+const budgetKb = Number(arg("budget", "201"));
 const dir = resolve(arg("dir", ".next"));
 const statsPath = resolve(dir, "diagnostics/route-bundle-stats.json");
 

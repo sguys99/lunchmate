@@ -1,5 +1,8 @@
 # 10단계 메뉴 제보 비교 자료 (T10.16b ⛔ 선택)
 
+> **선택 (2026-11-03, design-decisions D-35)**: **조합 A + C.** 홈 카드는 A(가격 칸에 대표 메뉴), 상세는 C 메뉴판, 피드백은 A 칩, 알려주기는 C 메뉴판 안 펼침. 안건: (1) 홈 예산 **201 KB로 올림** (2) 카드 최소 제보 **2건** (3) "예산 안"은 **상세에만** (4) 비교 키 + **메뉴판 알려주기 칸에 쓰는 동안 기존 메뉴 제안**(B 검색형 조각) (5) 20자 (6) **180일** (7) 칩 3개 + 직접 쓰기 (8) 하루 20건. 비교 페이지 https://claude.ai/artifact/8HbWa2i7cKFWfw6ywTtqt7
+>
+
 > ⛔ T10.16b 메뉴와 메뉴별 가격 제보(D-34, PRD 6.6B MENU-01~05) 시안 게이트입니다. 시안 하나(또는 조합)를 고르고 5절 안건을 함께 정합니다. 고른 뒤 6절 설계안을 새 마이그레이션으로 옮겨 내용을 보여 드리고 승인을 받은 다음 `db:backup` → `db:push`로 넘어갑니다. 지금은 **마이그레이션 파일이 없습니다**(이 문서에만 초안).
 > 시안 라우트와 쿼리(머리 주석이 정본, `src/features/design-lab/menu/params.ts`): `/design-lab/menu/<a|b|c>?view=home|detail|feedback|report&state=ready|loading|empty|error|offline&edit=1&fail=save|banned|limit`. 코드 `src/features/design-lab/menu/`(공용 `shared.tsx`, 안별 `a/`, `b/`, `c/`), 문구 `src/copy/design-lab-menu.ts`.
 > 관련: CLAUDE.md 1장(10초, 3개 이하), 6장(카드 숫자 3개 + 이유 1줄 + 배지 최대 2개, 올리브 버튼 하나), 7장(사용자가 직접 쓴 메뉴 이름과 가격 저장 규칙), 13장(홈 JS 예산), PRD REC-06, PLACE-02, FB-02, MENU-01~05, DESIGN.md 5장 "오늘(홈) 화면"(D-25 한 화면 압축), "식당 상세"(D-10), "식후 피드백"(D-11).

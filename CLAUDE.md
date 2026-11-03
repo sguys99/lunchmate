@@ -161,7 +161,7 @@ docs/                    basic-plan, prd, tasks, design-decisions, research-note
   - 예문, 금지 표현, 숫자 표기, `src/copy` 작성법은 `docs/copy-guide.md`.
   - 이 규칙은 화면 문구에만 적용한다. 문서 서술의 중간점은 그대로 둔다.
 - 외부 API 호출은 `src/lib/kakao|naver` 래퍼 경유. 실패 시 재시도 1회 + PRD 12장 대체 동작.
-- 성능 예산: 홈 JS 200KB(gzip) 이하, LCP 2.5초(4G). 큰 의존성 추가 전 사용자에게 묻는다.
+- 성능 예산: 홈 JS 201KB(gzip) 이하(메뉴 제보 홈 카드로 200에서 올림, D-35 2026-11-03), LCP 2.5초(4G). 큰 의존성 추가 전 사용자에게 묻는다.
 
 ## 10. 테스트·완료 기준(DoD)
 
