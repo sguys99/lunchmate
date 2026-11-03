@@ -91,11 +91,21 @@ export default function TodayDetail({
   meal,
   budgetKRW,
   origin,
+  pollEntry,
   placeMemo,
 }: TodayDetailProps) {
   const content = useMemo(
-    () => detailContent({ card, place, meal, budgetKRW, origin, placeMemo }),
-    [card, place, meal, budgetKRW, origin, placeMemo],
+    () =>
+      detailContent({
+        card,
+        place,
+        meal,
+        budgetKRW,
+        origin,
+        pollEntry,
+        placeMemo,
+      }),
+    [card, place, meal, budgetKRW, origin, pollEntry, placeMemo],
   );
   return (
     <PlaceDetailSheet
