@@ -122,6 +122,62 @@ export type Database = {
         }
         Relationships: []
       }
+      menu_reports: {
+        Row: {
+          created_at: string
+          hidden_at: string | null
+          hidden_reason: string | null
+          id: string
+          kst_day: string
+          menu_key: string
+          menu_name: string
+          place_id: string
+          place_url: string | null
+          price_krw: number
+          review_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hidden_at?: string | null
+          hidden_reason?: string | null
+          id?: string
+          kst_day?: string
+          menu_key?: string
+          menu_name: string
+          place_id: string
+          place_url?: string | null
+          price_krw: number
+          review_id?: string | null
+          source: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          hidden_at?: string | null
+          hidden_reason?: string | null
+          id?: string
+          kst_day?: string
+          menu_key?: string
+          menu_name?: string
+          place_id?: string
+          place_url?: string | null
+          price_krw?: number
+          review_id?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offices: {
         Row: {
           created_at: string
@@ -1000,6 +1056,18 @@ export type Database = {
           starts_on: string
           still_count: number
           type: string
+        }[]
+      }
+      place_menus: {
+        Args: { p_place_ids: string[] }
+        Returns: {
+          last_month: string
+          median_krw: number
+          menu_key: string
+          menu_name: string
+          place_id: string
+          rank: number
+          report_count: number
         }[]
       }
       place_reviews: {

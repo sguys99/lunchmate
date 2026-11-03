@@ -10,7 +10,7 @@ import { pollCreateCopy } from "@/copy/poll-create";
 import { MEMO_DAILY, MEMO_PLACES_MAX } from "@/features/memo/model";
 
 /** PRD 정본 수치 (MOD-05, DEAL-04, T5.14 방문 20). 베타 의견 10은 D-23 안건 12(PRD 밖 베타 운영 값) */
-const PRD = { reviews: 20, reports: 30, deals: 10, polls: 10, visits: 20 };
+const PRD = { reviews: 20, reports: 30, deals: 10, polls: 10, visits: 20, menuReports: 20 };
 const BETA_FEEDBACK = 10;
 /** 식당 메모 저장과 고침 하루 30 (T10.15, D-33. PRD 밖 운영 값) */
 const PLACE_MEMOS = 30;
@@ -44,6 +44,8 @@ describe("하루 한도: PRD = DB = 문구", () => {
       polls: PRD.polls,
       beta_feedback: BETA_FEEDBACK,
       place_memos: PLACE_MEMOS,
+      // 메뉴 제보 하루 20 (MOD-05, T10.16c). 화면 문구 비교는 src/copy/menu.ts를 만들 때(T10.16g) 더한다
+      menu_reports: PRD.menuReports,
     });
   });
 
