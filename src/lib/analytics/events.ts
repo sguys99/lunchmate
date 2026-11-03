@@ -72,6 +72,12 @@ export interface AnalyticsEventMap {
     place_id: string;
     source: "rec" | "map" | "detail" | "party" | "favorite" | "history";
   };
+  /** 메뉴 제보(MENU-01, MENU-02, T10.16). 메뉴 이름과 가격은 넣지 않는다. 화면 연결은 T10.16d */
+  menu_reported: {
+    place_id: string;
+    source: "feedback" | "detail";
+    picked: "chip" | "typed";
+  };
   /** 장소 이름 해석 집계(T5.12a). 개수만, place_id, 이름, 좌표는 넣지 않는다. */
   place_names_resolved: {
     screen: string;

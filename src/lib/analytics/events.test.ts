@@ -37,6 +37,7 @@ describe("이벤트 타입", () => {
       | "favorite_added"
       | "poll_candidate_added"
       | "place_names_resolved"
+      | "menu_reported"
     >();
   });
 

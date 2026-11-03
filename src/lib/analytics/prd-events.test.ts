@@ -47,6 +47,7 @@ const EVENT_PROPS = {
   favorite_added: ["place_id", "source"],
   poll_candidate_added: ["place_id", "source"],
   place_names_resolved: ["screen", "total", "unresolved", "extra_calls"],
+  menu_reported: ["place_id", "source", "picked"],
 } as const satisfies { [N in AnalyticsEventName]: readonly Props<N>[] };
 
 type Missing = {
