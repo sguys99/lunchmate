@@ -75,6 +75,14 @@ export const historyCopy = {
     openPlace: (name: string) => `${name} 상세 보기`,
     settingsRow: "설정",
     settingsValue: "사무실, 예산, 화면",
+    delete: "삭제",
+    deleteLabel: (name: string) => `${name} 방문 기록 삭제`,
+    deleteAsk: "이 방문 기록을 지울까요?",
+    deleteBody: "지우면 되돌릴 수 없습니다.",
+    deleteBodyWithReview:
+      "이 방문에 남긴 후기도 함께 지워지고 식당 집계에서 빠집니다. 되돌릴 수 없습니다.",
+    deleting: "방문 기록을 지우는 중입니다.",
+    deleted: "방문 기록을 지웠습니다.",
   },
 
   /** 기록 탭 맨 위 이번 달 숫자 (D-12 안건 10) */

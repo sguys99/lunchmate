@@ -7,10 +7,11 @@
 // - 처음 2주, "지난 기록 더 보기"로 2주씩. 가장 오래된 방문일(myOldestVisitAction)로 끝을 안다.
 //   빈 2주가 이어지면 기록이 나올 때까지 이어서 받는다(무한 스크롤 없음).
 // - 맨 아래 "설정" 줄(안건 1). 오류 상태에서도 남는다.
+// - 줄 끝 휴지통 → 그 자리 확인 → 방문 삭제(후기가 있으면 cascade). 지운 줄은 떠날 때까지 결과 한 줄로 남는다(후기 탭과 같은 방식).
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   ErrorState,
   LoadingRegion,
@@ -23,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { historyCopy as copy } from "@/copy/history";
 import { moderationCopy } from "@/copy/moderation";
 import {
+  deleteVisitAction,
   markNotVisitedAction,
   rateVisitAction,
 } from "@/features/feedback/actions";
@@ -49,6 +51,7 @@ import { useMeMap, type MeMapPin } from "./me-map-store";
 import {
   groupVisitsByWeek,
   hasOlderVisits,
+  mergeKept,
   monthRange,
   summarizeMonth,
   visitFallbackName,
@@ -75,6 +78,10 @@ import { useRecordNames } from "./use-record-names";
 import { read } from "@/lib/read";
 
 type Answer = "up" | "down" | "no";
+
+const idOf = (v: MyVisit) => v.id;
+// 서버 정렬(visited_on, created_at 내림차순)과 같은 순서
+const sortKey = (v: MyVisit) => `${v.visitedOn}|${v.createdAt}`;
 
 export const oldestVisitKey = [...dbKeys.myVisitsAll, "oldest"] as const;
 
@@ -107,6 +114,11 @@ export function HistoryPanel({
   const visits = useMemo(
     () => hist.data?.pages.flatMap((p) => (p.signedIn ? p.visits : [])) ?? [],
     [hist.data],
+  );
+  const [deleted, setDeleted] = useState<Record<string, MyVisit>>({});
+  const shown = useMemo(
+    () => mergeKept(visits, Object.values(deleted), idOf, sortKey),
+    [visits, deleted],
   );
   const pages = hist.data?.pages.length ?? 0;
   const oldestKey =
@@ -147,8 +159,8 @@ export function HistoryPanel({
     [monthVisits, todayKey, names],
   );
   const groups = useMemo(
-    () => groupVisitsByWeek(visits, todayKey),
-    [visits, todayKey],
+    () => groupVisitsByWeek(shown, todayKey),
+    [shown, todayKey],
   );
 
   // 데스크톱 우측 지도: 이번 주 다녀온 곳(이름을 아는 곳만)
@@ -159,7 +171,12 @@ export function HistoryPanel({
     const seen = new Set<string>();
     for (const v of thisWeek?.visits ?? []) {
       const r = names.get(v.placeId);
-      if (v.status === "not_visited" || r?.status !== "resolved") continue;
+      if (
+        v.status === "not_visited" ||
+        deleted[v.id] ||
+        r?.status !== "resolved"
+      )
+        continue;
       if (seen.has(v.placeId)) continue;
       seen.add(v.placeId);
       pins.push({
@@ -169,7 +186,7 @@ export function HistoryPanel({
       });
     }
     setPins(pins);
-  }, [thisWeek, names, setPins]);
+  }, [thisWeek, names, deleted, setPins]);
 
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [busy, setBusy] = useState<Record<string, true>>({});
@@ -204,6 +221,18 @@ export function HistoryPanel({
       },
     });
     void invalidateAfterWrite(client, "review", visit.placeId);
+  };
+
+  const remove = async (visit: MyVisit): Promise<boolean> => {
+    const result = await deleteVisitAction({ visitId: visit.id });
+    if (!result.ok) {
+      void toast.error(errorTitle(result));
+      return false;
+    }
+    setDeleted((d) => ({ ...d, [visit.id]: visit }));
+    // 방문, 후기, 이번 달 숫자, 식당 집계를 다시 받는다(후기는 cascade로 함께 지워진다)
+    void invalidateAfterWrite(client, "review", visit.placeId);
+    return true;
   };
 
   const settingsRow = (
@@ -246,7 +275,7 @@ export function HistoryPanel({
     return <HistorySkeleton />;
   }
 
-  const empty = visits.length === 0 && !more;
+  const empty = shown.length === 0 && !more;
   if (visits.length === 0 && !empty) return <HistorySkeleton />;
 
   return (
@@ -284,7 +313,9 @@ export function HistoryPanel({
                     ) : null}
                   </h3>
                   <span className="shrink-0 type-caption text-muted-foreground tabular-nums">
-                    {copy.history.count(g.visits.length)}
+                    {copy.history.count(
+                      g.visits.filter((v) => !deleted[v.id]).length,
+                    )}
                   </span>
                 </div>
                 <ul className="flex flex-col">
@@ -306,6 +337,9 @@ export function HistoryPanel({
                       busy={busy[v.id] === true}
                       offline={offline}
                       onAnswer={(a) => guard(() => void answer(v, a))()}
+                      deleted={!!deleted[v.id]}
+                      guard={guard}
+                      onDelete={() => remove(v)}
                     />
                   ))}
                 </ul>
@@ -413,6 +447,9 @@ function VisitRow({
   busy,
   offline,
   onAnswer,
+  deleted,
+  guard,
+  onDelete,
 }: {
   visit: MyVisit;
   now: Date;
@@ -423,8 +460,23 @@ function VisitRow({
   busy: boolean;
   offline: boolean;
   onAnswer: (a: Answer) => void;
+  deleted: boolean;
+  guard: (fn: () => void) => () => void;
+  onDelete: () => Promise<boolean>;
 }) {
   const entry = useDetailEntry();
+  const [phase, setPhase] = useState<"idle" | "confirm" | "busy">("idle");
+  const askId = useId();
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  const deleteRef = useRef<HTMLButtonElement>(null);
+  const doneRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (phase === "confirm") confirmRef.current?.focus();
+  }, [phase]);
+  // 지운 뒤 초점이 사라지지 않게 그 자리 결과 줄로 옮긴다
+  useEffect(() => {
+    if (deleted && phase === "busy") doneRef.current?.focus();
+  }, [deleted, phase]);
   const wasCandidate = visit.status === "candidate" || answer !== undefined;
   const notVisited =
     answer === "no" || (answer === undefined && visit.status === "not_visited");
@@ -443,6 +495,21 @@ function VisitRow({
     answer === undefined &&
     canAnswerLate(visit, now);
   const name = place.name ?? fallback;
+
+  if (deleted) {
+    return (
+      <li className="border-b border-border py-4">
+        <p
+          ref={doneRef}
+          role="status"
+          tabIndex={-1}
+          className="animate-in pl-12 type-body-sm text-muted-foreground duration-(--lm-duration-base) ease-enter fade-in focus:outline-none motion-reduce:animate-none"
+        >
+          {copy.history.deleted}
+        </p>
+      </li>
+    );
+  }
 
   return (
     <li className="flex flex-col gap-2 border-b border-border py-3">
@@ -504,7 +571,72 @@ function VisitRow({
             className="shrink-0"
           />
         )}
+        <button
+          ref={deleteRef}
+          type="button"
+          aria-label={copy.history.deleteLabel(name)}
+          aria-disabled={offline || undefined}
+          aria-expanded={phase !== "idle"}
+          aria-controls={askId}
+          onClick={guard(() => setPhase("confirm"))}
+          className={cn(btn.ghostIcon, "-mr-2.5 text-muted-foreground")}
+        >
+          <Trash2 aria-hidden className="size-4" strokeWidth={1.5} />
+        </button>
       </div>
+      {phase !== "idle" ? (
+        <div
+          id={askId}
+          role="group"
+          aria-label={copy.history.deleteAsk}
+          aria-busy={phase === "busy" || undefined}
+          className="ml-12 flex animate-in flex-col gap-3 rounded-card border border-border bg-card p-4 duration-(--lm-duration-base) ease-enter fade-in motion-reduce:animate-none"
+        >
+          <p className="type-body-sm break-keep">
+            {copy.history.deleteAsk}
+            <span className="block type-caption text-muted-foreground">
+              {visit.review
+                ? copy.history.deleteBodyWithReview
+                : copy.history.deleteBody}
+            </span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              ref={confirmRef}
+              type="button"
+              aria-disabled={phase === "busy" || offline || undefined}
+              onClick={guard(() => {
+                if (phase === "busy") return;
+                setPhase("busy");
+                void onDelete().then((ok) => {
+                  if (!ok) setPhase("confirm");
+                });
+              })}
+              className={cn(
+                buttonClass("destructive", "sm"),
+                "aria-disabled:opacity-60",
+              )}
+            >
+              {copy.reviews.deleteConfirm}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPhase("idle");
+                deleteRef.current?.focus();
+              }}
+              className={buttonClass("ghost", "sm")}
+            >
+              {copy.reviews.keep}
+            </button>
+          </div>
+          {phase === "busy" ? (
+            <span role="status" className="sr-only">
+              {copy.history.deleting}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       {wasCandidate && answer !== undefined ? (
         <p
           role="status"

@@ -9,6 +9,7 @@ const {
   markFeedbackPrompted,
   markNotVisited,
   rateVisit,
+  removeVisit,
   updateReview,
   updateReviewSchema,
   writeFromDetail,
@@ -32,7 +33,7 @@ function deps(over: Partial<FeedbackDeps> = {}): FeedbackDeps {
     listOpenVisits: async () => [],
     latestReviewAt: async () => null,
     insertVisit: vi.fn(async () => ({ id: VISIT, error: null })),
-    deleteVisit: vi.fn(async () => {}),
+    deleteVisit: vi.fn(async () => ok),
     setNotVisited: vi.fn(async () => ok),
     markPrompted: vi.fn(async () => ok),
     insertReview: vi.fn(async () => ({ id: REVIEW, error: null })),
@@ -46,9 +47,9 @@ function deps(over: Partial<FeedbackDeps> = {}): FeedbackDeps {
 describe("rateVisit (FB-01)", () => {
   it("후기 행을 평가만으로 만든다", async () => {
     const d = deps();
-    await expect(rateVisit({ visitId: VISIT, rating: "up" }, d)).resolves.toEqual(
-      { ok: true, reviewId: REVIEW, created: true },
-    );
+    await expect(
+      rateVisit({ visitId: VISIT, rating: "up" }, d),
+    ).resolves.toEqual({ ok: true, reviewId: REVIEW, created: true });
     expect(d.insertReview).toHaveBeenCalledWith("user-1", VISIT, {
       rating: "up",
     });
@@ -68,7 +69,10 @@ describe("rateVisit (FB-01)", () => {
     });
   });
   it.each([
-    ["reviews_daily_limit_exceeded", { ok: false, error: "limit", bucket: "reviews" }],
+    [
+      "reviews_daily_limit_exceeded",
+      { ok: false, error: "limit", bucket: "reviews" },
+    ],
     ["reviews_visit_too_old", { ok: false, error: "too_old" }],
     ["reviews_visit_not_found", { ok: false, error: "not_found" }],
   ])("DB 오류 %s를 결과로 바꾼다", async (message, expected) => {
@@ -78,9 +82,9 @@ describe("rateVisit (FB-01)", () => {
         error: { code: "23514", message },
       }),
     });
-    await expect(rateVisit({ visitId: VISIT, rating: "up" }, d)).resolves.toEqual(
-      expected,
-    );
+    await expect(
+      rateVisit({ visitId: VISIT, rating: "up" }, d),
+    ).resolves.toEqual(expected);
   });
   it("비로그인, 잘못된 입력", async () => {
     await expect(
@@ -123,10 +127,18 @@ describe("markNotVisited (FB-05)", () => {
   it("이미 안 갔어요면 그대로 성공, 다녀옴이면 duplicate, 없으면 not_found", async () => {
     const at = (status: "visited" | "not_visited") =>
       deps({
-        readVisit: async () => ({ id: VISIT, visited_on: "2026-11-03", status }),
+        readVisit: async () => ({
+          id: VISIT,
+          visited_on: "2026-11-03",
+          status,
+        }),
       });
-    await expect(markNotVisited({ visitId: VISIT }, at("not_visited"))).resolves.toEqual({ ok: true });
-    await expect(markNotVisited({ visitId: VISIT }, at("visited"))).resolves.toEqual({ ok: false, error: "duplicate" });
+    await expect(
+      markNotVisited({ visitId: VISIT }, at("not_visited")),
+    ).resolves.toEqual({ ok: true });
+    await expect(
+      markNotVisited({ visitId: VISIT }, at("visited")),
+    ).resolves.toEqual({ ok: false, error: "duplicate" });
     await expect(
       markNotVisited({ visitId: VISIT }, deps({ readVisit: async () => null })),
     ).resolves.toEqual({ ok: false, error: "not_found" });
@@ -147,7 +159,12 @@ describe("updateReview (FB-02, FB-03, FB-07, MOD-04)", () => {
   it("보낸 칸만 바꾸고 null은 지운다", async () => {
     const d = deps();
     await updateReview(
-      { reviewId: REVIEW, priceKrw: null, tags: ["solo_ok", "quiet"], body: "  국물이 진해요 " },
+      {
+        reviewId: REVIEW,
+        priceKrw: null,
+        tags: ["solo_ok", "quiet"],
+        body: "  국물이 진해요 ",
+      },
       d,
     );
     expect(d.updateReview).toHaveBeenCalledWith("user-1", REVIEW, {
@@ -159,7 +176,9 @@ describe("updateReview (FB-02, FB-03, FB-07, MOD-04)", () => {
   it("빈 글은 null(글 없음)", async () => {
     const d = deps();
     await updateReview({ reviewId: REVIEW, body: "   " }, d);
-    expect(d.updateReview).toHaveBeenCalledWith("user-1", REVIEW, { body: null });
+    expect(d.updateReview).toHaveBeenCalledWith("user-1", REVIEW, {
+      body: null,
+    });
   });
   it("금칙어면 banned, 저장하지 않는다", async () => {
     const d = deps();
@@ -202,9 +221,21 @@ describe("updateReviewSchema", () => {
   it.each([
     ["가격 경계", { priceKrw: 1000 }],
     ["가격 경계 상한", { priceKrw: 100_000 }],
-    ["태그 8개", {
-      tags: ["solo_ok", "quick_15", "short_wait", "private_room", "group_seats", "good_value", "big_portion", "quiet"],
-    }],
+    [
+      "태그 8개",
+      {
+        tags: [
+          "solo_ok",
+          "quick_15",
+          "short_wait",
+          "private_room",
+          "group_seats",
+          "good_value",
+          "big_portion",
+          "quiet",
+        ],
+      },
+    ],
     ["100자 글", { body: "가".repeat(100) }],
     ["공개 여부", { isPublic: false }],
   ])("%s는 통과", (_label, extra) => {
@@ -220,6 +251,38 @@ describe("deleteReview (FB-07)", () => {
     await expect(deleteReview({ reviewId: REVIEW }, d)).resolves.toEqual({
       ok: true,
     });
+  });
+});
+
+describe("removeVisit (HIS-01 방문 기록 삭제)", () => {
+  it("세션 사용자의 방문만 지운다", async () => {
+    const d = deps();
+    await expect(removeVisit({ visitId: VISIT }, d)).resolves.toEqual({
+      ok: true,
+    });
+    expect(d.deleteVisit).toHaveBeenCalledWith("user-1", VISIT);
+  });
+  it("지운 행이 없으면(남의 방문, 이미 지움) not_found", async () => {
+    const d = deps({
+      deleteVisit: vi.fn(async () => ({ count: 0, error: null })),
+    });
+    await expect(removeVisit({ visitId: VISIT }, d)).resolves.toEqual({
+      ok: false,
+      error: "not_found",
+    });
+  });
+  it("로그인하지 않았거나 id가 uuid가 아니면 지우지 않는다", async () => {
+    const out = deps({ currentUserId: async () => null });
+    await expect(removeVisit({ visitId: VISIT }, out)).resolves.toMatchObject({
+      ok: false,
+      error: "unauthenticated",
+    });
+    const bad = deps();
+    await expect(removeVisit({ visitId: "1" }, bad)).resolves.toMatchObject({
+      ok: false,
+    });
+    expect(out.deleteVisit).not.toHaveBeenCalled();
+    expect(bad.deleteVisit).not.toHaveBeenCalled();
   });
 });
 
@@ -258,7 +321,9 @@ describe("writeFromDetail (FB-06)", () => {
       })),
       findVisit: async () => ({ id: VISIT, hasReview: false }),
     });
-    await expect(writeFromDetail(input, d)).resolves.toMatchObject({ ok: true });
+    await expect(writeFromDetail(input, d)).resolves.toMatchObject({
+      ok: true,
+    });
   });
   it("그 방문에 후기가 있으면 duplicate", async () => {
     const d = deps({
@@ -318,7 +383,11 @@ describe("writeFromDetail (FB-06)", () => {
       const d = deps({
         listOpenVisits: async () => [
           open({ createdAt: "2026-10-27T03:00:00Z" }),
-          open({ id: VISIT, visitedOn: "2026-10-01", createdAt: "2026-10-01T03:00:00Z" }),
+          open({
+            id: VISIT,
+            visitedOn: "2026-10-01",
+            createdAt: "2026-10-01T03:00:00Z",
+          }),
         ],
         latestReviewAt: async () => "2026-10-28T04:00:00Z",
       });
@@ -331,7 +400,9 @@ describe("writeFromDetail (FB-06)", () => {
           throw new Error("load");
         },
       });
-      await expect(writeFromDetail(input, d)).resolves.toMatchObject({ ok: true });
+      await expect(writeFromDetail(input, d)).resolves.toMatchObject({
+        ok: true,
+      });
       expect(d.insertVisit).toHaveBeenCalled();
     });
     it("후보 평가가 막히면 그 오류를 돌려주고 방문은 지우지 않는다", async () => {

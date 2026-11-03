@@ -811,3 +811,9 @@
 - 삭제: `src/features/swipe/`, `app-shell/swipe-main.tsx`(본문은 다시 일반 `<main>`), `tabs.ts`의 `rootTabIndex`, `copy/shell.ts`의 `swipeRelease`, 화면의 `data-swipe-ignore`, E2E `e2e/tab-swipe.spec.ts`, 시안 코드(`design-lab/swipe`, `features/design-lab/swipe`, `copy/design-lab-swipe.ts`)
 - 남김: 캡처 `docs/design/shots/2026-11-03/swipe-*`, 비교 자료 `docs/design/g9-comparison-swipe.md`, D-36 기록. 같은 커밋(656a8f3)의 문서 튕김 복원(globals.css, T9.10)은 스와이프와 별개라 그대로 둔다
 
+### D-42. HIS-01 방문 기록 삭제
+
+- 날짜: 2026-11-04. 사용자 요청("방문 기록 삭제가 안돼. 삭제 버튼 추가해줘")
+- 결정: 나 탭 기록 줄 끝에 휴지통 아이콘 버튼(44px, 레이블 "{이름} 방문 기록 삭제") → 줄 아래 그 자리 확인("이 방문 기록을 지울까요?", 지우기 / 그대로 두기) → 결과 한 줄을 떠날 때까지 남김. 후기 탭 삭제(FB-07)와 같은 패턴
+- 시안 게이트: 기존 후기 삭제 UI와 토큰, 컴포넌트만 재사용해서 3안 시안은 생략(사용자가 원하면 따로 비교)
+- 데이터: `visits` 본인 삭제 RLS는 T5.14부터 있었다(마이그레이션 없음). 후기는 `reviews.visit_id` cascade로 함께 지워지고 집계에서 바로 빠진다. 후기가 있는 방문은 확인 문구에서 미리 알린다. 하루 방문 기록 한도는 지워도 돌려주지 않는다

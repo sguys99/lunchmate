@@ -166,7 +166,7 @@ export type FeedbackDeps = {
   ) => Promise<OpenVisitRow[]>;
   /** 이 식당의 내 마지막 후기 created_at. 없으면 null */
   latestReviewAt: (userId: string, placeId: string) => Promise<string | null>;
-  deleteVisit: (userId: string, visitId: string) => Promise<void>;
+  deleteVisit: (userId: string, visitId: string) => Promise<Changed>;
   setNotVisited: (userId: string, visitId: string) => Promise<Changed>;
   markPrompted: (userId: string, visitId: string) => Promise<Changed>;
   insertReview: (
@@ -304,6 +304,20 @@ export async function deleteReview(
   const userId = await signedIn(deps);
   if (!userId) return fail("unauthenticated");
   const changed = await deps.deleteReview(userId, p.data.reviewId);
+  if (changed.error) return mapPgError(changed.error) ?? fail("save");
+  return changed.count === 1 ? { ok: true } : fail("not_found");
+}
+
+/** 내 방문 기록 삭제 (HIS-01, 2026-11-04 사용자 요청). 그 방문의 후기와 메뉴 제보도 cascade로 지워진다 */
+export async function removeVisit(
+  raw: unknown,
+  deps: FeedbackDeps,
+): Promise<WriteResult> {
+  const p = parseInput(visitIdSchema, raw);
+  if (!p.ok) return fail(p.error);
+  const userId = await signedIn(deps);
+  if (!userId) return fail("unauthenticated");
+  const changed = await deps.deleteVisit(userId, p.data.visitId);
   if (changed.error) return mapPgError(changed.error) ?? fail("save");
   return changed.count === 1 ? { ok: true } : fail("not_found");
 }

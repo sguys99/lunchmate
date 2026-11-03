@@ -13,6 +13,7 @@ import {
   deleteReview,
   markFeedbackPrompted,
   markNotVisited,
+  removeVisit,
   rateVisit,
   updateReview,
   writeFromDetail,
@@ -109,7 +110,13 @@ function depsFor(supabase: ServerSupabase): FeedbackDeps {
       return data?.created_at ?? null;
     },
     async deleteVisit(userId, visitId) {
-      await supabase.from("visits").delete().eq("user_id", userId).eq("id", visitId);
+      const { data, error } = await supabase
+        .from("visits")
+        .delete()
+        .eq("user_id", userId)
+        .eq("id", visitId)
+        .select("id");
+      return { count: data?.length ?? 0, error };
     },
     async setNotVisited(userId, visitId) {
       const { data, error } = await supabase
@@ -208,6 +215,13 @@ export async function markNotVisitedAction(
   input: VisitIdRequest,
 ): Promise<WriteResult> {
   return write((d) => markNotVisited(input, d), fail("save"));
+}
+
+/** 내 방문 기록 삭제 (HIS-01). 후기가 있으면 함께 지워진다 */
+export async function deleteVisitAction(
+  input: VisitIdRequest,
+): Promise<WriteResult> {
+  return write((d) => removeVisit(input, d), fail("save"));
 }
 
 /** 홈 띠를 처음 보였을 때 한 번 (FB-04). isNewPrompt가 true일 때만 부른다 */
