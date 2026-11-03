@@ -1171,6 +1171,7 @@ export type Database = {
         Returns: {
           closed: boolean
           closed_reports: number
+          closed_today: number
           deal_count: number
           place_id: string
           price_count: number
