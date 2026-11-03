@@ -41,6 +41,8 @@ function lineOf(kind: ReasonKind, pick: RecoPick, now: Date): string | null {
       return e.lastUpAt ? likedPlaceLine(e.lastUpAt, now) : null;
     case "craving":
       return copy.craving(withObject(label));
+    case "favorite":
+      return copy.favorite(withObject(label));
     case "likedCategory":
       return copy.likedCategory(label);
     case "budget":

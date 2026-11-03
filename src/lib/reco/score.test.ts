@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { addKstDays } from "@/lib/time";
-import { MEAL_CATEGORY_PENALTY, NEUTRAL, WEIGHTS } from "./constants";
+import {
+  LIKED_CATEGORY_BOOST,
+  MEAL_CATEGORY_PENALTY,
+  NEUTRAL,
+  WEIGHTS,
+} from "./constants";
 import {
   scoreAll,
   scoreCandidate,
@@ -275,5 +280,64 @@ describe("끼니 적합도 P 감점 (T9.16)", () => {
       },
     };
     expect(pFor(cafe, settings)).toBeGreaterThan(NEUTRAL);
+  });
+});
+
+describe("좋아하는 음식 P 가산 (T9.17, D-39)", () => {
+  const gukbap = makeCandidate("g", { category: "gukbap" });
+  const liked: RecoSettings = { ...BASE_SETTINGS, liked: ["gukbap"] };
+  const rated = (n: number): RecoHistory => ({
+    blocked: new Set(),
+    visits: Array.from({ length: n }, (_, i) => ({
+      placeId: `other-${i}`,
+      category: "gukbap" as const,
+      at: NOW,
+      status: "visited" as const,
+      rating: i % 2 === 0 ? ("up" as const) : ("down" as const),
+    })),
+  });
+
+  it("피드백이 없으면 0.15를 더하고 근거에 favorite을 남긴다", () => {
+    const s = scoreAll([gukbap], liked, EMPTY_HISTORY, NOW)[0]!;
+    expect(s.factors.P).toBeCloseTo(NEUTRAL + LIKED_CATEGORY_BOOST);
+    expect(s.evidence.favorite).toBe(true);
+  });
+
+  it("그 카테고리에 👍👎을 남길수록 가산이 줄어든다(👍👎이 상쇄된 경우로 가산만 본다)", () => {
+    const p2 = scoreAll([gukbap], liked, rated(2), NOW)[0]!.factors.P;
+    const p0 = scoreAll([gukbap], BASE_SETTINGS, rated(2), NOW)[0]!.factors.P;
+    expect(p2 - p0).toBeCloseTo(LIKED_CATEGORY_BOOST / 3);
+  });
+
+  it("요즘 땡겨요와 겹치면 땡겨요만 더한다", () => {
+    const both: RecoSettings = {
+      ...liked,
+      craving: {
+        categories: ["gukbap"],
+        until: new Date(NOW.getTime() + 86_400_000),
+      },
+    };
+    const onlyCraving: RecoSettings = { ...both, liked: [] };
+    expect(scoreAll([gukbap], both, EMPTY_HISTORY, NOW)[0]!.factors.P).toBe(
+      scoreAll([gukbap], onlyCraving, EMPTY_HISTORY, NOW)[0]!.factors.P,
+    );
+  });
+
+  it("좋아하는 음식으로 고른 카페는 끼니 감점을 받지 않는다", () => {
+    const cafe = makeCandidate("c", { category: "cafe" });
+    const s = scoreAll(
+      [cafe],
+      { ...BASE_SETTINGS, liked: ["cafe"] },
+      EMPTY_HISTORY,
+      NOW,
+    )[0]!;
+    expect(s.factors.P).toBeCloseTo(NEUTRAL + LIKED_CATEGORY_BOOST);
+  });
+
+  it("고르지 않은 카테고리는 그대로다", () => {
+    const hansik = makeCandidate("h");
+    expect(scoreAll([hansik], liked, EMPTY_HISTORY, NOW)[0]!.factors.P).toBe(
+      NEUTRAL,
+    );
   });
 });

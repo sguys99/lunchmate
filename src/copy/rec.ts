@@ -14,6 +14,7 @@ export const recCopy = {
       older: (label: string) => `예전에 👍한 ${label}`,
     },
     craving: (label: string) => `요즘 땡기는 ${label}`,
+    favorite: (label: string) => `좋아하는 ${label}`,
     likedCategory: (label: string) => `👍한 적 있는 ${label}`,
     /** 제보 가격이 있을 때. band는 "9천 원대" */
     budgetReported: (band: string) => `예산 안 1인 ${band}`,
@@ -41,6 +42,9 @@ export const recCopy = {
     },
     craving: (labelWithParticle: string) =>
       `요즘 땡긴다고 고른 ${labelWithParticle} 먼저 찾았습니다.`,
+    /** 좋아하는 음식(ONB-06). labelWithParticle은 "국밥을" */
+    favorite: (labelWithParticle: string) =>
+      `좋아하는 음식으로 ${labelWithParticle} 골라 두셔서 조금 더 자주 보여 드립니다.`,
     likedCategory: (label: string) => `👍를 남긴 적 있는 ${label} 집입니다.`,
     budget: (band: string) => `제보된 1인 가격이 ${band}로 예산 안입니다.`,
     reputation: (percent: number) => `후기의 ${percent}%가 👍입니다.`,

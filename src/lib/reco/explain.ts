@@ -52,6 +52,12 @@ export function reasonOptions(s: ScoredCandidate, now: Date): ReasonOption[] {
       weight: pGain,
       text: recCopy.reason.craving(label),
     });
+  } else if (e.favorite) {
+    out.push({
+      kind: "favorite",
+      weight: pGain,
+      text: recCopy.reason.favorite(label),
+    });
   } else if (e.categoryLiked) {
     out.push({
       kind: "likedCategory",

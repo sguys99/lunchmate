@@ -24,6 +24,13 @@ export type TodayData = {
   prefs: Prefs;
   avoid: AvoidRule[];
   craving: { categories: string[]; until: string | null };
+  /** 좋아하는 음식 slug (ONB-06, D-39). 비로그인이면 빈 배열 */
+  liked: string[];
+  /**
+   * 홈 취향 띠(D-39) 판정 재료. 비로그인이면 null.
+   * joinedAt은 preferences 행을 만든 시각(가입 시각), dismissedAt은 띠를 닫은 시각
+   */
+  tastePrompt: { joinedAt: string; dismissedAt: string | null } | null;
   blocked: string[];
   /** 최근 방문 기록과 내 평가(선호 P, 반복 R). 비로그인이면 빈 배열 */
   history: HistoryRow[];
@@ -55,6 +62,8 @@ function guestData(params: Params, nowIso: string): TodayData {
       ...avoid.allergies.map((value) => ({ kind: "allergy" as const, value })),
     ],
     craving: { categories: [], until: null },
+    liked: [],
+    tastePrompt: null,
     blocked: [],
     history: [],
     nowIso,
@@ -109,7 +118,7 @@ export async function loadToday(params: Params): Promise<TodayData> {
     supabase
       .from("preferences")
       .select(
-        "lunch_budget, dinner_budget, walk_minutes, craving_categories, craving_until",
+        "lunch_budget, dinner_budget, walk_minutes, craving_categories, craving_until, liked_categories, taste_prompt_dismissed_at, created_at",
       )
       .eq("user_id", userId)
       .maybeSingle(),
@@ -154,6 +163,13 @@ export async function loadToday(params: Params): Promise<TodayData> {
       categories: prefs.data?.craving_categories ?? [],
       until: prefs.data?.craving_until ?? null,
     },
+    liked: prefs.data?.liked_categories ?? [],
+    tastePrompt: prefs.data
+      ? {
+          joinedAt: prefs.data.created_at,
+          dismissedAt: prefs.data.taste_prompt_dismissed_at,
+        }
+      : null,
     blocked: (blocked.data ?? []).map((b) => b.place_id),
     history: visits.error ? [] : historyRows(visits.data ?? []),
     nowIso,

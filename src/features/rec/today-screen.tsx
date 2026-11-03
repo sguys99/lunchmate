@@ -313,8 +313,9 @@ export function TodayScreen({
         categories: data.craving.categories.filter(isCategorySlug),
         until: data.craving.until ? new Date(data.craving.until) : null,
       },
+      liked: data.liked.filter(isCategorySlug),
     }),
-    [meal, budgetKRW, walk, data.avoid, data.craving],
+    [meal, budgetKRW, walk, data.avoid, data.craving, data.liked],
   );
   const sessionBlocked = session.blocked;
   const sessionDisliked = session.reroll.disliked;

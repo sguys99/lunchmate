@@ -114,3 +114,27 @@ describe("추천 이유 (T5.10)", () => {
     expect(shortCategoryLabel("hansik")).toBe("한식");
   });
 });
+
+describe("좋아하는 음식 이유 (T9.17, D-39)", () => {
+  it('콜드 스타트에서 좋아하는 음식이면 "좋아하는 국밥"을 이유로 쓴다', () => {
+    const r = reasonOf(
+      makeCandidate("g", { category: "gukbap", distanceM: 200 }),
+      { ...BASE_SETTINGS, liked: ["gukbap"] },
+    );
+    expect(r.kinds).toContain("favorite");
+    expect(r.text).toContain("좋아하는 국밥");
+  });
+
+  it("요즘 땡겨요가 겹치면 땡겨요 문장을 쓴다", () => {
+    const r = reasonOf(
+      makeCandidate("g", { category: "gukbap", distanceM: 200 }),
+      {
+        ...BASE_SETTINGS,
+        liked: ["gukbap"],
+        craving: { categories: ["gukbap"], until: daysAgo(-3) },
+      },
+    );
+    expect(r.kinds).toContain("craving");
+    expect(r.kinds).not.toContain("favorite");
+  });
+});

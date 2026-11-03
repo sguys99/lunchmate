@@ -41,6 +41,12 @@ export const PLACE_PREF_SCALE = 0.35;
 export const CATEGORY_PREF_SCALE = 0.15;
 /** 요즘 이게 땡겨요(SET-05) 카테고리면 P에 더한다(7일 동안) */
 export const CRAVING_BOOST = 0.25;
+/**
+ * 좋아하는 음식(ONB-06, D-39) 카테고리면 P에 더한다. 만료 없음. 카테고리 👍 최대 폭(0.15)과 같은 크기로,
+ * 처음 며칠 피드백이 없을 때 취향을 대신한다. 그 카테고리에 👍👎을 남길 때마다 줄여(÷ (1 + 남긴 수)) 실제 기록을 따른다.
+ * 요즘 땡겨요와 겹치면 큰 쪽(땡겨요)만 쓴다.
+ */
+export const LIKED_CATEGORY_BOOST = 0.15;
 
 /* 끼니 적합도 (T9.16, 사용자 지적 11/03: 점심에 술집 추천) ------------- */
 

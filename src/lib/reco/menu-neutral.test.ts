@@ -25,13 +25,20 @@ describe("AC-MENU-2 메뉴 제보는 추천에 쓰지 않는다", () => {
   });
 
   it("오늘(홈) 엔진 조립 파일(engine, candidates, place-stats)도 메뉴를 읽지 않는다", () => {
-    for (const f of ["src/features/rec/engine.ts", "src/features/rec/candidates.ts", "src/features/rec/place-stats.ts"]) {
+    for (const f of [
+      "src/features/rec/engine.ts",
+      "src/features/rec/candidates.ts",
+      "src/features/rec/place-stats.ts",
+    ]) {
       expect(readFileSync(join(root, f), "utf8"), f).not.toMatch(FORBIDDEN);
     }
   });
 
   it("홈 화면은 메뉴를 카드에만 넘긴다(statsLookup에는 rows만)", () => {
-    const screen = readFileSync(join(root, "src/features/rec/today-screen.tsx"), "utf8");
+    const screen = readFileSync(
+      join(root, "src/features/rec/today-screen.tsx"),
+      "utf8",
+    );
     expect(screen).toMatch(/engine\.statsLookup\(statsRows\)/);
     expect(screen).not.toMatch(/statsLookup\([^)]*menus/);
   });

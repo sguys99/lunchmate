@@ -99,12 +99,7 @@ describe("하드 필터 순서 (T5.6)", () => {
       makeCandidate("d", { priceReport: { medianKRW: 20_000, count: 2 } }),
       makeCandidate("e"),
     ];
-    const r = applyHardFilters(
-      cs,
-      settings,
-      { blocked: new Set(["b"]) },
-      NOW,
-    );
+    const r = applyHardFilters(cs, settings, { blocked: new Set(["b"]) }, NOW);
     expect(r.kept.map((c) => c.id)).toEqual(["e"]);
     expect(r.filtered).toEqual({
       avoid: 1,

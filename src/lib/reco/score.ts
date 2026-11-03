@@ -17,6 +17,7 @@ import {
   CRAVING_BOOST,
   ESTIMATE_BUDGET_CONFIDENCE,
   FEEDBACK_HALF_LIFE_DAYS,
+  LIKED_CATEGORY_BOOST,
   MEAL_CATEGORY_PENALTY,
   MIN_REVIEWS_FOR_REPUTATION,
   NEUTRAL,
@@ -113,9 +114,13 @@ export function scoreCandidate(
   let lastUpAt: Date | null = null;
   let categoryLiked = false;
   let everVisited = false;
+  // 이 카테고리에 남긴 👍👎 수(이 식당 포함). 좋아하는 음식 가산을 줄이는 데 쓴다
+  let categoryRated = 0;
   for (const v of history.visits) {
     if (v.status === "skipped") continue; // FB-05: 안 갔어요는 신호가 아니다
     const sign = ratingSign(v);
+    if (v.rating !== null && (v.placeId === c.id || v.category === c.category))
+      categoryRated += 1;
     if (v.placeId === c.id) {
       everVisited = true;
       placeSignal += sign * decay(v.at, now);
@@ -133,17 +138,23 @@ export function scoreCandidate(
     else if (w.category === c.category) categorySignal += signal;
   }
   const craving = ctx.cravings.has(c.category);
+  const favorite = settings.liked?.includes(c.category) ?? false;
+  // 좋아하는 음식(D-39): 땡겨요와 겹치면 땡겨요만, 피드백이 쌓일수록 줄인다
+  const favoriteBoost =
+    favorite && !craving ? LIKED_CATEGORY_BOOST / (1 + categoryRated) : 0;
   // 다시 뽑기 3연속 동안 화면에 있던 카테고리: 이번 세션 약한 부정(T6.11, reshuffle.ts)
   const reshuffled = history.sessionDisliked?.has(c.category) ?? false;
   // 끼니 적합도(T9.16): 이 끼니에 덜 어울리는 카테고리는 콜드 스타트부터 낮춘다. 요즘 땡겨요면 적용하지 않는다
   const mealPenalties: Partial<Record<string, number>> =
     MEAL_CATEGORY_PENALTY[settings.meal];
-  const mealPenalty = craving ? 0 : (mealPenalties[c.category] ?? 0);
+  const mealPenalty =
+    craving || favorite ? 0 : (mealPenalties[c.category] ?? 0);
   const P = clamp01(
     NEUTRAL +
       PLACE_PREF_SCALE * Math.tanh(placeSignal) +
       CATEGORY_PREF_SCALE * Math.tanh(categorySignal) +
-      (craving ? CRAVING_BOOST : 0) -
+      (craving ? CRAVING_BOOST : 0) +
+      favoriteBoost -
       (reshuffled ? RESHUFFLE_CATEGORY_PENALTY : 0) -
       mealPenalty,
   );
@@ -196,6 +207,7 @@ export function scoreCandidate(
     lastUpAt,
     categoryLiked,
     craving,
+    favorite,
     thumbsUpPercent:
       n < MIN_REVIEWS_FOR_REPUTATION ? null : thumbsUpPercent(c.thumbs.up, n),
     everVisited,

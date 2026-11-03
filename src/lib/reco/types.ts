@@ -54,6 +54,8 @@ export type RecoSettings = {
   avoid: readonly AvoidRule[];
   /** 요즘 이게 땡겨요 (SET-05). until이 지났으면 엔진이 무시한다 */
   craving: { categories: readonly CategorySlug[]; until: Date | null };
+  /** 좋아하는 음식 (ONB-06, D-39). 만료 없음. 없으면 빈 목록으로 본다(비로그인 둘러보기) */
+  liked?: readonly CategorySlug[];
 };
 
 /** 피드백 값. "안 갔어요"는 부정 신호가 아니다(FB-05) */
@@ -136,6 +138,8 @@ export type ScoreEvidence = {
   /** 같은 카테고리에 👍가 있었는가(이 식당 제외) */
   categoryLiked: boolean;
   craving: boolean;
+  /** 좋아하는 음식으로 고른 카테고리인가(D-39) */
+  favorite: boolean;
   /** 후기 3건 이상일 때만 👍 비율(0~100), 아니면 null */
   thumbsUpPercent: number | null;
   /** 이 식당에 간 적이 있는가(skipped 제외) */
@@ -158,6 +162,7 @@ export type ReasonKind =
   | "distance"
   | "likedPlace"
   | "craving"
+  | "favorite"
   | "likedCategory"
   | "budget"
   | "reputation"
