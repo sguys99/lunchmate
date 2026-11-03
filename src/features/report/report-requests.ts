@@ -105,7 +105,12 @@ export const reportPlaceSchema = z
       kind: z.literal("info"),
       placeId: placeIdSchema,
       placeUrl,
-      fields: z.array(z.enum(INFO_FIELDS)).min(1).max(4).refine(unique).optional(),
+      fields: z
+        .array(z.enum(INFO_FIELDS))
+        .min(1)
+        .max(4)
+        .refine(unique)
+        .optional(),
     }),
   ])
   .refine(placeUrlMatches);
@@ -140,6 +145,8 @@ export const reportWaitSchema = z.strictObject({
   level: z.enum(["walkIn", "short", "long"]),
 });
 export const waitReportIdSchema = z.strictObject({ reportId: z.uuid() });
+/** 홈 카드 "문이 닫혀 있어요" 되돌리기(D-40): 이 식당에 남긴 내 "오늘만 쉬어요" 제보 */
+export const closedTodayUndoSchema = z.strictObject({ placeId: placeIdSchema });
 
 export type ReportReviewRequest = z.input<typeof reportReviewSchema>;
 export type ReportDealRequest = z.input<typeof reportDealSchema>;
@@ -149,6 +156,7 @@ export type CheckDealRequest = z.input<typeof checkDealSchema>;
 export type DealIdRequest = z.input<typeof dealIdSchema>;
 export type ReportWaitRequest = z.input<typeof reportWaitSchema>;
 export type WaitReportIdRequest = z.input<typeof waitReportIdSchema>;
+export type ClosedTodayUndoRequest = z.input<typeof closedTodayUndoSchema>;
 
 /* ---------- 의존성 ---------- */
 
@@ -160,8 +168,18 @@ export type ReportDeps = {
   insertReviewReport: (
     userId: string,
     row:
-      | { target_type: "review"; review_id: string; reason: string; note: string | null }
-      | { target_type: "deal"; deal_id: string; reason: string; note: string | null },
+      | {
+          target_type: "review";
+          review_id: string;
+          reason: string;
+          note: string | null;
+        }
+      | {
+          target_type: "deal";
+          deal_id: string;
+          reason: string;
+          note: string | null;
+        },
   ) => Promise<PgErrorLike>;
   insertMenuFlag: (
     userId: string,
@@ -186,7 +204,11 @@ export type ReportDeps = {
     p_slots: string[];
     p_replace: boolean;
   }) => Promise<{
-    data: { deal_id: string | null; merged_with: string | null; ends_on: string | null } | null;
+    data: {
+      deal_id: string | null;
+      merged_with: string | null;
+      ends_on: string | null;
+    } | null;
     error: PgErrorLike;
   }>;
   insertDealCheck: (
@@ -210,6 +232,8 @@ export type ReportDeps = {
     error: PgErrorLike;
   }>;
   deleteWaitReport: (userId: string, reportId: string) => Promise<Changed>;
+  /** 내 "오늘만 쉬어요" 제보 지우기. RLS가 2분 지난 행을 거른다(D-40) */
+  deleteClosedToday: (userId: string, placeId: string) => Promise<Changed>;
 };
 
 async function signedIn(deps: Pick<ReportDeps, "currentUserId">) {
@@ -289,7 +313,8 @@ export async function reportPlace(
   const v = p.data;
   const detail: Record<string, string | number | string[]> = {};
   if (v.kind === "closed" && v.closed) detail.closed = v.closed;
-  if (v.kind === "price" && v.priceKrw !== undefined) detail.price_krw = v.priceKrw;
+  if (v.kind === "price" && v.priceKrw !== undefined)
+    detail.price_krw = v.priceKrw;
   if (v.kind === "info" && v.fields) detail.fields = v.fields;
   return done(
     await deps.insertPlaceReport(userId, {
@@ -332,9 +357,15 @@ export async function registerDeal(
     p_replace: v.replace ?? false,
   });
   if (error) return mapPgError(error) ?? fail("save");
-  if (data?.merged_with) return { ok: true, status: "merged", mergedWith: data.merged_with };
+  if (data?.merged_with)
+    return { ok: true, status: "merged", mergedWith: data.merged_with };
   if (data?.deal_id && data.ends_on)
-    return { ok: true, status: "created", dealId: data.deal_id, endsOn: data.ends_on };
+    return {
+      ok: true,
+      status: "created",
+      dealId: data.deal_id,
+      endsOn: data.ends_on,
+    };
   return fail("save");
 }
 
@@ -403,12 +434,15 @@ export async function reportWait(
       ? { ok: false, error: "cooldown", retryAt: data.retry_at }
       : fail("save");
   }
-  if (!data.report_id || !data.reported_at || !data.retry_at) return fail("save");
+  if (!data.report_id || !data.reported_at || !data.retry_at)
+    return fail("save");
   return {
     ok: true,
     reportId: data.report_id,
     reportedAt: data.reported_at,
-    undoUntil: new Date(Date.parse(data.reported_at) + WAIT_UNDO_MS).toISOString(),
+    undoUntil: new Date(
+      Date.parse(data.reported_at) + WAIT_UNDO_MS,
+    ).toISOString(),
     retryAt: data.retry_at,
   };
 }
@@ -427,8 +461,26 @@ export async function undoWait(
   return changed.count === 1 ? { ok: true } : fail("undo_expired");
 }
 
+/** 홈 카드 "문이 닫혀 있어요" 되돌리기 (2분 안, D-40) */
+export async function undoClosedToday(
+  raw: unknown,
+  deps: ReportDeps,
+): Promise<WriteResult> {
+  const p = parseInput(closedTodayUndoSchema, raw);
+  if (!p.ok) return fail(p.error);
+  const userId = await signedIn(deps);
+  if (!userId) return fail("unauthenticated");
+  const changed = await deps.deleteClosedToday(userId, p.data.placeId);
+  if (changed.error) return mapPgError(changed.error) ?? fail("save");
+  return changed.count >= 1 ? { ok: true } : fail("undo_expired");
+}
+
 /** 오늘 KST 기준 할인 종료일 기본값과 최대값 (화면의 날짜 고르기 범위) */
-export function dealEndRange(now: Date): { min: string; defaultValue: string; max: string } {
+export function dealEndRange(now: Date): {
+  min: string;
+  defaultValue: string;
+  max: string;
+} {
   return {
     min: kstDateKey(now),
     defaultValue: kstDateKey(addKstDays(now, 7)),

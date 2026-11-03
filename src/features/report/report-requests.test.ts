@@ -15,6 +15,7 @@ const {
   reportWait,
   undoDealCheck,
   undoWait,
+  undoClosedToday,
 } = await import("./report-requests");
 
 const ID = "33333333-3333-4333-8333-333333333333";
@@ -44,6 +45,7 @@ function deps(over: Partial<ReportDeps> = {}): ReportDeps {
       error: null,
     })),
     deleteWaitReport: vi.fn(async () => ({ count: 1, error: null })),
+    deleteClosedToday: vi.fn(async () => ({ count: 1, error: null })),
     ...over,
   };
 }
@@ -75,7 +77,11 @@ describe("reportReview (MOD-01)", () => {
     ).resolves.toEqual({ ok: false, error: "banned" });
   });
   it.each([
-    ["reports_daily_limit_exceeded", "23514", { ok: false, error: "limit", bucket: "reports" }],
+    [
+      "reports_daily_limit_exceeded",
+      "23514",
+      { ok: false, error: "limit", bucket: "reports" },
+    ],
     ["report_own_target", "23514", { ok: false, error: "own_target" }],
     ["report_target_unavailable", "23514", { ok: false, error: "unavailable" }],
     ["duplicate key", "23505", { ok: false, error: "duplicate" }],
@@ -125,25 +131,41 @@ describe("reportMenu (T10.16f, MENU-05)", () => {
       { placeId: "123", menuKey: "제육", reason: "other", note: "글" },
       { placeId: "abc", menuKey: "제육", reason: "false" },
     ]) {
-      await expect(reportMenu(bad, deps())).resolves.toEqual({ ok: false, error: "invalid" });
+      await expect(reportMenu(bad, deps())).resolves.toEqual({
+        ok: false,
+        error: "invalid",
+      });
     }
   });
   it("자기 메뉴뿐인 줄, 같은 줄 두 번은 DB 오류를 그대로 옮긴다", async () => {
     await expect(
       reportMenu(
         { placeId: "123", menuKey: "제육", reason: "false" },
-        deps({ insertMenuFlag: async () => ({ code: "23505", message: "menu_flags_one_per_group" }) }),
+        deps({
+          insertMenuFlag: async () => ({
+            code: "23505",
+            message: "menu_flags_one_per_group",
+          }),
+        }),
       ),
     ).resolves.toEqual({ ok: false, error: "duplicate" });
     const own = await reportMenu(
       { placeId: "123", menuKey: "제육", reason: "false" },
-      deps({ insertMenuFlag: async () => ({ code: "23514", message: "report_own_target" }) }),
+      deps({
+        insertMenuFlag: async () => ({
+          code: "23514",
+          message: "report_own_target",
+        }),
+      }),
     );
     expect(own.ok).toBe(false);
   });
   it("로그인하지 않았으면 unauthenticated", async () => {
     await expect(
-      reportMenu({ placeId: "123", menuKey: "제육", reason: "false" }, deps({ currentUserId: async () => null })),
+      reportMenu(
+        { placeId: "123", menuKey: "제육", reason: "false" },
+        deps({ currentUserId: async () => null }),
+      ),
     ).resolves.toEqual({ ok: false, error: "unauthenticated" });
   });
 });
@@ -153,12 +175,15 @@ describe("reportPlace (PLACE-05)", () => {
     [{ kind: "closed", closed: "gone" }, { closed: "gone" }],
     [{ kind: "closed" }, {}],
     [{ kind: "price", priceKrw: 11000 }, { price_krw: 11000 }],
-    [{ kind: "info", fields: ["name", "phone"] }, { fields: ["name", "phone"] }],
+    [
+      { kind: "info", fields: ["name", "phone"] },
+      { fields: ["name", "phone"] },
+    ],
   ])("%o → detail %o", async (extra, detail) => {
     const d = deps();
-    await expect(
-      reportPlace({ placeId: "123", ...extra }, d),
-    ).resolves.toEqual({ ok: true });
+    await expect(reportPlace({ placeId: "123", ...extra }, d)).resolves.toEqual(
+      { ok: true },
+    );
     expect(d.insertPlaceReport).toHaveBeenCalledWith(
       "user-1",
       expect.objectContaining({ place_id: "123", detail }),
@@ -177,7 +202,10 @@ describe("reportPlace (PLACE-05)", () => {
   });
   it("같은 날 같은 종류는 duplicate", async () => {
     const d = deps({
-      insertPlaceReport: async () => ({ code: "23505", message: "place_reports_once_per_day" }),
+      insertPlaceReport: async () => ({
+        code: "23505",
+        message: "place_reports_once_per_day",
+      }),
     });
     await expect(
       reportPlace({ placeId: "123", kind: "closed" }, d),
@@ -186,7 +214,11 @@ describe("reportPlace (PLACE-05)", () => {
 });
 
 describe("registerDeal (DEAL-01, DEAL-04)", () => {
-  const input = { placeId: "123", type: "lunch_special", content: "정식 9천 원" } as const;
+  const input = {
+    placeId: "123",
+    type: "lunch_special",
+    content: "정식 9천 원",
+  } as const;
   it("새로 등록", async () => {
     const d = deps();
     await expect(registerDeal(input, d)).resolves.toEqual({
@@ -268,7 +300,9 @@ describe("checkDeal (DEAL-03)", () => {
     const d = deps({
       insertDealCheck: vi.fn(async () => ({ code: "23505", message: "dup" })),
     });
-    await expect(checkDeal({ dealId: ID, answer: "ended" }, d)).resolves.toEqual({
+    await expect(
+      checkDeal({ dealId: ID, answer: "ended" }, d),
+    ).resolves.toEqual({
       ok: true,
       answer: "ended",
     });
@@ -276,9 +310,14 @@ describe("checkDeal (DEAL-03)", () => {
   });
   it("내려간 할인은 unavailable", async () => {
     const d = deps({
-      insertDealCheck: async () => ({ code: "23514", message: "deal_not_open" }),
+      insertDealCheck: async () => ({
+        code: "23514",
+        message: "deal_not_open",
+      }),
     });
-    await expect(checkDeal({ dealId: ID, answer: "still" }, d)).resolves.toEqual({
+    await expect(
+      checkDeal({ dealId: ID, answer: "still" }, d),
+    ).resolves.toEqual({
       ok: false,
       error: "unavailable",
     });
@@ -302,7 +341,10 @@ describe("reportWait (PLACE-07)", () => {
       undoUntil: "2026-11-04T03:02:00.000Z",
       retryAt: "2026-11-04T03:30:00.000Z",
     });
-    expect(d.reportWait).toHaveBeenCalledWith({ p_place_id: "123", p_level: "now" });
+    expect(d.reportWait).toHaveBeenCalledWith({
+      p_place_id: "123",
+      p_level: "now",
+    });
   });
   it("30분 안이면 cooldown + retryAt", async () => {
     const d = deps({
@@ -339,5 +381,27 @@ describe("reportWait (PLACE-07)", () => {
     await expect(undoWait({ reportId: ID }, deps())).resolves.toEqual({
       ok: true,
     });
+  });
+});
+
+describe("오늘 쉬어요 되돌리기 (T9.18, D-40)", () => {
+  const P = "12345";
+  it("내 제보를 지우면 ok", async () => {
+    const d = deps();
+    expect(await undoClosedToday({ placeId: P }, d)).toEqual({ ok: true });
+    expect(d.deleteClosedToday).toHaveBeenCalledWith(expect.any(String), P);
+  });
+  it("2분이 지나 지운 행이 없으면 undo_expired", async () => {
+    expect(
+      await undoClosedToday(
+        { placeId: P },
+        deps({ deleteClosedToday: async () => ({ count: 0, error: null }) }),
+      ),
+    ).toEqual({ ok: false, error: "undo_expired" });
+  });
+  it("장소 id 형식이 아니면 지우지 않는다", async () => {
+    const d = deps();
+    expect((await undoClosedToday({ placeId: "abc" }, d)).ok).toBe(false);
+    expect(d.deleteClosedToday).not.toHaveBeenCalled();
   });
 });

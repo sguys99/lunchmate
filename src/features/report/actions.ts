@@ -4,7 +4,10 @@
 // - 사용자 세션(publishable 키 + 쿠키)으로 쓴다. RLS 본인 정책 + 열 권한, 등록은 보안 함수(register_deal, report_wait).
 // - 요청에 장소명, 좌표, 현위치는 없다(CLAUDE.md 7장). 신고 글과 할인 내용은 금칙어를 거른 뒤 저장한다.
 import { isEnabled } from "@/lib/flags";
-import { createServerSupabase, type ServerSupabase } from "@/lib/supabase/server";
+import {
+  createServerSupabase,
+  type ServerSupabase,
+} from "@/lib/supabase/server";
 import { fail, type WriteResult } from "@/lib/supabase/write-result";
 import type { DealCheckAnswer } from "./labels";
 import {
@@ -17,6 +20,7 @@ import {
   reportWait,
   undoDealCheck,
   undoWait,
+  undoClosedToday,
   type CheckDealRequest,
   type DealIdRequest,
   type RegisterDealRequest,
@@ -29,6 +33,7 @@ import {
   type ReportWaitRequest,
   type ReportWaitResult,
   type WaitReportIdRequest,
+  type ClosedTodayUndoRequest,
 } from "./report-requests";
 
 function depsFor(supabase: ServerSupabase): ReportDeps {
@@ -96,6 +101,18 @@ function depsFor(supabase: ServerSupabase): ReportDeps {
     async reportWait(args) {
       const { data, error } = await supabase.rpc("report_wait", args);
       return { data: data?.[0] ?? null, error };
+    },
+    async deleteClosedToday(userId, placeId) {
+      // RLS가 본인, 오늘만 쉬어요, 2분 안의 행만 지우게 한다
+      const { data, error } = await supabase
+        .from("place_reports")
+        .delete()
+        .eq("user_id", userId)
+        .eq("place_id", placeId)
+        .eq("kind", "closed")
+        .eq("detail->>closed", "today")
+        .select("id");
+      return { count: data?.length ?? 0, error };
     },
     async deleteWaitReport(userId, reportId) {
       // RLS가 2분 지난 행을 거른다(지우면 0행)
@@ -186,4 +203,10 @@ export async function undoWaitAction(
   input: WaitReportIdRequest,
 ): Promise<WriteResult> {
   return run((d) => undoWait(input, d), fail("save"));
+}
+
+export async function undoClosedTodayAction(
+  input: ClosedTodayUndoRequest,
+): Promise<WriteResult> {
+  return run((d) => undoClosedToday(input, d), fail("save"));
 }
