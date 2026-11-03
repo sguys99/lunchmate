@@ -10,6 +10,8 @@ import { pollCreateCopy } from "@/copy/poll-create";
 /** PRD 정본 수치 (MOD-05, DEAL-04, T5.14 방문 20). 베타 의견 10은 D-23 안건 12(PRD 밖 베타 운영 값) */
 const PRD = { reviews: 20, reports: 30, deals: 10, polls: 10, visits: 20 };
 const BETA_FEEDBACK = 10;
+/** 식당 메모 저장과 고침 하루 30 (T10.15, D-33. PRD 밖 운영 값) */
+const PLACE_MEMOS = 30;
 
 const dir = join(process.cwd(), "supabase", "migrations");
 const migrations = readdirSync(dir)
@@ -39,6 +41,7 @@ describe("하루 한도: PRD = DB = 문구", () => {
       deals: PRD.deals,
       polls: PRD.polls,
       beta_feedback: BETA_FEEDBACK,
+      place_memos: PLACE_MEMOS,
     });
   });
 

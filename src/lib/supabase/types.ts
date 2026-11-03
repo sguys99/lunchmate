@@ -247,6 +247,33 @@ export type Database = {
         }
         Relationships: []
       }
+      place_memos: {
+        Row: {
+          body: string
+          created_at: string
+          place_id: string
+          place_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          place_id: string
+          place_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          place_id?: string
+          place_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       place_moderation: {
         Row: {
           closed_status: string
@@ -926,6 +953,15 @@ export type Database = {
           limit_count: number
           remaining: number
           used: number
+        }[]
+      }
+      my_favorite_memos: {
+        Args: never
+        Returns: {
+          body: string
+          place_id: string
+          place_url: string
+          updated_at: string
         }[]
       }
       my_polls: {
