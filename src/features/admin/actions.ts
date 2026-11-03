@@ -10,9 +10,13 @@ import {
   closureRowSchema,
   decideClosureInput,
   decideItemInput,
+  decideMenuInput,
   decideRowSchema,
   logRowSchema,
   mapAdminError,
+  menuFlaggedRowSchema,
+  menuSuggestionRowSchema,
+  mergeMenuInput,
   reportedRowSchema,
   searchUsersInput,
   setSuspensionInput,
@@ -25,6 +29,8 @@ import {
   type BetaFeedbackItem,
   type DecideClosureInput,
   type DecideItemInput,
+  type DecideMenuInput,
+  type MergeMenuInput,
   type SetSuspensionInput,
 } from "./model";
 import { callAdminRpc, getAdminSession, type AdminSession } from "./server";
@@ -47,13 +53,15 @@ export async function loadAdminSnapshotAction(): Promise<
 > {
   const s = await session();
   if (isFail(s)) return s;
-  const [items, closures, users, log] = await Promise.all([
+  const [items, closures, users, log, menuFlagged, menuSuggestions] = await Promise.all([
     callAdminRpc(s.supabase, "admin_reported_items"),
     callAdminRpc(s.supabase, "admin_closures"),
     callAdminRpc(s.supabase, "admin_users", {}),
     callAdminRpc(s.supabase, "admin_log", { p_limit: 200 }),
+    callAdminRpc(s.supabase, "admin_menu_flagged"),
+    callAdminRpc(s.supabase, "admin_menu_suggestions"),
   ]);
-  for (const r of [items, closures, users, log]) {
+  for (const r of [items, closures, users, log, menuFlagged, menuSuggestions]) {
     const failed = mapAdminError(r.error);
     if (failed) return { ok: false, error: failed };
   }
@@ -61,12 +69,16 @@ export async function loadAdminSnapshotAction(): Promise<
     .object({
       items: z.array(reportedRowSchema),
       closures: z.array(closureRowSchema),
+      menuFlagged: z.array(menuFlaggedRowSchema),
+      menuSuggestions: z.array(menuSuggestionRowSchema),
       users: z.array(userRowSchema),
       log: z.array(logRowSchema),
     })
     .safeParse({
       items: items.data,
       closures: closures.data,
+      menuFlagged: menuFlagged.data,
+      menuSuggestions: menuSuggestions.data,
       users: users.data,
       log: log.data,
     });
@@ -125,6 +137,54 @@ export async function decideClosureAction(
     "admin_decide_closure",
     { p_place_id: v.data.placeId, p_result: v.data.result },
   );
+  return oneAction(data, error);
+}
+
+/** 메뉴 줄 숨김(hide) 또는 문제없음(clear, 자동 숨김이면 되살림) (T10.16f) */
+export async function decideMenuAction(
+  input: DecideMenuInput,
+): Promise<AdminResult<{ actionIds: string[] }>> {
+  const v = decideMenuInput.safeParse(input);
+  if (!v.success) return { ok: false, error: "invalid" };
+  const s = await session();
+  if (isFail(s)) return s;
+  const { data, error } = await callAdminRpc(s.supabase, "admin_menu_decide", {
+    p_place_id: v.data.placeId,
+    p_menu_key: v.data.menuKey,
+    p_result: v.data.result,
+  });
+  return oneAction(data, error);
+}
+
+/** 같은 식당 메뉴 합치기(from → to). 원본 제보는 그대로 (T10.16f) */
+export async function mergeMenuAction(
+  input: MergeMenuInput,
+): Promise<AdminResult<{ actionIds: string[] }>> {
+  const v = mergeMenuInput.safeParse(input);
+  if (!v.success) return { ok: false, error: "invalid" };
+  const s = await session();
+  if (isFail(s)) return s;
+  const { data, error } = await callAdminRpc(s.supabase, "admin_menu_merge", {
+    p_place_id: v.data.placeId,
+    p_from: v.data.from,
+    p_to: v.data.to,
+  });
+  return oneAction(data, error);
+}
+
+/** 합치기 제안 따로 두기 (T10.16f) */
+export async function separateMenuAction(
+  input: MergeMenuInput,
+): Promise<AdminResult<{ actionIds: string[] }>> {
+  const v = mergeMenuInput.safeParse(input);
+  if (!v.success) return { ok: false, error: "invalid" };
+  const s = await session();
+  if (isFail(s)) return s;
+  const { data, error } = await callAdminRpc(s.supabase, "admin_menu_separate", {
+    p_place_id: v.data.placeId,
+    p_from: v.data.from,
+    p_to: v.data.to,
+  });
   return oneAction(data, error);
 }
 

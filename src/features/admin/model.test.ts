@@ -3,10 +3,15 @@ import { adminCopy } from "@/copy/admin";
 import {
   betaFeedbackRowSchema,
   decideItemInput,
+  decideMenuInput,
   filterBetaFeedback,
   hiddenKeyOfLog,
   logRowSchema,
   mapAdminError,
+  menuFlaggedRowSchema,
+  menuQueue,
+  menuSuggestionRowSchema,
+  mergeMenuInput,
   orderWithSkipped,
   reportedRowSchema,
   sameAuthorOthers,
@@ -342,5 +347,100 @@ describe("베타 의견 (T9.4)", () => {
   });
   it("베타 의견 구역은 검토 대기 수가 없다(읽음 처리 없음)", () => {
     expect(sectionCounts(undefined).beta).toBeNull();
+  });
+});
+
+/* ---------- 메뉴 제보 (T10.16f) ---------- */
+
+function flaggedRow(over: Record<string, unknown> = {}) {
+  return {
+    place_id: "111",
+    menu_key: "차슈덮밥",
+    menu_name: "차슈덮밥",
+    report_count: 4,
+    median_krw: 3000,
+    lo_krw: 1000,
+    hi_krw: 9500,
+    last_at: "2026-11-03T03:00:00Z",
+    variants: [{ name: "차슈덮밥", count: 4 }],
+    auto_hidden: true,
+    flags: { false: 2, abuse: 1, privacy: 9 },
+    flag_count: 3,
+    first_flag_at: "2026-11-03T03:10:00Z",
+    others: [{ key: "제육", name: "제육", count: 1 }],
+    ...over,
+  };
+}
+function suggestionRow(over: Record<string, unknown> = {}) {
+  return {
+    place_id: "111",
+    from_key: "제육",
+    from_name: "제육",
+    from_count: 1,
+    from_median: 9000,
+    to_key: "제육볶음",
+    to_name: "제육볶음",
+    to_count: 2,
+    to_median: 9200,
+    to_last_at: "2026-11-03T03:00:00Z",
+    why: "contains",
+    ...over,
+  };
+}
+
+describe("메뉴 제보 큐 (T10.16f, MENU-05)", () => {
+  it("신고 줄: 모르는 사유는 버리고, 집계가 없으면 이름은 키로", () => {
+    const f = menuFlaggedRowSchema.parse(flaggedRow());
+    expect(f).toMatchObject({ kind: "flag", key: "menu:111/차슈덮밥", autoHidden: true });
+    expect(f.flags).toEqual({ false: 2, abuse: 1 });
+    const gone = menuFlaggedRowSchema.parse(
+      flaggedRow({ menu_name: null, report_count: null, median_krw: null, lo_krw: null, hi_krw: null, last_at: null }),
+    );
+    expect(gone).toMatchObject({ name: "차슈덮밥", reportCount: 0, medianKrw: null });
+  });
+
+  it("큐는 신고 줄 다음 합치기 후보, 같은 옛 줄이면 신고 쪽만", () => {
+    const flag = menuFlaggedRowSchema.parse(flaggedRow({ menu_key: "제육", menu_name: "제육" }));
+    const other = menuFlaggedRowSchema.parse(flaggedRow());
+    const s = menuSuggestionRowSchema.parse(suggestionRow());
+    const s2 = menuSuggestionRowSchema.parse(
+      suggestionRow({ from_key: "돈꼬츠라멘", from_name: "돈꼬츠라멘", to_key: "돈코츠라멘", to_name: "돈코츠라멘", why: "typo" }),
+    );
+    expect(menuQueue([other, flag], [s, s2]).map((i) => i.key)).toEqual([
+      "menu:111/차슈덮밥",
+      "menu:111/제육",
+      "menu:111/돈꼬츠라멘",
+    ]);
+  });
+
+  it("입력: 공백 있는 키, 같은 키 합치기, 모르는 결과는 받지 않는다", () => {
+    expect(decideMenuInput.safeParse({ placeId: "111", menuKey: "제육", result: "hide" }).success).toBe(true);
+    expect(decideMenuInput.safeParse({ placeId: "111", menuKey: "제육 볶음", result: "hide" }).success).toBe(false);
+    expect(decideMenuInput.safeParse({ placeId: "111", menuKey: "제육", result: "restore" }).success).toBe(false);
+    expect(mergeMenuInput.safeParse({ placeId: "111", from: "제육", to: "제육" }).success).toBe(false);
+    expect(mergeMenuInput.safeParse({ placeId: "x", from: "제육", to: "제육볶음" }).success).toBe(false);
+  });
+
+  it("처리 이력: 메뉴 처리는 키와 함께, 되돌리면 그 줄이 다시 보이게 키를 돌려준다", () => {
+    const l = logRowSchema.parse({
+      id: UUID,
+      created_at: "2026-11-03T03:00:00Z",
+      action: "menu_merge",
+      target_type: "menu",
+      target_id: null,
+      target_place_id: "111",
+      target_user_id: null,
+      target_nickname: null,
+      reason: null,
+      duration: null,
+      by_system: false,
+      admin_nickname: "운영자",
+      reverted_at: null,
+      undoable: true,
+      target_menu_key: "제육",
+    });
+    expect(l.targetMenuKey).toBe("제육");
+    expect(hiddenKeyOfLog(l)).toBe("menu:111/제육");
+    expect(adminCopy.log.actions[l.action]).toBe("메뉴 합치기");
   });
 });

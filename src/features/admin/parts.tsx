@@ -624,6 +624,7 @@ export function logTarget(e: LogEntry): string {
     return e.targetUserId ? nicknameOf(e.targetNickname) : copy.log.deletedUser;
   const place = e.targetPlaceId ? copy.place.idLabel(e.targetPlaceId) : "";
   if (e.targetType === "place") return place;
+  if (e.targetType === "menu") return e.targetMenuKey ? `${e.targetMenuKey}, ${place}` : place;
   const kind = copy.target[e.targetType];
   return e.targetId
     ? `${kind}, ${place}`

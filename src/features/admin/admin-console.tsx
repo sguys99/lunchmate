@@ -28,7 +28,10 @@ import {
   clearUserAction,
   decideClosureAction,
   decideItemAction,
+  decideMenuAction,
   loadAdminSnapshotAction,
+  mergeMenuAction,
+  separateMenuAction,
   loadBetaFeedbackAction,
   searchUsersAction,
   setSuspensionAction,
@@ -43,6 +46,7 @@ import {
   formatKstDateTime,
   hiddenKeyOfLog,
   isExcluded,
+  menuQueue,
   orderWithSkipped,
   sameAuthorOthers,
   sectionCounts,
@@ -57,6 +61,8 @@ import {
   type BetaFeedbackItem,
   type ClosureItem,
   type LogEntry,
+  type MenuFlaggedItem,
+  type MenuQueueItem,
   type ReportedItem,
 } from "./model";
 import {
@@ -124,7 +130,7 @@ function useAdminConsole() {
   // 이 화면에서 처리해 응답 전에 먼저 뺀 항목(다시 받으면 서버 목록에서도 빠진다)
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
   const [leaving, setLeaving] = useState<string | null>(null);
-  const [done, setDone] = useState({ reviews: 0, closures: 0 });
+  const [done, setDone] = useState({ reviews: 0, closures: 0, menus: 0 });
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
@@ -295,6 +301,50 @@ function useAdminConsole() {
     );
   };
 
+  const menuDone = (message: string, key: string) => (ids: string[]) => {
+    setDone((d) => ({ ...d, menus: d.menus + 1 }));
+    showDone(message, ids, [key]);
+  };
+
+  /** 메뉴 줄 숨김 또는 문제없음 (T10.16f) */
+  const decideMenu = (item: MenuFlaggedItem, result: "hide" | "clear") =>
+    leaveAndRun(
+      item.key,
+      [item.key],
+      () => decideMenuAction({ placeId: item.placeId, menuKey: item.menuKey, result }),
+      menuDone(
+        result === "hide" ? copy.menus.done.hidden(item.name) : copy.menus.done.cleared(item.name),
+        item.key,
+      ),
+    );
+
+  /** 합치기: 신고된 줄을 다른 메뉴로, 또는 합치기 후보 그대로 */
+  const mergeMenu = (
+    key: string,
+    placeId: string,
+    from: { key: string; name: string },
+    to: { key: string; name: string },
+  ) =>
+    leaveAndRun(
+      key,
+      [key],
+      () => mergeMenuAction({ placeId, from: from.key, to: to.key }),
+      menuDone(copy.menus.done.merged(from.name, to.name), key),
+    );
+
+  const separateMenu = (
+    key: string,
+    placeId: string,
+    from: { key: string; name: string },
+    to: { key: string; name: string },
+  ) =>
+    leaveAndRun(
+      key,
+      [key],
+      () => separateMenuAction({ placeId, from: from.key, to: to.key }),
+      menuDone(copy.menus.done.separated(from.name, to.name), key),
+    );
+
   return {
     query,
     hidden,
@@ -303,6 +353,9 @@ function useAdminConsole() {
     refresh,
     decideItem,
     decideClosure,
+    decideMenu,
+    mergeMenu,
+    separateMenu,
     setSuspension,
     clearUser,
     undo: (id: string) => {
@@ -392,6 +445,8 @@ export function AdminConsole({ adminNickname }: { adminNickname: string }) {
             />
           ) : section === "closures" ? (
             <ClosureQueue c={c} data={data} disabled={disabled} />
+          ) : section === "menus" ? (
+            <MenuQueue c={c} data={data} disabled={disabled} keysEnabled={!keysOff} />
           ) : section === "users" ? (
             <UserQueue c={c} data={data} disabled={disabled} />
           ) : (
@@ -926,6 +981,308 @@ function ClosureQueue({
         action={copy.actions.confirmClosed}
         onConfirm={() => decide("confirm")}
       />
+    </div>
+  );
+}
+
+/* ---------- 메뉴 제보 큐 (T10.16f, MENU-05, D-37 A 한 건씩 큐) ---------- */
+
+function wonText(n: number): string {
+  return copy.menus.won(n.toLocaleString("ko-KR"));
+}
+
+function lastMonthOf(iso: string | null): number | null {
+  if (!iso) return null;
+  return Number(
+    new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Seoul", month: "numeric" }).format(new Date(iso)),
+  );
+}
+
+/** 제보 12건 | 중앙값 9,000원 | 8,500~9,500원 | 최근 11월. 문자 구분자 없이 얇은 세로선 */
+function MenuMeta({ parts }: { parts: readonly (string | null)[] }) {
+  const list = parts.filter((p): p is string => p !== null);
+  return (
+    <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 type-caption text-muted-foreground tabular-nums">
+      {list.map((t, i) => (
+        <span key={`${i}-${t}`} className="flex items-center gap-2.5">
+          {i > 0 ? <span aria-hidden className="h-3 w-px bg-border" /> : null}
+          {t}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function flaggedMeta(item: MenuFlaggedItem): (string | null)[] {
+  const m = lastMonthOf(item.lastAt);
+  return [
+    copy.menus.reports(item.reportCount),
+    item.medianKrw !== null ? copy.menus.median(item.medianKrw.toLocaleString("ko-KR")) : null,
+    item.loKrw !== null && item.hiKrw !== null
+      ? item.loKrw === item.hiKrw
+        ? wonText(item.loKrw)
+        : copy.menus.range(item.loKrw.toLocaleString("ko-KR"), item.hiKrw.toLocaleString("ko-KR"))
+      : null,
+    m !== null ? copy.menus.last(m) : null,
+  ];
+}
+
+function MenuQueue({
+  c,
+  data,
+  disabled,
+  keysEnabled,
+}: {
+  c: Console;
+  data: AdminSnapshot;
+  disabled: boolean;
+  keysEnabled: boolean;
+}) {
+  const [skipped, setSkipped] = useState<string[]>([]);
+  const [picking, setPicking] = useState(false);
+  const [target, setTarget] = useState<string | null>(null);
+  const visible = menuQueue(data.menuFlagged, data.menuSuggestions).filter((i) => !c.hidden.has(i.key));
+  const list: MenuQueueItem[] = [
+    ...visible.filter((x) => !skipped.includes(x.key)),
+    ...visible.filter((x) => skipped.includes(x.key)),
+  ];
+  const current = list[0] ?? null;
+  const { headingRef, announce, markMoved } = useCardFocus(current?.key ?? null, list.length);
+  const total = c.done.menus + list.length;
+  const leaving = current !== null && c.leaving === current.key;
+  const others =
+    current?.kind === "flag"
+      ? current.others.filter((o) => !c.hidden.has(`menu:${current.placeId}/${o.key}`))
+      : [];
+
+  const reset = () => {
+    setPicking(false);
+    setTarget(null);
+  };
+  const run = (fn: () => void) => {
+    if (disabled || leaving || !current) return;
+    markMoved();
+    reset();
+    fn();
+  };
+  const hide = () => current?.kind === "flag" && run(() => c.decideMenu(current, "hide"));
+  const keep = () => {
+    if (!current) return;
+    if (current.kind === "flag") run(() => c.decideMenu(current, "clear"));
+    else run(() => c.separateMenu(current.key, current.placeId, current.from, current.to));
+  };
+  const merge = () => {
+    if (!current) return;
+    if (current.kind === "merge") {
+      run(() => c.mergeMenu(current.key, current.placeId, current.from, current.to));
+      return;
+    }
+    const to = others.find((o) => o.key === target);
+    if (!to) return;
+    run(() =>
+      c.mergeMenu(current.key, current.placeId, { key: current.menuKey, name: current.name }, to),
+    );
+  };
+  const skip = () => {
+    if (!current || list.length < 2) return;
+    markMoved();
+    reset();
+    setSkipped((p) => [...p.filter((k) => k !== current.key), current.key]);
+  };
+
+  useKeys(
+    {
+      h: hide,
+      r: keep,
+      m: () => {
+        if (current?.kind === "merge") merge();
+        else if (others.length > 0) setPicking(true);
+      },
+      j: skip,
+      escape: reset,
+    },
+    keysEnabled && !disabled && !picking,
+  );
+
+  const live = (
+    <p role="status" className="sr-only">
+      {announce}
+    </p>
+  );
+  const progress = <Progress done={c.done.menus} total={total} label={copy.sections.menus} />;
+  if (!current) {
+    return (
+      <div className="flex flex-col gap-8">
+        {live}
+        {progress}
+        <AllDone />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {live}
+      {progress}
+      <article
+        key={current.key}
+        aria-labelledby={`menu-${current.key}`}
+        className={cn(cardBox, cardEnter, cardLeave, leaving && "-translate-x-2 opacity-0")}
+      >
+        {current.kind === "flag" ? (
+          <>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant={current.autoHidden ? "default" : "muted"}>
+                  {current.autoHidden ? copy.menus.autoHidden : copy.menus.open}
+                </Badge>
+                <span className="type-caption text-muted-foreground">{copy.menus.flagged}</span>
+                <span className="ml-auto type-caption text-muted-foreground tabular-nums">
+                  {copy.review.firstReported(formatKstDateTime(current.firstFlagAt))}
+                </span>
+              </div>
+              <h2
+                id={`menu-${current.key}`}
+                ref={headingRef}
+                tabIndex={-1}
+                className="type-title font-heading break-keep outline-none"
+              >
+                {current.name}
+              </h2>
+              <PlaceLine placeId={current.placeId} />
+            </div>
+            <p className="type-body-sm break-keep text-muted-foreground">
+              {current.autoHidden ? copy.menus.autoHiddenHelp : copy.menus.openHelp}
+            </p>
+            <div className="flex flex-col gap-2">
+              <MenuMeta parts={flaggedMeta(current)} />
+              {current.variants.length > 1 ? (
+                <p className="type-caption break-keep text-muted-foreground">
+                  {copy.menus.variants}{" "}
+                  {current.variants.map((v) => copy.menus.variant(v.name, v.count)).join(", ")}
+                </p>
+              ) : null}
+            </div>
+            <ul className="flex flex-wrap gap-2" aria-label={copy.reportCount(current.flagCount)}>
+              {(Object.entries(current.flags) as [keyof typeof copy.menus.reasons, number][])
+                .sort((a, b) => b[1] - a[1])
+                .map(([r, n]) => (
+                  <li key={r}>
+                    <Badge variant="muted">{copy.reasonCount(copy.menus.reasons[r], n)}</Badge>
+                  </li>
+                ))}
+            </ul>
+            {picking ? (
+              <fieldset className="flex flex-col gap-3 border-t border-border pt-5">
+                <legend className="type-label">{copy.menus.pickTarget}</legend>
+                <p className="type-caption break-keep text-muted-foreground">{copy.menus.pickTargetHelp}</p>
+                <ChipGroup
+                  aria-label={copy.menus.pickTarget}
+                  value={target ? [target] : []}
+                  onValueChange={(v: unknown[]) => setTarget((v[0] as string | undefined) ?? null)}
+                >
+                  {others.map((o) => (
+                    <Chip key={o.key} value={o.key} className="tabular-nums">
+                      {o.name}
+                      <span className="text-muted-foreground">{copy.menus.reports(o.count)}</span>
+                    </Chip>
+                  ))}
+                </ChipGroup>
+              </fieldset>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant="muted">{copy.menus.mergeKind}</Badge>
+                <span className="type-caption text-muted-foreground">{copy.menus.why[current.why]}</span>
+              </div>
+              <h2
+                id={`menu-${current.key}`}
+                ref={headingRef}
+                tabIndex={-1}
+                className="type-title font-heading break-keep outline-none"
+              >
+                {copy.menus.pair(current.from.name, current.to.name)}
+              </h2>
+              <PlaceLine placeId={current.placeId} />
+            </div>
+            <dl className="grid grid-cols-1 gap-4 desktop:grid-cols-2">
+              {[current.from, current.to].map((g, i) => (
+                <div
+                  key={g.key}
+                  className={cn("flex flex-col gap-1.5 border-l-2 pl-4", i === 1 ? "border-primary" : "border-border")}
+                >
+                  <dt className="type-label break-keep">{g.name}</dt>
+                  <dd>
+                    <MenuMeta parts={[copy.menus.reports(g.count), copy.menus.median(g.medianKrw.toLocaleString("ko-KR"))]} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        )}
+      </article>
+      <DecisionRow
+        hint={
+          <>
+            <Kbd>H</Kbd> {copy.keys.hide} <Kbd>R</Kbd> {copy.keys.keep} <Kbd>M</Kbd> {copy.menus.merge}{" "}
+            <Kbd>J</Kbd> {copy.keys.skip}
+          </>
+        }
+      >
+        {current.kind === "flag" ? (
+          picking ? (
+            <>
+              <Button
+                variant="primary"
+                onClick={merge}
+                disabled={disabled || !target}
+                className="flex-1 desktop:flex-none"
+              >
+                {copy.menus.merge}
+              </Button>
+              <Button variant="ghost" onClick={reset} className="flex-1 desktop:flex-none">
+                {copy.menus.cancel}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="primary" onClick={hide} disabled={disabled} className="flex-1 desktop:flex-none">
+                {copy.actions.hide}
+              </Button>
+              <Button variant="secondary" onClick={keep} disabled={disabled} className="flex-1 desktop:flex-none">
+                {copy.actions.keep}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setPicking(true)}
+                disabled={disabled || others.length === 0}
+                title={others.length === 0 ? copy.menus.noOthers : undefined}
+                className="flex-1 desktop:flex-none"
+              >
+                {copy.menus.mergeInto}
+              </Button>
+              <Button variant="link" onClick={skip} disabled={list.length < 2} className="desktop:ml-2">
+                {copy.actions.skip}
+              </Button>
+            </>
+          )
+        ) : (
+          <>
+            <Button variant="primary" onClick={merge} disabled={disabled} className="flex-1 desktop:flex-none">
+              {copy.menus.merge}
+            </Button>
+            <Button variant="secondary" onClick={keep} disabled={disabled} className="flex-1 desktop:flex-none">
+              {copy.menus.separate}
+            </Button>
+            <Button variant="link" onClick={skip} disabled={list.length < 2} className="desktop:ml-2">
+              {copy.actions.skip}
+            </Button>
+          </>
+        )}
+      </DecisionRow>
     </div>
   );
 }

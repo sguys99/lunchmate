@@ -122,6 +122,33 @@ export type Database = {
         }
         Relationships: []
       }
+      menu_flags: {
+        Row: {
+          created_at: string
+          id: string
+          menu_key: string
+          place_id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          menu_key: string
+          place_id: string
+          reason: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          menu_key?: string
+          place_id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       menu_reports: {
         Row: {
           created_at: string
@@ -914,11 +941,59 @@ export type Database = {
           reason: string
           reverted_at: string
           target_id: string
+          target_menu_key: string
           target_nickname: string
           target_place_id: string
           target_type: string
           target_user_id: string
           undoable: boolean
+        }[]
+      }
+      admin_menu_decide: {
+        Args: { p_menu_key: string; p_place_id: string; p_result: string }
+        Returns: string
+      }
+      admin_menu_flagged: {
+        Args: never
+        Returns: {
+          auto_hidden: boolean
+          first_flag_at: string
+          flag_count: number
+          flags: Json
+          hi_krw: number
+          last_at: string
+          lo_krw: number
+          median_krw: number
+          menu_key: string
+          menu_name: string
+          others: Json
+          place_id: string
+          report_count: number
+          variants: Json
+        }[]
+      }
+      admin_menu_merge: {
+        Args: { p_from: string; p_place_id: string; p_to: string }
+        Returns: string
+      }
+      admin_menu_separate: {
+        Args: { p_from: string; p_place_id: string; p_to: string }
+        Returns: string
+      }
+      admin_menu_suggestions: {
+        Args: never
+        Returns: {
+          from_count: number
+          from_key: string
+          from_median: number
+          from_name: string
+          place_id: string
+          to_count: number
+          to_key: string
+          to_last_at: string
+          to_median: number
+          to_name: string
+          why: string
         }[]
       }
       admin_reported_items: {

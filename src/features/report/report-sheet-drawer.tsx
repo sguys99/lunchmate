@@ -31,13 +31,14 @@ import {
 } from "@/features/place/use-place-stats";
 import { track } from "@/lib/analytics/track";
 import { useOnlineStatus } from "@/lib/network";
-import { invalidateAfterWrite } from "@/lib/query/db-keys";
+import { dbKeys, invalidateAfterWrite } from "@/lib/query/db-keys";
 import type { WriteFailure } from "@/lib/supabase/write-result";
 import { cn } from "@/lib/utils";
 import {
   checkDealAction,
   registerDealAction,
   reportDealAction,
+  reportMenuAction,
   reportPlaceAction,
   reportReviewAction,
 } from "./actions";
@@ -73,8 +74,10 @@ import {
 import {
   DEAL_CONTENT_MAX,
   DEAL_REPORT_REASONS,
+  MENU_FLAG_REASONS,
   REVIEW_REPORT_REASONS,
   type DealType,
+  type MenuFlagReason,
 } from "./labels";
 import {
   ClosedChips,
@@ -105,6 +108,12 @@ export type ReportSheetConfig = (
       placeId: string;
       placeUrl: string | null;
       report: "closed" | "price" | "info";
+    }
+  | {
+      kind: "menu";
+      placeId: string;
+      /** 지금 메뉴판에 보이는 메뉴(비교 키, 대표 이름). 세션 메모리 집계에서 */
+      menus: readonly { key: string; name: string }[];
     }
   | {
       kind: "flag";
@@ -167,6 +176,8 @@ export default function ReportSheetDrawer({
               <DealQuestions config={config} onSignedOut={signedOut} />
             ) : config.kind === "place" ? (
               <PlaceQuestions config={config} onSignedOut={signedOut} />
+            ) : config.kind === "menu" ? (
+              <MenuFlagQuestions config={config} onSignedOut={signedOut} />
             ) : (
               <FlagQuestions config={config} onSignedOut={signedOut} />
             )}
@@ -892,6 +903,142 @@ function PlaceQuestions({
 }
 
 /* ---------- 후기 신고, 할인 신고 (MOD-01, DEAL-04, D-13 안건 10, 11) ---------- */
+
+/* ---------- 메뉴 줄 신고 2단계 (T10.16f, MENU-05, D-37 C) ---------- */
+
+function MenuFlagQuestions({
+  config,
+  onSignedOut,
+}: {
+  config: Extract<ReportSheetConfig, { kind: "menu" }>;
+  onSignedOut: () => void;
+}) {
+  const client = useQueryClient();
+  const online = useOnlineStatus();
+  const offline = !online;
+  const limit = useWriteLimit("reports");
+  useSignedOutRedirect(limit, onSignedOut);
+  const m = copy.menu;
+  const [menu, setMenu] = useState<string | null>(
+    config.menus.length === 1 ? (config.menus[0]?.key ?? null) : null,
+  );
+  const [reason, setReason] = useState<MenuFlagReason | null>(null);
+  const [step, setStep] = useState<"menu" | "reason" | "done">(
+    config.menus.length === 1 ? "reason" : "menu",
+  );
+  const [limitHit, setLimitHit] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<WriteFailure | null>(null);
+  const [blocked, setBlocked] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  if (limit.kind === "unknown" || limit.kind === "signedOut")
+    return <LoadingQuestion title={m.title} />;
+  if (limit.kind === "blocked" || limitHit)
+    return <LimitQuestion title={m.title} bucket="reports" />;
+  if (step === "done") return <DoneQuestion title={m.doneTitle} body={m.doneBody} />;
+
+  const total = config.menus.length === 1 ? 1 : 2;
+  if (step === "menu")
+    return (
+      <Question step={1} total={total} stepKey="menu" eyebrow={m.title} title={m.qMenu}>
+        {offline ? <OfflineLine /> : null}
+        <RadioRows
+          name="report-menu"
+          legend={m.menuLabel}
+          options={config.menus.map((x) => ({ key: x.key, label: x.name }))}
+          value={menu}
+          onChange={(k) => {
+            setMenu(k);
+            setBlocked(null);
+            if (timer.current) clearTimeout(timer.current);
+            timer.current = setTimeout(() => setStep("reason"), ADVANCE_MS);
+          }}
+        />
+        <RemainingLine limit={limit} />
+      </Question>
+    );
+
+  const name = config.menus.find((x) => x.key === menu)?.name ?? "";
+
+  async function submit() {
+    if (!menu || !reason || busy) return;
+    setBusy(true);
+    setFailure(null);
+    setBlocked(null);
+    const r = await reportMenuAction({ placeId: config.placeId, menuKey: menu, reason });
+    setBusy(false);
+    if (!r.ok) {
+      if (r.error === "duplicate") return setBlocked(m.errors.duplicate);
+      if (r.error === "own_target") return setBlocked(m.errors.own);
+      if (r.error === "unavailable") return setBlocked(m.errors.unavailable);
+      const c = classify(r, onSignedOut);
+      if (c?.kind === "limit") setLimitHit(true);
+      else if (c?.kind === "line") setFailure(c.failure);
+      return;
+    }
+    track({ name: "report_submitted", properties: { type: "menu" } });
+    void client.invalidateQueries({ queryKey: dbKeys.placeMenus(config.placeId) });
+    setStep("done");
+    config.onDone?.();
+  }
+
+  return (
+    <Question
+      step={total}
+      total={total}
+      stepKey="reason"
+      eyebrow={name ? `${m.title}, ${name}` : m.title}
+      title={m.qReason}
+      onBack={
+        config.menus.length > 1
+          ? () => {
+              setFailure(null);
+              setBlocked(null);
+              setStep("menu");
+            }
+          : undefined
+      }
+      footer={
+        <>
+          {failure ? <FailureLine failure={failure} /> : null}
+          {blocked ? (
+            <p role="alert" className="type-body-sm break-keep text-destructive">
+              {blocked}
+            </p>
+          ) : null}
+          <PrimaryButton
+            offline={offline}
+            busy={busy}
+            disabled={!reason || blocked !== null}
+            onClick={() => void submit()}
+          >
+            {failure?.error === "save" ? moderationCopy.retry : m.submit}
+          </PrimaryButton>
+        </>
+      }
+    >
+      {offline ? <OfflineLine /> : null}
+      <RadioRows
+        name="report-menu-reason"
+        legend={m.reasonLabel}
+        options={MENU_FLAG_REASONS.map((k) => ({ key: k, label: m.reasons[k], hint: m.hints[k] }))}
+        value={reason}
+        onChange={(k) => {
+          setReason(k);
+          setFailure(null);
+        }}
+      />
+      <p className="type-caption break-keep text-muted-foreground">{m.note}</p>
+    </Question>
+  );
+}
 
 function FlagQuestions({
   config,

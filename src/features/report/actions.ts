@@ -11,6 +11,7 @@ import {
   checkDeal,
   registerDeal,
   reportDeal,
+  reportMenu,
   reportPlace,
   reportReview,
   reportWait,
@@ -22,6 +23,7 @@ import {
   type RegisterDealResult,
   type ReportDealRequest,
   type ReportDeps,
+  type ReportMenuRequest,
   type ReportPlaceRequest,
   type ReportReviewRequest,
   type ReportWaitRequest,
@@ -39,6 +41,12 @@ function depsFor(supabase: ServerSupabase): ReportDeps {
     async insertReviewReport(userId, row) {
       const { error } = await supabase
         .from("review_reports")
+        .insert({ user_id: userId, ...row });
+      return error;
+    },
+    async insertMenuFlag(userId, row) {
+      const { error } = await supabase
+        .from("menu_flags")
         .insert({ user_id: userId, ...row });
       return error;
     },
@@ -128,6 +136,14 @@ export async function reportDealAction(
   input: ReportDealRequest,
 ): Promise<WriteResult> {
   return run((d) => reportDeal(input, d), fail("save"));
+}
+
+/** 메뉴 줄 신고 (T10.16f, MENU-05). 플래그 menuReports가 꺼져 있으면 받지 않는다 */
+export async function reportMenuAction(
+  input: ReportMenuRequest,
+): Promise<WriteResult> {
+  if (!isEnabled("menuReports")) return fail("save");
+  return run((d) => reportMenu(input, d), fail("save"));
 }
 
 /** 식당 정보 제보: 문 닫았어요 / 가격이 달라요 / 정보가 틀려요 (PLACE-05) */

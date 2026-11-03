@@ -91,3 +91,7 @@ export function waitLevelFromDb(level: string | null | undefined) {
 export function waitLevelToDb(level: WaitingLevel): WaitDbLevel {
   return BADGE_TO_DB[level];
 }
+
+/** 메뉴 줄 신고 사유 (T10.16f, MENU-05, D-37 안건 5). DB menu_flags_reason_values와 같다 */
+export const MENU_FLAG_REASONS = ["false", "abuse", "spam", "other"] as const;
+export type MenuFlagReason = (typeof MENU_FLAG_REASONS)[number];

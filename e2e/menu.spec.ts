@@ -16,6 +16,7 @@ import {
   deleteAuthUser,
   newRunId,
   rest,
+  rpc,
   type TestUser,
 } from "../src/lib/supabase/rls/harness";
 import { expectNoA11yViolations } from "./helpers/axe";
@@ -223,6 +224,95 @@ test.describe("메뉴 제보", () => {
         )
         .toEqual([{ menu_name: "돼지국밥", price_krw: 9500, source: "feedback", has_review: true }]);
     } finally {
+      await s.cleanup();
+    }
+  });
+
+  test("MENU-05, T10.16f: 상세 \"메뉴가 달라요\"로 신고하고, 관리자가 한 건씩 큐에서 숨긴 뒤 되돌린다", async ({
+    page,
+    context,
+    baseURL,
+    browser,
+  }) => {
+    // 두 세션(사용자, 관리자)을 만들고 지운다. 시간이 모자라 정리 전에 끊기지 않게 넉넉히
+    test.setTimeout(90_000);
+    const s = await setup(page, context, baseURL!, "menu3", false);
+    const adminContext = await browser.newContext({ baseURL });
+    const adminPage = await adminContext.newPage();
+    let adminCleanup: (() => Promise<void>) | null = null;
+    try {
+      await page.goto("/today");
+      const hero = page.locator(".lm-today-deck article").first();
+      await expect(hero.locator("h2")).toBeVisible({ timeout: 20_000 });
+      await expect(hero.locator("dt", { hasText: "돼지국밥" })).toBeVisible({ timeout: 15_000 });
+      const heroName = (await hero.locator("h2").innerText()).trim();
+      const placeId = String(9_100_000 + Number(heroName.replace(/\D/g, "")) - 1);
+
+      await page.getByRole("button", { name: `${heroName} 상세` }).click();
+      const detail = page.getByRole("dialog");
+      await expect(detail.getByRole("region", { name: "메뉴판" })).toBeVisible({ timeout: 15_000 });
+      await detail.getByRole("button", { name: "다른 행동 더 보기" }).click();
+      await page.getByRole("menuitem", { name: "메뉴가 달라요" }).click();
+      const sheet = page.getByRole("dialog").filter({ has: page.locator("[data-question-title]") });
+      await expect(sheet.getByRole("heading", { name: "어떻게 다른가요?" })).toBeVisible();
+      await sheet.getByRole("radio", { name: /가격이나 메뉴가 달라요/ }).check();
+      await shot(page, "flag");
+      await expectNoA11yViolations(page, { include: '[role="dialog"]:has([data-question-title])' });
+      await sheet.getByRole("button", { name: "신고하기" }).click();
+      await expect(sheet.getByRole("heading", { name: "신고를 받았습니다" })).toBeVisible();
+
+      const flags = await readOwn<{ place_id: string; menu_key: string; reason: string }[]>(
+        env!,
+        s.token,
+        "menu_flags?select=place_id,menu_key,reason",
+      );
+      expect(flags).toEqual([{ place_id: placeId, menu_key: "돼지국밥", reason: "false" }]);
+
+      // 관리자: 한 건씩 큐에서 그 식당 카드까지 건너뛰고 숨기기 → 메뉴판에서 빠짐 → 토스트 되돌리기
+      const signed = await signInContext(adminContext, env!, baseURL!, "madm");
+      adminCleanup = signed.cleanup;
+      await adminPatch(env!, "profiles", `user_id=eq.${signed.user.id}`, {
+        role: "admin",
+        nickname: "test_관리",
+        terms_agreed_at: new Date().toISOString(),
+        birth_confirmed_at: new Date().toISOString(),
+      });
+      await adminPage.goto("/admin");
+      await adminPage.getByRole("tab", { name: /메뉴 제보/ }).click();
+      const main = adminPage.getByRole("main");
+      // 큐를 받은 뒤 찾는다(개발 DB에 다른 검토 대기 줄이 있을 수 있어 건너뛰기로 이 실행의 줄까지)
+      await expect(main.getByRole("article")).toBeVisible({ timeout: 20_000 });
+      for (let i = 0; i < 40; i++) {
+        if (await main.getByText(`장소 ${placeId}`, { exact: true }).isVisible()) break;
+        const skip = main.getByRole("button", { name: "건너뛰기" });
+        if (!(await skip.isEnabled())) break;
+        await skip.click();
+        await adminPage.waitForTimeout(350);
+      }
+      await expect(main.getByText(`장소 ${placeId}`, { exact: true })).toBeVisible();
+      await expect(main.getByRole("heading", { name: "돼지국밥" })).toBeVisible();
+      // 이 실행의 신고 1건 이상(개발 DB에 먼저 들어온 신고가 있을 수 있다)
+      await expect(main.getByText(/^가격이나 메뉴가 달라요 \d+$/)).toBeVisible();
+      await shot(adminPage, "admin-menu");
+      await expectNoA11yViolations(adminPage);
+      await main.getByRole("button", { name: "숨기기" }).click();
+      const done = adminPage.getByText("돼지국밥을 메뉴판에서 내렸습니다.");
+      await expect(done).toBeVisible();
+      const keys = async () =>
+        ((await rpc<{ menu_key: string }[]>(env!, "place_menus", { p_place_ids: [placeId] })).data ?? []).map(
+          (m) => m.menu_key,
+        );
+      await expect.poll(keys).toEqual([]);
+      await adminPage
+        .locator("[data-sonner-toast]")
+        .filter({ has: done })
+        .getByRole("button", { name: "되돌리기" })
+        .click();
+      await expect(adminPage.getByText("되돌렸습니다.")).toBeVisible();
+      await expect.poll(keys).toEqual(["돼지국밥"]);
+    } finally {
+      await adminContext.close();
+      await adminCleanup?.();
       await s.cleanup();
     }
   });

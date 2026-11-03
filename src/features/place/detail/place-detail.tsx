@@ -73,7 +73,7 @@ import {
 import { CategoryIllustration } from "../illustrations";
 import type { DirectionsResult } from "../launch-directions";
 import { MenuBoard } from "@/features/menu/menu-board";
-import { menuReportsOn } from "@/features/menu/use-place-menus";
+import { menuReportsOn, usePlaceMenus } from "@/features/menu/use-place-menus";
 import { PlaceMoreMenu, type MoreMenuAction } from "./more-menu";
 export { PlaceDetailSkeleton } from "./place-detail-skeleton";
 import {
@@ -631,6 +631,9 @@ export function PlaceDetailActions({
   const live = givenStats === undefined;
   const reportSheet = useReportSheet();
   const named = place.name !== null;
+  // 메뉴 신고 입구(T10.16f, D-37 C): 메뉴판과 같은 쿼리 키라 세션 메모리 값을 그대로 쓴다
+  const menuFlagOn = live && !onReport && menuReportsOn();
+  const placeMenus = usePlaceMenus(place.id, menuFlagOn);
   const fav = useFavorite({
     placeId: place.id,
     placeUrl: place.placeUrl,
@@ -733,6 +736,21 @@ export function PlaceDetailActions({
       disabled: !online,
     },
   );
+  const flaggable = placeMenus.data ?? [];
+  if (menuFlagOn && flaggable.length > 0) {
+    reports.push({
+      key: "menu",
+      label: reportCopy.menu.entry,
+      icon: Flag,
+      onSelect: () =>
+        reportSheet.open({
+          kind: "menu",
+          placeId: place.id,
+          menus: flaggable.map((m) => ({ key: m.key, name: m.name })),
+        }),
+      disabled: !online,
+    });
+  }
 
   let primary: ReactNode;
   if (directions.available && place.name) {

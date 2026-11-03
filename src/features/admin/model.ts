@@ -14,6 +14,7 @@ import { getKstParts, isSameKstDay } from "@/lib/time";
 export const ADMIN_SECTIONS = [
   "reviews",
   "closures",
+  "menus",
   "users",
   "log",
   "beta",
@@ -64,6 +65,10 @@ export const LOG_ACTIONS = [
   "user_suspend",
   "user_unsuspend",
   "user_clear",
+  "menu_hide",
+  "menu_clear",
+  "menu_merge",
+  "menu_separate",
 ] as const;
 export type LogAction = (typeof LOG_ACTIONS)[number];
 
@@ -219,7 +224,7 @@ export const logRowSchema = z
     id: z.string(),
     created_at: ts,
     action: z.enum(LOG_ACTIONS),
-    target_type: z.enum(["review", "deal", "place", "user"]),
+    target_type: z.enum(["review", "deal", "place", "user", "menu"]),
     target_id: z.string().nullable(),
     target_place_id: z.string().nullable(),
     target_user_id: z.string().nullable(),
@@ -230,6 +235,8 @@ export const logRowSchema = z
     admin_nickname: z.string().nullable(),
     reverted_at: tsNullable,
     undoable: z.boolean(),
+    // T10.16f 전 응답에는 없다
+    target_menu_key: z.string().nullable().optional(),
   })
   .transform((r) => ({
     id: r.id,
@@ -246,6 +253,7 @@ export const logRowSchema = z
     adminNickname: r.admin_nickname,
     reverted: r.reverted_at !== null,
     undoable: r.undoable,
+    targetMenuKey: r.target_menu_key ?? null,
   }));
 export type LogEntry = z.output<typeof logRowSchema>;
 
@@ -306,9 +314,104 @@ export function filterBetaFeedback(
   return items.filter((i) => i.category === filter);
 }
 
+/* ---------- 메뉴 제보 (T10.16f, MENU-05, D-37) ---------- */
+
+export const MENU_FLAG_REASONS = ["false", "abuse", "spam", "other"] as const;
+export type MenuFlagReason = (typeof MENU_FLAG_REASONS)[number];
+
+const menuKey = z.string().regex(/^\S{1,40}$/);
+const placeId = z.string().regex(/^[0-9]{1,20}$/);
+
+const menuFlagsSchema = z.record(z.string(), int).transform((r) => {
+  const out: Partial<Record<MenuFlagReason, number>> = {};
+  for (const k of MENU_FLAG_REASONS) {
+    const n = r[k];
+    if (typeof n === "number" && n > 0) out[k] = n;
+  }
+  return out;
+});
+
+const variantsSchema = z.array(z.object({ name: z.string(), count: int }));
+
+/** admin_menu_flagged 한 줄. 집계(stats)가 없으면(180일이 지나 제보가 빠짐) 이름은 키로 둔다 */
+export const menuFlaggedRowSchema = z
+  .object({
+    place_id: placeId,
+    menu_key: menuKey,
+    menu_name: z.string().nullable(),
+    report_count: int.nullable(),
+    median_krw: int.nullable(),
+    lo_krw: int.nullable(),
+    hi_krw: int.nullable(),
+    last_at: tsNullable,
+    variants: variantsSchema,
+    auto_hidden: z.boolean(),
+    flags: menuFlagsSchema,
+    flag_count: int,
+    first_flag_at: ts,
+    others: z.array(z.object({ key: menuKey, name: z.string(), count: int })),
+  })
+  .transform((r) => ({
+    kind: "flag" as const,
+    key: `menu:${r.place_id}/${r.menu_key}`,
+    placeId: r.place_id,
+    menuKey: r.menu_key,
+    name: r.menu_name ?? r.menu_key,
+    reportCount: r.report_count ?? 0,
+    medianKrw: r.median_krw,
+    loKrw: r.lo_krw,
+    hiKrw: r.hi_krw,
+    lastAt: r.last_at,
+    variants: r.variants,
+    autoHidden: r.auto_hidden,
+    flags: r.flags,
+    flagCount: r.flag_count,
+    firstFlagAt: r.first_flag_at,
+    others: r.others,
+  }));
+export type MenuFlaggedItem = z.output<typeof menuFlaggedRowSchema>;
+
+export const menuSuggestionRowSchema = z
+  .object({
+    place_id: placeId,
+    from_key: menuKey,
+    from_name: z.string(),
+    from_count: int,
+    from_median: int,
+    to_key: menuKey,
+    to_name: z.string(),
+    to_count: int,
+    to_median: int,
+    to_last_at: ts,
+    why: z.enum(["contains", "typo"]),
+  })
+  .transform((r) => ({
+    kind: "merge" as const,
+    // 합치면 옛 줄(from)이 빠지므로 키는 옛 줄 기준
+    key: `menu:${r.place_id}/${r.from_key}`,
+    placeId: r.place_id,
+    from: { key: r.from_key, name: r.from_name, count: r.from_count, medianKrw: r.from_median },
+    to: { key: r.to_key, name: r.to_name, count: r.to_count, medianKrw: r.to_median },
+    toLastAt: r.to_last_at,
+    why: r.why,
+  }));
+export type MenuSuggestion = z.output<typeof menuSuggestionRowSchema>;
+export type MenuQueueItem = MenuFlaggedItem | MenuSuggestion;
+
+/** 메뉴 큐: 신고된 줄(자동 숨김 먼저, 서버 순서) 다음 합치기 후보. 같은 옛 줄이 두 번 나오면 신고 쪽만 */
+export function menuQueue(
+  flagged: readonly MenuFlaggedItem[],
+  suggestions: readonly MenuSuggestion[],
+): MenuQueueItem[] {
+  const seen = new Set(flagged.map((f) => f.key));
+  return [...flagged, ...suggestions.filter((s) => !seen.has(s.key))];
+}
+
 export type AdminSnapshot = {
   items: ReportedItem[];
   closures: ClosureItem[];
+  menuFlagged: MenuFlaggedItem[];
+  menuSuggestions: MenuSuggestion[];
   users: AdminUser[];
   log: LogEntry[];
 };
@@ -347,6 +450,18 @@ export const setSuspensionInput = z.discriminatedUnion("status", [
 export type SetSuspensionInput = z.input<typeof setSuspensionInput>;
 
 export const userIdInput = z.object({ userId: id });
+
+export const decideMenuInput = z.object({
+  placeId,
+  menuKey,
+  result: z.enum(["hide", "clear"]),
+});
+export type DecideMenuInput = z.input<typeof decideMenuInput>;
+
+export const mergeMenuInput = z
+  .object({ placeId, from: menuKey, to: menuKey })
+  .refine((v) => v.from !== v.to);
+export type MergeMenuInput = z.input<typeof mergeMenuInput>;
 
 export const undoInput = z.object({
   actionIds: z.array(id).min(1).max(50),
@@ -457,6 +572,7 @@ export function sectionCounts(
   return {
     reviews: s ? s.items.length : null,
     closures: s ? s.closures.length : null,
+    menus: s ? menuQueue(s.menuFlagged, s.menuSuggestions).length : null,
     users: s ? s.users.filter((u) => u.kind === "candidate").length : null,
     log: null,
     // 읽음 처리가 없어 검토 대기 수를 두지 않는다(D-23 안건 14)
@@ -480,6 +596,8 @@ export function hiddenKeyOfLog(e: LogEntry): string | null {
     return `${e.targetType}:${e.targetId}`;
   if (e.targetType === "place" && e.targetPlaceId)
     return `place:${e.targetPlaceId}`;
+  if (e.targetType === "menu" && e.targetPlaceId && e.targetMenuKey)
+    return `menu:${e.targetPlaceId}/${e.targetMenuKey}`;
   if (e.action === "user_clear" && e.targetUserId)
     return `user:${e.targetUserId}`;
   return null;

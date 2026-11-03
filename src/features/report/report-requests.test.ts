@@ -9,6 +9,7 @@ const {
   dealEndRange,
   registerDeal,
   reportDeal,
+  reportMenu,
   reportPlace,
   reportReview,
   reportWait,
@@ -25,6 +26,7 @@ function deps(over: Partial<ReportDeps> = {}): ReportDeps {
     now: () => NOW,
     insertReviewReport: vi.fn(async () => null),
     insertPlaceReport: vi.fn(async () => null),
+    insertMenuFlag: vi.fn(async () => null),
     registerDeal: vi.fn(async () => ({
       data: { deal_id: ID, merged_with: null, ends_on: "2026-11-11" },
       error: null,
@@ -100,6 +102,49 @@ describe("reportDeal (DEAL-04)", () => {
     await expect(
       reportDeal({ dealId: ID, reason: "spam" }, deps()),
     ).resolves.toEqual({ ok: false, error: "invalid" });
+  });
+});
+
+describe("reportMenu (T10.16f, MENU-05)", () => {
+  it("메뉴 줄(장소 + 비교 키)과 사유 칩만 보낸다", async () => {
+    const d = deps();
+    await expect(
+      reportMenu({ placeId: "123", menuKey: "제육볶음", reason: "false" }, d),
+    ).resolves.toEqual({ ok: true });
+    expect(d.insertMenuFlag).toHaveBeenCalledWith("user-1", {
+      place_id: "123",
+      menu_key: "제육볶음",
+      reason: "false",
+    });
+  });
+  it("공백 있는 키, 대문자 키, 모르는 사유, 글은 받지 않는다", async () => {
+    for (const bad of [
+      { placeId: "123", menuKey: "제육 볶음", reason: "false" },
+      { placeId: "123", menuKey: "Ramen", reason: "false" },
+      { placeId: "123", menuKey: "제육", reason: "privacy" },
+      { placeId: "123", menuKey: "제육", reason: "other", note: "글" },
+      { placeId: "abc", menuKey: "제육", reason: "false" },
+    ]) {
+      await expect(reportMenu(bad, deps())).resolves.toEqual({ ok: false, error: "invalid" });
+    }
+  });
+  it("자기 메뉴뿐인 줄, 같은 줄 두 번은 DB 오류를 그대로 옮긴다", async () => {
+    await expect(
+      reportMenu(
+        { placeId: "123", menuKey: "제육", reason: "false" },
+        deps({ insertMenuFlag: async () => ({ code: "23505", message: "menu_flags_one_per_group" }) }),
+      ),
+    ).resolves.toEqual({ ok: false, error: "duplicate" });
+    const own = await reportMenu(
+      { placeId: "123", menuKey: "제육", reason: "false" },
+      deps({ insertMenuFlag: async () => ({ code: "23514", message: "report_own_target" }) }),
+    );
+    expect(own.ok).toBe(false);
+  });
+  it("로그인하지 않았으면 unauthenticated", async () => {
+    await expect(
+      reportMenu({ placeId: "123", menuKey: "제육", reason: "false" }, deps({ currentUserId: async () => null })),
+    ).resolves.toEqual({ ok: false, error: "unauthenticated" });
   });
 });
 

@@ -23,10 +23,12 @@ import {
   DEAL_SLOTS,
   DEAL_TYPES,
   INFO_FIELDS,
+  MENU_FLAG_REASONS,
   REPORT_NOTE_MAX,
   REVIEW_REPORT_REASONS,
   waitLevelToDb,
   type DealCheckAnswer,
+  type MenuFlagReason,
   type WaitDbLevel,
 } from "./labels";
 
@@ -72,6 +74,17 @@ export const reportDealSchema = z
     note,
   })
   .refine(onlyOtherHasNote);
+
+/** 메뉴 줄 신고 (T10.16f, MENU-05, D-37). 대상은 메뉴 줄(장소 + 비교 키), 사유 칩만, 글 없음 */
+export const reportMenuSchema = z.strictObject({
+  placeId: placeIdSchema,
+  menuKey: z
+    .string()
+    .regex(/^\S{1,40}$/)
+    .refine((v) => v === v.toLowerCase()),
+  reason: z.enum(MENU_FLAG_REASONS),
+});
+export type ReportMenuRequest = z.input<typeof reportMenuSchema>;
 
 /** 식당 정보 제보 (PLACE-05). 세부는 모두 선택, 자유 글 없음 */
 export const reportPlaceSchema = z
@@ -150,6 +163,10 @@ export type ReportDeps = {
       | { target_type: "review"; review_id: string; reason: string; note: string | null }
       | { target_type: "deal"; deal_id: string; reason: string; note: string | null },
   ) => Promise<PgErrorLike>;
+  insertMenuFlag: (
+    userId: string,
+    row: { place_id: string; menu_key: string; reason: MenuFlagReason },
+  ) => Promise<PgErrorLike>;
   insertPlaceReport: (
     userId: string,
     row: {
@@ -219,6 +236,24 @@ export async function reportReview(
       review_id: p.data.reviewId,
       reason: p.data.reason,
       note: p.data.note,
+    }),
+  );
+}
+
+/** 메뉴 줄 신고 (T10.16f). 서로 다른 3명이면 DB가 그 줄을 메뉴판에서 내린다 */
+export async function reportMenu(
+  raw: unknown,
+  deps: ReportDeps,
+): Promise<WriteResult> {
+  const p = parseInput(reportMenuSchema, raw);
+  if (!p.ok) return fail(p.error);
+  const userId = await signedIn(deps);
+  if (!userId) return fail("unauthenticated");
+  return done(
+    await deps.insertMenuFlag(userId, {
+      place_id: p.data.placeId,
+      menu_key: p.data.menuKey,
+      reason: p.data.reason,
     }),
   );
 }
