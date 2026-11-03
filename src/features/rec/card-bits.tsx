@@ -7,6 +7,8 @@ import { showMemoBadge } from "@/features/memo/badge-slot";
 import { SkeletonLine } from "@/components/states/loading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { homeCopy } from "@/copy/home";
+import { menuCardCopy } from "@/copy/menu-card";
+import type { CardMenu } from "@/features/menu/card-menu-pick";
 import { categoryLabel, type CategorySlug } from "@/features/place/categories";
 import { lazy, Suspense } from "react";
 import type { CategoryIllustrationProps } from "@/features/place/illustrations";
@@ -64,12 +66,18 @@ export function NumberValue({
   );
 }
 
-/** 라벨 위, 숫자 아래 3칸 격자. 칸 폭 0.8fr 1.3fr 0.9fr, 칸 사이 1px 세로선 */
+/**
+ * 라벨 위, 숫자 아래 3칸 격자. 칸 폭 0.8fr 1.3fr 0.9fr, 칸 사이 1px 세로선.
+ * menu(T10.16e, D-35 A, 큰 카드만): 가운데 칸 라벨이 대표 메뉴 이름, 숫자가 그 메뉴 가격 중앙값("9,000원").
+ * 이때 "예산 안"과 추정 표시는 카드에서 빠지고 상세에서 본다(D-35 안건 3). 표시 전용, 추천 점수와 무관.
+ */
 export function NumberGrid({
   card,
+  menu,
   className,
 }: {
   card: TodayCard;
+  menu?: CardMenu | null;
   className?: string;
 }) {
   const cells = [
@@ -89,20 +97,43 @@ export function NumberGrid({
         className,
       )}
     >
-      {cells.map((c) => (
-        <div
-          key={c.key}
-          className="flex min-w-0 flex-col gap-1.5 px-4 first:pl-0 last:pr-0 @max-[23.75rem]/screen:px-3"
-        >
-          <dt className="flex items-baseline gap-1.5 type-caption text-muted-foreground">
-            {c.label}
-            {c.estimate ? <EstimateMark /> : null}
-          </dt>
-          <dd className="flex min-h-[1.35rem] items-end">
-            <NumberValue cell={c.cell} />
-          </dd>
-        </div>
-      ))}
+      {cells.map((c) =>
+        c.key === "price" && menu ? (
+          <div
+            key={c.key}
+            className="flex min-w-0 flex-col gap-1.5 px-4 first:pl-0 last:pr-0 @max-[23.75rem]/screen:px-3"
+          >
+            <dt className="truncate type-caption text-foreground">
+              <span className="sr-only">{menuCardCopy.popular} </span>
+              {menu.name}
+              <span className="sr-only">
+                , {menuCardCopy.reportsLabel(menu.count)}
+              </span>
+            </dt>
+            <dd className="flex min-h-[1.35rem] items-end">
+              <NumberValue
+                cell={{
+                  value: menu.medianKrw.toLocaleString("ko-KR"),
+                  unit: menuCardCopy.priceUnit,
+                }}
+              />
+            </dd>
+          </div>
+        ) : (
+          <div
+            key={c.key}
+            className="flex min-w-0 flex-col gap-1.5 px-4 first:pl-0 last:pr-0 @max-[23.75rem]/screen:px-3"
+          >
+            <dt className="flex items-baseline gap-1.5 type-caption text-muted-foreground">
+              {c.label}
+              {c.estimate ? <EstimateMark /> : null}
+            </dt>
+            <dd className="flex min-h-[1.35rem] items-end">
+              <NumberValue cell={c.cell} />
+            </dd>
+          </div>
+        ),
+      )}
     </dl>
   );
 }

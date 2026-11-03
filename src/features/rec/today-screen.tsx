@@ -284,6 +284,8 @@ export function TodayScreen({
   });
   const statsRows = statsQuery.data?.rows;
   const memos = statsQuery.data?.memos;
+  // 카드 대표 메뉴(T10.16e): 표시 전용, 엔진에 넘기지 않는다(AC-MENU-2)
+  const menus = statsQuery.data?.menus;
   const statsSettled =
     placeIds.length === 0 ||
     statsQuery.isSuccess ||
@@ -830,6 +832,7 @@ export function TodayScreen({
               key={hero.id}
               card={hero}
               memo={memos?.[hero.id]}
+              menu={menus?.[hero.id]}
               heroRef={heroRef}
               spot={spotOf(pick, heroIndex)}
               order={copy.single.order(1, cards.length)}

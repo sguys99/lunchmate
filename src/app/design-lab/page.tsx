@@ -14,7 +14,6 @@ import { appIconLabCopy } from "@/copy/design-lab-app-icon";
 import { adminLabCopy } from "@/copy/design-lab-admin";
 import { betaLabCopy } from "@/copy/design-lab-beta";
 import { betaFeedbackLabCopy } from "@/copy/design-lab-beta-feedback";
-import { menuLabCopy } from "@/copy/design-lab-menu";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
@@ -90,12 +89,11 @@ export default function DesignLabPage() {
         </div>
       </Section>
 
-      {/* 9, 10단계 시안(T9.3, T9.4, T10.16b): 게이트 뒤 고른 안만 남긴다 */}
+      {/* 9단계 시안(T9.3, T9.4): 게이트 뒤 고른 안만 남긴다 */}
       {(
         [
           ["beta", betaLabCopy],
           ["beta-feedback", betaFeedbackLabCopy],
-          ["menu", menuLabCopy],
         ] as const
       ).map(([route, labCopy]) => (
         <Section

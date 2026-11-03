@@ -38,6 +38,7 @@ import {
   NumberValue,
 } from "./card-bits";
 import type { TodayCard } from "./card-model";
+import type { CardMenu } from "@/features/menu/card-menu-pick";
 import { showMemoBadge } from "@/features/memo/badge-slot";
 import { heroNameSize } from "./hero-name";
 import type { JustPick } from "./just-pick";
@@ -72,6 +73,7 @@ const textButton = cn(
 export function TodayHero({
   card,
   memo,
+  menu,
   spot,
   order,
   why,
@@ -83,6 +85,8 @@ export function TodayHero({
   card: TodayCard;
   /** 내 메모(T10.15). 카드 배지가 2개 미만일 때만 배지 줄 끝에 한 자리를 쓴다 */
   memo?: string;
+  /** 대표 메뉴(T10.16e, D-35 A). 숫자 3칸 가운데 칸을 바꾼다. 표시 전용 */
+  menu?: CardMenu;
   spot?: Spot;
   /** "3곳 중 1번째" */
   order: string;
@@ -210,7 +214,7 @@ export function TodayHero({
       ) : null}
 
       <div data-reveal style={reveal(3)} className="mt-3">
-        <NumberGrid card={card} />
+        <NumberGrid card={card} menu={menu} />
       </div>
     </article>
   );

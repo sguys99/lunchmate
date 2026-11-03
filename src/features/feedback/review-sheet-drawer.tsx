@@ -22,13 +22,20 @@ import {
   DrawerViewport,
 } from "@/components/ui/drawer";
 import { focusRing } from "@/components/ui/interaction";
+import { toast } from "@/components/ui/lazy-toaster";
 import { feedbackCopy } from "@/copy/feedback";
+import { menuCopy } from "@/copy/menu";
 import { moderationCopy } from "@/copy/moderation";
+import {
+  MenuField,
+  saveReviewMenu,
+  useMenuChoice,
+} from "@/features/menu/menu-field";
 import type { CategorySlug } from "@/features/place/categories";
 import { CategoryIllustration } from "@/features/place/illustrations";
 import { track } from "@/lib/analytics/track";
 import { useOnlineStatus } from "@/lib/network";
-import { invalidateAfterWrite } from "@/lib/query/db-keys";
+import { dbKeys, invalidateAfterWrite } from "@/lib/query/db-keys";
 import type { WriteFailure } from "@/lib/supabase/write-result";
 import { cn } from "@/lib/utils";
 import {
@@ -209,6 +216,12 @@ function ReviewForm({
 
   const ready = canSubmit(mode, draft);
   const focus = config.focus ?? null;
+  // 먹은 메뉴(T10.16, MENU-01). 후기 저장이 끝난 뒤 그 후기 id로 따로 저장한다
+  const menu = useMenuChoice({
+    placeId: config.placeId,
+    reviewId: mode.kind === "edit" ? mode.reviewId : null,
+    enabled: true,
+  });
 
   async function submit() {
     if (busy || !ready || !online) return;
@@ -229,6 +242,20 @@ function ReviewForm({
       track({ name: "feedback_submitted", properties });
     }
     void invalidateAfterWrite(client, "review", config.placeId);
+    const menuResult = await saveReviewMenu({
+      state: menu,
+      reviewId: r.reviewId,
+      placeId: config.placeId,
+      placeUrl: mode.kind === "write" ? mode.placeUrl : null,
+      priceKrw: draft.priceKrw,
+    });
+    // 메뉴는 덤이다: 실패해도 후기는 남았으므로 닫고 알린다(오늘 같은 메뉴를 이미 알려 준 경우는 알리지 않는다)
+    if (menuResult && !menuResult.ok && menuResult.error !== "duplicate")
+      void toast(menuCopy.feedback.menuFailed);
+    if (menuResult?.ok) {
+      void client.invalidateQueries({ queryKey: dbKeys.placeMenus(config.placeId) });
+      void client.invalidateQueries({ queryKey: dbKeys.myReviewMenu(r.reviewId) });
+    }
     config.onSaved?.({ reviewId: r.reviewId, rating: r.rating, draft });
     setBusy(false);
     onDone();
@@ -293,6 +320,13 @@ function ReviewForm({
             {copy.hint}
           </p>
         ) : null}
+        <MenuField
+          state={menu}
+          estimateKrw={config.price.value}
+          priceKrw={draft.priceKrw}
+          onPrice={(v) => patch({ priceKrw: v })}
+          disabled={!online || busy}
+        />
         <PriceField
           draft={draft}
           patch={patch}

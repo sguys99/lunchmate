@@ -26,6 +26,7 @@
     "test:e2e:recommend": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop e2e/recommend.spec.ts",
     "test:e2e:feedback": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop e2e/feedback.spec.ts",
     "test:e2e:poll": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/poll-flow.spec.ts e2e/poll-room.spec.ts e2e/poll-create.spec.ts e2e/party.spec.ts",
+    "test:e2e:menu": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/menu.spec.ts",
     "test:e2e:feedback-reco": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/feedback-reco.spec.ts",
     "test:e2e:report": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/report.spec.ts",
     "test:e2e:admin": "RUN_DB_E2E=1 playwright test --project=mobile --project=desktop --workers=1 e2e/admin.spec.ts",

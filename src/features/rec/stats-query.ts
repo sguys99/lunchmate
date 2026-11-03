@@ -6,6 +6,7 @@
 // - 한 요청이 STATS_TIMEOUT_MS를 넘으면 실패로 보고 한 번 더 시도한다. 그래도 실패하면 화면은 중립값으로 추천한다.
 // - 이 파일은 홈 첫 로드에 들어간다. 읽기 본체(stats-load, 서버 액션 호출)는 queryFn 안에서 동적으로 받는다.
 import { queryOptions } from "@tanstack/react-query";
+import type { CardMenu } from "@/features/menu/card-menu-pick";
 import type { PlaceStatsRow } from "./place-stats";
 
 const load = () => import("./stats-load");
@@ -43,6 +44,8 @@ export type HomeStats = {
   rows: PlaceStatsRow[];
   /** place_id → 내 메모. 비로그인이거나 메모가 꺼지면 빈 표 */
   memos: Record<string, string>;
+  /** place_id → 카드 대표 메뉴(T10.16e, 제보 2건 이상인 1위). menuReports가 꺼지면 빈 표. 표시 전용 */
+  menus: Record<string, CardMenu>;
 };
 
 /**

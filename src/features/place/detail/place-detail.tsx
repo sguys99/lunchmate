@@ -72,6 +72,8 @@ import {
 } from "../detail-model";
 import { CategoryIllustration } from "../illustrations";
 import type { DirectionsResult } from "../launch-directions";
+import { MenuBoard } from "@/features/menu/menu-board";
+import { menuReportsOn } from "@/features/menu/use-place-menus";
 import { PlaceMoreMenu, type MoreMenuAction } from "./more-menu";
 export { PlaceDetailSkeleton } from "./place-detail-skeleton";
 import {
@@ -297,6 +299,18 @@ export function PlaceDetailBody({
         className="mt-5"
       />
       <PlaceBadges badges={badgesOf(stats)} className="mt-4" />
+      {/* 메뉴판(T10.16, D-35 C): 실제 상세(목업 집계가 아닌 것)에서만, menuReports 플래그가 켜졌을 때 */}
+      {live && menuReportsOn() ? (
+        <MenuBoard
+          placeId={place.id}
+          placeUrl={place.placeUrl}
+          name={place.name}
+          naverUrl={naverUrl}
+          estimateKrw={price.value}
+          online={online}
+          className="mt-6"
+        />
+      ) : null}
 
       {/* 내 후기 (T6.10, D-11 안건 6): 내 방문 기록 아래, 근거 접힘 행 위 */}
       {reviews.mine ? <div className="mt-6">{reviews.mine}</div> : null}

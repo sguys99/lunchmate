@@ -1,4 +1,5 @@
 // 오늘(홈) 후보 집계 읽기 본체 (T6.11). stats-query.ts의 queryFn이 동적으로 받는다(홈 첫 로드 밖).
+import type { CardMenu } from "@/features/menu/card-menu-pick";
 import type { QueryClient } from "@tanstack/react-query";
 import { fetchHomeStats, fetchPlaceStats } from "./stats-source";
 import type { PlaceStatsRow } from "./place-stats";
@@ -55,7 +56,11 @@ export async function loadHomeStats(
   withMemos: boolean,
   /** 받은 집계를 같은 후보 집합의 지도 캐시(placeStats 키)에도 넣어 지도 탭이 다시 읽지 않게 한다 */
   client?: QueryClient,
-): Promise<{ rows: PlaceStatsRow[]; memos: Record<string, string> }> {
+): Promise<{
+  rows: PlaceStatsRow[];
+  memos: Record<string, string>;
+  menus: Record<string, CardMenu>;
+}> {
   const batches = statsBatches(ids);
   const results = await Promise.all(
     batches.map((b) =>
@@ -64,10 +69,12 @@ export async function loadHomeStats(
   );
   const rows: PlaceStatsRow[] = [];
   const memos: Record<string, string> = {};
+  const menus: Record<string, CardMenu> = {};
   for (const r of results) {
     if (!r.ok) throw new Error("place_stats_failed");
     rows.push(...r.rows);
     Object.assign(memos, r.memos);
+    Object.assign(menus, r.menus);
   }
   // 메모 배지 조각을 카드가 그려지기 전에 받아 둔다(홈 첫 로드 밖, 메모가 있을 때만)
   if (Object.keys(memos).length > 0)
@@ -75,5 +82,5 @@ export async function loadHomeStats(
   const mapKey = ["placeStats", statsBatches(ids).flat().join(",")];
   if (client && client.getQueryData(mapKey) === undefined)
     client.setQueryData(mapKey, rows);
-  return { rows, memos };
+  return { rows, memos, menus };
 }

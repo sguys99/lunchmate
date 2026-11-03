@@ -11,6 +11,8 @@ export const dbKeys = {
   placeStatsAll: ["db", "place-stats"] as const,
   placeReviews: (placeId: string) => ["db", "place-reviews", placeId] as const,
   placeDeals: (placeId: string) => ["db", "place-deals", placeId] as const,
+  /** 메뉴 집계(place_menus, T10.16). 익명 집계라 로그아웃 때 지우지 않아도 된다 */
+  placeMenus: (placeId: string) => ["db", "place-menus", placeId] as const,
   /** 내 기록(방문, 후기, 장소, 한도). 사용자마다 다르므로 로그아웃 때 함께 지운다 */
   me: ["db", "me"] as const,
   myVisits: (from: string, to: string, placeId?: string) =>
@@ -21,6 +23,9 @@ export const dbKeys = {
   myReviewsAll: ["db", "me", "reviews"] as const,
   myPlaces: ["db", "me", "places"] as const,
   dailyLimits: ["db", "me", "daily-limits"] as const,
+  /** 내 후기에 붙은 메뉴(T10.16, 고치기 시트 처음 값) */
+  myReviewMenu: (reviewId: string) =>
+    ["db", "me", "review-menu", reviewId] as const,
 };
 
 /** 쓰기 종류. 무엇을 다시 불러야 하는지 정한다 */
@@ -57,6 +62,8 @@ export function invalidateAfterWrite(
       keys.push(dbKeys.myVisitsAll, dbKeys.myReviewsAll, dbKeys.dailyLimits);
       keys.push(dbKeys.placeStatsAll);
       placeScoped(dbKeys.placeReviews);
+      // 후기를 지우면 그 후기의 메뉴 제보도 지워진다(T10.16, cascade)
+      placeScoped(dbKeys.placeMenus);
       break;
     case "prompt":
       keys.push(dbKeys.myVisitsAll);

@@ -126,3 +126,38 @@ export function mapPlaceMemoError(
       return "save";
   }
 }
+
+/** 메뉴 제보 실패 (T10.16, 20261103200000). 문구는 src/copy/menu.ts errors의 같은 키 */
+export type MenuReportErrorCode =
+  | "invalid"
+  | "unauthenticated"
+  | "banned"
+  /** 하루 20건 (MOD-05) */
+  | "daily"
+  /** 같은 식당 같은 메뉴는 하루 1회 */
+  | "duplicate"
+  | "suspended"
+  | "save";
+
+/** menu_reports 쓰기 오류 → 메뉴 실패 이름. 오류가 없으면 null */
+export function mapMenuReportError(
+  error: PgErrorLike,
+): MenuReportErrorCode | null {
+  if (!error) return null;
+  const msg = error.message ?? "";
+  if (/\bmenu_reports_daily_limit_exceeded\b/.test(msg)) return "daily";
+  // 후기가 남의 것이거나 다른 식당이면 형식 오류로 본다(화면이 만들 수 없는 요청)
+  if (/\bmenu_reports_review_mismatch\b/.test(msg)) return "invalid";
+  const mapped = mapPgError(error);
+  switch (mapped?.error) {
+    case "suspended":
+    case "banned":
+    case "invalid":
+    case "unauthenticated":
+    case "duplicate":
+      return mapped.error;
+    default:
+      if (error.code === "42501") return "unauthenticated";
+      return "save";
+  }
+}

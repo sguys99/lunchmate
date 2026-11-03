@@ -11,12 +11,16 @@
 // place_stats와 나란히 읽는다(브라우저 왕복은 그대로 1번). place_stats 함수는 바꾸지 않는다(익명 집계에 개인 메모를 섞지 않음).
 // 메모는 오늘(홈)만 읽는다. 지도, 회식, 투표는 fetchPlaceStats(메모 없음)를 쓴다.
 // 메모 읽기가 실패하면 메모 없이 집계만 돌려준다(배지는 덤이라 카드를 막지 않는다). RLS가 본인 행만 보이므로 user id를 따로 묻지 않는다.
+//
+// 홈 카드 대표 메뉴 (T10.16e, D-35 A + 안건 2): 같은 요청 안에서 익명 집계 place_menus를 나란히 읽고, 식당마다 1위 메뉴가
+// 제보 2건 이상일 때만 돌려준다. 표시 전용이고 추천 엔진에 넘기지 않는다(AC-MENU-2). 실패하면 메뉴 없이 집계만 돌려준다.
 import * as z from "zod";
 import { isEnabled } from "@/lib/flags";
 import {
   createServerSupabase,
   type ServerSupabase,
 } from "@/lib/supabase/server";
+import { cardMenu, type CardMenu } from "@/features/menu/card-menu-pick";
 import type { PlaceStatsRow } from "./place-stats";
 
 const idsSchema = z
@@ -38,7 +42,12 @@ export async function fetchPlaceStats(
 }
 
 export type HomeStatsResult =
-  | { ok: true; rows: PlaceStatsRow[]; memos: Record<string, string> }
+  | {
+      ok: true;
+      rows: PlaceStatsRow[];
+      memos: Record<string, string>;
+      menus: Record<string, CardMenu>;
+    }
   | { ok: false };
 
 /** 오늘(홈) 집계 + 본인 메모(withMemos, 로그인 사용자만). 메모는 카드 배지 표시 전용이고 추천 엔진에 넘기지 않는다 */
@@ -52,12 +61,40 @@ export async function fetchHomeStats(
   if (!supabase) return { ok: false };
   const readMemos =
     withMemos && isEnabled("auth") && isEnabled("userPlaceMemo");
-  const [stats, memos] = await Promise.all([
+  const [stats, memos, menus] = await Promise.all([
     readStats(supabase, parsed.data),
     readMemos ? readOwnMemos(supabase, parsed.data) : Promise.resolve({}),
+    isEnabled("menuReports")
+      ? readCardMenus(supabase, parsed.data)
+      : Promise.resolve({}),
   ]);
   if (!stats.ok) return { ok: false };
-  return { ok: true, rows: stats.rows, memos };
+  return { ok: true, rows: stats.rows, memos, menus };
+}
+
+async function readCardMenus(
+  supabase: ServerSupabase,
+  placeIds: string[],
+): Promise<Record<string, CardMenu>> {
+  try {
+    const { data, error } = await supabase.rpc("place_menus", {
+      p_place_ids: placeIds,
+    });
+    if (error || !data) return {};
+    const out: Record<string, CardMenu> = {};
+    for (const r of data) {
+      if (r.rank !== 1) continue;
+      const m = cardMenu({
+        name: r.menu_name,
+        medianKrw: r.median_krw,
+        count: r.report_count,
+      });
+      if (m) out[r.place_id] = m;
+    }
+    return out;
+  } catch {
+    return {};
+  }
 }
 
 async function readOwnMemos(
