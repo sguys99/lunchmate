@@ -42,17 +42,3 @@ export function matchTab(pathname: string | null | undefined): AppTabId | null {
   );
   return tab?.id ?? null;
 }
-
-/**
- * 탭 첫 화면이면 그 탭 순번(0~3), 아니면 null. 탭 스와이프(T9.14)는 첫 화면에서만 켠다.
- * `/poll/abc`, `/me/settings` 같은 하위 화면은 뒤로 가기와 헷갈리지 않게 null이다. 끝 슬래시, 쿼리, 해시는 무시한다.
- */
-export function rootTabIndex(
-  pathname: string | null | undefined,
-): number | null {
-  if (!pathname) return null;
-  const [bare = ""] = pathname.split(/[?#]/);
-  const path = bare.replace(/\/+$/, "") || "/";
-  const i = APP_TABS.findIndex(({ href }) => href === path);
-  return i === -1 ? null : i;
-}

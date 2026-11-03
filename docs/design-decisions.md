@@ -802,3 +802,12 @@
 - 안건: **모두 기본안.** 그 끼니(점심 15시, 저녁 자정 KST)까지 유효, 서로 다른 2명이면 그 끼니 추천에서 뺌, 1명이면 카드 배지 "오늘 쉰다는 제보" + 웨이팅 감점과 같은 크기의 감점, 폐업 집계(3명)는 따로
 - 다음: 구현 계획과 마이그레이션(place_stats에 이번 끼니 today 제보 수) 승인 뒤 `db:backup` → `db:push`. 구현 뒤 시안 코드(`design-lab/closed`)는 지우고 캡처와 비교 자료는 남김
 - **구현(2026-11-04)**: 마이그레이션 `20261104100000_t9_18_closed_today.sql`(사용자 승인, 백업 2026-11-03_2312 뒤 db:push, RLS t9-closed-today 5건). 엔진 하드 필터 `closedToday`와 W 감점(ALGO_VERSION 2026-11-04.1), 카드 배지 "오늘 쉰다는 제보"(우선순위 기피 다음), 카드 더 보기 맨 위 "문이 닫혀 있어요"(`card-menu.tsx`, 다시 안 갈래요의 자리 채우기 재사용, 되돌리기는 2분 안 제보 삭제). 시안과 다른 점: (1) 결과는 카드 위 한 줄 대신 다시 안 갈래요와 같은 되돌리기 토스트(같은 자리 채우기 흐름이라 한 가지 문법으로 맞춤), (2) 둘째 항목은 따로 만들지 않고 기존 "메뉴 보기"(같은 네이버 플레이스 링크)를 "영업시간과 메뉴 보기"로 넓혀 둘째로 올림. 시안 코드(`design-lab/closed`)는 지움, 캡처와 비교 자료는 남김. 구현 캡처 `docs/design/shots/t9-18-impl/`. /today 200.3 KB
+
+### D-41. T9.14 탭 스와이프 이동 철회
+
+- 날짜: 2026-11-03. D-36(시안 A 따라오는 페이지)으로 구현한 탭 사이 스와이프를 없앤다
+- 문제(사용자 지적): transform 전환, 놓자마자 이동 같은 보정(656a8f3) 뒤에도 미는 감각이 어색하고 자연스럽지 않음
+- 판단: 탭이 4개뿐이라 하단 탭 한 번으로 충분하고 스와이프로 아끼는 시간이 거의 없다. 지도 끌기, 시트 손잡이, 나 안쪽 탭, iOS 가장자리 뒤로 가기와 제스처가 겹친다. 본문 transform 때문에 안쪽 fixed 요소(오늘 행동 줄)를 따로 맞추는 우회가 다른 화면까지 퍼진다. Claude 추천과 같음
+- 삭제: `src/features/swipe/`, `app-shell/swipe-main.tsx`(본문은 다시 일반 `<main>`), `tabs.ts`의 `rootTabIndex`, `copy/shell.ts`의 `swipeRelease`, 화면의 `data-swipe-ignore`, E2E `e2e/tab-swipe.spec.ts`, 시안 코드(`design-lab/swipe`, `features/design-lab/swipe`, `copy/design-lab-swipe.ts`)
+- 남김: 캡처 `docs/design/shots/2026-11-03/swipe-*`, 비교 자료 `docs/design/g9-comparison-swipe.md`, D-36 기록. 같은 커밋(656a8f3)의 문서 튕김 복원(globals.css, T9.10)은 스와이프와 별개라 그대로 둔다
+

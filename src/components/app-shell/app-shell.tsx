@@ -16,7 +16,6 @@
 import type { ReactNode } from "react";
 import { shellCopy } from "@/copy/shell";
 import { cn } from "@/lib/utils";
-import { SwipeMain } from "./swipe-main";
 
 /**
  * 좌 리스트 + 우 지도 2단 틀. AppShell과 디자인 랩 화면이 함께 쓴다.
@@ -84,7 +83,7 @@ export function MapPane({
 
 /**
  * 앱 화면 전체 틀. (app) 레이아웃이 한 번 마운트한다.
- * children은 탭 화면(페이지)이고 <main>(SwipeMain: 탭 스와이프, T9.14)으로 감싼다. 페이지 안 여백과 폭은 PageColumn이 맡는다.
+ * children은 탭 화면(페이지)이고 <main>으로 감싼다. 페이지 안 여백과 폭은 PageColumn이 맡는다.
  */
 export function AppShell({
   children,
@@ -101,7 +100,7 @@ export function AppShell({
       className="@container/screen flex min-h-lvh flex-1 flex-col bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)] text-foreground"
     >
       <ShellSplit
-        list={<SwipeMain>{children}</SwipeMain>}
+        list={<main className="flex min-w-0 flex-1 flex-col">{children}</main>}
         map={map}
         tabBar={tabBar}
       />

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_TABS, matchTab, rootTabIndex } from "./tabs";
+import { APP_TABS, matchTab } from "./tabs";
 
 describe("APP_TABS", () => {
   it("오늘, 지도, 투표, 나 4개를 이 순서로 둔다 (APP-03)", () => {
@@ -47,17 +47,3 @@ describe("matchTab", () => {
   });
 });
 
-describe("rootTabIndex (탭 스와이프 T9.14)", () => {
-  it("탭 첫 화면만 순번, 끝 슬래시와 쿼리는 무시", () => {
-    expect(rootTabIndex("/today")).toBe(0);
-    expect(rootTabIndex("/map/")).toBe(1);
-    expect(rootTabIndex("/poll?x=1")).toBe(2);
-    expect(rootTabIndex("/me#a")).toBe(3);
-  });
-  it("하위 화면과 탭 밖 경로는 null", () => {
-    expect(rootTabIndex("/poll/AbCdEf1234")).toBeNull();
-    expect(rootTabIndex("/me/settings")).toBeNull();
-    expect(rootTabIndex("/")).toBeNull();
-    expect(rootTabIndex(null)).toBeNull();
-  });
-});

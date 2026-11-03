@@ -6,6 +6,4 @@ export const shellCopy = {
   mapPane: "지도 영역",
   /** 데스크톱 오른쪽 칸 랜드마크(aside) 이름 */
   mapRegion: "지도",
-  /** 탭 스와이프(T9.14, D-36): 기준선을 넘겨 놓으면 옆 탭으로 옮긴다는 안내. 옆 탭 이름 아래 한 줄 */
-  swipeRelease: "놓으면 옮깁니다",
 } as const;

@@ -156,8 +156,6 @@ function Tabs({
       <div
         role="tablist"
         aria-label={copy.tabs.label}
-        // 안쪽 탭 줄은 탭 스와이프(T9.14)를 받지 않는다(안쪽 탭과 헷갈리지 않게)
-        data-swipe-ignore
         className="relative grid grid-cols-3 border-b border-border"
       >
         {ME_TABS.map((t, i) => (
