@@ -6,8 +6,17 @@
 // - 실패하면 ok: false. 화면은 중립값으로 추천을 계속한다(카드를 막지 않는다).
 // - 돌려주는 열은 엔진이 쓰는 것만. 가격 값 목록과 태그는 상세(features/place)가 따로 읽는다.
 // 상세 화면용 집계 읽기가 생기면 그 모듈과 합친다(오케스트레이터 정리 대상).
+//
+// 홈 메모 배지 (T10.15, D-33 안건 1): fetchHomeStats는 같은 요청 안에서 본인 메모(place_memos, place_id in 후보)를
+// place_stats와 나란히 읽는다(브라우저 왕복은 그대로 1번). place_stats 함수는 바꾸지 않는다(익명 집계에 개인 메모를 섞지 않음).
+// 메모는 오늘(홈)만 읽는다. 지도, 회식, 투표는 fetchPlaceStats(메모 없음)를 쓴다.
+// 메모 읽기가 실패하면 메모 없이 집계만 돌려준다(배지는 덤이라 카드를 막지 않는다). RLS가 본인 행만 보이므로 user id를 따로 묻지 않는다.
 import * as z from "zod";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { isEnabled } from "@/lib/flags";
+import {
+  createServerSupabase,
+  type ServerSupabase,
+} from "@/lib/supabase/server";
 import type { PlaceStatsRow } from "./place-stats";
 
 const idsSchema = z
@@ -25,8 +34,54 @@ export async function fetchPlaceStats(
   if (!parsed.success) return { ok: false };
   const supabase = await createServerSupabase();
   if (!supabase) return { ok: false };
+  return readStats(supabase, parsed.data);
+}
+
+export type HomeStatsResult =
+  | { ok: true; rows: PlaceStatsRow[]; memos: Record<string, string> }
+  | { ok: false };
+
+/** 오늘(홈) 집계 + 본인 메모(withMemos, 로그인 사용자만). 메모는 카드 배지 표시 전용이고 추천 엔진에 넘기지 않는다 */
+export async function fetchHomeStats(
+  placeIds: string[],
+  withMemos: boolean,
+): Promise<HomeStatsResult> {
+  const parsed = idsSchema.safeParse(placeIds);
+  if (!parsed.success) return { ok: false };
+  const supabase = await createServerSupabase();
+  if (!supabase) return { ok: false };
+  const readMemos =
+    withMemos && isEnabled("auth") && isEnabled("userPlaceMemo");
+  const [stats, memos] = await Promise.all([
+    readStats(supabase, parsed.data),
+    readMemos ? readOwnMemos(supabase, parsed.data) : Promise.resolve({}),
+  ]);
+  if (!stats.ok) return { ok: false };
+  return { ok: true, rows: stats.rows, memos };
+}
+
+async function readOwnMemos(
+  supabase: ServerSupabase,
+  placeIds: string[],
+): Promise<Record<string, string>> {
+  try {
+    const { data, error } = await supabase
+      .from("place_memos")
+      .select("place_id, body")
+      .in("place_id", placeIds);
+    if (error || !data) return {};
+    return Object.fromEntries(data.map((r) => [r.place_id, r.body]));
+  } catch {
+    return {};
+  }
+}
+
+async function readStats(
+  supabase: ServerSupabase,
+  placeIds: string[],
+): Promise<PlaceStatsResult> {
   const { data, error } = await supabase.rpc("place_stats", {
-    p_place_ids: parsed.data,
+    p_place_ids: placeIds,
   });
   if (error || !data) return { ok: false };
   return {

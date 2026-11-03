@@ -61,6 +61,7 @@ async function Records({
       nowIso={new Date().toISOString()}
       initialTab={parseMeTab(params.tab)}
       betaFeedback={isEnabled("betaFeedback")}
+      placeMemo={isEnabled("userPlaceMemo")}
     />
   );
 }

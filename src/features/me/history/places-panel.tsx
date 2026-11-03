@@ -4,6 +4,8 @@
 // - 즐겨찾기 해제는 별 토글(aria-pressed). 끈 줄은 흐리게 남아 다시 누르면 되돌리고, 화면을 떠나면 빠진다.
 // - 다시 안 갈 곳은 "해제" → 그 자리 "다시 추천에 넣었습니다." + "되돌리기".
 // 쓰기는 place/actions.ts(setFavoriteAction, setBlockedAction). 요청에는 place_id, place_url만 간다.
+// - 식당 메모(T10.15, D-33 시안 B, placeMemo 플래그): 즐겨찾기 줄 둘째 줄이 이름표 알약(메모 글, 없으면 점선 "메모 남기기").
+//   누르면 상세와 같은 작은 시트. 이름을 불러오지 못한 줄은 메모가 이름 자리로 가고("내 메모" 앞머리), 둘째 줄은 카카오맵 링크.
 import { useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -24,12 +26,18 @@ import { placeLinkFor } from "@/features/place/resolve-place-names";
 import { invalidateAfterWrite } from "@/lib/query/db-keys";
 import { kstDateKey } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { useMemoSheet } from "@/features/memo/memo-sheet";
+import { NameTag, NameTagSkeleton, SavedLine } from "@/features/memo/name-tag";
+import { useMyMemos } from "@/features/memo/use-my-memos";
+import { memoCopy } from "@/copy/memo";
+import { StickyNote } from "lucide-react";
 import { useDetailEntry, type OfficeAnchor } from "./detail-entry";
 import { useMeMap, type MeMapPin } from "./me-map-store";
 import { mdLabel, mergeKept, savedFallbackName } from "./model";
 import {
   MoreButton,
   NamesFailNote,
+  KakaoLink,
   OfflineBanner,
   PlaceGlyph,
   PlaceName,
@@ -59,16 +67,51 @@ function toggleKept(
 
 const dateOf = (iso: string) => mdLabel(kstDateKey(new Date(iso)));
 
+/** 즐겨찾기 줄의 메모 자리(T10.15). null이면 메모 기능 꺼짐 */
+type RowMemo = {
+  /** undefined: 받는 중 */
+  memo: string | null | undefined;
+  open: (el: HTMLElement) => void;
+  preload: () => void;
+} | null;
+
 export function PlacesPanel({
   office,
   offline,
+  placeMemo = false,
 }: {
   office: OfficeAnchor | null;
   offline: boolean;
+  /** 식당 메모 이름표(T10.15, 서버 판정) */
+  placeMemo?: boolean;
 }) {
   const client = useQueryClient();
   const q = useMyPlaces();
   const data = q.data?.signedIn ? q.data : null;
+  const memosQ = useMyMemos(placeMemo && !!data);
+  const memos = memosQ.data?.signedIn ? memosQ.data.memos : null;
+  const memoEditor = useMemoSheet();
+  const rowMemo = (p: MyPlace): RowMemo =>
+    placeMemo
+      ? {
+          // 받는 중이면 undefined(알약 자리 스켈레톤), 실패하면 메모 없음으로
+          memo: memos
+            ? (memos[p.placeId] ?? null)
+            : memosQ.isPending
+              ? undefined
+              : null,
+          open: (el) =>
+            memoEditor.open(
+              {
+                placeId: p.placeId,
+                placeUrl: placeLinkFor(p),
+                memo: memos?.[p.placeId] ?? null,
+              },
+              el,
+            ),
+          preload: memoEditor.preload,
+        }
+      : null;
 
   // 화면에서 끈 즐겨찾기, 해제한 다시 안 갈 곳(떠날 때까지 그 자리에 남긴다)
   const [favOff, setFavOff] = useState<Record<string, MyPlace>>({});
@@ -208,6 +251,7 @@ export function PlacesPanel({
                   names={names}
                   on={!favOff[p.placeId]}
                   offline={offline}
+                  memo={rowMemo(p)}
                   onToggle={guard(() => void toggleFavorite(p))}
                 />
               ))}
@@ -220,6 +264,8 @@ export function PlacesPanel({
             ) : null}
           </>
         )}
+        <SavedLine text={memoEditor.result} className="mt-2" />
+        {memoEditor.sheet}
       </section>
 
       <section aria-labelledby="me-block" className="mt-12 flex flex-col">
@@ -272,6 +318,7 @@ function FavoriteRow({
   names,
   on,
   offline,
+  memo = null,
   onToggle,
 }: {
   item: MyPlace;
@@ -279,6 +326,7 @@ function FavoriteRow({
   names: RecordNames;
   on: boolean;
   offline: boolean;
+  memo?: RowMemo;
   onToggle: () => void;
 }) {
   const entry = useDetailEntry();
@@ -288,7 +336,10 @@ function FavoriteRow({
     placeLinkFor(item),
   );
   const fallback = savedFallbackName(index);
-  const title = place.name ?? fallback;
+  const memoText = memo?.memo ?? null;
+  // 이름을 불러오지 못한 줄은 내 메모가 이름 자리로(D-32 (2) 이름표)
+  const memoAsName = !place.name && !names.pending && memoText !== null;
+  const title = place.name ?? (memoAsName ? memoText : fallback);
   const [message, setMessage] = useState("");
   return (
     <li className="flex min-h-18 items-center gap-4 border-b border-border py-3">
@@ -301,17 +352,55 @@ function FavoriteRow({
         )}
       />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <PlaceName
-          place={place}
-          fallback={fallback}
-          pending={names.pending}
-          onOpen={entry.openPlace}
-          onPreload={entry.preload}
-          className={cn(!on && "text-muted-foreground")}
-        />
-        <span className="type-caption text-muted-foreground">
-          {copy.places.savedOn(dateOf(item.createdAt))}
-        </span>
+        {memoAsName ? (
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span
+              className={cn(
+                "flex min-w-0 items-center gap-1.5",
+                !on && "text-muted-foreground",
+              )}
+            >
+              <StickyNote
+                aria-hidden
+                className="size-3.5 shrink-0 text-muted-foreground"
+                strokeWidth={1.5}
+              />
+              <span className="sr-only">{memoCopy.label} </span>
+              <span className="truncate type-label">{memoText}</span>
+            </span>
+            <KakaoLink href={place.link} label={memoText} className="min-h-6" />
+          </span>
+        ) : (
+          <PlaceName
+            place={place}
+            fallback={fallback}
+            pending={names.pending}
+            onOpen={entry.openPlace}
+            onPreload={entry.preload}
+            className={cn(!on && "text-muted-foreground")}
+          />
+        )}
+        {memo && place.name ? (
+          // 이름표 알약(D-33 B): 메모 글 또는 점선 "메모 남기기"
+          <span className="pt-1">
+            {memo.memo === undefined ? (
+              <NameTagSkeleton size="sm" />
+            ) : (
+              <NameTag
+                size="sm"
+                memo={memo.memo}
+                name={place.name}
+                disabled={offline}
+                onOpen={memo.open}
+                onPreload={memo.preload}
+              />
+            )}
+          </span>
+        ) : memoAsName ? null : (
+          <span className="type-caption text-muted-foreground">
+            {copy.places.savedOn(dateOf(item.createdAt))}
+          </span>
+        )}
       </div>
       <button
         type="button"

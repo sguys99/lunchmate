@@ -64,6 +64,7 @@ describe("deleteAccount (AUTH-05)", () => {
         "poll_candidates",
         "private.daily_usage",
         "beta_feedback",
+        "place_memos",
       ]),
     );
   });

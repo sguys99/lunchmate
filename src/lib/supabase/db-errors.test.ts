@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapPgError } from "./db-errors";
+import { mapPgError, mapPlaceMemoError } from "./db-errors";
 
 const err = (message: string, code = "23514") => ({ code, message });
 
@@ -71,5 +71,38 @@ describe("mapPgError", () => {
       ok: false,
       error: "suspended",
     });
+  });
+});
+
+describe("mapPlaceMemoError (T10.15)", () => {
+  it("오류가 없으면 null", () => {
+    expect(mapPlaceMemoError(null)).toBeNull();
+  });
+
+  it("하루 30회와 300곳을 나눈다", () => {
+    expect(
+      mapPlaceMemoError(err("place_memos_daily_limit_exceeded", "P0001")),
+    ).toBe("daily");
+    expect(mapPlaceMemoError(err("place_memos_limit_exceeded"))).toBe("limit");
+  });
+
+  it("금칙어, 정지, 형식 위반, 권한 거절", () => {
+    expect(mapPlaceMemoError(err("banned_content"))).toBe("banned");
+    expect(mapPlaceMemoError(err("account_suspended", "42501"))).toBe(
+      "suspended",
+    );
+    expect(
+      mapPlaceMemoError(
+        err('violates check constraint "place_memos_body_length"'),
+      ),
+    ).toBe("invalid");
+    expect(mapPlaceMemoError(err("permission denied", "42501"))).toBe(
+      "unauthenticated",
+    );
+  });
+
+  it("그 밖은 저장 실패", () => {
+    expect(mapPlaceMemoError({ message: "fetch failed" })).toBe("save");
+    expect(mapPlaceMemoError(err("duplicate key", "23505"))).toBe("save");
   });
 });

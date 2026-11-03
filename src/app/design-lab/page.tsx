@@ -14,7 +14,6 @@ import { appIconLabCopy } from "@/copy/design-lab-app-icon";
 import { adminLabCopy } from "@/copy/design-lab-admin";
 import { betaLabCopy } from "@/copy/design-lab-beta";
 import { betaFeedbackLabCopy } from "@/copy/design-lab-beta-feedback";
-import { memoLabCopy } from "@/copy/design-lab-memo";
 import { getScreenTokens } from "@/features/design-lab/system/tokens.server";
 import {
   DESIGN_IDS,
@@ -95,10 +94,13 @@ export default function DesignLabPage() {
         [
           ["beta", betaLabCopy],
           ["beta-feedback", betaFeedbackLabCopy],
-          ["memo", memoLabCopy],
         ] as const
       ).map(([route, labCopy]) => (
-        <Section key={route} title={labCopy.index.title} body={labCopy.index.body}>
+        <Section
+          key={route}
+          title={labCopy.index.title}
+          body={labCopy.index.body}
+        >
           <div className="flex flex-wrap gap-4">
             {Object.entries(labCopy.names).map(([id, name]) => (
               <Link

@@ -38,6 +38,7 @@ import {
   NumberValue,
 } from "./card-bits";
 import type { TodayCard } from "./card-model";
+import { showMemoBadge } from "@/features/memo/badge-slot";
 import { heroNameSize } from "./hero-name";
 import type { JustPick } from "./just-pick";
 
@@ -70,6 +71,7 @@ const textButton = cn(
 
 export function TodayHero({
   card,
+  memo,
   spot,
   order,
   why,
@@ -79,6 +81,8 @@ export function TodayHero({
   more,
 }: {
   card: TodayCard;
+  /** 내 메모(T10.15). 카드 배지가 2개 미만일 때만 배지 줄 끝에 한 자리를 쓴다 */
+  memo?: string;
   spot?: Spot;
   /** "3곳 중 1번째" */
   order: string;
@@ -199,9 +203,9 @@ export function TodayHero({
         )}
       </div>
 
-      {card.badges.length > 0 ? (
+      {card.badges.length > 0 || showMemoBadge(card.badges.length, memo) ? (
         <div data-reveal style={reveal(2)} className="mt-1">
-          <CardBadges card={card} />
+          <CardBadges card={card} memo={memo} />
         </div>
       ) : null}
 

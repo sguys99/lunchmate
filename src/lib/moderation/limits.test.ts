@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BETA_FEEDBACK_DAILY, betaFeedbackCopy } from "@/copy/beta";
 import { DAILY_LIMITS, moderationCopy } from "@/copy/moderation";
+import { memoCopy } from "@/copy/memo";
 import { pollCreateCopy } from "@/copy/poll-create";
+import { MEMO_DAILY, MEMO_PLACES_MAX } from "@/features/memo/model";
 
 /** PRD 정본 수치 (MOD-05, DEAL-04, T5.14 방문 20). 베타 의견 10은 D-23 안건 12(PRD 밖 베타 운영 값) */
 const PRD = { reviews: 20, reports: 30, deals: 10, polls: 10, visits: 20 };
@@ -48,6 +50,16 @@ describe("하루 한도: PRD = DB = 문구", () => {
   it("베타 의견 하루 10번 문구 (T9.4)", () => {
     expect(BETA_FEEDBACK_DAILY).toBe(BETA_FEEDBACK);
     expect(betaFeedbackCopy.states.limit).toContain(`${BETA_FEEDBACK}번`);
+  });
+
+  it("식당 메모 하루 30번, 300곳 문구 (T10.15)", () => {
+    expect(MEMO_DAILY).toBe(PLACE_MEMOS);
+    expect(memoCopy.errors.daily).toContain(`${PLACE_MEMOS}번`);
+    expect(allSql).toMatch(
+      /if existing >= 300 then\s+raise exception 'place_memos_limit_exceeded'/,
+    );
+    expect(MEMO_PLACES_MAX).toBe(300);
+    expect(memoCopy.errors.limit).toContain("300곳");
   });
 
   it("방문 기록 20 (visits 트리거)", () => {

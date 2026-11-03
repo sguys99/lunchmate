@@ -41,6 +41,11 @@ import {
   type ReviewSheetConfig,
 } from "@/features/feedback/review-sheet";
 import { useMyReviews } from "@/features/feedback/use-my-records";
+import {
+  DetailMemoTag,
+  MemoNameHeader,
+  useDetailMemo,
+} from "@/features/memo/detail-memo";
 import { reasonWithoutWalk } from "@/features/rec/reason";
 import { placeKindToDb } from "@/features/report/flow";
 import { nowSummaryText } from "@/features/report/flow";
@@ -114,6 +119,8 @@ export type PlaceDetailProps = {
   origin: DirectionsOrigin | null;
   /** 이름 제목 수준. 시트 안이면 h2 */
   headingLevel?: "h1" | "h2";
+  /** 식당 메모 이름표(T10.15, flags.userPlaceMemo). 서버가 판정해 넘긴다. 없거나 false면 메모를 보이지 않는다 */
+  placeMemo?: boolean;
   /** 투표에 추가 (pollEntry 플래그가 켜지고 이 값이 있을 때만 메뉴에 보인다, 7단계) */
   onAddToPoll?: () => void;
   /** 제보 3종 (PLACE-05, 6단계). 없으면 "곧 열립니다" 안내 */
@@ -168,6 +175,7 @@ export function PlaceDetailBody({
   meal,
   budgetKRW,
   headingLevel = "h2",
+  placeMemo = false,
   onReportWaiting,
   onMoreReviews,
   onReportReview,
@@ -175,6 +183,14 @@ export function PlaceDetailBody({
 }: PlaceDetailProps) {
   const online = useOnlineStatus();
   const live = givenStats === undefined;
+  // 식당 메모(T10.15): 실제 상세(목업 집계가 아닌 것)에서만, 로그인 사용자에게만
+  const memo = useDetailMemo(place.id, placeMemo && live);
+  const memoEditor = {
+    placeId: place.id,
+    placeUrl: place.placeUrl,
+    name: place.name,
+    online,
+  };
   const detail = usePlaceDetailStats(place.id, { enabled: live });
   const stats = givenStats ?? detail.stats;
   const pending = live && detail.status === "pending";
@@ -232,6 +248,13 @@ export function PlaceDetailBody({
             </Heading>
           </div>
         </header>
+      ) : memo.show && !memo.loading && memo.memo ? (
+        // 이름을 모를 때 내 메모가 제목 자리로(D-33 B 이름표 상자)
+        <MemoNameHeader
+          {...memoEditor}
+          memo={memo.memo}
+          heading={headingLevel}
+        />
       ) : (
         <header className="flex flex-col gap-2">
           <span className={cn("type-caption", CATEGORY_INK[place.category])}>
@@ -245,6 +268,10 @@ export function PlaceDetailBody({
           </p>
         </header>
       )}
+      {/* 이름표 알약(D-33 B): 이름 바로 아래. 이름 대체 상자를 그렸으면 그 안에서 고친다 */}
+      {named || !(memo.show && !memo.loading && memo.memo) ? (
+        <DetailMemoTag {...memoEditor} state={memo} className="mt-3" />
+      ) : null}
 
       {reason ? (
         <p className="mt-4 type-body-sm break-keep text-muted-foreground">

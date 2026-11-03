@@ -46,7 +46,7 @@ export const FLAGS = {
   },
   auth: {
     description:
-      "로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 3종 /terms, /privacy, /location(T10.3 최종본), 계정 /me/account, proxy의 경로 보호와 약관 확인. 2026-11-02 T9.2에서 프로덕션에도 공개(D-22, 주소는 lunchmate-kr.vercel.app 유지). 끄면 나 탭과 로그인 유도가 \"곧 열립니다\" 안내로 돌아간다.",
+      '로그인 묶음: /login(인앱 안내 포함), /auth/sign-in, /auth/callback, /auth/sign-out, /auth/delete-account, 약관 동의 /welcome/terms, 온보딩 /welcome/onboarding(T4.16), 약관 3종 /terms, /privacy, /location(T10.3 최종본), 계정 /me/account, proxy의 경로 보호와 약관 확인. 2026-11-02 T9.2에서 프로덕션에도 공개(D-22, 주소는 lunchmate-kr.vercel.app 유지). 끄면 나 탭과 로그인 유도가 "곧 열립니다" 안내로 돌아간다.',
     default: false,
     source: { type: "const", value: true },
     owner:
@@ -75,10 +75,10 @@ export const FLAGS = {
   },
   userPlaceMemo: {
     description:
-      "사용자가 직접 쓰는 장소 메모 저장. 카카오 답변 전까지 숨김 (T0.16). 메모 컬럼은 T5.14에서 만들지 않았고 T10.2 답변 뒤 새 마이그레이션으로 추가한다.",
+      '나만 보는 식당 메모(T10.15, D-32, D-33 시안 B): 상세 이름표와 작은 시트, 홈 카드 메모 배지(배지 2개 미만일 때), 나 탭 즐겨찾기 이름표, 카카오 장애 때 이름 대체와 홈 "즐겨찾기에서 고르기". 테이블 place_memos(20261103100000). 끄면 화면에서 메모를 모두 숨기고 setPlaceMemoAction이 disabled를 돌려준다(데이터는 지우지 않음, 지우려면 사용자 승인 뒤 새 마이그레이션). 서버에서 판정해 props로 내려준다.',
     default: false,
-    source: { type: "const", value: false },
-    owner: "T10.2",
+    source: { type: "const", value: true },
+    owner: "T10.15 (해제: 2026-11-03 구현 완료)",
   },
 } as const satisfies Record<string, FlagDefinition>;
 

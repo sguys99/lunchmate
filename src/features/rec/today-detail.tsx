@@ -29,6 +29,8 @@ export type TodayDetailProps = {
   origin: DirectionsOrigin | null;
   /** 투표 진입점 플래그(서버 판정, T7.35). 꺼지면 "투표에 추가"를 두지 않는다 */
   pollEntry?: boolean;
+  /** 식당 메모 이름표 플래그(서버 판정, T10.15) */
+  placeMemo?: boolean;
 };
 
 export function detailContent(
@@ -53,6 +55,7 @@ export function detailContent(
     source: "rec",
     origin: p.origin,
     headingLevel: "h2",
+    placeMemo: p.placeMemo ?? false,
     // 상세에서 길찾기를 눌러도 어제 피드백 띠를 접는다(T6.8, D-11 안건 2)
     onDirectionsLaunched: () =>
       useTodaySession.getState().patch({ directedOn: kstDateKey(new Date()) }),
@@ -88,10 +91,11 @@ export default function TodayDetail({
   meal,
   budgetKRW,
   origin,
+  placeMemo,
 }: TodayDetailProps) {
   const content = useMemo(
-    () => detailContent({ card, place, meal, budgetKRW, origin }),
-    [card, place, meal, budgetKRW, origin],
+    () => detailContent({ card, place, meal, budgetKRW, origin, placeMemo }),
+    [card, place, meal, budgetKRW, origin, placeMemo],
   );
   return (
     <PlaceDetailSheet

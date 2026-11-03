@@ -155,10 +155,13 @@ function baseName(s: MapScreenState): string {
   return s.base.kind === "office" ? s.base.office.name : copy.base.here;
 }
 
+/** 서버가 판정한 상세 플래그(pollEntry T7.35, placeMemo T10.15) */
+type DetailFlags = { pollEntry: boolean; placeMemo: boolean };
+
 function detailProps(
   s: MapScreenState,
   place: MapPlace,
-  pollEntry: boolean,
+  { pollEntry, placeMemo }: DetailFlags,
 ): PlaceDetailProps {
   const b = s.base;
   return {
@@ -182,6 +185,8 @@ function detailProps(
         : { kind: "current", name: copy.base.here, position: b.center }
       : null,
     headingLevel: "h2",
+    // 식당 메모 이름표(T10.15). 서버가 판정한 userPlaceMemo
+    placeMemo,
     // 투표에 추가(T7.12, D-15 안건 9). 서버가 판정한 pollEntry가 꺼지면 넘기지 않아 메뉴에 없다
     onAddToPoll: !pollEntry
       ? undefined
@@ -206,13 +211,17 @@ export function MapScreen({
   data,
   providerKind,
   pollEntry = false,
+  placeMemo = false,
 }: {
   data: MapData;
   providerKind: MapProviderKind;
   /** 투표 진입점 플래그(서버 판정, T7.35) */
   pollEntry?: boolean;
+  /** 식당 메모 플래그(서버 판정, T10.15) */
+  placeMemo?: boolean;
 }) {
   const s = useMapScreen(data);
+  const flags: DetailFlags = { pollEntry, placeMemo };
   const router = useRouter();
   const login = useLoginPrompt();
   // 로그인이 닫힌 환경(flags.auth 꺼짐)에서는 회사 위치 저장 버튼을 두지 않는다(gate.tsx)
@@ -304,7 +313,7 @@ export function MapScreen({
   /* ---------- 시트 머리와 본문 ---------- */
 
   const header = <SheetHeader s={s} onToggleFilter={onToggleFilter} />;
-  const body = <SheetBody s={s} detailRef={detailRef} pollEntry={pollEntry} />;
+  const body = <SheetBody s={s} detailRef={detailRef} flags={flags} />;
 
   /* ---------- 지도 실패: 목록 보기 (T5.32) ---------- */
 
@@ -317,7 +326,7 @@ export function MapScreen({
             <div ref={detailRef} className="flex flex-col gap-2">
               <BackButton onClick={() => s.select(null)} />
               <MapPlaceDetail
-                {...detailProps(s, s.selected, pollEntry)}
+                {...detailProps(s, s.selected, flags)}
                 footerClassName="bottom-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] bg-background"
               />
             </div>
@@ -407,9 +416,7 @@ export function MapScreen({
           lowLine={<LowLine s={s} />}
           footer={
             s.selected ? (
-              <MapPlaceDetailActions
-                {...detailProps(s, s.selected, pollEntry)}
-              />
+              <MapPlaceDetailActions {...detailProps(s, s.selected, flags)} />
             ) : null
           }
           bodyClassName="px-(--lm-layout-gutter) desktop:px-10"
@@ -553,11 +560,11 @@ function LowLine({ s }: { s: MapScreenState }) {
 function SheetBody({
   s,
   detailRef,
-  pollEntry,
+  flags,
 }: {
   s: MapScreenState;
   detailRef: React.RefObject<HTMLDivElement | null>;
-  pollEntry: boolean;
+  flags: DetailFlags;
 }) {
   if (s.loadingPlaces)
     return (
@@ -568,7 +575,7 @@ function SheetBody({
   if (s.selected) {
     return (
       <div ref={detailRef} key={s.selected.id} className="lm-map-rise">
-        <MapPlaceDetailBody {...detailProps(s, s.selected, pollEntry)} />
+        <MapPlaceDetailBody {...detailProps(s, s.selected, flags)} />
       </div>
     );
   }

@@ -47,11 +47,14 @@ export type OfficeAnchor = { readonly name: string; readonly position: LatLng };
 export function DetailEntryProvider({
   office,
   budget,
+  placeMemo = false,
   children,
 }: {
   /** 기본 사무실(이름과 사용자가 놓은 핀). 도보 분과 길찾기 출발지 */
   office: OfficeAnchor | null;
   budget: { lunch: number; dinner: number };
+  /** 상세 이름표(T10.15, userPlaceMemo 서버 판정) */
+  placeMemo?: boolean;
   children: ReactNode;
 }) {
   const detail = usePlaceDetailSheet();
@@ -88,9 +91,10 @@ export function DetailEntryProvider({
         source: "detail",
         origin: office ? { ...office, kind: "office" } : null,
         headingLevel: "h2",
+        placeMemo,
       });
     },
-    [office, budget.lunch, budget.dinner, open, setActive],
+    [office, budget.lunch, budget.dinner, open, setActive, placeMemo],
   );
 
   const review = useReviewSheet();

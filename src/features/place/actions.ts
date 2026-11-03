@@ -38,7 +38,21 @@ function outcomeOf(
 }
 
 function depsFor(supabase: ServerSupabase): PlaceDeps & BlockDeps {
+  // 식당 메모(T10.15): 플래그가 켜졌을 때만 상세 상태와 함께 읽는다(본인 행만, RLS). 실패하면 메모 없음으로
+  const readMemo: PlaceDeps["readMemo"] = isEnabled("userPlaceMemo")
+    ? async (userId, placeId) => {
+        const { data, error } = await supabase
+          .from("place_memos")
+          .select("body")
+          .eq("user_id", userId)
+          .eq("place_id", placeId)
+          .maybeSingle();
+        if (error) return null;
+        return data?.body ?? null;
+      }
+    : undefined;
   return {
+    readMemo,
     async currentUserId() {
       // getUser는 Auth 서버에 토큰을 검증받는다(쿠키 값만 믿지 않는다)
       const { data } = await supabase.auth.getUser();

@@ -6,6 +6,8 @@
 // - 20261101180000(T8.5): account_suspended(정지된 계정의 쓰기, 공통 트리거 block_suspended_writer)
 // - 20261102200000(T10.3b): banned_content(금칙어 DB 안전망, 23514). 서버 액션 zod가 먼저 거르므로 보통 오지 않는다.
 //   목록이 어긋나 DB만 거절해도 zod와 같은 "banned" 문구가 나가게 check 위반(invalid)보다 먼저 본다.
+// - 20261103100000(T10.15): place_memos_limit_exceeded(1인 300곳), place_memos_daily_limit_exceeded(하루 30회).
+//   메모는 mapPlaceMemoError로 따로 바꾼다(문구는 src/copy/memo.ts errors).
 // 원문 message와 hint는 화면에 그대로 보내지 않는다. 문구는 src/copy/moderation.ts writeErrorCopy.
 
 /** 일일 한도 칸 (MOD-05, DEAL-04, T5.14 방문 20) */
@@ -89,4 +91,38 @@ export function mapPgError(error: PgErrorLike): WriteFailure | null {
   )
     return { ok: false, error: "invalid" };
   return { ok: false, error: "save" };
+}
+
+/** 식당 메모 저장 실패 (T10.15). 문구는 src/copy/memo.ts errors의 같은 키 */
+export type PlaceMemoErrorCode =
+  | "invalid"
+  | "unauthenticated"
+  | "banned"
+  /** 1인 300곳 */
+  | "limit"
+  /** 저장과 고침 하루 30회 */
+  | "daily"
+  | "suspended"
+  | "save";
+
+/** place_memos 쓰기 오류 → 메모 실패 이름. 오류가 없으면 null */
+export function mapPlaceMemoError(
+  error: PgErrorLike,
+): PlaceMemoErrorCode | null {
+  if (!error) return null;
+  const msg = error.message ?? "";
+  if (/\bplace_memos_daily_limit_exceeded\b/.test(msg)) return "daily";
+  if (/\bplace_memos_limit_exceeded\b/.test(msg)) return "limit";
+  const mapped = mapPgError(error);
+  switch (mapped?.error) {
+    case "suspended":
+    case "banned":
+    case "invalid":
+    case "unauthenticated":
+      return mapped.error;
+    default:
+      // 42501(RLS, 열 권한 거절)은 세션이 끝났거나 남의 id: 다시 로그인하게 한다
+      if (error.code === "42501") return "unauthenticated";
+      return "save";
+  }
 }

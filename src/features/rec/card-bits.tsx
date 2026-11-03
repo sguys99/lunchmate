@@ -3,6 +3,7 @@
 // 숫자는 numeric-md 18px(이름과 이유가 먼저, 숫자는 확인용, g3-card-rules.md 1절), tabular-nums.
 // 숫자 칸 구분은 문자 대신 1px 세로선(CLAUDE.md 9장). 추정 가격은 가격 칸 라벨 옆 EstimateMark.
 import { EstimateMark } from "@/components/badges/estimate-mark";
+import { showMemoBadge } from "@/features/memo/badge-slot";
 import { SkeletonLine } from "@/components/states/loading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { homeCopy } from "@/copy/home";
@@ -107,24 +108,30 @@ export function NumberGrid({
 }
 
 /** 배지 모듈(아이콘, 문구)은 배지가 있는 카드에서만 받는다. 콜드 스타트 카드에는 배지가 없다(홈 첫 로드 예산) */
-const PlaceBadges = lazy(() =>
-  import("@/components/badges/place-badges").then((m) => ({
-    default: m.PlaceBadges,
-  })),
-);
+const CardBadgeRow = lazy(() => import("./card-badge-row"));
 
-/** 카드 배지 한 줄. 공용 PlaceBadges(calm, 최대 2개, 툴팁 없음). 받는 동안은 배지 높이(24)만 지킨다 */
+/**
+ * 카드 배지 한 줄. 공용 PlaceBadges(calm, 최대 2개, 툴팁 없음). 받는 동안은 배지 높이(24)만 지킨다.
+ * memo(T10.15, 큰 카드만): 카드 배지가 2개 미만일 때만 줄 끝에 내 메모 배지(D-33 안건 1, 한 줄 말줄임)
+ */
 export function CardBadges({
   card,
+  memo,
   className,
 }: {
   card: TodayCard;
+  memo?: string;
   className?: string;
 }) {
-  if (card.badges.length === 0) return null;
+  const withMemo = showMemoBadge(card.badges.length, memo);
+  if (card.badges.length === 0 && !withMemo) return null;
   return (
     <Suspense fallback={<span aria-hidden className={cn("h-6", className)} />}>
-      <PlaceBadges badges={card.badges} className={className} />
+      <CardBadgeRow
+        badges={card.badges}
+        memo={withMemo ? memo : undefined}
+        className={className}
+      />
     </Suspense>
   );
 }

@@ -78,7 +78,7 @@ import {
 } from "./today-cards";
 import { noticeText, TodayHeader } from "./today-header";
 import { ShortNote } from "./today-states-light";
-import { placeStatsQuery, preloadPlaceStats } from "./stats-query";
+import { homeStatsQuery, preloadPlaceStats } from "./stats-query";
 import { RELAXED_BUDGET_KRW, useTodaySession } from "./today-store";
 import { preloadDirections, useCardDirections } from "./use-card-directions";
 import { useReducedMotion } from "./use-reduced-motion";
@@ -137,6 +137,8 @@ export type TodayScreenProps = {
   showEntries: boolean;
   /** 투표에 추가(7단계, flags.pollEntry). 없으면 더 보기에 보이지 않는다 */
   onAddToPoll?: (card: TodayCard) => void;
+  /** 식당 메모(T10.15, flags.userPlaceMemo): 큰 카드 메모 배지, 상세 이름표, 카카오 오류 때 즐겨찾기에서 고르기. 서버가 판정해 넘긴다 */
+  placeMemo?: boolean;
 };
 
 /** 묶음 안 번호 순서. 묶음이 바뀌어 길이가 달라도 0..n-1의 순열이 되게 맞춘다 */
@@ -150,6 +152,7 @@ export function TodayScreen({
   data,
   showEntries,
   onAddToPoll,
+  placeMemo = false,
 }: TodayScreenProps) {
   const router = useRouter();
   const session = useTodaySession();
@@ -273,11 +276,14 @@ export function TodayScreen({
   // 우리 DB 집계(👍, 가격 제보, 폐업, 웨이팅, 할인 표시, T6.11). 후보 집합마다 한 번. 실패하거나 오프라인이면
   // 중립값(콜드 스타트)으로 카드를 낸다. 받는 동안만 스켈레톤을 유지해 카드가 눈앞에서 바뀌지 않게 한다.
   const placeIds = useMemo(() => (places ?? []).map((p) => p.id), [places]);
+  // 본인 메모(T10.15)도 같은 요청에서 받는다. 메모는 카드 배지 표시 전용이고 엔진에는 넘기지 않는다
+  const memoOn = placeMemo && data.signedIn;
   const statsQuery = useQuery({
-    ...placeStatsQuery(placeIds),
+    ...homeStatsQuery(placeIds, memoOn),
     enabled: placeIds.length > 0 && online,
   });
-  const statsRows = statsQuery.data;
+  const statsRows = statsQuery.data?.rows;
+  const memos = statsQuery.data?.memos;
   const statsSettled =
     placeIds.length === 0 ||
     statsQuery.isSuccess ||
@@ -755,6 +761,7 @@ export function TodayScreen({
       <KakaoErrorCard
         center={base.kind === "office" ? base.center : null}
         onRetry={() => void query.refetch()}
+        favoriteMemos={memoOn}
       />
     );
   } else if (locating || !deck || !shortage) {
@@ -809,6 +816,7 @@ export function TodayScreen({
             <TodayHero
               key={hero.id}
               card={hero}
+              memo={memos?.[hero.id]}
               heroRef={heroRef}
               spot={spotOf(pick, heroIndex)}
               order={copy.single.order(1, cards.length)}
@@ -942,6 +950,7 @@ export function TodayScreen({
             budgetKRW={budgetKRW}
             origin={origin}
             pollEntry={showEntries}
+            placeMemo={placeMemo}
           />
         </Suspense>
       ) : null}

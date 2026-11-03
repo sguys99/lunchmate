@@ -26,7 +26,11 @@ async function Today({
       {/* 카카오 SDK를 첫 로드 JS와 나란히 받는다(AC-REC-4). 정적 껍데기가 아니라 여기(요청 시점 부분)에 두어
           하단 탭과 링크의 /today 미리 받기(정적 껍데기만)가 다른 화면에서 SDK를 받게 하지 않는다 */}
       <KakaoSdkPreload />
-      <TodayScreen data={data} showEntries={isEnabled("pollEntry")} />
+      <TodayScreen
+        data={data}
+        showEntries={isEnabled("pollEntry")}
+        placeMemo={isEnabled("userPlaceMemo")}
+      />
     </>
   );
 }

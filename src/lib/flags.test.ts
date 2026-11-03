@@ -77,10 +77,13 @@ describe("evaluateFlag", () => {
       .map(([key]) => key);
     expect(off).toEqual(["designLab"]);
   });
-  it("앞으로의 플래그는 모두 기본 false", () => {
-    for (const key of ["userPlaceMemo"] as const) {
-      expect(evaluateFlag(FLAGS[key], ctx())).toBe(false);
-    }
+  it("userPlaceMemo는 T10.15 구현 뒤 모든 환경에서 켜진다(기본값은 false, 상수로 켬)", () => {
+    const def: FlagDefinition = FLAGS.userPlaceMemo;
+    expect(def.default).toBe(false);
+    expect(def.owner).toContain("T10.15");
+    expect(def.productionOff).toBeUndefined();
+    expect(evaluateFlag(def, ctx())).toBe(true);
+    expect(evaluateFlag(def, ctx({ vercelEnv: "production" }))).toBe(true);
   });
 });
 

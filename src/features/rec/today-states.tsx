@@ -3,7 +3,7 @@
 // 머리 아래 카드 면 안내. 빈 상태만 primary 버튼(이 화면에 다른 주 버튼이 없을 때). 모바일은 엄지 쪽(아래)에 붙인다.
 // 공통 상태 컴포넌트(T2.7)를 쓰고, 두 번째 행동(네이버 지도 링크, 로그인 유도)은 그 아래 글자 버튼으로 둔다.
 import { ExternalLink, MapPinOff } from "lucide-react";
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import {
   EmptyState,
   ErrorState,
@@ -20,6 +20,9 @@ import type { Shortage } from "./deck";
 
 const copy = homeCopy.today;
 const states = homeCopy.states;
+
+/** 카카오 오류 때 "즐겨찾기에서 고르기"(T10.15, D-33 안건 4). 오류 카드를 그릴 때만 받는다 */
+const FavoriteMemos = lazy(() => import("@/features/memo/favorite-memos"));
 
 const secondaryText = cn(
   "inline-flex items-center gap-1.5 self-start rounded-sm type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground active:text-foreground",
@@ -108,13 +111,16 @@ export function EmptyDeck({
 export function KakaoErrorCard({
   center,
   onRetry,
+  favoriteMemos = false,
 }: {
   /** 사무실 기준이면 그 핀을 네이버 지도 중심으로. 현위치는 링크에 싣지 않는다 */
   center: LatLng | null;
   onRetry: () => void;
+  /** 카드 아래 메모 있는 즐겨찾기 3곳(T10.15, 로그인 + userPlaceMemo) */
+  favoriteMemos?: boolean;
 }) {
   const naverHref = naverPlaceSearchUrl(copy.error.naverQuery, center);
-  return (
+  const card = (
     <StateCard>
       <ErrorState
         title={states.error.title}
@@ -131,6 +137,15 @@ export function KakaoErrorCard({
         <ExternalLink aria-hidden className="size-3.5" strokeWidth={1.5} />
       </a>
     </StateCard>
+  );
+  if (!favoriteMemos) return card;
+  return (
+    <>
+      {card}
+      <Suspense fallback={null}>
+        <FavoriteMemos className="mt-6" />
+      </Suspense>
+    </>
   );
 }
 

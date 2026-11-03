@@ -74,7 +74,14 @@ export type BlockResult =
   | { ok: true; on: false }
   | { ok: false; error: PlaceSaveError };
 export type PlaceUserState =
-  { signedIn: false } | { signedIn: true; favorite: boolean; blocked: boolean };
+  | { signedIn: false }
+  | {
+      signedIn: true;
+      favorite: boolean;
+      blocked: boolean;
+      /** 내 식당 메모(T10.15). 메모 기능이 꺼지면 없다(undefined), 메모가 없으면 null */
+      memo?: string | null;
+    };
 
 export type InsertOutcome = "ok" | "duplicate" | "limit" | "error";
 
@@ -91,6 +98,8 @@ export type PlaceDeps = {
   ) => Promise<InsertOutcome>;
   isFavorite: (userId: string, placeId: string) => Promise<boolean>;
   isBlocked: (userId: string, placeId: string) => Promise<boolean>;
+  /** 내 식당 메모(T10.15). userPlaceMemo 플래그가 꺼지면 넘기지 않는다(상태에 memo가 없다) */
+  readMemo?: (userId: string, placeId: string) => Promise<string | null>;
   insertFavorite: (
     userId: string,
     row: { place_id: string; place_url: string | null },
@@ -207,9 +216,12 @@ export async function readPlaceUserState(
   if (!userId) return { signedIn: false };
   if (!parsed.success)
     return { signedIn: true, favorite: false, blocked: false };
-  const [favorite, blocked] = await Promise.all([
+  const [favorite, blocked, memo] = await Promise.all([
     deps.isFavorite(userId, parsed.data.placeId),
     deps.isBlocked(userId, parsed.data.placeId),
+    deps.readMemo?.(userId, parsed.data.placeId),
   ]);
-  return { signedIn: true, favorite, blocked };
+  return memo === undefined
+    ? { signedIn: true, favorite, blocked }
+    : { signedIn: true, favorite, blocked, memo };
 }

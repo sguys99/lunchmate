@@ -6,6 +6,7 @@
 // - 한 요청이 STATS_TIMEOUT_MS를 넘으면 실패로 보고 한 번 더 시도한다. 그래도 실패하면 화면은 중립값으로 추천한다.
 // - 이 파일은 홈 첫 로드에 들어간다. 읽기 본체(stats-load, 서버 액션 호출)는 queryFn 안에서 동적으로 받는다.
 import { queryOptions } from "@tanstack/react-query";
+import type { PlaceStatsRow } from "./place-stats";
 
 const load = () => import("./stats-load");
 
@@ -19,15 +20,45 @@ export function placeStatsKey(ids: readonly string[]): string {
   return [...new Set(ids)].sort().join(",");
 }
 
+/** 받은 뒤 다시 읽지 않는 공통 옵션(지도와 홈) */
+const ONCE = {
+  retry: 1,
+  retryDelay: 300,
+  staleTime: Infinity,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+  refetchOnMount: false,
+} as const;
+
 export function placeStatsQuery(ids: readonly string[]) {
   return queryOptions({
     queryKey: ["placeStats", placeStatsKey(ids)] as const,
     queryFn: () => load().then((m) => m.loadStatsRows(ids)),
-    retry: 1,
-    retryDelay: 300,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
+    ...ONCE,
+  });
+}
+
+/** 오늘(홈) 집계 + 본인 메모(T10.15, D-33 안건 1). 메모는 카드 배지 표시 전용, 추천 엔진에 넘기지 않는다 */
+export type HomeStats = {
+  rows: PlaceStatsRow[];
+  /** place_id → 내 메모. 비로그인이거나 메모가 꺼지면 빈 표 */
+  memos: Record<string, string>;
+};
+
+/**
+ * 오늘(홈) 쿼리. 지도(placeStatsQuery)와 키를 나눈다: 지도, 회식, 투표는 메모를 받지 않는다.
+ * 받은 집계는 같은 후보 집합의 지도 캐시(placeStats 키)에도 넣어 지도 탭이 다시 읽지 않게 한다.
+ * 메모를 고친 뒤에는 메모 표만 setQueryData로 바꾼다(features/memo/cache). 다시 읽으면 카드가 다시 뽑히므로 refetch하지 않는다.
+ */
+export function homeStatsQuery(ids: readonly string[], withMemos: boolean) {
+  return queryOptions({
+    queryKey: [
+      "placeStats",
+      placeStatsKey(ids),
+      withMemos ? "home-memos" : "home",
+    ] as const,
+    queryFn: ({ client }): Promise<HomeStats> =>
+      load().then((m) => m.loadHomeStats(ids, withMemos, client)),
+    ...ONCE,
   });
 }

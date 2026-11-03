@@ -40,6 +40,7 @@ export function MeRecords({
   nowIso,
   initialTab,
   betaFeedback = false,
+  placeMemo = false,
 }: {
   nickname: string | null;
   /** 본인 프로필 사진(허용 CDN만, T9.10) */
@@ -51,6 +52,8 @@ export function MeRecords({
   initialTab: MeTab;
   /** 베타 의견 보내기 줄(T9.4, betaFeedback 플래그, 서버 판정) */
   betaFeedback?: boolean;
+  /** 식당 메모(T10.15, userPlaceMemo 플래그, 서버 판정): 즐겨찾기 이름표와 상세 이름표 */
+  placeMemo?: boolean;
 }) {
   const now = useMemo(() => new Date(nowIso), [nowIso]);
   const online = useOnlineStatus();
@@ -68,7 +71,7 @@ export function MeRecords({
   }, [office, setBase, setPins, setActive]);
 
   return (
-    <DetailEntryProvider office={office} budget={budget}>
+    <DetailEntryProvider office={office} budget={budget} placeMemo={placeMemo}>
       <header className="flex items-end justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-2">
           {nickname ? (
@@ -99,7 +102,11 @@ export function MeRecords({
           tab === "history" ? (
             <HistoryPanel now={now} office={office} offline={offline} />
           ) : tab === "places" ? (
-            <PlacesPanel office={office} offline={offline} />
+            <PlacesPanel
+              office={office}
+              offline={offline}
+              placeMemo={placeMemo}
+            />
           ) : (
             <ReviewsPanel office={office} offline={offline} />
           )

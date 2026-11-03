@@ -44,6 +44,9 @@ export const ACCOUNT_DELETION_SCOPE = [
   // T9.4 (supabase/migrations/20261102120000_t9_4_beta_feedback.sql). auth.users on delete cascade.
   //   account_residue가 외래 키를 카탈로그에서 찾으므로 별도 점검 코드 없이 0행을 확인한다(t9-beta-feedback RLS 테스트).
   "beta_feedback", // 베타 의견(본인 쓰기, 관리자 읽기)
+  // T10.15 (supabase/migrations/20261103100000_t10_15_place_memos.sql). auth.users on delete cascade.
+  //   account_residue가 외래 키를 카탈로그에서 찾으므로 별도 점검 코드 없이 0행을 확인한다(t10-place-memos RLS 테스트).
+  "place_memos", // 식당 메모(본인만 읽고 쓴다)
 ] as const;
 
 export type DeleteAccountDeps = {
