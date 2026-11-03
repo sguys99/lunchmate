@@ -7,8 +7,11 @@
 // 360px: 좌우 여백 24px(--lm-layout-gutter)를 유지하고 탭 4칸은 같은 폭이라 줄바꿈 없이 들어간다.
 //
 // safe-area: (app) 레이아웃이 viewport-fit=cover를 켠다. 위와 좌우는 이 셸이, 아래는 하단 탭이 env()로 비운다.
-// 높이: 최소 높이는 svh(주소 막대가 펼쳐진 작은 화면)다. dvh는 iOS Safari에서 스크롤로 주소 막대가 접힐 때마다 값이 바뀌어
-//   문서 높이가 스크롤 도중 다시 계산됐다(T9.10). 모바일 하단 탭은 fixed라 셸 높이와 무관하게 화면 아래에 붙는다.
+// 높이: 최소 높이는 lvh(주소 막대가 접힌 가장 큰 화면)다. 스크롤 도중 값이 바뀌지 않는다.
+//   dvh는 iOS Safari에서 주소 막대가 접힐 때마다 값이 바뀌어 문서 높이가 스크롤 도중 다시 계산됐다(T9.10).
+//   svh도 안 된다: iOS WebKit은 fixed 요소의 기준(layout viewport)을 문서 높이 안으로 줄인다. 내용이 짧은 화면(오늘, 지도)에서
+//   문서가 svh뿐이면 주소 막대가 접혀 화면이 lvh로 커져도 fixed 하단 탭과 행동 줄이 svh 바닥에 남아 탭 아래가 비었다.
+//   문서를 lvh 이상으로 두면 기준이 화면 전체가 되어 탭이 늘 실제 화면 아래에 붙는다.
 // desktop: 변형은 뷰포트가 아니라 @container/screen 기준이다(globals.css). AppShell 루트가 그 컨테이너다.
 import type { ReactNode } from "react";
 import { shellCopy } from "@/copy/shell";
@@ -94,7 +97,7 @@ export function AppShell({
   return (
     <div
       data-slot="app-shell"
-      className="@container/screen flex min-h-svh flex-1 flex-col bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)] text-foreground"
+      className="@container/screen flex min-h-lvh flex-1 flex-col bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)] text-foreground"
     >
       <ShellSplit
         list={<main className="flex min-w-0 flex-1 flex-col">{children}</main>}
