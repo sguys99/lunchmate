@@ -13,7 +13,7 @@ import {
   lockAxis,
   releaseTarget,
   type SwipeDrag,
-} from "./gesture";
+} from "@/features/swipe/gesture";
 
 type Track = {
   id: number;

@@ -43,7 +43,11 @@ import { categoryLabel } from "@/features/place/categories";
 import { CategoryIllustration } from "@/features/place/illustrations";
 import { useMotionReduced } from "@/lib/motion/motion-scope";
 import { cn } from "@/lib/utils";
-import { RUBBER_MAX_PX, type SwipeDir, type SwipeDrag } from "./gesture";
+import {
+  RUBBER_MAX_PX,
+  type SwipeDir,
+  type SwipeDrag,
+} from "@/features/swipe/gesture";
 import type { SwipeDemo } from "./params";
 
 export const copy = swipeLabCopy;

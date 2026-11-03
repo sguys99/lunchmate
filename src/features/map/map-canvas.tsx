@@ -469,6 +469,8 @@ export function MapCanvas({
 
   return (
     <div
+      // 지도 끌기와 부딪히지 않게 탭 스와이프(T9.14)를 받지 않는다
+      data-swipe-ignore
       className={cn("relative isolate overflow-hidden bg-muted", className)}
       style={
         {

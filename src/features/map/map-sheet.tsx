@@ -210,6 +210,8 @@ export function MapSheet({
     >
       <div
         {...dragHandlers}
+        // 시트 끌기 손잡이는 탭 스와이프(T9.14)를 받지 않는다
+        data-swipe-ignore
         className="shrink-0 touch-none select-none desktop:touch-auto desktop:select-auto"
       >
         <button

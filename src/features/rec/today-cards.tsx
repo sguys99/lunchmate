@@ -315,6 +315,8 @@ export function BottomDock({
       <div
         role="group"
         aria-label={label}
+        // 탭 스와이프(T9.14)가 미는 동안 본문과 같은 거리만큼 이 줄도 옮긴다(features/swipe/controller)
+        data-slot="bottom-dock"
         className={cn(
           "fixed inset-x-0 bottom-[calc(var(--lm-layout-tab-bar-height)+env(safe-area-inset-bottom,0px))] z-[5] mt-auto border-t border-border bg-background px-(--lm-layout-gutter) py-3 desktop:sticky desktop:bottom-(--lm-layout-tab-bar-height) desktop:px-0",
           className,

@@ -6,9 +6,7 @@ import { historyCopy } from "./history";
 
 export const swipeLabCopy = {
   names: {
-    a: "스와이프 시안 A 따라오는 페이지",
-    b: "스와이프 시안 B 가장자리 표시",
-    c: "스와이프 시안 C 탭 막대 밀기",
+    a: "스와이프 시안 A 따라오는 페이지 (선택안)",
   },
   index: {
     title: "탭 스와이프 이동 시안 (T9.14)",
@@ -18,12 +16,10 @@ export const swipeLabCopy = {
   /** 스크린 리더 알림(탭을 옮긴 뒤 한 번) */
   moved: (label: string) => `${label} 탭으로 옮겼습니다.`,
 
-  /** A 옆 탭 미리 보기, B 가장자리 표시 */
+  /** A 옆 탭 미리 보기 */
   hint: {
     release: "놓으면 옮깁니다",
   },
-  /** C 탭 막대 위 안내(처음 한 번) */
-  scrubHint: "탭 막대를 좌우로 밀어도 옮길 수 있습니다.",
 
   today: {
     eyebrow: "11월 3일 화요일 점심",
