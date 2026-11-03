@@ -10,7 +10,10 @@
 // - 네이버 지도는 map-sdk-mocks.ts의 가짜를 그대로 쓴다(데스크톱 /today 오른쪽 지도). 라우트는 나중에 등록한 것이 먼저라
 //   mockMapSdks 다음에 카카오만 덮어쓴다.
 // 장소 id는 숫자 문자열이다(visits.place_id 형식 검사 ^[0-9]{1,20}$).
-import type { Page } from "@playwright/test";
+// 같은 시각에 도는 테스트끼리 id가 겹치지 않게 워커 번호(parallelIndex)마다 1000개씩 범위를 나눈다.
+// 식당별 집계(메뉴, 할인, 제보)는 사용자를 가리지 않아, 모바일과 데스크톱이 같은 id에 동시에 쓰면 서로 섞였다(2026-11-04).
+// 테스트 밖(모듈 최상단)에서 부르면 0번 범위를 쓴다. 테스트 안에서만 부를 것.
+import { test, type Page } from "@playwright/test";
 import { mockMapSdks } from "./map-sdk-mocks";
 
 export type FakeKakaoOptions = {
@@ -36,12 +39,27 @@ const CATEGORIES = [
 ] as const;
 
 /** 가짜 장소 id. i번째 곳 */
-export function fakePlaceId(i: number): string {
-  return String(9_100_000 + i);
+/** 이 워커의 가짜 장소 id 시작값 */
+export function fakePlaceIdBase(): number {
+  let slot = 0;
+  try {
+    slot = test.info().parallelIndex;
+  } catch {
+    slot = 0;
+  }
+  return 9_100_000 + slot * 1000;
 }
 
-function fakeScript(count: number, delay: readonly [number, number]): string {
-  const config = JSON.stringify({ count, delay, categories: CATEGORIES });
+export function fakePlaceId(i: number): string {
+  return String(fakePlaceIdBase() + i);
+}
+
+function fakeScript(
+  count: number,
+  delay: readonly [number, number],
+  base: number,
+): string {
+  const config = JSON.stringify({ count, delay, base, categories: CATEGORIES });
   return `(function () {
   var C = ${config};
   var DEG_PER_M = 1 / 111320;
@@ -58,7 +76,7 @@ function fakeScript(count: number, delay: readonly [number, number]): string {
       var d = 30 + Math.round((i * 470) / Math.max(1, C.count - 1));
       var a = ((i * 137.5 + 11) * Math.PI) / 180; // 11도 틀어 기준점과 위도, 경도가 0.00005도 이상 떨어지게(45곳 기준)
       var dy = d * Math.cos(a) * DEG_PER_M, dx = (d * Math.sin(a) * DEG_PER_M) / Math.cos((lat * Math.PI) / 180);
-      var id = String(${9_100_000} + i);
+      var id = String(C.base + i);
       out.push({ id: id, place_name: "테스트식당" + (i + 1), category_name: C.categories[i % C.categories.length],
         category_group_code: "FD6", address_name: "서울 중구 테스트동 " + (i + 1), road_address_name: "서울 중구 테스트로 " + (i + 1),
         place_url: "http://place.map.kakao.com/" + id, phone: "02-000-" + String(1000 + i),
@@ -108,7 +126,7 @@ function delayRange(options: FakeKakaoOptions): readonly [number, number] {
 export function kakaoFakeInitSource(
   options: Omit<FakeKakaoOptions, "sdkDelayMs"> = {},
 ): string {
-  return `${fakeScript(options.count ?? 45, delayRange(options))}
+  return `${fakeScript(options.count ?? 45, delayRange(options), fakePlaceIdBase())}
 window.kakao.maps.load(function () {});`;
 }
 
@@ -122,12 +140,13 @@ export async function mockRecommendSdks(
   const count = options.count ?? 45;
   const delay = delayRange(options);
   const sdkDelay = options.sdkDelayMs ?? 0;
+  const base = fakePlaceIdBase();
   await mockMapSdks(page);
   await page.route("https://dapi.kakao.com/v2/maps/sdk.js**", async (route) => {
     if (sdkDelay > 0) await new Promise((r) => setTimeout(r, sdkDelay));
     await route.fulfill({
       contentType: "application/javascript",
-      body: fakeScript(count, delay),
+      body: fakeScript(count, delay, base),
     });
   });
 }

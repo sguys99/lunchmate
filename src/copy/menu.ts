@@ -48,7 +48,7 @@ export const menuCopy = {
   feedback: {
     ask: "뭐 드셨어요?",
     askHint: "고르면 그 메뉴 가격에서 시작합니다.",
-    askHintEmpty: "먹은 메뉴를 쓰면 가격과 함께 메뉴판에 들어갑니다.",
+    askHintEmpty: "쓰면 가격과 함께 메뉴판에 들어갑니다.",
     typed: "직접 쓰기",
     chip: (name: string, price: string) => `${name} ${price}`,
     menuFailed: "후기는 남겼지만 메뉴를 저장하지 못했습니다. 상세 메뉴판에서 다시 알려 주세요.",

@@ -6,7 +6,7 @@
 // - 클라우드 개발 DB에 test_rls_ 사용자를 만들고(약관 동의, 사무실 1곳) 끝나면 지운다(cascade: 할인, 확인, 웨이팅, 신고, 후기).
 //   다른 사용자(제보자, 끝났어요 2명, 후기 작성자)는 그 사용자 세션의 REST로 준비한다(RLS 적용).
 //   adminPatch(secret 키)는 웨이팅 제보 시각을 과거로 옮길 때만 쓴다(feedback.spec.ts와 같은 방식).
-// - 화면과 단언은 사용자 세션으로 한다(CLAUDE.md 7.1). 카카오 SDK는 가짜(음식점 45곳, id 9100000부터).
+// - 화면과 단언은 사용자 세션으로 한다(CLAUDE.md 7.1). 카카오 SDK는 가짜(음식점 45곳, id는 워커마다 fakePlaceId 범위).
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -24,7 +24,7 @@ import {
   rpc,
 } from "../src/lib/supabase/rls/harness";
 import { expectNoA11yViolations } from "./helpers/axe";
-import { mockRecommendSdks } from "./helpers/kakao-places-fake";
+import { fakePlaceId, mockRecommendSdks } from "./helpers/kakao-places-fake";
 import { loadDbE2eEnv, readOwn, signInContext } from "./helpers/session";
 
 const env = loadDbE2eEnv();
@@ -125,7 +125,7 @@ async function heroOf(page: Page) {
   ).trim();
   const n = Number(/테스트식당(\d+)/.exec(name)?.[1]);
   expect(Number.isFinite(n)).toBe(true);
-  return { name, placeId: String(9_100_000 + n - 1) };
+  return { name, placeId: fakePlaceId(n - 1) };
 }
 
 /** 같은 화면에서 그 카드의 상세를 연다(페이지 이동 없음) */
@@ -442,7 +442,9 @@ test.describe("제보와 신고: 웨이팅, 정보 제보, 후기 신고", () =>
       const { detail, placeId, name } = await openHeroDetail(page);
       await openNow(detail);
       await expect(
-        detail.getByText('"줄 길어요"는 점심 피크에 추천 순서를 조금 낮춥니다.'),
+        detail.getByText(
+          '"줄 길어요"는 점심 피크에 추천 순서를 조금 낮춥니다.',
+        ),
       ).toBeVisible();
       await detail.getByRole("button", { name: "줄 길어요" }).click();
       const line = detail.getByText(

@@ -4,7 +4,7 @@
 //   PLAYWRIGHT_BASE_URL=http://localhost:3102 pnpm test:e2e:menu
 //   (RUN_DB_E2E=1. .env.local의 Supabase 값이 있을 때만 돈다. MENU_SHOTS=1이면 캡처를 남긴다. menuReports 플래그는 pnpm dev에서만 켜진다)
 // - 클라우드 개발 DB에 test_ 사용자를 만들고 끝나면 지운다(cascade로 메뉴 제보도 지워진다).
-// - 카카오 SDK는 가짜(음식점 45곳, "테스트식당{i+1}" = place_id 9100000+i). 첫 카드가 어느 곳이 되어도 대표 메뉴가 보이게
+// - 카카오 SDK는 가짜(음식점 45곳, "테스트식당{i+1}" = place_id fakePlaceId(i), 워커마다 범위). 첫 카드가 어느 곳이 되어도 대표 메뉴가 보이게
 //   제보용 사용자 5명이 45곳 모두에 "돼지국밥"을 2건씩 남긴다(사용자당 하루 20건 안: 18건씩).
 // - 화면과 단언은 사용자 세션(RLS 적용)으로 한다(CLAUDE.md 7.1).
 import { mkdirSync } from "node:fs";
@@ -246,7 +246,7 @@ test.describe("메뉴 제보", () => {
       await expect(hero.locator("h2")).toBeVisible({ timeout: 20_000 });
       await expect(hero.locator("dt", { hasText: "돼지국밥" })).toBeVisible({ timeout: 15_000 });
       const heroName = (await hero.locator("h2").innerText()).trim();
-      const placeId = String(9_100_000 + Number(heroName.replace(/\D/g, "")) - 1);
+      const placeId = fakePlaceId(Number(heroName.replace(/\D/g, "")) - 1);
 
       await page.getByRole("button", { name: `${heroName} 상세` }).click();
       const detail = page.getByRole("dialog");

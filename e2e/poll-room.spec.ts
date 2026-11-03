@@ -7,7 +7,7 @@
 // - 클라우드 개발 DB에 test_rls_ 사용자(방장, 참여자)를 만들고 끝나면 지운다. 투표방 제목은 test_ 접두(rls-cleanup이 지운다).
 // - 투표방은 방장 세션 REST(create_poll)로 준비한다. 화면과 단언은 사용자 세션(RLS 적용, CLAUDE.md 7.1).
 // - 마감 시각을 과거로 옮기는 준비(AC-POLL-2)만 secret 키(adminPatch)를 쓴다.
-// - 카카오 SDK는 가짜(음식점 45곳, id 9100000부터, 이름 "테스트식당N"). 후보 이름은 기준점 주변 매칭(T5.12a)으로 붙는다.
+// - 카카오 SDK는 가짜(음식점 45곳, id는 워커마다 fakePlaceId 범위, 이름 "테스트식당N"). 후보 이름은 기준점 주변 매칭(T5.12a)으로 붙는다.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test, type Browser, type Page } from "@playwright/test";

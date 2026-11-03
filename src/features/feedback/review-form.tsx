@@ -1,7 +1,7 @@
 "use client";
 // 후기 시트 입력 부품 (T6.9, T6.10, FB-02, FB-03, FB-06, FB-07, D-11 B 한 장 시트, DESIGN.md 5장 "식후 피드백").
 // review-sheet-drawer.tsx가 쓴다(같은 지연 로딩 청크). 시안 `/design-lab/feedback/b`의 부품을 실제 문구와 값으로 옮긴 것.
-// 순서: (상세 쓰기, 접힌 줄, 수정) 한 탭 답 → 1인 가격(스테퍼 + 칩 3) → 태그 8종 2열 → 한 줄 후기(늘 보임)
+// 순서: (상세 쓰기, 접힌 줄, 수정) 한 탭 답 → 1인 가격(스테퍼 + 칩 3) → 태그 8종(흐르는 칩) → 한 줄 후기(늘 보임)
 //   → 공개 범위와 집계 포함 고지 한 줄 → (수정) 내 후기 삭제.
 // 접근성: 칩 묶음은 role="group" + 제목 id, 가격 숫자 aria-live, 글자 수는 aria-describedby, 금칙어 오류는 role="alert".
 import { AlertCircle, Minus, Plus, ThumbsDown, ThumbsUp } from "lucide-react";
@@ -44,6 +44,7 @@ export const textButton = cn(
 /**
  * 시트 안 칩: 보이는 높이 36, 터치 44(hitArea44). 칩 사이 8이라 줄 간격 44로 터치 영역이 겹치지 않는다.
  * 390 × 844에서 고지 한 줄까지 첫 화면에 들어오게 줄였다(D-11 6절, T6.9).
+ * 메뉴 칸(D-35)이 들어온 뒤로 태그는 2열 격자 대신 글자 길이대로 흐르는 칩(좌우 10, 390에서 2줄)으로 둔다(2026-11-04).
  */
 const compactChip = cn("h-9", hitArea44);
 
@@ -283,14 +284,13 @@ export function TagsField({
             ),
           })
         }
-        className="grid grid-cols-2"
       >
         {REVIEW_TAGS.map((tag, i) => (
           <Chip
             key={tag}
             value={tag}
             data-first={i === 0 ? "" : undefined}
-            className={cn("w-full", compactChip)}
+            className={cn(compactChip, "px-2.5")}
           >
             {reviewTagLabels[tag]}
           </Chip>

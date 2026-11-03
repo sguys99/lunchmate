@@ -148,7 +148,8 @@ export function MenuField({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-1">
+      {/* 보조 한 줄은 제목 옆(390 × 844에서 고지 한 줄까지 첫 화면, D-11 6절) */}
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         <h3 id={id} className="type-label text-foreground">
           {copy.feedback.ask}
         </h3>
