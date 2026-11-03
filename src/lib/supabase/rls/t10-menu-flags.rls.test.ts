@@ -10,6 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   adminPatch,
+  adminRpc,
   createTestUser,
   deleteAuthUser,
   loadRlsEnv,
@@ -41,6 +42,7 @@ type Flagged = {
   others: { key: string; name: string; count: number }[];
 };
 type Suggestion = { place_id: string; from_key: string; to_key: string; why: string };
+type ResidueRow = { table_schema: string; table_name: string; on_delete: string; remaining: number };
 type LogRow = { id: string; action: string; target_menu_key: string | null; target_place_id: string | null; undoable: boolean };
 
 const base = 790_000_000 + Math.floor(Math.random() * 9_000_000);
@@ -174,6 +176,20 @@ describe.skipIf(!ready)(
         expect((await menus()).map((m) => m.menu_key)).not.toContain("차슈덮밥");
         const after = await flag(r1, "차슈덮밥");
         expect(after.error?.message).toBe("report_target_unavailable");
+      });
+    });
+
+    describe("탈퇴", () => {
+      it("Auth 사용자를 지우면 메뉴 신고도 cascade로 지워진다", async () => {
+        const gone = await createTestUser(e, runId, "fg");
+        created.push(gone.id);
+        expect((await flag(gone, "제육")).error).toBeNull();
+        await deleteAuthUser(e, gone.id);
+        const res = await adminRpc<ResidueRow[]>(e, "account_residue", { p_user_id: gone.id });
+        expect(res.error).toBeNull();
+        const t = res.data?.find((x) => x.table_schema === "public" && x.table_name === "menu_flags");
+        expect(t?.on_delete).toBe("cascade");
+        expect(Number(t?.remaining)).toBe(0);
       });
     });
 

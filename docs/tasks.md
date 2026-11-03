@@ -675,7 +675,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
   - [x] T10.16d (11/03 완료, `src/features/menu/`(model, requests, actions, menu-field), 피드백 시트는 후기 저장 뒤 그 후기 id로 setReviewMenuAction, 실패하면 토스트만(후기는 남음), 같은 날 같은 메뉴는 알리지 않음. 단위 18건, E2E `e2e/menu.spec.ts` 칩 한 번 + 저장 AC-MENU-4) 입력: 피드백 시트 메뉴 칸(MENU-01, AC-MENU-4), 상세 "메뉴 알려주기"(MENU-02), 서버 zod `normalizeMenuName`, 이벤트 `menu_reported`(PRD 10.2)
   - [x] T10.16e (11/03 완료, 상세 `MenuBoard`(C 메뉴판, 쓰는 동안 기존 메뉴 제안), 홈 `NumberGrid` 가운데 칸(A, 제보 2건 이상 1위, 예산 안은 상세에만), 홈 집계 서버 액션에서 place_menus 나란히, `/today` 200.2 KB(예산 201), AC-MENU-2 경계 테스트 `src/lib/reco/menu-neutral.test.ts`, 캡처 `menu-impl-*` 16장, 시안 코드 삭제) 표시: 상세 메뉴 목록(MENU-03), 홈 카드 대표 메뉴(MENU-04, 시안 결과). 홈 집계 서버 액션과 같은 왕복에서 읽기, 홈 JS 200 KB 예산 확인(`pnpm build`), 추천 점수 미반영 테스트(AC-MENU-2)
   - [x] T10.16f (11/03 완료, D-37: 관리자 A 한 건씩 큐 + 사용자 입구 C "메뉴가 달라요", 안건 모두 기본안. 마이그레이션 `20261103210000_t10_16f_menu_moderation`(백업 2026-11-03_1910 뒤 db:push), RLS `t10-menu-flags` 16건 + 전체 228건, E2E `e2e/menu.spec.ts` 신고와 관리자 숨김, 되돌리기. 시안 코드 삭제, 캡처 `admin-menu-*` 83장과 `menu-impl-flag-*`, `menu-impl-admin-menu-*`) 관리자: 메뉴 제보 숨김, 비교 키 합치기(MENU-05), 메뉴 제보 신고 진입점
-  - [ ] T10.16g 처리방침 수집 항목에 메뉴 제보 추가, 탈퇴 삭제 범위 갱신, 문구 `src/copy/menu.ts`(lint:copy)
+  - [x] T10.16g (11/03 완료, 11월 16일 시행 전 최종본이라 T10.15와 같이 시행일을 바꾸지 않고 같은 판에 고침. 약관 게시물 정의와 자동 숨김, 처리방침 1, 2, 3, 4, 9, 13장, 탈퇴 범위 `delete-account.ts`에 menu_reports, menu_flags, PRD 11.4. RLS 탈퇴 cascade 확인) 처리방침 수집 항목에 메뉴 제보 추가, 탈퇴 삭제 범위 갱신, 문구 `src/copy/menu.ts`(lint:copy)
   - [ ] T10.16h 베타 첫 주 `menuReports` 켜기, 입력률(`menu_reported` ÷ `feedback_submitted` detail)과 카드 대표 메뉴 노출 비율 기록. 결과로 MENU-06 착수 여부 판단
 - [ ] T10.14 **G10 확인**: 일반 공개
 

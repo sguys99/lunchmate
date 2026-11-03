@@ -47,6 +47,12 @@ export const ACCOUNT_DELETION_SCOPE = [
   // T10.15 (supabase/migrations/20261103100000_t10_15_place_memos.sql). auth.users on delete cascade.
   //   account_residue가 외래 키를 카탈로그에서 찾으므로 별도 점검 코드 없이 0행을 확인한다(t10-place-memos RLS 테스트).
   "place_memos", // 식당 메모(본인만 읽고 쓴다)
+  // T10.16c, T10.16f (supabase/migrations/20261103200000_t10_16c_menu_reports.sql, 20261103210000_t10_16f_menu_moderation.sql).
+  //   auth.users on delete cascade. 지운 메뉴 제보는 바로 메뉴판 집계(place_menus)에서 빠진다.
+  //   관리자가 만든 합치기 표(private.menu_key_merges.created_by)는 on delete set null(식당 메뉴판 정리는 남긴다).
+  //   확인은 account_residue + t10-menu-reports, t10-menu-flags RLS 테스트.
+  "menu_reports", // 메뉴 제보(이름과 가격, 본인만 원본을 읽는다)
+  "menu_flags", // 메뉴 줄 신고(본인만 읽는다)
 ] as const;
 
 export type DeleteAccountDeps = {
