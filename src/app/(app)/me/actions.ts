@@ -12,6 +12,7 @@ import {
   saveAvoid,
   saveCravings,
   saveLiked,
+  dismissTastePrompt,
   saveNickname,
   savePrefs,
   setDefaultOffice,
@@ -135,6 +136,14 @@ function depsFor(supabase: Supabase): SettingsDeps {
         .in("id", ids);
       return !error;
     },
+    async dismissTastePrompt(userId) {
+      const { data, error } = await supabase
+        .from("preferences")
+        .update({ taste_prompt_dismissed_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .select("user_id");
+      return !error && data?.length === 1;
+    },
     async updateLiked(userId, categories) {
       const { data, error } = await supabase
         .from("preferences")
@@ -228,4 +237,9 @@ export async function saveLikedAction(
   input: LikedRequest,
 ): Promise<SettingsResult> {
   return run((deps) => saveLiked(input, deps));
+}
+
+/** 홈 취향 띠 닫기(T9.17, D-39). 홈은 다시 그리지 않는다(띠가 스스로 사라진다) */
+export async function dismissTastePromptAction(): Promise<SettingsResult> {
+  return run((deps) => dismissTastePrompt(deps));
 }

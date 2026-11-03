@@ -45,6 +45,7 @@ function deps(over: Partial<SettingsDeps> = {}): SettingsDeps {
     insertAvoid: vi.fn(async () => true),
     deleteAvoid: vi.fn(async () => true),
     updateLiked: vi.fn(async () => true),
+    dismissTastePrompt: vi.fn(async () => true),
     readCravings: vi.fn(async () => []),
     updateCravings: vi.fn(async (_u: string, c: string[]) => ({
       until: c.length ? "2026-11-06T01:00:00Z" : null,

@@ -74,6 +74,7 @@ export default function FeedbackBand({
   anchor,
   anchorPending,
   directedToday,
+  whenHidden,
   className,
 }: FeedbackBandProps & { className?: string }) {
   const client = useQueryClient();
@@ -232,7 +233,8 @@ export default function FeedbackBand({
     );
   }
   // 실패, 비로그인, 물을 곳 없음: 띠 없음(추천은 그대로)
-  if (visitsQuery.isError || !visit || view.kind === "hidden") return null;
+  if (visitsQuery.isError || !visit || view.kind === "hidden")
+    return whenHidden ?? null;
   if (names.isPending && !names.isFetched) {
     return (
       <div className={className}>

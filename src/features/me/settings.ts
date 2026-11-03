@@ -82,6 +82,8 @@ export type SettingsDeps = {
   listAvoid: (userId: string) => Promise<StoredAvoid[]>;
   insertAvoid: (userId: string, rows: AvoidRow[]) => Promise<boolean>;
   deleteAvoid: (userId: string, ids: string[]) => Promise<boolean>;
+  /** 홈 취향 띠를 닫은 시각을 지금으로(D-39). 성공하면 true */
+  dismissTastePrompt: (userId: string) => Promise<boolean>;
   /** 좋아하는 음식 저장(SET-06). 성공하면 true */
   updateLiked: (userId: string, categories: string[]) => Promise<boolean>;
   readCravings: (userId: string) => Promise<string[]>;
@@ -285,5 +287,15 @@ export async function saveLiked(
     deps.updateLiked(p.userId, [...p.input.categories]),
     false,
   );
+  return ok ? { ok: true } : { ok: false, error: "save" };
+}
+
+/** 홈 취향 띠 닫기(D-39 안건 4). 입력 없음, 본인 행에 지금 시각을 남긴다 */
+export async function dismissTastePrompt(
+  deps: Pick<SettingsDeps, "currentUserId" | "dismissTastePrompt">,
+): Promise<SettingsResult> {
+  const userId = await safe(deps.currentUserId(), null);
+  if (!userId) return { ok: false, error: "unauthenticated" };
+  const ok = await safe(deps.dismissTastePrompt(userId), false);
   return ok ? { ok: true } : { ok: false, error: "save" };
 }

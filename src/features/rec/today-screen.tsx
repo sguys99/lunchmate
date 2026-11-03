@@ -35,6 +35,8 @@ import {
 import { currentPathForNext } from "@/features/auth/login-prompt/triggers";
 import { locateOnce } from "@/features/onboarding/geolocation";
 import { FeedbackBandSlot } from "@/features/feedback/band-slot";
+import { shouldShowTastePrompt } from "@/features/taste/prompt-rule";
+import { TasteBandSlot } from "@/features/taste/slot";
 import { isCategorySlug } from "@/features/place/categories";
 import { searchRadiusFromWalkMinutes } from "@/lib/format/number";
 import {
@@ -942,6 +944,17 @@ export function TodayScreen({
         anchor={center}
         anchorPending={locating}
         directedToday={session.directedOn === kstDateKey(now)}
+        whenHidden={
+          // 설정을 건너뛴 사용자에게 가입 7일 안 취향 띠(T9.17, D-39). 피드백 띠가 없는 날에만 그 자리에
+          shouldShowTastePrompt({
+            tastePrompt: data.tastePrompt,
+            avoidCount: data.avoid.length,
+            likedCount: data.liked.length,
+            now,
+          }) ? (
+            <TasteBandSlot className="mt-3" />
+          ) : null
+        }
         className="mt-3"
       />
       {/* 탭이 열린 채 끊김: 세션 메모리의 결과를 "연결 전 결과"로 표시(T8.3, APP-02). 기기에는 저장하지 않는다 */}

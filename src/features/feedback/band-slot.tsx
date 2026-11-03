@@ -4,7 +4,8 @@
 // - 띠 본체(내 방문 쿼리, 이름 해석, 서버 액션, 시트 진입점)는 React.lazy로 따로 받는다. 받는 동안은 같은 높이(64)의
 //   빈 띠 틀(위아래 헤어라인)만 두고, 막대 뼈대는 본체가 그린다(홈 첫 로드 예산, bundle-log 2026-11-01).
 // - 띠 데이터는 추천과 따로 온다. 실패하면 띠만 숨기고 추천은 그대로다(AC-FB-1).
-import { lazy, Suspense } from "react";
+// - 물을 방문이 없거나 실패하면 그 자리에 whenHidden(홈 취향 띠, D-39)을 그린다. 높이가 늘지 않는다(D-25).
+import { lazy, Suspense, type ReactNode } from "react";
 import type { LatLng } from "@/lib/map/types";
 
 const FeedbackBand = lazy(() => import("./feedback-band"));
@@ -17,6 +18,8 @@ export type FeedbackBandProps = {
   anchorPending: boolean;
   /** 이 탭에서 오늘 길찾기를 눌렀는가(D-11 안건 2) */
   directedToday: boolean;
+  /** 피드백 띠가 없을 때 그 자리에 대신 그릴 것(홈 취향 띠, T9.17 D-39). 피드백 띠가 먼저다 */
+  whenHidden?: ReactNode;
 };
 
 export function FeedbackBandSlot({
