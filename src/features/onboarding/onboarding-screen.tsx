@@ -25,6 +25,7 @@ import type {
 import {
   AvoidFields,
   BudgetFields,
+  LikedFields,
   LocateButton,
   LocationNotes,
   LocationSearch,
@@ -100,7 +101,7 @@ export function OnboardingScreen({
           className={cn(
             "relative z-20 -mt-7 flex flex-col rounded-t-sheet bg-popover text-popover-foreground shadow-sheet",
             // 3단계는 칩과 직접 입력이 길어 시트를 늘리고 지도는 위에 띠(최소 176)로 남긴다
-            ob.step === 3 ? "max-h-[calc(100dvh-11rem)]" : "max-h-[72dvh]",
+            ob.step >= 3 ? "max-h-[calc(100dvh-11rem)]" : "max-h-[72dvh]",
             "desktop:order-1 desktop:mt-0 desktop:max-h-none desktop:rounded-none desktop:bg-background desktop:shadow-none",
           )}
         >
@@ -162,6 +163,19 @@ export function OnboardingScreen({
                   />
                   <div className="mt-6">
                     <AvoidFields ob={ob} />
+                  </div>
+                </>
+              ) : null}
+
+              {ob.step === 4 ? (
+                <>
+                  <StepTitle
+                    title={copy.liked.title}
+                    body={copy.liked.body}
+                    visited={ob.visited}
+                  />
+                  <div className="mt-6">
+                    <LikedFields ob={ob} />
                   </div>
                 </>
               ) : null}
@@ -240,12 +254,12 @@ function PrimaryAction({
 }) {
   const step = ob.step;
   const blocked =
-    ob.finishing || (step === 1 && !ob.canSave) || (step === 3 && !ob.online);
+    ob.finishing || (step === 1 && !ob.canSave) || (step === 4 && !ob.online);
   const label = ob.finishing
     ? copy.finishing
     : step === 1
       ? copy.actions.save
-      : step === 2
+      : step === 2 || step === 3
         ? copy.actions.next
         : copy.actions.done;
   return (
@@ -272,9 +286,9 @@ function PrimaryAction({
   );
 }
 
-/** 시트 머리: 뒤로 + 단계 이름 세 개(지금만 foreground + 밑줄) + 건너뛰기 */
+/** 시트 머리: 뒤로 + 단계 이름(지금과 앞뒤 하나, 지금만 foreground + 밑줄) + 건너뛰기 */
 function SheetHeader({ ob }: { ob: Onboarding }) {
-  const canSkip = (ob.step === 2 || ob.step === 3) && !ob.finishing;
+  const canSkip = ob.step >= 2 && !ob.finishing;
   return (
     <header className="flex h-12 shrink-0 items-center justify-between gap-2 px-(--lm-layout-gutter) desktop:h-20 desktop:items-end desktop:px-10 desktop:pb-2">
       <div className="flex min-w-0 items-center gap-1">
@@ -291,14 +305,16 @@ function SheetHeader({ ob }: { ob: Onboarding }) {
             <ChevronLeft aria-hidden className="size-5" strokeWidth={1.75} />
           </button>
         ) : null}
-        <nav aria-label={copy.screenLabel}>
+        <nav aria-label={copy.screenLabel} className="min-w-0">
+          {/* 단계 이름은 지금 단계와 앞뒤 한 단계만 보인다(넷이 다 들어가지 않는 폭, T9.17). 뒤로 버튼이 앞 단계로 간다 */}
           <ol className="flex items-center gap-4">
             {copy.progress.steps.map((name, idx) => {
-              const n = (idx + 1) as 1 | 2 | 3;
+              const n = (idx + 1) as 1 | 2 | 3 | 4;
               const active = n === ob.step;
               const reachable = n === 1 || ob.canSave;
+              const far = Math.abs(n - ob.step) > 1;
               return (
-                <li key={name}>
+                <li key={name} className={cn(far && "hidden")}>
                   <button
                     type="button"
                     onClick={() => ob.goTo(n)}
@@ -325,7 +341,7 @@ function SheetHeader({ ob }: { ob: Onboarding }) {
         <button
           type="button"
           onClick={ob.skip}
-          aria-disabled={(ob.step === 3 && !ob.online) || undefined}
+          aria-disabled={(ob.step === 4 && !ob.online) || undefined}
           className={cn(
             "-mr-1 inline-flex h-11 shrink-0 items-center px-1 type-label text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground active:text-foreground active:decoration-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50",
             focusRing,

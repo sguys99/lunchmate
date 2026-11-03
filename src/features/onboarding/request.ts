@@ -7,6 +7,8 @@ export type FinishOnboardingRequest = {
   office: OfficeSaveInput;
   prefs: Prefs;
   avoid: AvoidChoice;
+  /** 좋아하는 음식 slug (ONB-06, 최대 5) */
+  liked: string[];
   /** 마친 뒤 갈 곳(서버가 다시 검사) */
   next: string;
 };

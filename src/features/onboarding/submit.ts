@@ -4,7 +4,7 @@
 // 규칙
 // - 입력은 strictObject로 다시 검사한다. 알 수 없는 키(주소, 장소명, 검색 좌표 같은 값)가 섞이면 저장하지 않는다(AC-ONB-3).
 // - 사무실 좌표는 클라이언트가 핀에서만 만든 값(OfficeSaveInput)이다. 서버는 대한민국 범위만 다시 본다(DB 제약과 같음).
-// - 저장 순서: 예산과 도보 분 → 못 먹는 음식(지우고 다시 넣기) → 사무실. 사무실이 생겨야 온보딩을 마친 것으로 본다
+// - 저장 순서: 예산과 도보 분, 좋아하는 음식(ONB-06) → 못 먹는 음식(지우고 다시 넣기) → 사무실. 사무실이 생겨야 온보딩을 마친 것으로 본다
 //   (약관 뒤, 로그인 콜백의 온보딩 연결 고리). 중간에 실패해도 다시 누르면 같은 결과가 된다(멱등).
 // - 이미 사무실이 있으면(두 번 누름) 새로 만들지 않는다.
 // - 갈 곳은 sanitizeNext로 다시 검사하고 둘러보기 이어받기 키를 지운다(T4.20).
@@ -16,6 +16,8 @@ import {
   CUSTOM_AVOID_MAX_LENGTH,
   DEFAULT_OFFICE_NAME,
   FOOD_CHIPS,
+  LIKED_CATEGORY_SLUGS,
+  LIKED_MAX,
   PREF_RANGES,
   WALK_OPTIONS,
 } from "./constants";
@@ -56,6 +58,7 @@ export const finishOnboardingSchema = z.strictObject({
       .max(CUSTOM_AVOID_MAX_ITEMS)
       .refine(unique),
   }),
+  liked: z.array(z.enum(LIKED_CATEGORY_SLUGS)).max(LIKED_MAX).refine(unique),
   next: z.string().max(2048),
 });
 
@@ -69,6 +72,7 @@ export type FinishOnboardingDeps = {
   updatePrefs: (
     userId: string,
     prefs: FinishOnboardingInput["prefs"],
+    liked: FinishOnboardingInput["liked"],
   ) => Promise<boolean>;
   /** 본인 규칙을 모두 지우고 rows를 넣는다 */
   replaceAvoid: (userId: string, rows: AvoidRow[]) => Promise<boolean>;
@@ -102,7 +106,7 @@ export async function finishOnboarding(
   if (!userId) return { ok: false, error: "unauthenticated" };
 
   const prefsOk = await deps
-    .updatePrefs(userId, input.prefs)
+    .updatePrefs(userId, input.prefs, input.liked)
     .catch(() => false);
   if (!prefsOk) return { ok: false, error: "save" };
 

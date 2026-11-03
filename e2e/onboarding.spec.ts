@@ -80,6 +80,11 @@ test.describe("온보딩", () => {
         page.getByRole("heading", { name: "못 먹는 음식이 있나요?" }),
       ).toBeVisible();
       await page.getByRole("button", { name: "건너뛰기" }).click();
+      // 4단계 좋아하는 음식(ONB-06, T9.17)
+      await expect(
+        page.getByRole("heading", { name: "자주 끌리는 음식을 골라 주세요" }),
+      ).toBeVisible();
+      await page.getByRole("button", { name: "건너뛰기" }).click();
 
       await expect(page).toHaveURL(/\/today$/);
       await expect(page.getByRole("heading", { name: "오늘" })).toBeVisible();
@@ -100,12 +105,13 @@ test.describe("온보딩", () => {
       const prefs = await readOwn<Record<string, unknown>[]>(
         env!,
         session.access_token,
-        "preferences?select=lunch_budget,dinner_budget,walk_minutes",
+        "preferences?select=lunch_budget,dinner_budget,walk_minutes,liked_categories",
       );
       expect(prefs[0]).toEqual({
         lunch_budget: 10000,
         dinner_budget: 20000,
         walk_minutes: 10,
+        liked_categories: [],
       });
       const avoid = await readOwn<unknown[]>(
         env!,

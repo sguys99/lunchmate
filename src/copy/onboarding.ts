@@ -1,8 +1,8 @@
-// 온보딩 3단계 문구 (T4.16~T4.21, PRD ONB-01~05, D-07, copy-guide 4.6). 컴포넌트 안에 문장을 직접 쓰지 않는다 (CLAUDE.md 4장).
+// 온보딩 4단계 문구 (T4.16~T4.21, T9.17, PRD ONB-01~06, D-07, D-39, copy-guide 4.6). 컴포넌트 안에 문장을 직접 쓰지 않는다 (CLAUDE.md 4장).
 // 문체 (tasks.md 2.2절): 상태, 결과, 설명, 오류, 권한, 정책은 습니다체, 질문과 부탁은 해요체. 버튼, 칩, 라벨은 명사형.
 // 시안 문구(design-lab-onboarding.ts)에서 옮겨 왔고, 실제 지도(누르거나 끌어서 핀 놓기, 안건 1)에 맞춰 안내를 고쳤다.
 
-const STEP_TOTAL = 3;
+const STEP_TOTAL = 4;
 
 export const onboardingCopy = {
   metaTitle: "처음 설정",
@@ -11,7 +11,7 @@ export const onboardingCopy = {
   /** 진행 표시 */
   progress: {
     label: (current: number) => `${STEP_TOTAL}단계 중 ${current}단계`,
-    steps: ["위치", "예산과 거리", "못 먹는 음식"] as const,
+    steps: ["위치", "예산과 거리", "못 먹는 음식", "좋아하는 음식"] as const,
   },
 
   /** 이동 버튼 (명사형) */
@@ -128,6 +128,18 @@ export const onboardingCopy = {
       "밀",
       "메밀",
     ] as const,
+  },
+
+  /** 4단계 좋아하는 음식 (ONB-06, D-39). 그림 타일 11종, 5개까지 */
+  liked: {
+    title: "자주 끌리는 음식을 골라 주세요",
+    body: "5개까지 고를 수 있습니다. 고른 음식은 추천에 조금 더 자주 나옵니다.",
+    gridLabel: "좋아하는 음식",
+    count: (n: number, max: number) => `${n}/${max}`,
+    countLabel: (n: number, max: number) => `${max}개 중 ${n}개 골랐습니다.`,
+    full: (max: number) =>
+      `${max}개를 모두 골랐습니다. 다른 음식을 고르려면 하나를 빼 주세요.`,
+    note: "아무것도 고르지 않아도 됩니다. 먹고 남긴 👍👎으로 맞춰 갑니다.",
   },
 
   /** 완료 (ONB-05): 저장 뒤 곧바로 오늘 추천으로 이동한다 */

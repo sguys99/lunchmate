@@ -32,13 +32,14 @@ export async function finishOnboardingAction(
       if (error) throw error;
       return (count ?? 0) > 0;
     },
-    async updatePrefs(userId, prefs) {
+    async updatePrefs(userId, prefs, liked) {
       const { data, error } = await supabase
         .from("preferences")
         .update({
           lunch_budget: prefs.lunch,
           dinner_budget: prefs.dinner,
           walk_minutes: prefs.walk,
+          liked_categories: liked,
         })
         .eq("user_id", userId)
         .select("user_id");

@@ -112,7 +112,7 @@ describe("useOnboarding 좌표 경로 (AC-ONB-3)", () => {
 });
 
 describe("건너뛰기와 단축 (ONB-04)", () => {
-  it("2단계 건너뛰기는 시작 값으로 되돌리고 3단계로, 3단계 건너뛰기는 저장", async () => {
+  it("2, 3단계 건너뛰기는 시작 값으로 되돌리고 다음으로, 4단계 건너뛰기는 빈 목록으로 저장", async () => {
     const { hook, submit, deps } = setup();
     act(() => hook.result.current.placePin({ kind: "map-tap", position: TAP }));
     act(() => hook.result.current.saveOffice());
@@ -121,10 +121,50 @@ describe("건너뛰기와 단축 (ONB-04)", () => {
     expect(hook.result.current.step).toBe(3);
     expect(hook.result.current.prefs.walk).toBe(10);
     act(() => hook.result.current.setFoods(["회"]));
+    act(() => hook.result.current.skip());
+    expect(hook.result.current.step).toBe(4);
+    expect(submit).not.toHaveBeenCalled();
+    act(() => {
+      hook.result.current.toggleLiked("gukbap");
+    });
     await act(async () => hook.result.current.skip());
     expect(submit.mock.calls[0]![0].avoid).toEqual(EMPTY_AVOID);
+    expect(submit.mock.calls[0]![0].liked).toEqual([]);
     expect(deps.stepCompleted).toHaveBeenCalledWith(2, true);
     expect(deps.stepCompleted).toHaveBeenCalledWith(3, true);
+    expect(deps.stepCompleted).toHaveBeenCalledWith(4, true);
+  });
+
+  it("4단계에서 고른 좋아하는 음식을 완료로 저장한다(5개까지)", async () => {
+    const { hook, submit } = setup();
+    act(() => hook.result.current.placePin({ kind: "map-tap", position: TAP }));
+    act(() => hook.result.current.saveOffice());
+    act(() => hook.result.current.primary());
+    act(() => hook.result.current.primary());
+    expect(hook.result.current.step).toBe(4);
+    const results: string[] = [];
+    for (const s of [
+      "hansik",
+      "gukbap",
+      "ilsik",
+      "salad",
+      "bunsik",
+      "asian",
+    ] as const)
+      act(() => {
+        results.push(hook.result.current.toggleLiked(s));
+      });
+    expect(results.at(-1)).toBe("full");
+    act(() => {
+      hook.result.current.toggleLiked("hansik");
+    });
+    await act(async () => hook.result.current.primary());
+    expect(submit.mock.calls[0]![0].liked).toEqual([
+      "gukbap",
+      "ilsik",
+      "salad",
+      "bunsik",
+    ]);
   });
 
   it("저장 실패면 값을 그대로 두고 오류를 보여 준다", async () => {

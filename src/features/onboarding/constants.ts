@@ -1,6 +1,7 @@
 // 온보딩 값의 기본값, 범위, 칩 목록 (ONB-02, ONB-03, D-07 안건 2, 4). 화면, 서버 검증, 테스트가 함께 쓴다.
 // 범위는 DB 제약(T4.4 마이그레이션 preferences_*, avoid_rules_*)과 같아야 한다.
 import { onboardingCopy } from "@/copy/onboarding";
+import type { CategorySlug } from "@/features/place/categories";
 
 export const PREF_DEFAULTS = {
   lunch: 10_000,
@@ -38,6 +39,31 @@ export const EMPTY_AVOID: AvoidChoice = {
   allergies: [],
   custom: [],
 };
+
+/**
+ * 좋아하는 음식으로 고를 수 있는 카테고리(ONB-06, D-39). 술집은 점심 추천에서 빠지고(T9.16) 취향보다 자리의 문제라 묻지 않는다.
+ * 순서는 화면 타일 순서. DB preferences_liked_slugs 제약과 같은 목록이어야 한다.
+ */
+export const LIKED_CATEGORY_SLUGS = [
+  "hansik",
+  "gukbap",
+  "gogi",
+  "jungsik",
+  "ilsik",
+  "yangsik",
+  "bunsik",
+  "asian",
+  "fastfood",
+  "salad",
+  "cafe",
+] as const satisfies readonly CategorySlug[];
+export type LikedCategory = (typeof LIKED_CATEGORY_SLUGS)[number];
+/** 좋아하는 음식 최대 개수(DB preferences_liked_slugs와 같음) */
+export const LIKED_MAX = 5;
+
+export function isLikedCategory(value: string): value is LikedCategory {
+  return (LIKED_CATEGORY_SLUGS as readonly string[]).includes(value);
+}
 
 /** 첫 사무실 이름(나 탭에서 바꿀 수 있음, SET-01) */
 export const DEFAULT_OFFICE_NAME = "회사";

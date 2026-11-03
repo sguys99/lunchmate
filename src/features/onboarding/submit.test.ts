@@ -20,6 +20,7 @@ const valid: FinishOnboardingInput = {
   office: { lat: 37.5021, lng: 127.0411 },
   prefs: { lunch: 10_000, dinner: 20_000, walk: 10 },
   avoid: { foods: ["회"], allergies: ["땅콩"], custom: ["고수"] },
+  liked: ["gukbap", "ilsik"],
   next: "/today?walk=15&tab=x",
 };
 
@@ -28,7 +29,10 @@ describe("finishOnboarding (서버 재검증, ONB-01~05)", () => {
     const d = deps();
     const r = await finishOnboarding(valid, d);
     expect(r).toEqual({ ok: true, location: "/today?tab=x" });
-    expect(d.updatePrefs).toHaveBeenCalledWith("u1", valid.prefs);
+    expect(d.updatePrefs).toHaveBeenCalledWith("u1", valid.prefs, [
+      "gukbap",
+      "ilsik",
+    ]);
     expect(d.replaceAvoid).toHaveBeenCalledWith("u1", [
       { kind: "food", value: "회" },
       { kind: "allergy", value: "땅콩" },
@@ -69,6 +73,12 @@ describe("finishOnboarding (서버 재검증, ONB-01~05)", () => {
     ["도보 분 목록 밖", { prefs: { lunch: 10_000, dinner: 20_000, walk: 12 } }],
     ["목록 밖 칩", { avoid: { foods: ["피자"], allergies: [], custom: [] } }],
     ["중복 칩", { avoid: { foods: ["회", "회"], allergies: [], custom: [] } }],
+    [
+      "좋아하는 음식 6개",
+      { liked: ["hansik", "jungsik", "ilsik", "yangsik", "bunsik", "gukbap"] },
+    ],
+    ["좋아하는 음식에 술집", { liked: ["pub"] }],
+    ["좋아하는 음식 중복", { liked: ["ilsik", "ilsik"] }],
     [
       "긴 직접 입력",
       { avoid: { foods: [], allergies: [], custom: ["가".repeat(21)] } },

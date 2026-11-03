@@ -1,5 +1,5 @@
 "use client";
-// 온보딩 흐름 상태 (T4.16~T4.21). 1 위치 → 2 예산과 거리 → 3 못 먹는 음식 → 저장 뒤 첫 추천(/today)으로.
+// 온보딩 흐름 상태 (T4.16~T4.21, T9.17). 1 위치 → 2 예산과 거리 → 3 못 먹는 음식 → 4 좋아하는 음식(D-39) → 저장 뒤 첫 추천(/today)으로.
 //
 // 좌표 경로 (AC-ONB-3)
 // - 검색 결과, 현위치 좌표(MapMoveTarget)는 moveMap()으로 지도 중심만 옮긴다. 핀 상태에는 "map-moved"(좌표 없음)만 보낸다.
@@ -15,7 +15,9 @@ import { useOnlineStatus } from "@/lib/network";
 import {
   CUSTOM_AVOID_MAX_ITEMS,
   CUSTOM_AVOID_MAX_LENGTH,
+  LIKED_MAX,
   type AvoidChoice,
+  type LikedCategory,
   type Prefs,
 } from "./constants";
 import type { GeoPermission, LocateResult } from "./geolocation";
@@ -28,7 +30,7 @@ import { usePinPlacement } from "./use-pin-placement";
 
 const copy = onboardingCopy;
 
-export type OnboardingStep = 1 | 2 | 3;
+export type OnboardingStep = 1 | 2 | 3 | 4;
 
 export type OnboardingDeps = {
   submit: (req: FinishOnboardingRequest) => Promise<FinishOnboardingResponse>;
@@ -42,6 +44,8 @@ export type OnboardingDeps = {
 export type { MapMover } from "./use-pin-placement";
 
 export type CustomAddResult = "added" | "duplicate" | "empty" | "limit";
+/** 좋아하는 음식 타일 누르기 결과. full이면 고르지 않고 안내만 한다 */
+export type LikedToggleResult = "added" | "removed" | "full";
 
 export function useOnboarding({
   next,
@@ -59,6 +63,7 @@ export function useOnboarding({
   const [visited, setVisited] = useState(0);
   const [prefs, setPrefs] = useState<Prefs>(initialPrefs);
   const [avoid, setAvoid] = useState<AvoidChoice>(initialAvoid);
+  const [liked, setLiked] = useState<LikedCategory[]>([]);
   const [announce, setAnnounce] = useState("");
   const [finishing, setFinishing] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -79,7 +84,11 @@ export function useOnboarding({
     setVisited((v) => v + 1);
   }, []);
 
-  async function finish(finalAvoid: AvoidChoice, finalPrefs: Prefs) {
+  async function finish(
+    finalAvoid: AvoidChoice,
+    finalPrefs: Prefs,
+    finalLiked: LikedCategory[],
+  ) {
     const officeInput = officeSaveInput(office);
     if (!officeInput || finishing) return;
     if (!online) return;
@@ -91,6 +100,7 @@ export function useOnboarding({
         office: officeInput,
         prefs: finalPrefs,
         avoid: finalAvoid,
+        liked: finalLiked,
         next,
       })
       .catch((): FinishOnboardingResponse => ({ ok: false, error: "save" }));
@@ -114,6 +124,7 @@ export function useOnboarding({
     canSave: canSaveOffice(office),
     prefs,
     avoid,
+    liked,
     initialPrefs,
     radiusM,
     announce,
@@ -153,6 +164,16 @@ export function useOnboarding({
     },
     removeCustom: (item: string) =>
       setAvoid((a) => ({ ...a, custom: a.custom.filter((x) => x !== item) })),
+    /** 좋아하는 음식 타일(4단계). 5개가 차면 더 고르지 않는다 */
+    toggleLiked(slug: LikedCategory): LikedToggleResult {
+      if (liked.includes(slug)) {
+        setLiked(liked.filter((s) => s !== slug));
+        return "removed";
+      }
+      if (liked.length >= LIKED_MAX) return "full";
+      setLiked([...liked, slug]);
+      return "added";
+    },
 
     /** 1단계 "이 위치로 저장": 핀이 있을 때만 다음으로(저장 요청은 마칠 때 한 번) */
     saveOffice() {
@@ -160,18 +181,18 @@ export function useOnboarding({
       depsRef.current.stepCompleted?.(1, false);
       go(2);
     },
-    /** 주 버튼: 2 → 3, 3 → 저장 */
+    /** 주 버튼: 2 → 3 → 4, 4 → 저장 */
     primary() {
       if (step === 1) return;
-      if (step === 2) {
-        depsRef.current.stepCompleted?.(2, false);
-        go(3);
+      if (step === 2 || step === 3) {
+        depsRef.current.stepCompleted?.(step, false);
+        go(step === 2 ? 3 : 4);
         return;
       }
-      depsRef.current.stepCompleted?.(3, false);
-      void finish(avoid, prefs);
+      depsRef.current.stepCompleted?.(4, false);
+      void finish(avoid, prefs, liked);
     },
-    /** 건너뛰기: 이 단계를 시작 값으로 두고 다음으로 */
+    /** 건너뛰기: 이 단계를 시작 값으로 두고 다음으로(4단계는 빈 목록으로 저장) */
     skip() {
       if (step === 2) {
         setPrefs(initialPrefs);
@@ -180,15 +201,20 @@ export function useOnboarding({
       } else if (step === 3) {
         setAvoid(initialAvoid);
         depsRef.current.stepCompleted?.(3, true);
-        void finish(initialAvoid, prefs);
+        go(4);
+      } else if (step === 4) {
+        setLiked([]);
+        depsRef.current.stepCompleted?.(4, true);
+        void finish(avoid, prefs, []);
       }
     },
-    /** 여기까지 하고 시작(C 단축): 지금까지 고른 값 그대로, 손대지 않은 3단계는 시작 값 */
+    /** 여기까지 하고 시작(C 단축): 지금까지 고른 값 그대로, 손대지 않은 3, 4단계는 시작 값 */
     finishNow() {
       if (step !== 2) return;
       depsRef.current.stepCompleted?.(2, false);
       depsRef.current.stepCompleted?.(3, true);
-      void finish(avoid, prefs);
+      depsRef.current.stepCompleted?.(4, true);
+      void finish(avoid, prefs, []);
     },
     goTo(target: OnboardingStep) {
       if (finishing || target === step) return;

@@ -1,6 +1,7 @@
 "use client";
-// 온보딩 단계 내용 (T4.16~T4.18): 위치 검색, 예산과 거리, 못 먹는 음식. 시안 B(D-07)의 조각을 실제 데이터로 옮겼다.
+// 온보딩 단계 내용 (T4.16~T4.18, T9.17): 위치 검색, 예산과 거리, 못 먹는 음식, 좋아하는 음식(D-39 A 그림 타일). 시안 B(D-07)의 조각을 실제 데이터로 옮겼다.
 import {
+  Check,
   CloudOff,
   LocateFixed,
   LocateOff,
@@ -27,11 +28,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { onboardingCopy } from "@/copy/onboarding";
 import { formatShortWon } from "@/lib/format";
+import { categoryLabel } from "@/features/place/categories";
+import { CategoryIllustration } from "@/features/place/illustrations";
 import type { NearbyRestaurant } from "@/lib/kakao/local";
 import { cn } from "@/lib/utils";
 import {
   ALLERGY_CHIPS,
   FOOD_CHIPS,
+  LIKED_CATEGORY_SLUGS,
+  LIKED_MAX,
   PREF_RANGES,
   WALK_OPTIONS,
 } from "./constants";
@@ -61,6 +66,7 @@ export type AvoidState = Pick<
   Onboarding,
   "avoid" | "setFoods" | "setAllergies" | "addCustom" | "removeCustom"
 >;
+export type LikedState = Pick<Onboarding, "liked" | "toggleLiked">;
 
 const copy = onboardingCopy;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -586,6 +592,99 @@ function CustomAvoid({ ob }: { ob: AvoidState }) {
           ))}
         </ul>
       ) : null}
+    </section>
+  );
+}
+
+/* ---------- 4단계: 좋아하는 음식 (ONB-06, D-39 A) ---------- */
+
+/**
+ * 카테고리 그림 타일 3열(넓으면 4열). 5개까지 고르고, 다 차면 나머지 타일은 흐리게(aria-disabled) 두고 안내 문장을 바꾼다.
+ * 나 탭 설정과 홈 취향 시트가 같은 조각을 자기 상태로 쓴다.
+ */
+export function LikedFields({ ob }: { ob: LikedState }) {
+  const gridId = useId();
+  const [announce, setAnnounce] = useState("");
+  const count = ob.liked.length;
+  const full = count >= LIKED_MAX;
+  return (
+    <section aria-labelledby={gridId} className="flex flex-col gap-3">
+      <div className="flex items-baseline justify-between">
+        <h2 id={gridId} className="type-caption text-muted-foreground">
+          {copy.liked.gridLabel}
+        </h2>
+        <span
+          aria-hidden
+          className="type-caption text-muted-foreground tabular-nums"
+        >
+          {copy.liked.count(count, LIKED_MAX)}
+        </span>
+      </div>
+      <ul
+        aria-labelledby={gridId}
+        className="grid grid-cols-3 gap-2 @min-[34rem]/screen:grid-cols-4 desktop:grid-cols-3"
+      >
+        {LIKED_CATEGORY_SLUGS.map((slug) => {
+          const on = ob.liked.includes(slug);
+          const dim = full && !on;
+          return (
+            <li key={slug}>
+              <button
+                type="button"
+                aria-pressed={on}
+                aria-disabled={dim || undefined}
+                onClick={() => {
+                  const r = ob.toggleLiked(slug);
+                  const n =
+                    r === "added"
+                      ? count + 1
+                      : r === "removed"
+                        ? count - 1
+                        : count;
+                  setAnnounce(
+                    r === "full"
+                      ? copy.liked.full(LIKED_MAX)
+                      : copy.liked.countLabel(n, LIKED_MAX),
+                  );
+                }}
+                className={cn(
+                  "relative flex min-h-24 w-full flex-col items-center justify-center gap-1.5 rounded-card border bg-card px-1 py-3 transition-[border-color,opacity] duration-(--lm-duration-fast)",
+                  on
+                    ? "border-primary ring-[0.5px] ring-primary ring-inset"
+                    : "border-border hover:bg-muted active:bg-muted",
+                  dim && "opacity-55",
+                  focusRing,
+                  pressMotion,
+                )}
+              >
+                <CategoryIllustration slug={slug} size={48} />
+                <span
+                  className={cn(
+                    "text-center type-label break-keep",
+                    on ? "text-primary" : "text-foreground",
+                  )}
+                >
+                  {categoryLabel(slug).split("/")[0]}
+                </span>
+                {on ? (
+                  <span
+                    aria-hidden
+                    className="absolute top-2 right-2 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground"
+                  >
+                    <Check className="size-3" strokeWidth={2.5} />
+                  </span>
+                ) : null}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="type-caption break-keep text-muted-foreground">
+        {full ? copy.liked.full(LIKED_MAX) : copy.liked.note}
+      </p>
+      <p aria-live="polite" className="sr-only">
+        {announce}
+      </p>
     </section>
   );
 }
