@@ -101,7 +101,7 @@ describe("예산 하드 필터: 가격 제보가 있을 때만 (AC-REC-1)", () =
   const settings = { ...BASE_SETTINGS, budgetKRW: 10_000 };
   it("제보 중앙값이 예산을 넘으면 뺀다", () => {
     const c = withRow("1", { price_count: 1, price_median: 15_000 });
-    const r = applyHardFilters([c], settings, EMPTY_HISTORY);
+    const r = applyHardFilters([c], settings, EMPTY_HISTORY, NOW);
     expect(r.kept).toHaveLength(0);
     expect(r.filtered.overBudget).toBe(1);
   });
@@ -115,6 +115,7 @@ describe("예산 하드 필터: 가격 제보가 있을 때만 (AC-REC-1)", () =
       [c],
       { ...settings, budgetKRW: 5_000 },
       EMPTY_HISTORY,
+      NOW,
     );
     expect(r.kept).toHaveLength(1);
   });
@@ -124,7 +125,7 @@ describe("폐업 제보 3건 누적 시 추천 제외 (T6.15, MOD-03)", () => {
   it("서로 다른 3명 제보(closed)면 하드 필터로 빠지고 2건이면 남는다", () => {
     const closed = withRow("1", { closed_reports: 3, closed: true });
     const two = withRow("2", { closed_reports: 2 });
-    const r = applyHardFilters([closed, two], BASE_SETTINGS, EMPTY_HISTORY);
+    const r = applyHardFilters([closed, two], BASE_SETTINGS, EMPTY_HISTORY, NOW);
     expect(r.kept.map((c) => c.id)).toEqual(["2"]);
     expect(r.filtered.closed).toBe(1);
   });
@@ -200,7 +201,7 @@ describe("점심 피크 줄 길어요 감점 (T6.25, PLACE-08)", () => {
       wait_reported_at: minutesBefore(now, 1),
     });
     expect(
-      applyHardFilters([c], BASE_SETTINGS, EMPTY_HISTORY).kept,
+      applyHardFilters([c], BASE_SETTINGS, EMPTY_HISTORY, NOW).kept,
     ).toHaveLength(1);
   });
 });

@@ -174,6 +174,8 @@ export type RecoPick = ScoredCandidate & {
 export type FilterCounts = {
   avoid: number;
   blocked: number;
+  /** 끼니에 안 맞는 카테고리(점심 술집, T9.16) */
+  offMeal: number;
   closed: number;
   overBudget: number;
 };

@@ -60,7 +60,12 @@ export function refillDeck(
   slots: readonly (string | null)[],
 ): Deck {
   const { candidates, settings, history, seen, now } = input;
-  const { kept, filtered } = applyHardFilters(candidates, settings, history);
+  const { kept, filtered } = applyHardFilters(
+    candidates,
+    settings,
+    history,
+    now,
+  );
   const scored = scoreAll(kept, settings, history, now);
   const byId = new Map(scored.map((s) => [s.candidate.id, s]));
   const held = slots.map((id) => (id === null ? null : (byId.get(id) ?? null)));

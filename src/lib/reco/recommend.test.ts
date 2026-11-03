@@ -35,6 +35,7 @@ describe("recommend 파이프라인 (REC-03)", () => {
     expect(r.filtered).toEqual({
       avoid: 0,
       blocked: 0,
+      offMeal: 0,
       closed: 1,
       overBudget: 1,
     });
@@ -93,6 +94,17 @@ describe("AC-REC-2 (파이프라인): 다시 뽑기 5회 연속, 같은 세션�
         expect(seen.has(p.candidate.id)).toBe(false);
         seen.add(p.candidate.id);
       }
+    }
+  });
+});
+
+describe("끼니 적합도 (T9.16)", () => {
+  it("점심 콜드 스타트에서 후보 절반이 술집이어도 카드에 술집이 나오지 않는다", () => {
+    const candidates = manyCandidates(20, ["pub", "hansik", "pub", "ilsik"]);
+    for (let seed = 1; seed <= 50; seed++) {
+      const r = recommend(makeInput({ candidates }), seededRng(seed));
+      expect(r.picks.some((p) => p.candidate.category === "pub")).toBe(false);
+      expect(r.filtered.offMeal).toBe(10);
     }
   });
 });

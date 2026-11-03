@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { addKstDays } from "@/lib/time";
-import { NEUTRAL, WEIGHTS } from "./constants";
+import { MEAL_CATEGORY_PENALTY, NEUTRAL, WEIGHTS } from "./constants";
 import {
   scoreAll,
   scoreCandidate,
@@ -250,5 +250,30 @@ describe("scoreAll", () => {
       NOW,
     );
     expect(r.map((s) => s.candidate.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("끼니 적합도 P 감점 (T9.16)", () => {
+  const cafe = makeCandidate("cafe", { category: "cafe" });
+  const rice = makeCandidate("rice");
+  const pFor = (c: typeof cafe, settings: RecoSettings) =>
+    scoreAll([c], settings, EMPTY_HISTORY, NOW)[0]!.factors.P;
+
+  it("콜드 스타트에서도 카페류는 중립보다 낮고, 다른 카테고리는 중립이다", () => {
+    expect(pFor(cafe, BASE_SETTINGS)).toBeCloseTo(
+      NEUTRAL - MEAL_CATEGORY_PENALTY.lunch.cafe,
+    );
+    expect(pFor(rice, BASE_SETTINGS)).toBe(NEUTRAL);
+  });
+
+  it("요즘 땡겨요로 카페를 고르면 감점하지 않고 올린다", () => {
+    const settings: RecoSettings = {
+      ...BASE_SETTINGS,
+      craving: {
+        categories: ["cafe"],
+        until: new Date(NOW.getTime() + 86_400_000),
+      },
+    };
+    expect(pFor(cafe, settings)).toBeGreaterThan(NEUTRAL);
   });
 });

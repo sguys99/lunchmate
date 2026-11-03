@@ -17,6 +17,7 @@ import {
   CRAVING_BOOST,
   ESTIMATE_BUDGET_CONFIDENCE,
   FEEDBACK_HALF_LIFE_DAYS,
+  MEAL_CATEGORY_PENALTY,
   MIN_REVIEWS_FOR_REPUTATION,
   NEUTRAL,
   PLACE_PREF_SCALE,
@@ -134,12 +135,17 @@ export function scoreCandidate(
   const craving = ctx.cravings.has(c.category);
   // 다시 뽑기 3연속 동안 화면에 있던 카테고리: 이번 세션 약한 부정(T6.11, reshuffle.ts)
   const reshuffled = history.sessionDisliked?.has(c.category) ?? false;
+  // 끼니 적합도(T9.16): 이 끼니에 덜 어울리는 카테고리는 콜드 스타트부터 낮춘다. 요즘 땡겨요면 적용하지 않는다
+  const mealPenalties: Partial<Record<string, number>> =
+    MEAL_CATEGORY_PENALTY[settings.meal];
+  const mealPenalty = craving ? 0 : (mealPenalties[c.category] ?? 0);
   const P = clamp01(
     NEUTRAL +
       PLACE_PREF_SCALE * Math.tanh(placeSignal) +
       CATEGORY_PREF_SCALE * Math.tanh(categorySignal) +
       (craving ? CRAVING_BOOST : 0) -
-      (reshuffled ? RESHUFFLE_CATEGORY_PENALTY : 0),
+      (reshuffled ? RESHUFFLE_CATEGORY_PENALTY : 0) -
+      mealPenalty,
   );
 
   // B: 예산 안이면 1, 넘으면 넘은 비율만큼 깎음. 추정가는 중립 쪽으로 반만 반영

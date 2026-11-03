@@ -76,8 +76,8 @@ describe("AC-DEAL-2: 할인 정보가 있는 식당과 없는 식당의 추천 �
   it("하드 필터 결과가 할인과 무관하다", () => {
     const plain = manyCandidates(12);
     const withDeals = plain.map((c) => ({ ...c, deal: { active: true } }));
-    const a = applyHardFilters(plain, BASE_SETTINGS, EMPTY_HISTORY);
-    const b = applyHardFilters(withDeals, BASE_SETTINGS, EMPTY_HISTORY);
+    const a = applyHardFilters(plain, BASE_SETTINGS, EMPTY_HISTORY, NOW);
+    const b = applyHardFilters(withDeals, BASE_SETTINGS, EMPTY_HISTORY, NOW);
     expect(b.kept.map((c) => c.id)).toEqual(a.kept.map((c) => c.id));
     expect(b.filtered).toEqual(a.filtered);
   });
