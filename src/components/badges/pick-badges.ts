@@ -7,6 +7,7 @@ export type WaitingLevel = "walkIn" | "short" | "long";
 
 export type PlaceBadge =
   | { kind: "avoidWarning" }
+  | { kind: "closedToday" }
   | { kind: "waiting"; level: WaitingLevel; minutesAgo?: number }
   | { kind: "estimate" }
   | { kind: "deal" }
@@ -31,6 +32,7 @@ type PriorityKey =
  * 배지 줄의 우선순위. 작을수록 먼저 남는다. 규칙은 "기피 > 웨이팅 > 할인 > 제보".
  * 기준은 (1) 빠지면 결정이 실패할 위험, (2) 정보가 유효한 시간이 짧은 순서다.
  * 1. avoidWarning: POLL-13. 같이 먹는 사람이 못 먹는 곳은 투표 실패 비용이 가장 크다.
+ * 1-1. closedToday: D-40. 이번 끼니에 문이 닫혀 있었다는 제보. 가도 못 먹을 수 있어 웨이팅보다 먼저다.
  * 2~4. waiting: PLACE-07/08. 30분만 유효하고 "지금 가도 되나"에 바로 답한다. 단계는 줄 길어요 > 조금 기다려요 > 바로 입장.
  *      바로 입장도 할인보다 앞이다. 할인은 종료일까지 며칠 남아 있고 상세에서도 보이지만 웨이팅은 30분 뒤 사라진다.
  * 5. deal: DEAL-02. 표시만 하는 정보이고 제품 원칙 6(추천과 광고 분리)에 따라 결정 근거 배지보다 뒤에 둔다.
@@ -39,6 +41,7 @@ type PriorityKey =
  */
 export const BADGE_PRIORITY: readonly PriorityKey[] = [
   "avoidWarning",
+  "closedToday",
   "waiting:long",
   "waiting:short",
   "waiting:walkIn",

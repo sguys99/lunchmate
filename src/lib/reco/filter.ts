@@ -1,8 +1,9 @@
 // 하드 필터 (T5.6, PRD 7장, AC-REC-1). 순수 함수.
-// 순서: 기피 음식 → 다시 안 갈 곳 → 끼니에 안 맞는 카테고리(T9.16, 점심 술집) → 폐업 제보 누적 → 예산 초과(제보 가격이 있을 때만).
+// 순서: 기피 음식 → 다시 안 갈 곳 → 끼니에 안 맞는 카테고리(T9.16, 점심 술집) → 폐업 제보 누적 → 이번 끼니 오늘 쉬어요 2명(T9.18)
+// → 예산 초과(제보 가격이 있을 때만).
 // 한 곳은 처음 걸린 규칙 하나에만 센다(REC-09 완화 제안 "예산 조건을 풀면 4곳이 더 있습니다"에 쓰는 수).
 import { matchesAvoid } from "./avoid-match";
-import { MEAL_EXCLUDED_CATEGORIES } from "./constants";
+import { CLOSED_TODAY_EXCLUDE, MEAL_EXCLUDED_CATEGORIES } from "./constants";
 import { activeCravings } from "./score";
 import type {
   Candidate,
@@ -48,7 +49,8 @@ export function isOffMeal(
 
 /**
  * 걸린 첫 규칙. 통과하면 null.
- * mealCheck를 넘기지 않으면 끼니 규칙을 건너뛴다(회식 모드는 술집이 후보라 쓰지 않는다, party/rank.ts).
+ * mealCheck를 넘기지 않으면 끼니 규칙과 이번 끼니 오늘 쉬어요 규칙을 건너뛴다
+ * (회식 모드는 술집이 후보이고 다른 날 모임일 수 있어 쓰지 않는다, party/rank.ts).
  */
 export function hardFilterReason(
   c: Candidate,
@@ -61,6 +63,8 @@ export function hardFilterReason(
   if (mealCheck && isOffMeal(c, mealCheck.meal, mealCheck.cravings))
     return "offMeal";
   if (c.closedReports >= CLOSED_REPORT_THRESHOLD) return "closed";
+  if (mealCheck && (c.closedToday ?? 0) >= CLOSED_TODAY_EXCLUDE)
+    return "closedToday";
   // 예산 초과는 실제 제보 가격이 있을 때만. 카테고리 추정가로는 빼지 않는다(점수 B에서만 반영)
   if (
     c.priceReport !== null &&
@@ -89,6 +93,7 @@ export function applyHardFilters(
     blocked: 0,
     offMeal: 0,
     closed: 0,
+    closedToday: 0,
     overBudget: 0,
   };
   const mealCheck = {

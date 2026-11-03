@@ -12,13 +12,19 @@ import { kakaoCategorySlug, kakaoCategoryText } from "./kakao-category";
 /** place_id에 붙는 우리 DB 집계(6단계). 홈은 아직 비어 있다 */
 export type PlaceStats = Pick<
   Candidate,
-  "priceReport" | "thumbs" | "closedReports" | "waiting" | "deal"
+  | "priceReport"
+  | "thumbs"
+  | "closedReports"
+  | "closedToday"
+  | "waiting"
+  | "deal"
 >;
 
 export const EMPTY_STATS: PlaceStats = {
   priceReport: null,
   thumbs: { up: 0, down: 0 },
   closedReports: 0,
+  closedToday: 0,
   waiting: null,
   deal: null,
 };

@@ -106,6 +106,7 @@ describe("하드 필터 순서 (T5.6)", () => {
       blocked: 1,
       offMeal: 0,
       closed: 1,
+      closedToday: 0,
       overBudget: 1,
     });
   });
@@ -225,5 +226,38 @@ describe("끼니 적합도 하드 필터 (T9.16)", () => {
       expect(isOffMeal(c, "lunch", new Set())).toBe(c.category === "pub");
       expect(isOffMeal(c, "dinner", new Set())).toBe(false);
     }
+  });
+});
+
+describe("이번 끼니 오늘 쉬어요 (T9.18, D-40)", () => {
+  const lunch = { meal: "lunch" as const, cravings: new Set<string>() };
+
+  it("서로 다른 2명이면 그 끼니 추천에서 빼고 closedToday로 센다", () => {
+    const r = applyHardFilters(
+      [
+        makeCandidate("two", { closedToday: 2 }),
+        makeCandidate("one", { closedToday: 1 }),
+        makeCandidate("none"),
+      ],
+      BASE_SETTINGS,
+      EMPTY_HISTORY,
+      NOW,
+    );
+    expect(r.kept.map((c) => c.id)).toEqual(["one", "none"]);
+    expect(r.filtered.closedToday).toBe(1);
+  });
+
+  it("폐업 3명이 먼저 걸리고, 회식 모드(끼니 기준 없음)는 빼지 않는다", () => {
+    const c = makeCandidate("x", { closedReports: 3, closedToday: 2 });
+    expect(hardFilterReason(c, BASE_SETTINGS, EMPTY_HISTORY, lunch)).toBe(
+      "closed",
+    );
+    expect(
+      hardFilterReason(
+        makeCandidate("y", { closedToday: 5 }),
+        BASE_SETTINGS,
+        EMPTY_HISTORY,
+      ),
+    ).toBeNull();
   });
 });

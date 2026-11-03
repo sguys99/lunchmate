@@ -29,6 +29,7 @@ describe("카카오 음식점 → 후보", () => {
       priceReport: null,
       thumbs: { up: 0, down: 0 },
       closedReports: 0,
+      closedToday: 0,
       waiting: null,
       deal: null,
     });

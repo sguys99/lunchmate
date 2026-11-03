@@ -32,6 +32,11 @@ export type Candidate = {
   thumbs: { up: number; down: number };
   /** "문 닫았어요" 제보 수 (서로 다른 사용자) */
   closedReports: number;
+  /**
+   * 이번 끼니 "오늘만 쉬어요" 제보 수(서로 다른 사용자, D-40). 1이면 감점(W와 같은 크기), 2 이상이면 그 끼니 추천에서 뺀다.
+   * 없으면 0으로 본다.
+   */
+  closedToday?: number;
   /** 아직 유효할 수 있는 최근 웨이팅 제보. 없으면 null. 30분 유효 판정은 엔진이 한다 */
   waiting: { level: WaitLevel; reportedAt: Date } | null;
   /**
@@ -125,7 +130,7 @@ export type ScoreFactors = {
   C: number;
   /** 반복 패널티. 클수록 감점 */
   R: number;
-  /** 웨이팅 패널티(PLACE-08). 점심 피크에 유효한 "줄 길어요"만 1 */
+  /** 자리 패널티. 점심 피크에 유효한 "줄 길어요"(PLACE-08) 또는 이번 끼니 "오늘 쉬어요" 제보 1건(D-40)이면 1 */
   W: number;
 };
 
@@ -182,6 +187,8 @@ export type FilterCounts = {
   /** 끼니에 안 맞는 카테고리(점심 술집, T9.16) */
   offMeal: number;
   closed: number;
+  /** 이번 끼니 "오늘 쉬어요" 제보 2명 이상(D-40) */
+  closedToday: number;
   overBudget: number;
 };
 

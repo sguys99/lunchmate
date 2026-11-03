@@ -10,6 +10,8 @@ export const badgeDescriptions = {
   report: reportNotice,
   deal: reportNotice,
   waiting: "최근 30분 안에 들어온 제보만 보여 줍니다.",
+  closedToday:
+    "이번 끼니에 가 보니 문이 닫혀 있었다는 제보입니다. 끼니가 바뀌면 사라집니다.",
   avoidWarning:
     "참여자 중 이 식당 음식을 피하는 분이 있지만, 누구인지는 알리지 않습니다.",
 } as const satisfies Record<PlaceBadgeKind, string>;

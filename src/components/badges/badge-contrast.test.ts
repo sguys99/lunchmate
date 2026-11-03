@@ -33,10 +33,7 @@ function ratio(theme: ThemeName, fg: string, bg: string): number {
 describe("도메인 배지 색 대비 (calm)", () => {
   for (const theme of THEMES)
     for (const bg of SURFACES)
-      it.each(PAIRS)(
-        `${theme} ${bg}: $use ($fg) >= $min`,
-        ({ fg, min }) => {
-          expect(ratio(theme, fg, bg)).toBeGreaterThanOrEqual(min);
-        },
-      );
+      it.each(PAIRS)(`${theme} ${bg}: $use ($fg) >= $min`, ({ fg, min }) => {
+        expect(ratio(theme, fg, bg)).toBeGreaterThanOrEqual(min);
+      });
 });

@@ -5,6 +5,7 @@
 // - 웨이팅 W: 30분 안의 최신 제보 1건. now(바로 지금), short, long 단계를 엔진 단계로 바꾼다.
 //   점심 피크와 "줄 길어요" 판정은 엔진이 한다(PLACE-08).
 // - 폐업(MOD-03): 서버가 closed(서로 다른 3명)로 판정했으면 하드 필터 기준 수 이상으로 맞춘다.
+// - 오늘 쉬어요(D-40): 이번 끼니 제보 수. 1명이면 W 감점과 카드 배지, 2명이면 엔진이 뺀다.
 // - 할인: 표시용 deal만. 엔진은 점수와 이유에 쓰지 않는다(AC-DEAL-2, deal-neutral.test.ts).
 // 집계를 못 받았으면 EMPTY_STATS(콜드 스타트 중립)로 추천을 계속한다.
 import { CLOSED_REPORT_THRESHOLD } from "@/lib/reco/filter";
@@ -20,6 +21,8 @@ export type PlaceStatsRow = {
   thumbs_down: number;
   closed_reports: number;
   closed: boolean;
+  /** 이번 끼니 "오늘 쉬어요" 제보 수(D-40). 옛 응답이면 없을 수 있다 */
+  closed_today?: number | null;
   wait_level: string | null;
   wait_reported_at: string | null;
   deal_count: number;
@@ -50,6 +53,7 @@ export function toPlaceStats(row: PlaceStatsRow): PlaceStats {
     closedReports: row.closed
       ? Math.max(closedReports, CLOSED_REPORT_THRESHOLD)
       : closedReports,
+    closedToday: count(row.closed_today ?? 0),
     waiting:
       level && reportedAt && !Number.isNaN(reportedAt.getTime())
         ? { level, reportedAt }

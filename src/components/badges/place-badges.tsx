@@ -16,6 +16,7 @@
 // - 카드당 최대 2개는 PlaceBadges가 pickBadges로 지킨다. 추정은 배지 줄 대신 가격 옆 EstimateMark(estimate-mark.tsx)로 붙는다(T3.2).
 import {
   BadgePercentIcon,
+  DoorClosedIcon,
   DoorOpenIcon,
   HourglassIcon,
   type LucideIcon,
@@ -183,6 +184,20 @@ export function AvoidWarningBadge(props: CommonProps) {
   );
 }
 
+/** D-40: 이번 끼니에 문이 닫혀 있었다는 제보(1명 이상). 2명이면 추천에서 빠져 카드에 오지 않는다 */
+export function ClosedTodayBadge(props: CommonProps) {
+  return (
+    <DomainBadge
+      kind="closedToday"
+      tone="warning"
+      icon={DoorClosedIcon}
+      label={badgeCopy.labels.closedToday}
+      srLabel={badgeCopy.ariaLabels.closedToday}
+      {...props}
+    />
+  );
+}
+
 /** PlaceBadge 데이터 하나를 알맞은 배지 컴포넌트로 */
 export function BadgeFor({
   badge,
@@ -205,6 +220,8 @@ export function BadgeFor({
       );
     case "avoidWarning":
       return <AvoidWarningBadge {...props} />;
+    case "closedToday":
+      return <ClosedTodayBadge {...props} />;
   }
 }
 

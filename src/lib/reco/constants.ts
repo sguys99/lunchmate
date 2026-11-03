@@ -69,6 +69,11 @@ export const MEAL_CATEGORY_PENALTY = {
   dinner: { cafe: 0.2 },
 } as const satisfies Record<Meal, Partial<Record<CategorySlug, number>>>;
 
+/* 오늘 쉬어요 (T9.18, D-40) ----------------------------------------- */
+
+/** 이번 끼니 "오늘만 쉬어요" 제보가 서로 다른 이 수 이상이면 그 끼니 추천에서 뺀다. 1명은 W 감점만 */
+export const CLOSED_TODAY_EXCLUDE = 2;
+
 /* 예산 B ------------------------------------------------------------ */
 
 /** 예산을 넘은 비율 × 이 값만큼 B가 깎인다. 2면 50% 넘을 때 0 */

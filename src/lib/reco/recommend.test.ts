@@ -37,6 +37,7 @@ describe("recommend 파이프라인 (REC-03)", () => {
       blocked: 0,
       offMeal: 0,
       closed: 1,
+      closedToday: 0,
       overBudget: 1,
     });
     expect(r.eligibleCount).toBe(2);

@@ -131,6 +131,7 @@ async function readStats(
       thumbs_down: r.thumbs_down ?? 0,
       closed_reports: r.closed_reports ?? 0,
       closed: r.closed ?? false,
+      closed_today: r.closed_today ?? 0,
       wait_level: r.wait_level ?? null,
       wait_reported_at: r.wait_reported_at ?? null,
       deal_count: r.deal_count ?? 0,

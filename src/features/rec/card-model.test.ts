@@ -62,6 +62,12 @@ describe("카드 표시 값 (REC-06)", () => {
     expect(cardBadges(stale, NOW)).toEqual([]);
   });
 
+  it("이번 끼니 오늘 쉬어요 제보가 있으면 배지 후보 맨 앞(T9.18, D-40)", () => {
+    expect(
+      cardBadges(pickOf({ closedToday: 1, deal: { active: true } }), NOW),
+    ).toEqual([{ kind: "closedToday" }, { kind: "deal" }]);
+  });
+
   it("카카오 값이 없는 곳은 묶음에서 뺀다", () => {
     expect(toCards([pickOf()], new Map(), "lunch", NOW)).toEqual([]);
   });

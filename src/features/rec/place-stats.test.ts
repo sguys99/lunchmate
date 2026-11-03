@@ -71,6 +71,12 @@ describe("toPlaceStats", () => {
     ).toBeNull();
   });
 
+  it("오늘 쉬어요 제보 수를 넘기고, 없거나 깨진 값은 0(T9.18)", () => {
+    expect(toPlaceStats(row({ closed_today: 2 })).closedToday).toBe(2);
+    expect(toPlaceStats(row({ closed_today: null })).closedToday).toBe(0);
+    expect(toPlaceStats(row({ closed_today: -1 })).closedToday).toBe(0);
+  });
+
   it("할인은 표시용 deal만 켠다", () => {
     expect(toPlaceStats(row({ deal_count: 2 })).deal).toEqual({
       active: true,
@@ -125,7 +131,12 @@ describe("폐업 제보 3건 누적 시 추천 제외 (T6.15, MOD-03)", () => {
   it("서로 다른 3명 제보(closed)면 하드 필터로 빠지고 2건이면 남는다", () => {
     const closed = withRow("1", { closed_reports: 3, closed: true });
     const two = withRow("2", { closed_reports: 2 });
-    const r = applyHardFilters([closed, two], BASE_SETTINGS, EMPTY_HISTORY, NOW);
+    const r = applyHardFilters(
+      [closed, two],
+      BASE_SETTINGS,
+      EMPTY_HISTORY,
+      NOW,
+    );
     expect(r.kept.map((c) => c.id)).toEqual(["2"]);
     expect(r.filtered.closed).toBe(1);
   });

@@ -12,6 +12,7 @@ export const badgeCopy = {
     deal: "할인",
     waiting: "웨이팅",
     avoidWarning: "못 먹는 분 있음",
+    closedToday: "오늘 쉰다는 제보",
   },
   /** PLACE-07 웨이팅 3단계 이름 */
   waitingLevels: {
@@ -32,5 +33,6 @@ export const badgeCopy = {
     deal: "할인 정보 있음",
     waiting: (text: string) => `웨이팅 ${text}`,
     avoidWarning: "못 먹는 분 있음",
+    closedToday: "이번 끼니에 문이 닫혀 있었다는 제보 있음",
   },
 } as const;

@@ -341,3 +341,23 @@ describe("좋아하는 음식 P 가산 (T9.17, D-39)", () => {
     );
   });
 });
+
+describe("오늘 쉬어요 1명 감점 (T9.18, D-40)", () => {
+  it("제보 1명이면 W가 1이고 점수가 웨이팅 감점만큼 내려간다", () => {
+    const one = scoreAll(
+      [makeCandidate("a", { closedToday: 1 })],
+      BASE_SETTINGS,
+      EMPTY_HISTORY,
+      NOW,
+    )[0]!;
+    const none = scoreAll(
+      [makeCandidate("a")],
+      BASE_SETTINGS,
+      EMPTY_HISTORY,
+      NOW,
+    )[0]!;
+    expect(one.factors.W).toBe(1);
+    expect(none.factors.W).toBe(0);
+    expect(none.score - one.score).toBeCloseTo(WEIGHTS.w);
+  });
+});

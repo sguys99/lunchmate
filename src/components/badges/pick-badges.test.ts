@@ -113,6 +113,7 @@ describe("pickBadges (T3.2 규칙: 기피 > 웨이팅 > 할인 > 제보, 추정�
     expect([...BADGE_PRIORITY, ...INLINE_BADGE_KINDS].sort()).toEqual(
       [
         "avoidWarning",
+        "closedToday",
         "deal",
         "estimate",
         "report",

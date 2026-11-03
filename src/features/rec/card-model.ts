@@ -52,6 +52,7 @@ export function priceNumber(priceKRW: number): CardNumber {
 export function cardBadges(pick: RecoPick, now: Date): PlaceBadge[] {
   const c = pick.candidate;
   const out: PlaceBadge[] = [];
+  if ((c.closedToday ?? 0) > 0) out.push({ kind: "closedToday" });
   if (c.waiting && !isExpired(c.waiting.reportedAt, WAIT_REPORT_TTL_MS, now)) {
     out.push({
       kind: "waiting",

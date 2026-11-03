@@ -191,14 +191,14 @@ export function scoreCandidate(
       Math.min(CATEGORY_REPEAT_MAX, categoryRecentCount * CATEGORY_REPEAT_STEP),
   );
 
-  // W: 점심 피크에 30분 안 "줄 길어요" 제보가 있으면 감점(PLACE-08)
-  const W =
+  // W: 점심 피크에 30분 안 "줄 길어요" 제보가 있으면 감점(PLACE-08).
+  // 이번 끼니 "오늘 쉬어요" 제보 1명도 같은 크기로 감점한다(D-40, 2명이면 하드 필터)
+  const longWait =
     ctx.lunchPeak &&
     c.waiting !== null &&
     c.waiting.level === "long" &&
-    !isExpired(c.waiting.reportedAt, WAIT_REPORT_TTL_MS, now)
-      ? 1
-      : 0;
+    !isExpired(c.waiting.reportedAt, WAIT_REPORT_TTL_MS, now);
+  const W = longWait || (c.closedToday ?? 0) > 0 ? 1 : 0;
 
   const factors: ScoreFactors = { D, P, B, C, R, W };
   const evidence: ScoreEvidence = {
