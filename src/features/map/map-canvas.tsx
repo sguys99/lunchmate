@@ -13,7 +13,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -239,15 +238,12 @@ export function MapCanvas({
           m.setSize({ width, height });
         });
         observer.observe(element);
+        // 사용자가 지도 면을 만졌다(마커 누르기 제외). 멈춤(onIdle)이 사용자 이동인지 가른다
         const touch = (e: Event) => {
           const t = e.target;
           if (t instanceof Element && t.closest(".lm-map-marker-slot")) return;
           userTouched.current = true;
         };
-        for (const type of ["pointerdown", "wheel", "touchstart"] as const) {
-          element.addEventListener(type, touch, { passive: true });
-          unsubs.push(() => element.removeEventListener(type, touch));
-        }
         // 지도 조작 시작(끌기 8px 이상, 두 손가락, 휠)을 한 번 알린다. 누르기와 방향키는 아니다
         let start: { x: number; y: number } | null = null;
         let fired = false;
@@ -260,6 +256,7 @@ export function MapCanvas({
           [
             "pointerdown",
             (e) => {
+              touch(e);
               const p = e as globalThis.PointerEvent;
               start = { x: p.clientX, y: p.clientY };
               fired = false;
@@ -285,7 +282,8 @@ export function MapCanvas({
           ],
           [
             "wheel",
-            () => {
+            (e) => {
+              touch(e);
               fired = false;
               gesture();
             },
@@ -342,25 +340,42 @@ export function MapCanvas({
     };
   }, [map, circleKey, providerKind]);
 
-  // 마커: id 목록이 바뀔 때만 DOM 요소를 새로 만들고, 내용은 포털로 그린다
+  // 마커: 새로 나타난 id만 DOM 요소와 공급자 마커를 만들고 사라진 id만 지운다(다시 묶을 때 전체가 깜빡이지 않게).
+  // 내용은 포털로 그린다
   const markerIds = markers.map((m) => m.id).join("|");
-  const slots = useMemo<ReadonlyMap<string, HTMLElement>>(() => {
-    if (!map || !markerIds) return new Map();
-    return new Map(
-      markerIds.split("|").map((id) => {
-        const el = document.createElement("div");
-        el.className = "lm-map-marker-slot";
-        return [id, el];
-      }),
-    );
-  }, [map, markerIds]);
+  const [slotState, setSlotState] = useState<{
+    map: MapInstance | null;
+    ids: string;
+    slots: ReadonlyMap<string, HTMLElement>;
+  }>({ map: null, ids: "", slots: new Map() });
+  let slots = slotState.slots;
+  if (slotState.map !== map || slotState.ids !== markerIds) {
+    const next = new Map<string, HTMLElement>();
+    if (map && markerIds) {
+      for (const id of markerIds.split("|")) {
+        let el = slotState.map === map ? slots.get(id) : undefined;
+        if (!el) {
+          el = document.createElement("div");
+          el.className = "lm-map-marker-slot";
+        }
+        next.set(id, el);
+      }
+    }
+    slots = next;
+    setSlotState({ map, ids: markerIds, slots });
+  }
   const handlesRef = useRef<Map<string, MarkerHandle>>(new Map());
   useEffect(() => {
     if (!map) return;
-    const handles = new Map<string, MarkerHandle>();
+    const handles = handlesRef.current;
+    for (const [id, h] of handles) {
+      if (slots.has(id)) continue;
+      h.remove();
+      handles.delete(id);
+    }
     for (const m of latest.current.markers) {
       const content = slots.get(m.id);
-      if (!content) continue;
+      if (!content || handles.has(m.id)) continue;
       handles.set(
         m.id,
         map.addMarker({
@@ -372,12 +387,15 @@ export function MapCanvas({
         }),
       );
     }
-    handlesRef.current = handles;
+  }, [map, slots]);
+  // 지도가 바뀌거나 사라지면 마커를 모두 지운다
+  useEffect(() => {
+    const handles = handlesRef.current;
     return () => {
       for (const h of handles.values()) h.remove();
-      handlesRef.current = new Map();
+      handles.clear();
     };
-  }, [map, slots]);
+  }, [map]);
   // 좌표와 쌓임 순서는 요소를 다시 만들지 않고 바꾼다(고른 마커를 위로, T5.27)
   const markerState = markers
     .map((m) => `${m.id}:${m.zIndex}:${m.position.lat},${m.position.lng}`)

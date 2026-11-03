@@ -33,6 +33,10 @@ export type { SheetSnap } from "./view-state";
 
 const copy = mapCopy.sheet;
 const DRAG_START_PX = 6;
+/** 속도는 이만큼(ms) 떨어진 두 점으로 잰다(몰려 오는 터치 이벤트 하나로 튀지 않게) */
+const VELOCITY_WINDOW_MS = 32;
+/** 놓기 전 이만큼(ms) 멈췄으면 튕김이 아니다 */
+const STILL_MS = 100;
 
 export const MAP_SHEET_ID = "lm-map-sheet";
 
@@ -97,7 +101,7 @@ export function MapSheet({
     return () => ro.disconnect();
   }, []);
 
-  // 바깥(지도 끌기, 마커 고르기, 탭 초점)이 바꾼 단계도 알린다
+  // 바뀐 단계를 알린다(끌기, 손잡이, 지도 끌기, 마커 고르기, 탭 초점 모두)
   const shownSnap = useRef(snap);
   useEffect(() => {
     if (desktop || shownSnap.current === snap) return;
@@ -113,6 +117,8 @@ export function MapSheet({
   const low = snap === "low" && !desktop;
 
   function onPointerDown(e: PointerEvent<HTMLElement>) {
+    // 터치로 끌면 click이 오지 않아 지난 끌기 표시가 남는다. 새 누르기마다 지운다
+    dragJustEnded.current = false;
     if (desktop || e.button !== 0) return;
     // 칩 줄 가로 스크롤과 버튼 누르기는 그대로 둔다(움직임이 생기면 그때 끌기로 바꾼다)
     drag.current = {
@@ -134,10 +140,12 @@ export function MapSheet({
       d.moved = true;
       e.currentTarget.setPointerCapture(e.pointerId);
     }
-    const dt = Math.max(1, e.timeStamp - d.lastT);
-    d.v = (e.clientY - d.lastY) / dt;
-    d.lastY = e.clientY;
-    d.lastT = e.timeStamp;
+    const dt = e.timeStamp - d.lastT;
+    if (dt >= VELOCITY_WINDOW_MS) {
+      d.v = (e.clientY - d.lastY) / dt;
+      d.lastY = e.clientY;
+      d.lastT = e.timeStamp;
+    }
     const min = layout.top.full;
     const max = layout.top.low;
     setDragTop(Math.min(max + 24, Math.max(min - 24, d.startTop + dy)));
@@ -148,11 +156,15 @@ export function MapSheet({
     if (!d || d.id !== e.pointerId || !d.moved) return;
     const pos = dragTop ?? top;
     setDragTop(null);
-    const next = snapAfterDrag({ layout, start: snap, top: pos, v: d.v });
-    if (next === snap) return;
-    shownSnap.current = next;
-    setAnnounce(copy.snapAnnounce[next]);
-    onSnapChange(next);
+    const dt = e.timeStamp - d.lastT;
+    const v =
+      dt > STILL_MS
+        ? 0
+        : dt >= VELOCITY_WINDOW_MS
+          ? (e.clientY - d.lastY) / dt
+          : d.v;
+    const next = snapAfterDrag({ layout, top: pos, v });
+    if (next !== snap) onSnapChange(next);
   }
   function onClickCapture(e: MouseEvent) {
     // 끌기로 끝난 누르기는 안쪽 버튼 클릭으로 이어지지 않게
@@ -177,10 +189,7 @@ export function MapSheet({
   };
 
   function onHandle() {
-    const next: SheetSnap = snap === "half" ? "full" : "half";
-    shownSnap.current = next;
-    setAnnounce(copy.snapAnnounce[next]);
-    onSnapChange(next);
+    onSnapChange(snap === "half" ? "full" : "half");
   }
 
   const scrollable = desktop || snap === "full";

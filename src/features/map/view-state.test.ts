@@ -187,21 +187,18 @@ describe("시트 3단과 지도 만지면 접힘 (2026-10-31)", () => {
     expect(small.top.half).toBeGreaterThanOrEqual(small.top.full);
   });
 
-  it("끌기를 놓으면 가까운 단계, 빠르게 튕기면 시작 단계에서 한 단계", () => {
-    expect(
-      snapAfterDrag({ layout, start: "half", top: layout.top.low - 10, v: 0 }),
-    ).toBe("low");
-    expect(snapAfterDrag({ layout, start: "half", top: 20, v: 0 })).toBe(
-      "full",
-    );
-    expect(
-      snapAfterDrag({ layout, start: "low", top: layout.top.low - 30, v: -1 }),
-    ).toBe("half");
-    expect(
-      snapAfterDrag({ layout, start: "half", top: layout.top.half + 30, v: 1 }),
-    ).toBe("low");
-    expect(snapAfterDrag({ layout, start: "full", top: 30, v: -1 })).toBe(
-      "full",
-    );
+  it("끌기를 놓으면 가까운 단계, 빠르게 튕기면 지금 위치에서 그 방향의 다음 단계", () => {
+    const { low, half, full } = layout.top;
+    expect(snapAfterDrag({ layout, top: low - 10, v: 0 })).toBe("low");
+    expect(snapAfterDrag({ layout, top: 20, v: 0 })).toBe("full");
+    expect(snapAfterDrag({ layout, top: low - 30, v: -1 })).toBe("half");
+    expect(snapAfterDrag({ layout, top: half + 30, v: 1 })).toBe("low");
+    // 이미 맨 위(아래)를 넘었으면 그 끝 단계
+    expect(snapAfterDrag({ layout, top: full - 5, v: -1 })).toBe("full");
+    expect(snapAfterDrag({ layout, top: low + 5, v: 1 })).toBe("low");
+    // 낮게에서 끝까지 근처로 끌어 올린 뒤 위로 튕기면 반쯤으로 되돌아가지 않는다
+    expect(snapAfterDrag({ layout, top: full + 30, v: -1 })).toBe("full");
+    // 끝까지에서 낮게 근처로 끌어 내린 뒤 아래로 튕기면 반쯤으로 올라가지 않는다
+    expect(snapAfterDrag({ layout, top: low - 10, v: 1 })).toBe("low");
   });
 });

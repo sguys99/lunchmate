@@ -196,28 +196,23 @@ export function sheetCover(
 const FLICK_PX_PER_MS = 0.5;
 
 /**
- * 끌기를 놓았을 때 단계: 가장 가까운 단계. 빠르게 튕기면 끌기 시작한 단계에서 그 방향으로 한 단계(위로 튕기면 더 높게).
+ * 끌기를 놓았을 때 단계: 가장 가까운 단계. 빠르게 튕기면 지금 위치에서 그 방향의 다음 단계(위로 튕기면 더 높게).
  * v: px/ms, 아래로 양수.
  */
 export function snapAfterDrag(input: {
   layout: SheetLayout;
-  start: SheetSnap;
   top: number;
   v: number;
 }): SheetSnap {
-  const { layout, start, top, v } = input;
+  const { layout, top, v } = input;
+  const byDistance = [...SHEET_ORDER].sort(
+    (a, b) => Math.abs(layout.top[a] - top) - Math.abs(layout.top[b] - top),
+  );
   if (Math.abs(v) > FLICK_PX_PER_MS) {
-    const i = SHEET_ORDER.indexOf(start);
-    const j = Math.min(
-      SHEET_ORDER.length - 1,
-      Math.max(0, v < 0 ? i + 1 : i - 1),
+    const ahead = byDistance.find((s) =>
+      v < 0 ? layout.top[s] < top : layout.top[s] > top,
     );
-    return SHEET_ORDER[j] ?? start;
+    if (ahead) return ahead;
   }
-  let best: SheetSnap = start;
-  for (const s of SHEET_ORDER) {
-    if (Math.abs(layout.top[s] - top) < Math.abs(layout.top[best] - top))
-      best = s;
-  }
-  return best;
+  return byDistance[0] ?? "half";
 }
