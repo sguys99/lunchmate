@@ -279,13 +279,10 @@
 }
 
 /*
- * 앱 화면(오늘, 지도, 투표, 나)은 문서 끝 고무줄 튕김을 끈다(T9.10). iOS Safari에서 튕김이 하단 고정 줄과 탭을
- * 내용과 따로 놀게 해 "덜렁거림"으로 느껴졌다. 랜딩과 약관은 브라우저 기본(당겨서 새로고침 포함)을 그대로 둔다.
+ * 앱 화면도 문서 끝 고무줄 튕김은 브라우저 기본을 쓴다. T9.10에서 튕김을 껐다(overscroll-behavior-y: none)가
+ * 스크롤이 끝에서 벽처럼 멈춰 뻑뻑했다(11/03). 그때 "덜렁거림"의 원인이던 sticky 하단 탭과 행동 줄은 같은 T9.10에서
+ * fixed로 바꿨으므로 튕김을 켜도 줄이 내용과 함께 끌려가지 않는다. 다시 덜렁거리면 실기기로 확인하고 되돌린다.
  */
-html:has([data-slot="app-shell"]),
-html:has([data-slot="app-shell"]) body {
-  overscroll-behavior-y: none;
-}
 
 /*
  * type-<step>: 타입 스케일 한 단계를 서체까지 한 번에 적용 (FORMAT.md 2.6). 예: type-title, type-numeric-lg

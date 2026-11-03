@@ -95,7 +95,18 @@ test("오늘에서 왼쪽으로 밀면 지도, 지도 목록에서 오른쪽으�
   await t.swipe(300, 150, 100, 150);
   await page.waitForTimeout(600);
   await expect(page).toHaveURL(/\/map$/);
-  // 지도 아래 목록 시트에서 오른쪽으로 밀면 이전 탭(오늘)
+  // 지도 아래 목록 시트에서 오른쪽으로 밀면 이전 탭(오늘).
+  // 목록이 그려지기 전에는 그 자리가 지도 스켈레톤(받지 않는 자리)이라 목록이 뜰 때까지 기다린다(dev 서버가 느릴 때)
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const el = document.elementFromPoint(100, 700);
+          return Boolean(el && !el.closest("[data-swipe-ignore]"));
+        }),
+      { timeout: 15_000 },
+    )
+    .toBe(true);
   await t.swipe(100, 700, 320, 702);
   await expect(page).toHaveURL(/\/today$/);
   await expect(activeTab(page)).toHaveText("오늘");
@@ -117,7 +128,7 @@ test("세로 스크롤, 가장자리 시작, 짧게 민 손가락은 탭을 옮�
   await expect(page).toHaveURL(/\/today$/);
   await expect(page.locator("[data-slot=swipe-main]")).not.toHaveAttribute(
     "style",
-    /left/,
+    /transform|left/,
   );
 });
 
@@ -136,7 +147,7 @@ test("미는 동안 본문과 오늘 행동 줄이 같이 밀리고, 행동 줄�
     .evaluate((el) => el.getBoundingClientRect().left);
   const during = await dock.boundingBox();
   expect(mainLeft).toBeLessThan(-60);
-  // 세로 자리는 그대로(transform이면 본문 기준이 되어 아래로 튄다), 가로는 본문과 같이
+  // 세로 자리는 그대로(본문 transform 기준으로 바뀌어도 pinDock이 화면 자리로 되돌린다), 가로는 본문과 같이
   expect(during!.y).toBeCloseTo(before!.y, 0);
   expect(during!.x - before!.x).toBeCloseTo(mainLeft, 0);
   // 옆 탭 표시
