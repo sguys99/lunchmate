@@ -43,7 +43,6 @@ import {
   DevicePicker,
   OfflineLine,
   OpenFailedBlock,
-  ShareDiagram,
   StepMark,
   textLink,
   type StepStatus,
@@ -370,9 +369,6 @@ function Steps({
         <p className="type-body-sm break-keep text-muted-foreground">
           {installText}
         </p>
-        {!installed && platform === "ios" && !iosChrome ? (
-          <ShareDiagram />
-        ) : null}
         {!installed && platform === "ios" ? (
           <p className="type-body-sm break-keep text-foreground">
             {copy.steps.install.iosLogin}

@@ -139,14 +139,18 @@ describe("BetaWelcome", () => {
     expect(steps).toHaveLength(2);
     expect(steps[0]).toHaveAttribute("aria-current", "step");
     expect(
-      screen.getByRole("img", { name: /공유 버튼 위치 그림/ }),
-    ).toBeInTheDocument();
+      screen.getAllByText(/"공유", 목록 아래 "더 보기"/).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.queryByRole("img", { name: /공유 버튼 위치 그림/ }),
+    ).toBeNull();
   });
 
   it("iOS Chrome: Chrome 공유 버튼 안내, Safari 그림 없음, 아이콘으로 열고 로그인 안내", () => {
     render(<BetaWelcome env={env({ iosChrome: true })} signedIn={false} />);
     expect(
-      screen.getAllByText(/Chrome 주소창 오른쪽 공유 버튼/).length,
+      screen.getAllByText(/Chrome 주소창 오른쪽 공유 버튼, 목록 아래 "더 보기"/)
+        .length,
     ).toBeGreaterThan(0);
     expect(
       screen.queryByRole("img", { name: /공유 버튼 위치 그림/ }),

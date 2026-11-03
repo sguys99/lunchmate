@@ -178,7 +178,10 @@ export function DevicePicker({
 
 export function OfflineLine() {
   return (
-    <div role="status" className="flex items-start gap-3 border-y border-border py-3">
+    <div
+      role="status"
+      className="flex items-start gap-3 border-y border-border py-3"
+    >
       <WifiOff
         aria-hidden
         className="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -221,14 +224,19 @@ export function OpenFailedBlock({
         </span>
         <button
           type="button"
-          onClick={async () => setCopied((await copyText(link)) ? "done" : "failed")}
+          onClick={async () =>
+            setCopied((await copyText(link)) ? "done" : "failed")
+          }
           className={buttonClass("secondary", "sm")}
         >
           {copy.states.error.copyLink}
         </button>
       </div>
       {copied !== "idle" ? (
-        <p role="status" className="type-caption break-keep text-muted-foreground">
+        <p
+          role="status"
+          className="type-caption break-keep text-muted-foreground"
+        >
           {copied === "done"
             ? copy.states.error.copied
             : copy.states.error.copyFailed}
@@ -249,7 +257,10 @@ export function BetaSkeleton() {
       </div>
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex gap-4">
-          <span aria-hidden className="size-7 shrink-0 rounded-full bg-skeleton" />
+          <span
+            aria-hidden
+            className="size-7 shrink-0 rounded-full bg-skeleton"
+          />
           <div className="flex flex-1 flex-col gap-1">
             <SkeletonLine type="label" className="w-[45%]" />
             <SkeletonLine type="body-sm" className="w-[90%]" />
@@ -274,7 +285,11 @@ export function StepMark({ n, status }: { n: number; status: StepStatus }) {
         status === "done" && "border-transparent bg-muted text-foreground",
       )}
     >
-      {status === "done" ? <Check className="size-3.5" strokeWidth={2.25} /> : n}
+      {status === "done" ? (
+        <Check className="size-3.5" strokeWidth={2.25} />
+      ) : (
+        n
+      )}
     </span>
   );
 }
