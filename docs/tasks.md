@@ -645,6 +645,7 @@ CLAUDE.md 6.1절을 따르되 **시안 수는 3안 이상**으로 합니다.
 - [ ] T9.11 베타 회고 문서 `docs/beta-retro.md`
 - [ ] T9.12 Git 전략 재검토 (main 직접 푸시 → PR과 미리보기 배포)
 - [ ] T9.13 **G9 확인**: 2.3절 목표 대비 결과 검토, 출시 결정
+- [ ] T9.14 (11/03 시안: A 따라오는 페이지, B 가장자리 표시, C 탭 막대 밀기, `/design-lab/swipe/<a|b|c>`, 캡처 87장, axe 0, 비교 `docs/design/g9-comparison-swipe.md`) ⛔ 탭 사이 스와이프 이동(사용자 요청 11/03, 네 탭 모두). 선택 뒤 design-decisions 기록, 첫 로드 밖 지연 로드로 구현(홈 예산), 실기기 iOS Safari 가장자리 뒤로 가기와 충돌 확인
 
 ---
 
