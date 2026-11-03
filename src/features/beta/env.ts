@@ -12,6 +12,8 @@ export type BetaEnv = {
   os: MobileOs | null;
   /** 설치 방법을 고를 기기. null이면 알아보지 못함 */
   platform: BetaPlatform | null;
+  /** 아이폰 Chrome(UA CriOS). 공유 버튼 위치가 Safari와 달라 설치 안내를 바꾼다 */
+  iosChrome?: boolean;
   /** 개발용 흉내: 홈 화면 앱으로 연 것처럼 */
   forceStandalone: boolean;
 };
@@ -20,6 +22,7 @@ export const BETA_DEVICE_OVERRIDES = [
   "kakao-ios",
   "kakao-android",
   "ios",
+  "chrome-ios",
   "android",
   "desktop",
   "app",
@@ -34,6 +37,7 @@ export function betaEnvFromUa(ua: string | null | undefined): BetaEnv {
     inApp: detectInApp(ua),
     os,
     platform: os ?? (ua ? "desktop" : null),
+    iosChrome: os === "ios" && /\bCriOS\//.test(ua ?? ""),
     forceStandalone: false,
   };
 }
@@ -49,14 +53,37 @@ export function resolveBetaEnv(
   const v = (Array.isArray(raw) ? raw[0] : raw)?.trim().toLowerCase();
   switch (v) {
     case "kakao-ios":
-      return { inApp: "kakaotalk", os: "ios", platform: "ios", forceStandalone: false };
+      return {
+        inApp: "kakaotalk",
+        os: "ios",
+        platform: "ios",
+        forceStandalone: false,
+      };
     case "kakao-android":
-      return { inApp: "kakaotalk", os: "android", platform: "android", forceStandalone: false };
+      return {
+        inApp: "kakaotalk",
+        os: "android",
+        platform: "android",
+        forceStandalone: false,
+      };
+    case "chrome-ios":
+      return {
+        inApp: null,
+        os: "ios",
+        platform: "ios",
+        iosChrome: true,
+        forceStandalone: false,
+      };
     case "ios":
     case "android":
       return { inApp: null, os: v, platform: v, forceStandalone: false };
     case "desktop":
-      return { inApp: null, os: null, platform: "desktop", forceStandalone: false };
+      return {
+        inApp: null,
+        os: null,
+        platform: "desktop",
+        forceStandalone: false,
+      };
     case "app":
       return { inApp: null, os: "ios", platform: "ios", forceStandalone: true };
     case "unknown":

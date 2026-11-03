@@ -39,14 +39,22 @@ export const betaCopy = {
     label: "시작하는 방법",
     external: {
       title: "외부 브라우저로 열기",
-      body: (app: string, menu: "bottom-right" | "top-right", item: "otherBrowser" | "externalBrowser") =>
+      body: (
+        app: string,
+        menu: "bottom-right" | "top-right",
+        item: "otherBrowser" | "externalBrowser",
+      ) =>
         `${app} 안에서는 홈 화면에 둘 수 없습니다. ${where[menu]} 메뉴에서 "${menuItems[item]}"를 골라 주세요.`,
       action: authCopy.inapp.openExternal,
       opening: authCopy.inapp.opening,
     },
     install: {
       title: "홈 화면에 추가",
-      ios: 'Safari 아래쪽 공유 버튼을 누른 뒤 "홈 화면에 추가"를 골라 주세요.',
+      ios: 'Safari 아래쪽 공유 버튼을 누른 뒤 "홈 화면에 추가"를 골라 주세요. 공유 버튼이 안 보이면 점 세 개 버튼을 먼저 눌러 주세요.',
+      iosChrome:
+        'Chrome 주소창 오른쪽 공유 버튼을 누른 뒤 "홈 화면에 추가"를 골라 주세요. 목록에 없으면 이 링크를 Safari에서 열어 주세요.',
+      iosLogin:
+        "홈 화면에 생긴 아이콘으로 연 뒤 로그인해 주세요. 아이폰은 브라우저에서 한 로그인이 이어지지 않습니다.",
       android:
         '설치를 누르면 홈 화면에 바로 생깁니다. 버튼이 없으면 Chrome 메뉴에서 "홈 화면에 추가"를 골라 주세요.',
       androidAction: "설치",
@@ -146,7 +154,8 @@ export const betaFeedbackCopy = {
     inApp: "앱 안 브라우저",
     standalone: "홈 화면 앱",
     privacy: "위치, 초대 코드, 식당 정보는 보내지 않습니다.",
-    retention: "보낸 의견은 베타가 끝나고 6개월 뒤 지웁니다. 탈퇴하면 바로 지웁니다.",
+    retention:
+      "보낸 의견은 베타가 끝나고 6개월 뒤 지웁니다. 탈퇴하면 바로 지웁니다.",
     send: "보내기",
     sending: "보내는 중입니다",
   },
@@ -178,8 +187,10 @@ export const betaFeedbackCopy = {
       "의견을 보내지 못했습니다. 쓴 내용은 그대로 있으니 다시 보내 주세요.",
     retry: "다시 보내기",
     limit: `오늘은 의견을 ${BETA_FEEDBACK_DAILY}번 보냈습니다. 내일 다시 보낼 수 있습니다.`,
-    suspended: "이용이 제한된 계정이라 의견을 보낼 수 없습니다. 나 탭의 문의하기로 알려 주세요.",
-    signedOut: "로그인이 끝나 의견을 보내지 못했습니다. 다시 로그인한 뒤 보내 주세요.",
+    suspended:
+      "이용이 제한된 계정이라 의견을 보낼 수 없습니다. 나 탭의 문의하기로 알려 주세요.",
+    signedOut:
+      "로그인이 끝나 의견을 보내지 못했습니다. 다시 로그인한 뒤 보내 주세요.",
     invalid: "보낼 수 없는 내용이 있습니다. 내용을 확인하고 다시 보내 주세요.",
     offline:
       "인터넷에 연결되어 있지 않습니다. 쓴 내용은 이 화면에 남아 있고, 연결되면 보낼 수 있습니다.",

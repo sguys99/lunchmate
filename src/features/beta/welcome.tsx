@@ -168,7 +168,9 @@ export function BetaWelcome({
       <div className="flex flex-col gap-3">
         <p className="type-caption text-muted-foreground">{copy.eyebrow}</p>
         <h1 className="type-display font-heading break-keep">{copy.title}</h1>
-        <p className="type-body break-keep text-muted-foreground">{copy.lead}</p>
+        <p className="type-body break-keep text-muted-foreground">
+          {copy.lead}
+        </p>
       </div>
 
       {platform === null ? (
@@ -207,10 +209,15 @@ export function BetaWelcome({
             </button>
           </div>
           <Collapsible open={others} id={othersId}>
-            <DevicePicker value={picked} onChange={setPicked} className="pt-3 pb-1" />
+            <DevicePicker
+              value={picked}
+              onChange={setPicked}
+              className="pt-3 pb-1"
+            />
           </Collapsible>
           <Steps
             platform={platform}
+            iosChrome={!picked && env.iosChrome === true}
             guide={guide}
             appName={appName}
             standalone={standalone && !picked}
@@ -245,7 +252,9 @@ export function BetaWelcome({
               aria-disabled={offline || opening || undefined}
               className={cn(buttonClass("primary"), "w-full")}
             >
-              {opening ? copy.steps.external.opening : copy.steps.external.action}
+              {opening
+                ? copy.steps.external.opening
+                : copy.steps.external.action}
             </button>
             <NextLink
               href={nextHref}
@@ -296,6 +305,7 @@ function NextLink({
 
 function Steps({
   platform,
+  iosChrome,
   guide,
   appName,
   standalone,
@@ -305,6 +315,7 @@ function Steps({
   bip,
 }: {
   platform: BetaPlatform;
+  iosChrome: boolean;
   guide: InAppGuide | null;
   appName: string;
   standalone: boolean;
@@ -343,7 +354,9 @@ function Steps({
   const installText = standalone
     ? copy.steps.install.done
     : platform === "ios"
-      ? copy.steps.install.ios
+      ? iosChrome
+        ? copy.steps.install.iosChrome
+        : copy.steps.install.ios
       : platform === "android"
         ? copy.steps.install.android
         : copy.steps.install.desktop;
@@ -357,7 +370,14 @@ function Steps({
         <p className="type-body-sm break-keep text-muted-foreground">
           {installText}
         </p>
-        {!installed && platform === "ios" ? <ShareDiagram /> : null}
+        {!installed && platform === "ios" && !iosChrome ? (
+          <ShareDiagram />
+        ) : null}
+        {!installed && platform === "ios" ? (
+          <p className="type-body-sm break-keep text-foreground">
+            {copy.steps.install.iosLogin}
+          </p>
+        ) : null}
         {!installed && bip ? (
           <button
             type="button"
@@ -382,7 +402,9 @@ function Steps({
     status: signedIn ? "done" : installed && !inApp ? "current" : "next",
     summary: loginText,
     body: (
-      <p className="type-body-sm break-keep text-muted-foreground">{loginText}</p>
+      <p className="type-body-sm break-keep text-muted-foreground">
+        {loginText}
+      </p>
     ),
   });
 
