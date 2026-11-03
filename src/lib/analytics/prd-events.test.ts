@@ -17,7 +17,13 @@ type Props<N extends AnalyticsEventName> = keyof AnalyticsEventMap[N] & string;
 /** 타입 맵의 속성 이름(런타임 목록). 아래 타입 검사가 빠진 속성과 없는 속성을 모두 막는다 */
 const EVENT_PROPS = {
   onboarding_step_completed: ["step", "skipped"],
-  recommendation_shown: ["meal", "origin", "algo_version", "place_ids"],
+  recommendation_shown: [
+    "meal",
+    "origin",
+    "algo_version",
+    "place_ids",
+    "menu_cards",
+  ],
   recommendation_reshuffled: ["count_in_session"],
   card_swiped: ["position"],
   directions_clicked: ["place_id", "source", "app_or_web"],

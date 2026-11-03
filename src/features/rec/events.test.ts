@@ -20,6 +20,7 @@ describe("오늘(홈) 분석 이벤트 (PRD 10.2절, T5.39에서 전송)", () =>
       baseKind: "here",
       algoVersion: "v",
       placeIds: ["1", "2", "3"],
+      menuCards: 1,
     });
     expect(e).toEqual({
       name: "recommendation_shown",
@@ -28,6 +29,7 @@ describe("오늘(홈) 분석 이벤트 (PRD 10.2절, T5.39에서 전송)", () =>
         origin: "current",
         algo_version: "v",
         place_ids: ["1", "2", "3"],
+        menu_cards: 1,
       },
     });
     expect(sanitizeEventProperties(e.properties).dropped).toEqual([]);

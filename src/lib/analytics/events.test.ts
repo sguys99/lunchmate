@@ -75,6 +75,7 @@ describe("이벤트 타입", () => {
           origin: "office",
           algo_version: "v1",
           place_ids: ["1", "2", "3"],
+          menu_cards: 0,
         },
       },
     ];

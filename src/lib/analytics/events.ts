@@ -18,6 +18,8 @@ export interface AnalyticsEventMap {
     /** 추천 가중치 버전(src/lib/reco/constants.ts). 지표를 알고리즘 버전별로 나눠 보기 위함. */
     algo_version: string;
     place_ids: readonly string[];
+    /** 묶음 카드 가운데 대표 메뉴(MENU-04, 제보 2건 이상)가 있는 카드 수. 숫자만, 메뉴 이름은 넣지 않는다(T10.16h) */
+    menu_cards: number;
   };
   recommendation_reshuffled: { count_in_session: number };
   /** position은 카드 순서(0부터)다. 화면 좌표가 아니다. */

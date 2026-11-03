@@ -82,10 +82,10 @@ export const FLAGS = {
   },
   menuReports: {
     description:
-      "메뉴와 메뉴별 가격 제보(T10.16, PRD MENU, D-35 조합 A + C): 홈 큰 카드 가격 칸의 대표 메뉴(제보 2건 이상), 상세 메뉴판과 그 자리 한 줄 더하기, 식후 피드백 시트의 먹은 메뉴 칩. 테이블 menu_reports, 집계 place_menus(20261103200000). 끄면 화면에서 메뉴를 모두 숨기고 쓰기 액션이 disabled를 돌려준다(데이터는 지우지 않음). 베타 첫 주에 켠다(T10.16h). 그 전에는 pnpm dev(NODE_ENV development)에서만 켜지고 빌드(Preview, 프로덕션)에서는 꺼진다. 코드 상수라 브라우저에서도 같은 값이다.",
+      "메뉴와 메뉴별 가격 제보(T10.16, PRD MENU, D-35 조합 A + C): 홈 큰 카드 가격 칸의 대표 메뉴(제보 2건 이상), 상세 메뉴판과 그 자리 한 줄 더하기, 식후 피드백 시트의 먹은 메뉴 칩. 테이블 menu_reports, 집계 place_menus(20261103200000). 끄면 화면에서 메뉴를 모두 숨기고 쓰기 액션이 disabled를 돌려준다(데이터는 지우지 않음). 2026-11-03 T10.16h에서 베타(11/16) 전에 모든 환경에서 켬(사용자 결정). 코드 상수라 브라우저에서도 같은 값이다.",
     default: false,
-    source: { type: "const", value: process.env.NODE_ENV === "development" },
-    owner: "T10.16 (켜기: T10.16h 베타 첫 주)",
+    source: { type: "const", value: true },
+    owner: "T10.16 (해제: 2026-11-03 T10.16h)",
   },
 } as const satisfies Record<string, FlagDefinition>;
 

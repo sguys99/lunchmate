@@ -327,6 +327,40 @@ where created_at >= '2026-11-16 00:00+09';
 - 재검토 기준(제안): 베타 마지막 주 평일 하루 평균 **살아 있는 할인 장소 5곳 이상**이고, 베타 의견에 "할인 중만 보고 싶다"류 요청이 **3건 이상**이면 출시 뒤 과제로 "할인 중" 필터를 연다. 둘 중 하나라도 못 미치면 MVP 제외를 유지한다. 걸리는 곳이 거의 없는 필터는 빈 결과만 보여 10초 원칙을 해친다.
 - 연다면 위치는 지도 필터(MAP-03)이고 홈이 아니다(3개 이하 원칙). 필터는 표시만 거르고 추천 점수에는 반영하지 않는다(제품 원칙 6). 새 UI라 시안 절차를 거친다.
 
+### 6.1 T10.16h 메뉴 제보 지표 (베타 첫 주, 11/16~11/20)
+
+`menuReports`는 11/03에 모든 환경에서 켰다(사용자 결정, 베타 첫날부터 쌓이게). 첫 주 금요일에 아래 두 수를 재고 표에 적는다.
+
+- **입력률** = `menu_reported`(source=feedback) 수 ÷ `feedback_submitted`(stage=detail) 수. PostHog Trends 두 줄, 기간 11/16~11/20, 공식 A/B. 상세 "메뉴 알려주기"(source=detail)는 따로 한 줄로 본다.
+- **카드 대표 메뉴 노출 비율** = `recommendation_shown`의 `menu_cards` 합 ÷ `place_ids` 개수 합. PostHog SQL 인사이트:
+
+```sql
+select sum(toInt(properties.menu_cards)) / sum(length(JSONExtractArrayRaw(properties.place_ids))) as menu_exposure
+from events
+where event = 'recommendation_shown'
+  and timestamp >= toDateTime('2026-11-16 00:00:00', 'Asia/Seoul')
+  and timestamp <  toDateTime('2026-11-21 00:00:00', 'Asia/Seoul')
+  and properties.menu_cards is not null
+```
+
+- 보조(Supabase SQL 편집기, 읽기만): 제보가 쌓인 식당 수와 카드 기준(제보 2건 이상)을 넘은 식당 수.
+
+```sql
+select count(distinct place_id) as places,
+       count(*) filter (where n >= 2) as card_ready_menus
+from (select place_id, menu_key, count(distinct user_id) as n
+      from public.menu_reports
+      where created_at >= '2026-11-16 00:00+09'
+      group by 1, 2) t;
+```
+
+| 날짜 | 입력률(피드백) | 상세 제보 수 | 노출 비율 | 제보 식당 수 | 판단 |
+| --- | --- | --- | --- | --- | --- |
+| 11/20 | | | | | |
+
+- MENU-06(공공데이터 첫 값) 판단(제안): 노출 비율이 **20% 미만**이면 제보만으로는 카드가 비어 있다는 뜻이라 출시 뒤 과제로 MENU-06을 연다. 20% 이상이거나 입력률이 **15% 이상**이면 제보만 유지하고 베타 끝(T9.11)에 다시 본다.
+- 신고와 숨김은 `/admin` "메뉴 제보" 탭에서 매일 루틴(3.1)과 함께 본다.
+
 ---
 
 ## 7. T9.11 회고 문서 틀 (`docs/beta-retro.md`, 베타 끝에 작성)

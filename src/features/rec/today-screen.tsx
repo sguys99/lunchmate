@@ -434,6 +434,7 @@ export function TodayScreen({
         baseKind: base.kind,
         algoVersion: deck.result.algoVersion,
         placeIds: cards.map((c) => c.id),
+        menuCards: cards.filter((c) => menus?.[c.id]).length,
       }),
     );
     // 같은 묶음에서는 한 번만

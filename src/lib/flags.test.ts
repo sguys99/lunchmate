@@ -85,12 +85,13 @@ describe("evaluateFlag", () => {
     expect(evaluateFlag(def, ctx())).toBe(true);
     expect(evaluateFlag(def, ctx({ vercelEnv: "production" }))).toBe(true);
   });
-  it("menuReports는 T10.16h 전까지 개발 서버에서만 켜진다(빌드에서는 꺼짐)", () => {
+  it("menuReports는 T10.16h 뒤 모든 환경에서 켜진다(기본값은 false, 상수로 켬)", () => {
     const def: FlagDefinition = FLAGS.menuReports;
     expect(def.default).toBe(false);
-    expect(def.owner).toContain("T10.16");
+    expect(def.owner).toContain("T10.16h");
     expect(def.productionOff).toBeUndefined();
-    expect(def.source).toEqual({ type: "const", value: process.env.NODE_ENV === "development" });
+    expect(evaluateFlag(def, ctx())).toBe(true);
+    expect(evaluateFlag(def, ctx({ vercelEnv: "production" }))).toBe(true);
   });
 });
 

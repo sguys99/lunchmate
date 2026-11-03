@@ -11,6 +11,8 @@ export function recommendationShown(args: {
   baseKind: "office" | "here";
   algoVersion: string;
   placeIds: readonly string[];
+  /** 대표 메뉴가 있는 카드 수(T10.16h 노출 비율). menuReports가 꺼지면 0 */
+  menuCards: number;
 }): AnalyticsEvent {
   return {
     name: "recommendation_shown",
@@ -19,6 +21,7 @@ export function recommendationShown(args: {
       origin: args.baseKind === "here" ? "current" : "office",
       algo_version: args.algoVersion,
       place_ids: args.placeIds,
+      menu_cards: args.menuCards,
     },
   };
 }
