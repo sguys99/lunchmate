@@ -197,6 +197,18 @@ export async function cancelPollAction(input: string): Promise<PollResult> {
   });
 }
 
+/** 투표 기록 삭제: 끝난 방을 내 목록에서만 지운다(방과 남의 결과는 남음, D-43) */
+export async function leaveEndedPollAction(input: string): Promise<PollResult> {
+  const parsed = uuid.safeParse(input);
+  if (!parsed.success) return fail("invalid");
+  return withSupabase(async (supabase) => {
+    const { error } = await supabase.rpc("leave_ended_poll", {
+      p_poll_id: parsed.data,
+    });
+    return mapPollError(error) ?? { ok: true };
+  });
+}
+
 /** 방장이 투표방에서 링크를 보냈을 때 (보낸 뒤에는 만들기 취소가 아니라 투표 취소, D-15 안건 2) */
 export async function markPollSharedAction(input: string): Promise<PollResult> {
   const parsed = uuid.safeParse(input);

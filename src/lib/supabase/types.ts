@@ -1082,6 +1082,7 @@ export type Database = {
       }
       get_poll: { Args: { p_poll_id: string }; Returns: Json }
       join_poll: { Args: { p_code: string }; Returns: string }
+      leave_ended_poll: { Args: { p_poll_id: string }; Returns: undefined }
       mark_poll_shared: { Args: { p_poll_id: string }; Returns: undefined }
       my_daily_limits: {
         Args: never

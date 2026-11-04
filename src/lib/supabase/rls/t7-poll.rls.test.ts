@@ -957,5 +957,96 @@ describe.skipIf(!ready)(
         }
       });
     });
+
+    describe("D-43 투표 기록 삭제 (끝난 방을 내 목록에서만)", () => {
+      it("끝난 방은 내 목록에서 빠지고 남의 결과는 남는다. 진행 중 방, 남의 방, 비로그인은 막는다", async () => {
+        const owner = await createTestUser(e, runId, "pv");
+        const member = await createTestUser(e, runId, "pw");
+        created.push(owner.id, member.id);
+        const myPolls = async (u: TestUser) =>
+          (
+            await rpc<{ poll_id: string }[]>(e, "my_polls", {}, u.token)
+          ).data!.map((p) => p.poll_id);
+
+        const open = await createPoll(owner, [place(301), place(302)]);
+        const done = await createPoll(owner, [place(303), place(304)]);
+        for (const p of [open, done])
+          await rpc(e, "join_poll", { p_code: p.invite_code }, member.token);
+        const sd = (await getPoll(owner, done.poll_id)).data!;
+        await rpc(
+          e,
+          "cast_vote",
+          { p_poll_id: done.poll_id, p_candidate_ids: [sd.candidates[0]!.id] },
+          member.token,
+        );
+        await rpc(
+          e,
+          "close_poll_now",
+          { p_poll_id: done.poll_id },
+          owner.token,
+        );
+
+        // 진행 중 방은 지울 수 없다
+        const r1 = await rpc(
+          e,
+          "leave_ended_poll",
+          { p_poll_id: open.poll_id },
+          member.token,
+        );
+        expect(r1.error?.message).toBe("poll_state_open");
+        // 참여하지 않은 방, 비로그인
+        const r2 = await rpc(
+          e,
+          "leave_ended_poll",
+          { p_poll_id: done.poll_id },
+          outsider.token,
+        );
+        expect(r2.error?.message).toBe("poll_not_found");
+        const r3 = await rpc(e, "leave_ended_poll", {
+          p_poll_id: done.poll_id,
+        });
+        expect(r3.error).not.toBeNull();
+
+        // 참여자가 지운다: 내 목록에서 빠지고 방은 더 읽지 못한다. 방장 쪽 결과와 표는 그대로
+        const r4 = await rpc(
+          e,
+          "leave_ended_poll",
+          { p_poll_id: done.poll_id },
+          member.token,
+        );
+        expect(r4.error).toBeNull();
+        expect(await myPolls(member)).not.toContain(done.poll_id);
+        expect(await myPolls(member)).toContain(open.poll_id);
+        const gone = await rest<{ id: string }[]>(
+          e,
+          `polls?id=eq.${done.poll_id}&select=id`,
+          { token: member.token },
+        );
+        expect(gone.data ?? []).toHaveLength(0);
+        const d = (await getPoll(owner, done.poll_id)).data!;
+        expect(d.members).toHaveLength(2);
+        expect(d.members.filter((m) => m.user_id === null)).toHaveLength(1);
+        expect(d.poll.winner_place_id).toBe(place(303));
+        // 끝난 방에는 다시 참여할 수 없다
+        const again = await rpc(
+          e,
+          "join_poll",
+          { p_code: done.invite_code },
+          member.token,
+        );
+        expect(again.error).not.toBeNull();
+
+        // 방장이 지워도 방은 남는다(방장 표시만 익명)
+        const r5 = await rpc(
+          e,
+          "leave_ended_poll",
+          { p_poll_id: done.poll_id },
+          owner.token,
+        );
+        expect(r5.error).toBeNull();
+        expect(await myPolls(owner)).not.toContain(done.poll_id);
+        expect(await myPolls(owner)).toContain(open.poll_id);
+      });
+    });
   },
 );

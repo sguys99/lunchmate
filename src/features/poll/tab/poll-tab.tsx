@@ -5,10 +5,19 @@
 // - 머리 오른쪽 "회식 후보 찾기"(D-16 안건 7). 주 버튼은 두지 않는다(만들기는 오늘 화면 "친구랑 정하기").
 // - 4상태: 스켈레톤 줄, 빈 상태(오늘 추천으로), 오류(다시 불러오기), 오프라인.
 // - 데스크톱 우측 지도(@map/poll, T8.11b): 진행 중 줄에 마우스나 초점을 두면 지도가 그 방의 후보 핀으로 바뀐다.
-import { useQuery } from "@tanstack/react-query";
-import { ChevronRight } from "lucide-react";
+// - 지난 투표 줄 끝 휴지통 → 그 자리 확인 → 내 목록에서만 지우기(leave_ended_poll, D-43). 진행 중 방은 버튼이 없다.
+//   지운 줄은 떠날 때까지 결과 한 줄로 남는다(나 탭 기록과 같은 방식).
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronRight, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { PageHeader } from "@/components/app-shell";
 import {
   EmptyState,
@@ -16,14 +25,20 @@ import {
   ListSkeleton,
   OfflineState,
 } from "@/components/states";
+import { buttonClass } from "@/components/ui/button-classes";
 import { focusRing } from "@/components/ui/interaction";
+import { toast } from "@/components/ui/lazy-toaster";
 import { rowPress } from "@/components/ui/row-press";
 import { pollCreateCopy } from "@/copy/poll-create";
 import { type MyPollRow } from "@/features/poll/create/actions";
 import { myPollsKey } from "@/features/poll/create/keys";
 import { partyHref, pollRoomHref } from "@/features/poll/routes";
 import { countdownUnits } from "@/lib/format/countdown-units";
-import { claimPollClosedReportAction } from "@/features/poll/room/actions";
+import {
+  claimPollClosedReportAction,
+  leaveEndedPollAction,
+} from "@/features/poll/room/actions";
+import { mergeKept } from "@/features/me/history/model";
 import { track } from "@/lib/analytics";
 import { useOnlineStatus } from "@/lib/network";
 import { getKstParts, kstDayDiff } from "@/lib/time";
@@ -32,6 +47,12 @@ import { usePollTabMapFocus } from "./map-focus-store";
 import { read } from "@/lib/read";
 
 const copy = pollCreateCopy.tab;
+
+const isPast = (p: MyPollRow) =>
+  p.status === "closed" || p.status === "canceled";
+const idOf = (p: MyPollRow) => p.pollId;
+// my_polls의 지난 방 정렬(coalesce(closed_at, created_at) 내림차순)과 같은 순서
+const sortKey = (p: MyPollRow) => p.closedAt ?? p.createdAt;
 
 export function PollTab() {
   const online = useOnlineStatus();
@@ -42,6 +63,25 @@ export function PollTab() {
   });
   const now = useNow();
   useClosedReports(q.data?.signedIn ? q.data.polls : null);
+  const client = useQueryClient();
+  const [removed, setRemoved] = useState<Record<string, MyPollRow>>({});
+  const polls = useMemo(() => (q.data?.signedIn ? q.data.polls : []), [q.data]);
+  const past = useMemo(
+    () =>
+      mergeKept(polls.filter(isPast), Object.values(removed), idOf, sortKey),
+    [polls, removed],
+  );
+
+  const remove = async (poll: MyPollRow): Promise<boolean> => {
+    const result = await leaveEndedPollAction(poll.pollId);
+    if (!result.ok) {
+      void toast.error(copy.deleteFailed);
+      return false;
+    }
+    setRemoved((r) => ({ ...r, [poll.pollId]: poll }));
+    void client.invalidateQueries({ queryKey: myPollsKey });
+    return true;
+  };
 
   const header = (
     <PageHeader
@@ -82,13 +122,9 @@ export function PollTab() {
       />
     );
   } else {
-    const polls = q.data.signedIn ? q.data.polls : [];
     const open = polls.filter((p) => p.status === "open" || p.status === "tie");
-    const past = polls.filter(
-      (p) => p.status === "closed" || p.status === "canceled",
-    );
     body =
-      polls.length === 0 ? (
+      polls.length === 0 && past.length === 0 ? (
         <EmptyState
           title={copy.empty.title}
           body={copy.empty.body}
@@ -110,7 +146,14 @@ export function PollTab() {
             empty={past.length === 0 ? copy.pastEmpty : null}
           >
             {past.map((p) => (
-              <PollRow key={p.pollId} poll={p} now={now} />
+              <PollRow
+                key={p.pollId}
+                poll={p}
+                now={now}
+                online={online}
+                removed={!!removed[p.pollId]}
+                onRemove={() => remove(p)}
+              />
             ))}
           </Section>
         </div>
@@ -176,7 +219,40 @@ function whenLabel(at: Date, now: Date): string {
   return kstDayDiff(now, at) === 0 ? hhmm : `${p.month}월 ${p.day}일 ${hhmm}`;
 }
 
-function PollRow({ poll, now }: { poll: MyPollRow; now: Date }) {
+function PollRow({
+  poll,
+  now,
+  online = true,
+  removed = false,
+  onRemove,
+}: {
+  poll: MyPollRow;
+  now: Date;
+  online?: boolean;
+  removed?: boolean;
+  /** 지난 방만 받는다. 없으면 삭제 버튼을 그리지 않는다 */
+  onRemove?: () => Promise<boolean>;
+}) {
+  const [phase, setPhase] = useState<"idle" | "confirm" | "busy">("idle");
+  const askId = useId();
+  const deleteRef = useRef<HTMLButtonElement>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  const doneRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (phase === "confirm") confirmRef.current?.focus();
+  }, [phase]);
+  // 지운 뒤 초점이 사라지지 않게 그 자리 결과 줄로 옮긴다
+  useEffect(() => {
+    if (removed && phase === "busy") doneRef.current?.focus();
+  }, [removed, phase]);
+  const offlineGuard = (fn: () => void) => () => {
+    if (!online) {
+      void toast(copy.offlineToast);
+      return;
+    }
+    fn();
+  };
+
   const closes = new Date(poll.closesAt);
   const left =
     poll.status === "open"
@@ -197,81 +273,165 @@ function PollRow({ poll, now }: { poll: MyPollRow; now: Date }) {
   const past = poll.status === "closed" || poll.status === "canceled";
   const setMapFocus = usePollTabMapFocus((s) => s.setFocus);
   const focusMap = past ? undefined : () => setMapFocus(poll.pollId);
+  if (removed) {
+    return (
+      <li className="border-b border-border py-4">
+        <p
+          ref={doneRef}
+          role="status"
+          tabIndex={-1}
+          className="animate-in type-body-sm text-muted-foreground duration-(--lm-duration-base) ease-enter fade-in focus:outline-none motion-reduce:animate-none"
+        >
+          {copy.deleted}
+        </p>
+      </li>
+    );
+  }
   return (
-    <li className="border-b border-border">
-      <Link
-        href={pollRoomHref(poll.code)}
-        onPointerEnter={focusMap}
-        onFocus={focusMap}
-        className={cn(
-          "flex min-h-18 items-center gap-4 rounded-md py-3 hover:bg-muted/50",
-          focusRing,
-          rowPress,
-        )}
-      >
-        <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="flex items-baseline gap-2">
+    <li className="flex flex-col border-b border-border">
+      <div className="flex items-center gap-1">
+        <Link
+          href={pollRoomHref(poll.code)}
+          onPointerEnter={focusMap}
+          onFocus={focusMap}
+          className={cn(
+            "flex min-h-18 min-w-0 flex-1 items-center gap-4 rounded-md py-3 hover:bg-muted/50",
+            focusRing,
+            rowPress,
+          )}
+        >
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="flex items-baseline gap-2">
+              <span
+                className={cn(
+                  "truncate type-heading break-keep",
+                  past && "text-muted-foreground",
+                )}
+              >
+                {poll.title}
+              </span>
+            </span>
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 type-caption text-muted-foreground tabular-nums">
+              <span>{copy.kind[poll.kind]}</span>
+              <Divider />
+              <span>{copy.candidates(poll.candidateCount)}</span>
+              <Divider />
+              <span>{copy.members(poll.memberCount)}</span>
+              {poll.isHost ? (
+                <>
+                  <Divider />
+                  <span>{copy.host}</span>
+                </>
+              ) : null}
+            </span>
+          </span>
+          <span className="flex shrink-0 flex-col items-end gap-1 text-right">
+            {left ? (
+              <span className="type-label tabular-nums">
+                {left.parts.map((part, i) => (
+                  <span key={part.unit} className={i > 0 ? "ml-1" : undefined}>
+                    {part.unit === "초" && i > 0
+                      ? String(part.value).padStart(2, "0")
+                      : part.value}
+                    <span className="ml-0.5 type-caption text-muted-foreground">
+                      {part.unit}
+                    </span>
+                  </span>
+                ))}
+              </span>
+            ) : (
+              <span className="type-caption text-muted-foreground tabular-nums">
+                {copy.closedOn(
+                  whenLabel(new Date(poll.closedAt ?? poll.closesAt), now),
+                )}
+              </span>
+            )}
             <span
               className={cn(
-                "truncate type-heading break-keep",
-                past && "text-muted-foreground",
+                "type-caption",
+                poll.status === "open" && !poll.hasVoted
+                  ? "text-foreground"
+                  : "text-muted-foreground",
               )}
             >
-              {poll.title}
+              {status}
             </span>
           </span>
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 type-caption text-muted-foreground tabular-nums">
-            <span>{copy.kind[poll.kind]}</span>
-            <Divider />
-            <span>{copy.candidates(poll.candidateCount)}</span>
-            <Divider />
-            <span>{copy.members(poll.memberCount)}</span>
-            {poll.isHost ? (
-              <>
-                <Divider />
-                <span>{copy.host}</span>
-              </>
-            ) : null}
-          </span>
-        </span>
-        <span className="flex shrink-0 flex-col items-end gap-1 text-right">
-          {left ? (
-            <span className="type-label tabular-nums">
-              {left.parts.map((part, i) => (
-                <span key={part.unit} className={i > 0 ? "ml-1" : undefined}>
-                  {part.unit === "초" && i > 0
-                    ? String(part.value).padStart(2, "0")
-                    : part.value}
-                  <span className="ml-0.5 type-caption text-muted-foreground">
-                    {part.unit}
-                  </span>
-                </span>
-              ))}
-            </span>
-          ) : (
-            <span className="type-caption text-muted-foreground tabular-nums">
-              {copy.closedOn(
-                whenLabel(new Date(poll.closedAt ?? poll.closesAt), now),
-              )}
-            </span>
-          )}
-          <span
+          <ChevronRight
+            aria-hidden
+            className="size-4 shrink-0 text-muted-foreground"
+            strokeWidth={1.5}
+          />
+        </Link>
+        {onRemove ? (
+          <button
+            ref={deleteRef}
+            type="button"
+            aria-label={copy.deleteLabel(poll.title)}
+            aria-disabled={!online || undefined}
+            aria-expanded={phase !== "idle"}
+            aria-controls={askId}
+            onClick={offlineGuard(() => setPhase("confirm"))}
             className={cn(
-              "type-caption",
-              poll.status === "open" && !poll.hasVoted
-                ? "text-foreground"
-                : "text-muted-foreground",
+              "-mr-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-(--lm-duration-fast) ease-standard hover:bg-muted active:bg-muted aria-disabled:opacity-50 motion-reduce:transition-none",
+              focusRing,
             )}
           >
-            {status}
-          </span>
-        </span>
-        <ChevronRight
-          aria-hidden
-          className="size-4 shrink-0 text-muted-foreground"
-          strokeWidth={1.5}
-        />
-      </Link>
+            <Trash2 aria-hidden className="size-4" strokeWidth={1.5} />
+          </button>
+        ) : null}
+      </div>
+      {onRemove && phase !== "idle" ? (
+        <div
+          id={askId}
+          role="group"
+          aria-label={copy.deleteAsk}
+          aria-busy={phase === "busy" || undefined}
+          className="mb-3 flex animate-in flex-col gap-3 rounded-card border border-border bg-card p-4 duration-(--lm-duration-base) ease-enter fade-in motion-reduce:animate-none"
+        >
+          <p className="type-body-sm break-keep">
+            {copy.deleteAsk}
+            <span className="block type-caption text-muted-foreground">
+              {copy.deleteBody}
+            </span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              ref={confirmRef}
+              type="button"
+              aria-disabled={phase === "busy" || !online || undefined}
+              onClick={offlineGuard(() => {
+                if (phase === "busy") return;
+                setPhase("busy");
+                void onRemove().then((ok) => {
+                  if (!ok) setPhase("confirm");
+                });
+              })}
+              className={cn(
+                buttonClass("destructive", "sm"),
+                "aria-disabled:opacity-60",
+              )}
+            >
+              {copy.deleteConfirm}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPhase("idle");
+                deleteRef.current?.focus();
+              }}
+              className={buttonClass("ghost", "sm")}
+            >
+              {copy.keep}
+            </button>
+          </div>
+          {phase === "busy" ? (
+            <span role="status" className="sr-only">
+              {copy.deleting}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
     </li>
   );
 }

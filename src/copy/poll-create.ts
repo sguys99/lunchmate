@@ -244,5 +244,15 @@ export const pollCreateCopy = {
     noResult: "표 없이 마감",
     canceled: "취소됨",
     closedOn: (when: string) => `${when} 마감`,
+    deleteLabel: (title: string) => `${title} 투표 기록 삭제`,
+    deleteAsk: "이 투표를 내 목록에서 지울까요?",
+    deleteBody:
+      "내 목록에서만 지워지고 다른 참여자의 결과는 그대로 남습니다. 되돌릴 수 없습니다.",
+    deleteConfirm: "지우기",
+    keep: "그대로 두기",
+    deleting: "투표 기록을 지우는 중입니다.",
+    deleted: "투표 기록을 지웠습니다.",
+    deleteFailed: "지우지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    offlineToast: "연결되면 지울 수 있습니다.",
   },
 } as const;
