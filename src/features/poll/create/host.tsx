@@ -3,6 +3,7 @@
 // 홈 첫 로드 예산(200KB) 때문에 이 자리 자체도 진입점을 처음 누른 뒤에 마운트한다(today-screen의 lazy).
 // 투표 탭과 회식 화면은 (app)/poll/layout.tsx가 마운트한다.
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { pollCreateCopy } from "@/copy/poll-create";
 import type { CreateDrawerProps } from "./create-drawer";
 import { usePollCreateIntent } from "./intent";
@@ -51,7 +52,17 @@ export default function PollCreateHost() {
   const isOpen = usePollCreateIntent((s) => s.isOpen);
   const nonce = usePollCreateIntent((s) => s.nonce);
   const close = usePollCreateIntent((s) => s.close);
-  if (!intent) return null;
+  // 탭 이동이나 홈 화면 배치 변경으로 이 자리가 새로 마운트되면 스토어에 지난 요청이 남아 있다.
+  // 이미 시작한 요청은 다시 그리지 않는다(그리면 시트가 마운트되며 방을 또 만든다). 열린 채였다면 닫는다
+  const [stale] = useState(() => {
+    const s = usePollCreateIntent.getState();
+    return s.intent && s.claimed === s.nonce ? s.nonce : null;
+  });
+  useEffect(() => {
+    if (stale !== null && usePollCreateIntent.getState().nonce === stale)
+      close();
+  }, [stale, close]);
+  if (!intent || nonce === stale) return null;
   return (
     <LazyDrawer
       key={nonce}

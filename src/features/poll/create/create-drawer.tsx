@@ -97,7 +97,13 @@ import {
 } from "./deadline";
 import type { PollWriteError } from "./errors";
 import { myPollsKey } from "./keys";
-import type { CandidateSource, PollCreateIntent, PollKind } from "./intent";
+import {
+  claimPollCreate,
+  usePollCreateIntent,
+  type CandidateSource,
+  type PollCreateIntent,
+  type PollKind,
+} from "./intent";
 import {
   buttonClass,
   CandidateNote,
@@ -326,10 +332,11 @@ export default function CreateDrawer({
   };
 
   // 열리면 바로 만든다(확인 모드가 아니면). 상세, 지도에서 열었으면 진행 중인 내 방부터 본다(D-15 안건 9).
-  // StrictMode 두 번 실행을 막는다
+  // StrictMode 두 번 실행과, 자리가 다시 마운트될 때의 중복 생성을 막는다
   useEffect(() => {
     if (started.current) return;
     started.current = true;
+    if (!claimPollCreate(usePollCreateIntent.getState().nonce)) return;
     if (!fromPlace) {
       // 서버 요청의 콜백에서 상태를 바꾼다(효과 안에서 곧바로 setState하지 않게)
       if (!intent.confirm) void Promise.resolve().then(create);

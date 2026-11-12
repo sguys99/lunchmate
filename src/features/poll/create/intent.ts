@@ -50,6 +50,8 @@ type IntentState = {
   isOpen: boolean;
   /** 같은 intent를 다시 열 때도 새 요청(새 시트 상태)으로 보이게 하는 번호 */
   nonce: number;
+  /** 시트가 이미 시작한 요청 번호. 자리가 다시 마운트돼도 같은 요청으로 방을 또 만들지 않는다 */
+  claimed: number;
   open: (intent: PollCreateIntent) => void;
   close: () => void;
 };
@@ -58,6 +60,7 @@ export const usePollCreateIntent = create<IntentState>((set) => ({
   intent: null,
   isOpen: false,
   nonce: 0,
+  claimed: 0,
   open: (intent) => set((s) => ({ intent, isOpen: true, nonce: s.nonce + 1 })),
   close: () => set({ isOpen: false }),
 }));
@@ -65,4 +68,11 @@ export const usePollCreateIntent = create<IntentState>((set) => ({
 /** 투표 만들기 시트를 연다. 시트 본체는 첫 호출 뒤 지연 로딩된다 */
 export function openPollCreate(intent: PollCreateIntent): void {
   usePollCreateIntent.getState().open(intent);
+}
+
+/** 이번 요청(nonce)을 처음 시작하면 true. 이미 시작한 요청이면 false(방 중복 생성 방지) */
+export function claimPollCreate(nonce: number): boolean {
+  if (usePollCreateIntent.getState().claimed >= nonce) return false;
+  usePollCreateIntent.setState({ claimed: nonce });
+  return true;
 }

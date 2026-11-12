@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "@/components/ui/lazy-toaster";
 import { pollCopy } from "@/copy/poll";
 import { track } from "@/lib/analytics";
-import { pollRoomKey } from "../create/keys";
+import { myPollsKey, pollRoomKey } from "../create/keys";
 import {
   addCandidateAction,
   cancelPollAction,
@@ -200,6 +200,8 @@ export function usePollRoom(pollId: string, online: boolean) {
     async (fn: () => Promise<{ ok: boolean; error?: PollErrorCode }>) => {
       const r = await fn();
       void client.invalidateQueries({ queryKey: key });
+      // 마감, 취소, 동점 결정은 투표 탭 목록(진행 중, 지난 투표)도 바꾼다
+      void client.invalidateQueries({ queryKey: myPollsKey });
       return r;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

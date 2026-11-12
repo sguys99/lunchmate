@@ -245,6 +245,51 @@ test.describe("투표 만들기 (D-15 C)", () => {
     }
   });
 
+  test("시트를 닫고 탭을 오가도 투표방이 다시 만들어지지 않고, 취소하면 탭 목록에 바로 반영된다", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    const s = await setup(page, context, baseURL!, "pc_remount");
+    try {
+      await startFriends(page);
+      await page.keyboard.press("Escape");
+      await expect(sheet(page)).toHaveCount(0);
+      // 클라이언트 이동(전체 새로 고침 없음): 투표 탭과 오늘 탭의 만들기 시트 자리가 새로 마운트된다
+      const tabs = page.getByRole("navigation", { name: "주요 메뉴" }).first();
+      await tabs.getByRole("link", { name: "투표" }).click();
+      await expect(
+        page.getByRole("heading", { name: "진행 중" }),
+      ).toBeVisible();
+      await tabs.getByRole("link", { name: "오늘" }).click();
+      await expect(page.locator(".lm-today-deck article h2")).toBeVisible({
+        timeout: 20_000,
+      });
+      await page.waitForTimeout(3_000);
+      const polls = await myPolls(s.token);
+      expect(polls).toHaveLength(1);
+
+      // 투표방에서 취소 → 투표 탭(클라이언트 이동)의 진행 중에 남지 않는다
+      await tabs.getByRole("link", { name: "투표" }).click();
+      await page
+        .getByRole("link", { name: new RegExp(`^${polls[0]!.title}`) })
+        .click();
+      await page.getByRole("button", { name: "투표 관리 더 보기" }).click();
+      await page.getByRole("menuitem", { name: "투표 취소하기" }).click();
+      await page.getByRole("button", { name: "취소하기" }).click();
+      await expect(
+        page.getByRole("heading", { name: /취소했습니다/ }),
+      ).toBeVisible();
+      await tabs.getByRole("link", { name: "투표" }).click();
+      await expect(
+        page.getByText('오늘 화면의 "친구랑 정하기"로 투표를 만들어보세요.'),
+      ).toBeVisible();
+      expect(await myPolls(s.token)).toHaveLength(1);
+    } finally {
+      await s.cleanup();
+    }
+  });
+
   test("빈 투표 탭은 오늘 추천으로 안내한다", async ({
     page,
     context,
