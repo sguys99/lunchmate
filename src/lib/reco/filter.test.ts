@@ -221,11 +221,38 @@ describe("끼니 적합도 하드 필터 (T9.16)", () => {
     expect(hardFilterReason(pub, BASE_SETTINGS, EMPTY_HISTORY)).toBeNull();
   });
 
-  it("술집 말고는 끼니로 빼지 않는다", () => {
+  it("점심은 술집과 카페를, 저녁은 카페만 카테고리로 뺀다", () => {
     for (const c of manyCandidates(12)) {
-      expect(isOffMeal(c, "lunch", new Set())).toBe(c.category === "pub");
-      expect(isOffMeal(c, "dinner", new Set())).toBe(false);
+      expect(isOffMeal(c, "lunch", new Set())).toBe(
+        c.category === "pub" || c.category === "cafe",
+      );
+      expect(isOffMeal(c, "dinner", new Set())).toBe(c.category === "cafe");
     }
+  });
+
+  it("점심에는 치킨 업종과 술집 이름도 뺀다 (T9.19, D-44)", () => {
+    const chicken = makeCandidate("ch", {
+      category: "fastfood",
+      categoryText: "치킨 > 치킨,닭강정",
+    });
+    const hof = makeCandidate("hof", {
+      name: "OO치킨호프",
+      category: "fastfood",
+    });
+    const none = new Set<string>();
+    expect(isOffMeal(chicken, "lunch", none)).toBe(true);
+    expect(isOffMeal(hof, "lunch", none)).toBe(true);
+    expect(isOffMeal(chicken, "dinner", none)).toBe(false);
+    expect(isOffMeal(chicken, "lunch", new Set(["fastfood"]))).toBe(false);
+  });
+
+  it("저녁에도 베이커리, 간식은 빼고, 요즘 땡겨요 카페면 남긴다", () => {
+    const bakery = makeCandidate("b", {
+      category: "cafe",
+      categoryText: "간식 > 제과,베이커리",
+    });
+    expect(isOffMeal(bakery, "dinner", new Set())).toBe(true);
+    expect(isOffMeal(bakery, "dinner", new Set(["cafe"]))).toBe(false);
   });
 });
 

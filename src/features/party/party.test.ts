@@ -208,19 +208,39 @@ describe("근거 3단계 (T7.27, PARTY-03, PARTY-04)", () => {
 });
 
 describe("후보 고르기 (T7.27, D-16 안건 2~5, 11)", () => {
-  it("주류를 켜면 카페, 분식, 샐러드, 패스트푸드를 뺀다", () => {
+  const mixed = [
+    place("1", "음식점 > 카페"),
+    place("2", "음식점 > 분식"),
+    place("3", "음식점 > 술집 > 호프,요리주점"),
+    place("4", "음식점 > 한식 > 육류,고기"),
+    place("5", "음식점 > 간식 > 제과,베이커리"),
+    place("6", "음식점 > 패스트푸드 > 햄버거"),
+    place("7", "음식점 > 치킨"),
+    place("8", "음식점 > 샐러드"),
+  ];
+
+  it("주류와 상관없이 간식, 분식, 치킨 아닌 패스트푸드는 늘 뺀다 (T9.19, D-44)", () => {
     const r = rankParty(
       input({
-        places: [
-          place("1", "음식점 > 카페"),
-          place("2", "음식점 > 분식"),
-          place("3", "음식점 > 술집 > 호프,요리주점"),
-          place("4", "음식점 > 한식 > 육류,고기"),
-        ],
+        places: mixed,
+        conditions: {
+          headcount: 8,
+          budget: 40_000,
+          room: true,
+          alcohol: false,
+        },
       }),
     );
-    expect(r.picks.map((p) => p.id).sort()).toEqual(["3", "4"]);
-    expect(r.filtered.alcohol).toBe(2);
+    expect(r.picks.map((p) => p.id).sort()).toEqual(["3", "4", "7", "8"]);
+    expect(r.filtered.notParty).toBe(4);
+    expect(r.filtered.alcohol).toBe(0);
+  });
+
+  it("주류를 켜면 샐러드도 뺀다", () => {
+    const r = rankParty(input({ places: mixed }));
+    expect(r.picks.map((p) => p.id).sort()).toEqual(["3", "4", "7"]);
+    expect(r.filtered.notParty).toBe(4);
+    expect(r.filtered.alcohol).toBe(1);
   });
 
   it("예산은 가격 제보가 있고 넘을 때만 거른다", () => {

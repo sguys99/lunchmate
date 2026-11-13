@@ -184,7 +184,7 @@ export type RecoPick = ScoredCandidate & {
 export type FilterCounts = {
   avoid: number;
   blocked: number;
-  /** 끼니에 안 맞는 카테고리(점심 술집, T9.16) */
+  /** 끼니에 안 맞는 곳(점심 술집, 치킨, 간식, 저녁 간식, T9.16, T9.19) */
   offMeal: number;
   closed: number;
   /** 이번 끼니 "오늘 쉬어요" 제보 2명 이상(D-40) */

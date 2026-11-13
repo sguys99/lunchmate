@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { addKstDays } from "@/lib/time";
-import {
-  LIKED_CATEGORY_BOOST,
-  MEAL_CATEGORY_PENALTY,
-  NEUTRAL,
-  WEIGHTS,
-} from "./constants";
+import { LIKED_CATEGORY_BOOST, NEUTRAL, WEIGHTS } from "./constants";
 import {
   scoreAll,
   scoreCandidate,
@@ -258,31 +253,6 @@ describe("scoreAll", () => {
   });
 });
 
-describe("끼니 적합도 P 감점 (T9.16)", () => {
-  const cafe = makeCandidate("cafe", { category: "cafe" });
-  const rice = makeCandidate("rice");
-  const pFor = (c: typeof cafe, settings: RecoSettings) =>
-    scoreAll([c], settings, EMPTY_HISTORY, NOW)[0]!.factors.P;
-
-  it("콜드 스타트에서도 카페류는 중립보다 낮고, 다른 카테고리는 중립이다", () => {
-    expect(pFor(cafe, BASE_SETTINGS)).toBeCloseTo(
-      NEUTRAL - MEAL_CATEGORY_PENALTY.lunch.cafe,
-    );
-    expect(pFor(rice, BASE_SETTINGS)).toBe(NEUTRAL);
-  });
-
-  it("요즘 땡겨요로 카페를 고르면 감점하지 않고 올린다", () => {
-    const settings: RecoSettings = {
-      ...BASE_SETTINGS,
-      craving: {
-        categories: ["cafe"],
-        until: new Date(NOW.getTime() + 86_400_000),
-      },
-    };
-    expect(pFor(cafe, settings)).toBeGreaterThan(NEUTRAL);
-  });
-});
-
 describe("좋아하는 음식 P 가산 (T9.17, D-39)", () => {
   const gukbap = makeCandidate("g", { category: "gukbap" });
   const liked: RecoSettings = { ...BASE_SETTINGS, liked: ["gukbap"] };
@@ -323,7 +293,7 @@ describe("좋아하는 음식 P 가산 (T9.17, D-39)", () => {
     );
   });
 
-  it("좋아하는 음식으로 고른 카페는 끼니 감점을 받지 않는다", () => {
+  it("좋아하는 음식으로 고른 카페도 그만큼만 오른다", () => {
     const cafe = makeCandidate("c", { category: "cafe" });
     const s = scoreAll(
       [cafe],

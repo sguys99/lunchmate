@@ -1,9 +1,10 @@
 // 하드 필터 (T5.6, PRD 7장, AC-REC-1). 순수 함수.
-// 순서: 기피 음식 → 다시 안 갈 곳 → 끼니에 안 맞는 카테고리(T9.16, 점심 술집) → 폐업 제보 누적 → 이번 끼니 오늘 쉬어요 2명(T9.18)
+// 순서: 기피 음식 → 다시 안 갈 곳 → 끼니에 안 맞는 곳(T9.16, T9.19: 점심 술집, 치킨, 간식, 저녁 간식) → 폐업 제보 누적 → 이번 끼니 오늘 쉬어요 2명(T9.18)
 // → 예산 초과(제보 가격이 있을 때만).
 // 한 곳은 처음 걸린 규칙 하나에만 센다(REC-09 완화 제안 "예산 조건을 풀면 4곳이 더 있습니다"에 쓰는 수).
 import { matchesAvoid } from "./avoid-match";
-import { CLOSED_TODAY_EXCLUDE, MEAL_EXCLUDED_CATEGORIES } from "./constants";
+import { CLOSED_TODAY_EXCLUDE, MEAL_EXCLUDED_KINDS } from "./constants";
+import { mealKind } from "./meal-kind";
 import { activeCravings } from "./score";
 import type {
   Candidate,
@@ -35,16 +36,16 @@ export function personalFilterReason(
 }
 
 /**
- * 이 끼니에 빼는 카테고리인가(T9.16). 요즘 땡겨요로 고른 카테고리는 빼지 않는다.
+ * 이 끼니에 빼는 곳인가(T9.16, T9.19). 요즘 땡겨요로 고른 카테고리는 빼지 않는다.
  * 사용자가 끼니를 저녁으로 바꾸면(수동 토글) 그 기준을 따른다.
  */
 export function isOffMeal(
-  c: Pick<Candidate, "category">,
+  c: Pick<Candidate, "category" | "categoryText" | "name">,
   meal: RecoSettings["meal"],
   cravings: ReadonlySet<string>,
 ): boolean {
-  const excluded: readonly string[] = MEAL_EXCLUDED_CATEGORIES[meal];
-  return excluded.includes(c.category) && !cravings.has(c.category);
+  const excluded: readonly string[] = MEAL_EXCLUDED_KINDS[meal];
+  return excluded.includes(mealKind(c)) && !cravings.has(c.category);
 }
 
 /**

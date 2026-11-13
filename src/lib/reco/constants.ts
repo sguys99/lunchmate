@@ -2,9 +2,9 @@
 //
 // S = w_d·D + w_p·P + w_b·B + w_c·C − w_r·R − w_w·W
 //   D 거리, P 선호(👍👎, 요즘 땡겨요), B 예산 적합도, C 평판, R 반복 패널티, W 웨이팅 패널티(PLACE-08)
-// 끼니 적합도: 점심 술집은 하드 필터(filter.ts), 카페류는 P 감점(score.ts). 요즘 땡겨요면 둘 다 적용하지 않는다.
+// 끼니 적합도: 끼니 성격(meal-kind.ts)으로 하드 필터(filter.ts). 요즘 땡겨요면 적용하지 않는다.
 // 양의 가중치 합이 1이라 S는 대략 −0.8~1 사이다. 할인 정보는 어떤 항에도 들어가지 않는다(AC-DEAL-2).
-import type { CategorySlug } from "@/features/place/categories";
+import type { MealKind } from "./meal-kind";
 import type { Meal } from "@/lib/time";
 
 export const WEIGHTS = {
@@ -48,26 +48,17 @@ export const CRAVING_BOOST = 0.25;
  */
 export const LIKED_CATEGORY_BOOST = 0.15;
 
-/* 끼니 적합도 (T9.16, 사용자 지적 11/03: 점심에 술집 추천) ------------- */
+/* 끼니 적합도 (T9.16, T9.19 D-44: 점심 치킨, 카페 추천 지적 11/13) ------- */
 
 /**
- * 이 끼니에는 하드 필터로 빼는 카테고리. 점심 술집은 대부분 저녁 영업이라 문이 닫혀 있다.
- * 요즘 땡겨요(SET-05)로 그 카테고리를 고른 동안은 빼지 않는다. 회식 모드(PARTY)는 이 규칙을 쓰지 않는다.
+ * 이 끼니에 하드 필터로 빼는 끼니 성격(meal-kind.ts). 점심 술집, 치킨은 대부분 저녁 영업이고,
+ * 카페, 베이커리, 간식은 한 끼로 약하다(T9.16의 카페 P 감점 0.2는 점수 차이 0.06이라 효과가 없었다).
+ * 요즘 땡겨요(SET-05)로 그 카테고리를 고른 동안은 빼지 않는다. 회식 모드(PARTY)는 rank.ts의 자기 규칙을 쓴다.
  */
-export const MEAL_EXCLUDED_CATEGORIES = {
-  lunch: ["pub"],
-  dinner: [],
-} as const satisfies Record<Meal, readonly CategorySlug[]>;
-
-/**
- * 이 끼니에 덜 어울리는 카테고리의 P 감점. 카페, 베이커리, 간식(카카오 "간식": 떡, 도넛, 아이스크림)은
- * 한 끼로는 약하지만 샌드위치, 샐러드가 되는 곳도 있어 빼지 않고 낮추기만 한다.
- * 카테고리 👎 최대 폭(0.15)보다 조금 크게, 요즘 땡겨요(+0.25)로는 뒤집힌다.
- */
-export const MEAL_CATEGORY_PENALTY = {
-  lunch: { cafe: 0.2 },
-  dinner: { cafe: 0.2 },
-} as const satisfies Record<Meal, Partial<Record<CategorySlug, number>>>;
+export const MEAL_EXCLUDED_KINDS = {
+  lunch: ["drink", "snack"],
+  dinner: ["snack"],
+} as const satisfies Record<Meal, readonly MealKind[]>;
 
 /* 오늘 쉬어요 (T9.18, D-40) ----------------------------------------- */
 

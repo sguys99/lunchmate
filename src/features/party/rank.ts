@@ -23,8 +23,9 @@ import type { LatLng } from "@/lib/map/types";
 import { estimateWalkMinutes } from "@/lib/reco/distance";
 import { CLOSED_REPORT_THRESHOLD, hardFilterReason } from "@/lib/reco/filter";
 import { MIN_REVIEWS_FOR_REPUTATION } from "@/lib/reco/constants";
+import { mealKind } from "@/lib/reco/meal-kind";
 import { scoreAll } from "@/lib/reco/score";
-import type { AvoidRule, Visit } from "@/lib/reco/types";
+import type { AvoidRule, Candidate, Visit } from "@/lib/reco/types";
 import {
   LARGE_GROUP,
   PARTY_RADIUS_M,
@@ -33,13 +34,14 @@ import {
   type PartyConditions,
 } from "./conditions";
 
-/** 주류를 켜면 뺄 카테고리 (D-16 안건 3) */
-export const ALCOHOL_EXCLUDED: readonly CategorySlug[] = [
-  "cafe",
-  "salad",
-  "fastfood",
-  "bunsik",
-];
+/** 주류를 켜면 더 뺄 카테고리 (D-16 안건 3). 카페, 분식, 패스트푸드는 늘 빠진다(isNotPartyPlace) */
+export const ALCOHOL_EXCLUDED: readonly CategorySlug[] = ["salad"];
+
+/** 회식 자리로 늘 빼는 곳 (T9.19, D-44): 간식(카페, 베이커리 포함), 분식, 치킨을 뺀 패스트푸드 */
+export function isNotPartyPlace(c: Candidate): boolean {
+  if (mealKind(c) === "snack" || c.category === "bunsik") return true;
+  return c.category === "fastfood" && mealKind(c) !== "drink";
+}
 
 export type EvidenceKey = "budget" | "room" | "alcohol";
 export type EvidenceStatus = "met" | "estimate" | "unknown";
@@ -75,6 +77,8 @@ export type PartyFiltered = {
   personal: number;
   closed: number;
   overBudget: number;
+  /** 회식 자리로 늘 빼는 곳(isNotPartyPlace) */
+  notParty: number;
   alcohol: number;
 };
 
@@ -174,6 +178,7 @@ export function rankParty(input: PartyInput): PartyResult {
     personal: 0,
     closed: 0,
     overBudget: 0,
+    notParty: 0,
     alcohol: 0,
   };
   const kept = [];
@@ -192,6 +197,10 @@ export function rankParty(input: PartyInput): PartyResult {
     }
     if (reason === "closed" || reason === "overBudget") {
       filtered[reason] += 1;
+      continue;
+    }
+    if (isNotPartyPlace(c)) {
+      filtered.notParty += 1;
       continue;
     }
     if (cond.alcohol && ALCOHOL_EXCLUDED.includes(c.category)) {
