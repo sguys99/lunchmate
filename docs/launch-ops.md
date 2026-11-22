@@ -189,12 +189,12 @@ Developer(무료) 플랜 수치(요금 페이지, 2026-11-02): 오류 월 5,000,
 
 | 서비스 | 도메인 제한 확인 | 한도, 알림 설정 | 지난 30일 사용량 | 확인일 |
 | --- | --- | --- | --- | --- |
-| 카카오 | JS SDK 도메인 2개, 웹 도메인 2개 | 쿼터 화면 확인 | 지도 /일, FD6 /일, 공유 /일 | |
-| 네이버 Maps | Web 서비스 URL 2개 | 월 / 일 한도, 70% 알림, 통보 대상 | 월 건 | |
-| Supabase | Site URL, Redirect URLs | (Free, 상한 없음) | DB MB, Egress GB, MAU, Realtime 최고 | |
-| PostHog | (해당 없음) | Free, 카드 없음, Owner 메일 | 이벤트 건 | |
-| Sentry | Allowed Domains | Spike Protection, 쿼터 알림 | 오류 건(Dropped 건) | |
-| Vercel | 프로덕션 도메인 1개 | 예산 $, 일시 중지 켬/끔, 알림 | 3.2절 | |
+| 카카오 | JS SDK 도메인 2개, 웹 도메인 2개 | 쿼터 화면 확인 | 지도 /일, FD6 /일, 공유 /일 (숫자 미기록) | 11/18 사용자 확인 |
+| 네이버 Maps | Web 서비스 URL 2개 | 월 6,000,000 / 일 200,000 한도, 70% 알림, 통보 대상 | 월 건 (숫자 미기록) | 11/20 사용자 확인 |
+| Supabase | Site URL, Redirect URLs | (Free, 상한 없음) | DB MB, Egress GB, MAU, Realtime 최고 (숫자 미기록) | 11/20 사용자 확인 |
+| PostHog | (해당 없음) | Free, 카드 없음, Owner 메일 | 이벤트 건 (숫자 미기록) | 11/20 사용자 확인 |
+| Sentry | Allowed Domains | Spike Protection, 쿼터 알림, 테스트 알림 | 오류 건(Dropped 건) (숫자 미기록) | 11/20 사용자 확인 |
+| Vercel | 프로덕션 도메인 1개 | 예산 $30(11/23 $10에서 올림, D-28), 일시 중지 켬, 알림 50/75/100% | 이번 주기 인프라 $32.67(빌드 대부분 다른 프로젝트, lunchmate-kr $4.41), 추가 지출 $12.65 | 11/23 Claude CLI |
 
 ---
 
