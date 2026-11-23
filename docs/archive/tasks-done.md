@@ -1,0 +1,541 @@
+# tasks.md 보관본 (0~9단계 완료 항목)
+
+> 2026-11-23 `docs/tasks.md`에서 분리했습니다. 내용은 고치지 않고 그대로 옮겼습니다. 진행 중인 작업과 공통 규칙(2장)은 `docs/tasks.md`가 정본입니다.
+
+## 3. 단계별 작업 (0~9단계)
+
+### 0단계. 준비 (3일)
+
+**목표**: 문서 불일치를 정리하고, 검수 기간이 긴 외부 등록을 먼저 시작하고, 빈 앱이 Vercel에서 지도를 띄웁니다.
+
+#### 0.1 문서 정리
+
+- [x] T0.1 `docs/`에 `basic-plan.md`, `prd.md`, `tasks.md`를 두고 루트에 `CLAUDE.md`를 둡니다.
+- [x] T0.2 CLAUDE.md 갱신 (10/28)
+  - [x] 정본 참조 `docs/plan.md` → `docs/tasks.md`, 문서 우선순위(tasks > CLAUDE > PRD > basic-plan) 명시
+  - [x] 시안 수 "2~3개" → "3안 이상", 시안 순서를 이 문서 단계 순서로
+  - [x] 디자인 방향 "토마토 레드 기본안" → "흙빛 계열 단일 포인트" (`docs/design/preferences.md` 참조), 카드 시각 주인공은 카테고리 일러스트, 제목 세리프 예외(시안 B)
+  - [x] 1단계에서 확정한 루트 `DESIGN.md`를 디자인 정본으로 참조하는 규칙 추가
+  - [x] 9장 문구 규칙을 "해요체" 단일에서 **해요체:습니다체 3:7, Em dash 금지, 중간점 금지**로 교체 (이 문서 2.2절 링크)
+  - [x] 기술 스택 표기 Framer Motion → Motion(`motion/react`), 동적 라이브러리 목록 추가
+  - [x] `pnpm lint:copy`, `pnpm tokens`, `pnpm analyze`를 명령어에, `lint:copy`를 푸시 전 필수 검사에 추가
+  - [x] 폴더 구조에 `DESIGN.md`, `src/copy`, `scripts`, 문서 파일 추가, `tokens.css`는 생성물로 표기
+  - [x] 커밋 규칙: PRD ID 없는 작업은 작업 ID 사용
+- [x] T0.3 PRD 정정 (10/28): 중간점이 들어간 UI 예문(7장 설명 문장, PLACE-07 웨이팅 표시, 8.3 카드 예시, PARTY-04)과 해요체 단일 문구를 2.2절 규칙에 맞게 고쳤습니다. 문서 서술용 중간점은 그대로 둡니다. 함께 고친 것: `plan.md` 참조, 시안 수와 순서, 포인트 컬러(8.2, Q6), PR 미리보기 전제, 14장 단계표, 다양성 적용 순서, 공개 프로필 뷰, 탈퇴 삭제 범위, 지표용 이벤트 3종.
+- [x] T0.4 `docs/design-decisions.md`, `docs/research-notes.md`, `docs/design/bundle-log.md` 빈 파일 생성
+
+#### 0.2 외부 등록 (도메인 확정 후, 검수 기간이 긴 것부터)
+
+- [x] T0.5 Vercel 프로젝트 생성, `lunchmate.vercel.app` 사용 가능 여부 확인 후 개발 도메인 확정 (PRD 14.1). 이후 모든 콘솔에는 이 도메인을 정확한 주소로 등록합니다(와일드카드 `*.vercel.app` 등록은 콘솔마다 허용 여부가 다르므로 쓰지 않음).
+- [x] T0.6 네이버 개발자센터: 네이버 로그인 애플리케이션 등록, 수집 항목(닉네임, 프로필 사진) 최소화, 서비스 URL에 T0.5 도메인과 `http://localhost:3000` 등록, **Callback URL은 Supabase 콜백 `https://shgpenqvdlvbpynzgfes.supabase.co/auth/v1/callback`** (커스텀 OIDC provider 방식, T0.14). 검수 전에는 등록한 테스트 아이디만 로그인되므로 검수 일정을 G4 이전에 잡습니다. Client ID/Secret은 `.env.local`이 아니라 Supabase 대시보드에 입력 (AUTH-01N)
+- [x] T0.7 카카오 디벨로퍼스: 앱 생성, JS 키, 플랫폼 Web 도메인, 카카오 로그인 활성화, **OpenID Connect 활성화**, 카카오 로그인 Client Secret 활성화, Redirect URI에 Supabase 콜백 등록, 동의 항목은 닉네임과 프로필 사진만(이메일 불필요, 비즈 앱 전환 없음), 카카오톡 공유 설정. REST API 키와 Client Secret은 Supabase 대시보드에만 입력 (AUTH-01, T0.20)
+- [x] T0.8 네이버 클라우드 Maps: Web Dynamic Map Client ID, 서비스 URL 등록, 일/월 사용량 한도와 알림 설정, 대표 계정 여부 확인(무료 이용량은 대표 계정만, T0.15)
+- [x] T0.9 Google Cloud: OAuth 클라이언트, 승인된 JavaScript 원본과 리디렉션 URI
+- [x] T0.10 Supabase 개발 프로젝트 생성 (리전: 서울), Site URL과 Redirect URLs(T0.5 도메인, `http://localhost:3000`) 등록. provider: 구글은 내장, **카카오와 네이버는 커스텀 OIDC provider로 등록**(`custom:kakao` issuer `https://kauth.kakao.com` scopes `openid profile_nickname profile_image`, `custom:naver` issuer `https://nid.naver.com` scopes `openid`, 둘 다 `email_optional: true`, 무료 플랜 커스텀 3개 중 2개 사용). provider 비밀값은 사용자가 대시보드에 직접 입력 (T0.14, T0.20)
+- [x] T0.11 PostHog 프로젝트(리전 선택), Sentry 프로젝트 생성
+- [x] T0.12 자체 도메인 후보 2~3개 가용성만 확인 (구매는 9단계 전)
+- [x] T0.13 모든 키를 `.env.local`과 Vercel 환경변수에 등록, 브라우저 키 도메인 제한 확인
+
+#### 0.3 확인 필요 항목 조사 (결과는 `docs/research-notes.md`에 출처와 함께)
+
+- [x] T0.14 Supabase가 네이버를 커스텀 OAuth/OIDC provider로 지원하는지, 불가하면 서버 함수 + Admin API 방식 설계 (AUTH-01N)
+- [x] T0.15 카카오 장소 데이터를 네이버 지도 위에 표시하는 것이 양사 약관상 허용되는지 (불가 시 카카오맵 전환 계획)
+- [x] T0.16 장소명, 좌표가 필요한 화면의 처리 방식 (`place_id`만 저장하는 규칙과의 충돌 정리)
+  - [x] 투표 후보 장소명, 좌표 스냅샷 저장이 카카오 정책과 충돌하는지
+  - [x] 카카오 로컬 API에 `place_id` 단건 조회 수단이 있는지 (없다면 즐겨찾기, 기록, "어제 ○○ 어땠어요?", 투표 결과에서 이름을 어떻게 보여줄지)
+  - [x] 오프라인 즐겨찾기 화면(APP-02)과 카카오 장애 시 즐겨찾기 대체 추천(PRD 12장)이 저장 금지 규칙 안에서 가능한지, 불가하면 대체 동작
+  - [x] 서버 OG 이미지(POLL-04, POLL-09S)에서 식당 이름이 필요할 때 카카오 REST 키가 필요한지 (필요하면 서버 전용 환경변수 추가)
+- [x] T0.17 카카오톡 인앱 브라우저의 외부 브라우저 열기 스킴 동작 (Android, iOS) (AUTH-04)
+- [x] T0.18 위치기반서비스사업 신고 대상 여부 (현위치 서버 미저장 구조 기준)
+- [x] T0.19 Vercel Hobby 플랜 제약(상업적 이용, Cron 빈도), Supabase 무료 플랜 일시 정지와 백업 범위
+- [x] T0.20 카카오 provider의 이메일 필수 여부와 비즈 앱 전환 필요성
+
+#### 0.4 리포와 개발 환경
+
+- [x] T0.21 Next.js(App Router, 최신 안정판) + TypeScript strict + pnpm 초기화, CLAUDE.md 4장 폴더 구조 생성
+- [x] T0.22 Tailwind CSS v4, shadcn/ui 초기화, Pretendard Variable(`next/font/local`, 서브셋) 적용
+- [x] T0.23 ESLint, Prettier, `typecheck` 스크립트, Vitest, Playwright 설정
+- [x] T0.24 `src/lib/env.ts`: zod로 환경변수 검증 (서버 전용 키가 클라이언트 번들에 들어가면 빌드 실패)
+- [x] T0.25 `src/lib/flags.ts`: 기능 플래그 (`NEXT_PUBLIC_DESIGN_LAB` 포함, 프로덕션에서 `/design-lab` 404)
+- [x] T0.26 `src/lib/time`: KST 끼니 판정, 마감 판정 유틸과 단위 테스트
+- [x] T0.27 동적 라이브러리 사전 조사: 2.4절 후보의 최신 버전, 유지보수 상태(특히 Vaul), 라이선스, Next.js 최신판과 React 버전 호환성을 Context7과 공식 문서로 확인
+- [x] T0.28 Supabase CLI 연결, `pnpm db:push`, `pnpm db:types` 스크립트
+- [x] T0.29 `pnpm shots <route>`: Playwright로 390px, 1280px, 라이트, 다크 캡처 → `docs/design/shots/`
+- [x] T0.30 `pnpm analyze` 스크립트: `next analyze --output --snapshot <이름>`(Turbopack 내장 분석기). 비교 수치는 `next analyze export --snapshot <이름>`으로 뽑아 bundle-log.md에 기록. `@next/bundle-analyzer`는 Webpack 전용이라 설치하지 않음 (T0.27)
+- [x] T0.31 `scripts/check-copy.ts` 뼈대 (금지 문자 검사만 먼저, 비율 리포트는 T2.3)
+- [x] T0.32 git pre-push 훅: lint, typecheck, test, lint:copy
+- [x] T0.33 GitHub 리포와 Vercel 연결, `main` 푸시 시 자동 배포 확인
+- [x] T0.34 `MapProvider` 인터페이스 초안과 네이버 구현체로 빈 지도 표시
+- [x] T0.35 Sentry, PostHog SDK 설치만 (이벤트 연결은 T2.20). PostHog는 첫 렌더 후 동적 import, Sentry `beforeSend`에 좌표 필터 자리 마련 (T0.18, T0.27)
+- [x] T0.36 **G0 확인**: `*.vercel.app`에서 네이버 지도가 보이고, pre-push 검사가 동작합니다.
+
+---
+
+### 1단계. 디자인 시스템: DESIGN.md 시안 (4일) ⛔ G1
+
+**목표**: 방향이 다른 DESIGN.md 시안 3개 이상을 만들고, 같은 실제 화면에 입혀 비교한 뒤 하나를 골라 루트 `DESIGN.md`로 확정합니다. **이 단계가 끝나기 전에는 기능 UI를 만들지 않습니다.**
+
+#### 1.1 취향 수집
+
+- [x] ❓ T1.1 (10/28 1차 완료, `preferences.md` 작성됨. 모서리와 라이트/다크는 묻지 않고 가정으로 기록했으므로 G1에서 함께 확인) 디자인 선호 질문지(8문항 이상, 2회에 나눠 질문)를 사용자에게 보내고 답을 받습니다. 답은 `docs/design/preferences.md`에 기록합니다. 문서 작성 단계(10/28)에서 1차 답변을 받았다면 그 내용을 옮기고 빈 항목만 다시 묻습니다.
+  - 좋아하는 앱/웹 2~3개와 좋아하는 이유 (기본 후보: 토스, Airbnb, Linear, 당근)
+  - 싫어하는 디자인 (예: 과한 그라데이션, 귀여운 캐릭터, 너무 차가운 무채색)
+  - 카드 표현: 일러스트형 / 타이포형 / 이모지와 색면형
+  - 모션 강도: 절제 / 보통 / 풍부
+  - 모서리: 각진 편 / 중간 / 둥근 편
+  - 포인트 컬러: 토마토 레드 고정 / 시안별로 다른 색 제안 허용
+  - 라이트 우선 / 다크 우선 / 동등
+  - 숫자 전용 보조 서체 허용 여부 (Pretendard 단일 원칙의 예외)
+- [x] T1.2 (10/28 완료, `preferences.md` 4절) 레퍼런스 정리: 선호 앱의 공통점을 텍스트로 정리합니다. 외부 스크린샷은 리포에 커밋하지 않고 링크만 남깁니다.
+
+#### 1.2 DESIGN.md 시안 작성
+
+- [x] T1.3 (10/28 완료, `docs/design/candidates/FORMAT.md`, `_template.DESIGN.md`, `src/lib/design/schema.ts`) DESIGN.md 형식 확정: 앞부분 YAML 프런트매터에 토큰(색 라이트/다크, 타입 스케일, 간격, 라운드, 그림자, 모션 duration/easing/spring), 본문에 아래 섹션
+  - 컨셉 한 줄과 무드 키워드 3개
+  - 색 사용 규칙 (포인트 컬러 사용처, 의미 색, 대비 수치)
+  - 타이포 (스케일, 숫자 표현, `tabular-nums`)
+  - 레이아웃 (그리드, 여백, 하단 1/3 액션 영역, 데스크톱 2단)
+  - 컴포넌트 규칙 (추천 카드, 버튼, 칩, 바텀시트, 하단 탭, 득표 바, 배지)
+  - 카테고리 아이콘/일러스트 시스템 (사진 없는 카드 대응, PRD 8.3)
+  - 모션 원칙과 동적 컴포넌트 사용 지점
+  - 문구 톤 (2.2절 연결)
+  - Do / Don't
+공통 조건 (preferences.md): 따뜻하고 편안한 인상, 흙빛 단일 포인트, 넓은 여백, 카드 중심, 카테고리 일러스트, 모션 보통, 빽빽한 정보와 과한 그라데이션/글래스 금지
+
+- [x] T1.4 (10/28 완료, `docs/design/candidates/a.DESIGN.md`, 일러스트 `src/features/design-lab/illustrations/a`) **시안 A "Terracotta Table"** (스타벅스 쪽): 크림 배경, 테라코타 포인트, 손맛 있는 채색 일러스트를 카드 위쪽에 크게, 쌓인 카드 스택, 중간 라운드, 스프링 스와이프와 셔플
+- [x] T1.5 (10/28 완료, `docs/design/candidates/b.DESIGN.md`, 세리프 마루 부리 Light+Regular 272KB, 일러스트 `src/features/design-lab/illustrations/b`) **시안 B "Quiet Stone"** (아만 쪽): 따뜻한 샌드 배경, 짙은 올리브 또는 흙갈색 포인트, **제목 세리프 시도**(한글 세리프 웹폰트 용량 측정 포함), 가는 선화 일러스트, 여백이 큰 단일 카드, 느린 페이드
+- [x] T1.6 (10/28 완료, `docs/design/candidates/c.DESIGN.md`, 일러스트 `src/features/design-lab/illustrations/c`) **시안 C "Clay Grid"** (Mintlify 쪽): 오프화이트, 캐러멜/클레이 포인트, 얇은 테두리와 정돈된 그리드, 작은 라운드, 단정한 플랫 일러스트, 빠른 전환과 숫자 롤링
+- [x] T1.7 ~~시안 D "Evening Table"~~: 다크 우선 선호가 없어 생략 (10/28 결정)
+- [x] T1.8 T1.1 답변 반영해 시안 방향 조정 완료 (10/28)
+
+#### 1.3 실제 화면으로 비교
+
+> G1의 비교 범위: 토큰(색, 타입, 라운드, 그림자), 일러스트 화풍, 모션 성격을 고릅니다. 카드 배치(스택, 캐러셀, 세로 3단)는 3단계 G3에서 확정하므로, 시안별 카드 구조는 분위기를 보여주는 참고 표현으로 다룹니다.
+
+- [x] T1.9 (10/28 완료, `pnpm tokens`, `--check`, 변환은 `src/lib/design/to-css.ts`) `scripts/build-tokens.ts`와 `pnpm tokens` 스크립트: 각 DESIGN 시안의 프런트매터를 `[data-design="a"]` 같은 CSS 변수 세트로 변환
+- [x] T1.10 (10/28 완료, `src/features/design-lab/mock`, `src/features/place/categories.ts`) design-lab 목업 데이터: 가상 식당 12곳 (실제 카카오 데이터 사용 금지), 카테고리별 1곳 이상
+- [x] T1.11 (10/28 완료, 시안 a/b/c 모두) 비교 화면 1: **오늘(홈) 추천 카드 3장 + 하단 탭** (CLAUDE.md 6.1 규칙)
+- [x] T1.12 (10/28 완료, 시안 a/b/c 모두) 비교 화면 2: **바텀시트 식당 상세 + 투표 득표 바** (모션 성격 비교용)
+- [x] T1.13 (10/28 완료, 시안 a/b/c 모두) 각 시안에 4상태와 다크 모드 적용
+- [x] T1.14 (10/28 완료, 스위처 `/design-lab/system`, 단독 화면 `/design-lab/system/{a|b|c}/{home|sheet}`) `/design-lab/system`: 같은 화면에서 시안을 실시간으로 바꿔 보는 스위처, 라이트/다크 토글, 390px 프레임 보기
+- [x] T1.15 (10/28 완료, `pnpm tokens` 사전 검사, `design-docs.test.ts`로 pre-push 차단, `pnpm contrast` 표) 토큰 대비 자동 검사: 텍스트/배경 쌍이 4.5:1 미만이면 실패
+- [x] T1.16 (10/28 완료, 캡처 124장, 견본표 `/design-lab/system/tokens`, 비교 자료 `docs/design/g1-comparison.md`) `pnpm shots`로 시안별 캡처, 보조 자료로 색 견본표와 타입 스케일 표 첨부
+- [x] ⛔ T1.17 (10/28 완료, 사용자 선택 B, 라이트 우선 확정) **선택 게이트 G1**: 2.3절 비교표와 캡처를 보여주고 선택(또는 조합 지시)을 요청한 뒤 멈춥니다.
+
+#### 1.4 확정
+
+- [x] T1.18 (10/28 완료, 루트 `DESIGN.md`, design-decisions D-01) 선택안을 루트 `DESIGN.md`로 확정하고 `docs/design-decisions.md`에 선택 내용, 조합 지시, 날짜를 기록
+- [x] T1.19 (10/29 완료, 서체는 `font.*.cssVar`로 next/font 연결, 마루 부리 300/400 swap 비preload, `lunchmate/no-hardcoded-color` + CSS 색 검사) `src/styles/tokens.css` 생성(빌드 스크립트 산출물), Tailwind v4 테마 연결, 하드코딩 색 금지 린트 규칙 추가
+- [x] T1.20 (10/29 완료, A/C 코드 삭제, design-lab은 루트 토큰 사용, 시안 문서와 캡처 보존) 미선택 시안의 design-lab 코드 삭제. 시안 DESIGN 파일은 `docs/design/candidates/`에, 캡처는 `docs/design/shots/`에 보존
+- [x] T1.21 (10/29 완료, `edit-flow.test.ts`로 회귀 방지, 기록은 `g1-comparison.md` 7절) **G1 확인**: DESIGN.md를 고치고 `pnpm tokens`를 실행하면 화면이 따라 바뀝니다.
+
+---
+
+### 2단계. 공통 기반: 문구, 컴포넌트, 모션 (4일)
+
+**목표**: 모든 화면이 같은 토큰, 같은 컴포넌트, 같은 모션, 같은 문구 규칙을 쓰도록 바닥을 깝니다.
+
+#### 2.1 문구 시스템
+
+- [x] T2.1 (10/29 완료, `docs/copy-guide.md`: 2.2절 규칙, 화면 14유형 예문, 금지 표현, 숫자 표기와 포매터 연결, src/copy 작성 규칙, lint:copy 사용법) `docs/copy-guide.md`: 2.2절 규칙, 화면 유형별 예문, 금지 표현, 숫자 표기법
+- [x] T2.2 (10/29 완료, `src/copy/common.ts` 공통 라벨, 4상태, 하단 탭, design-lab-b를 design-lab-quiet-stone으로 통합, 루트 metadata를 siteCopy로) 문구 중앙화: `src/copy/<도메인>.ts`에 화면 문구를 모읍니다. 컴포넌트 안에 문장을 직접 쓰지 않습니다 (라벨 1~2단어는 예외).
+- [x] T2.3 (10/29 완료, `scripts/copy-lint/tone.ts` 문체 비율 리포트 25~40% 경고, 5문장 미만 표본 부족, design-lab 문구는 비율 제외, 금지 문자는 src 전체 AST 검사, 테스트 `scripts/copy-lint/*.test.ts`) `pnpm lint:copy` 완성
+  - [x] 금지 문자 검사: `src/copy`, JSX 텍스트, OG 이미지 템플릿, 메타 태그, 매니페스트
+  - [x] 문체 비율 리포트: 문장 끝(`~니다.`, `~요.`, `~요?` 등)을 세어 파일별 해요체 비율 출력, 25~40% 밖이면 경고
+  - [x] Vitest로 검사 스크립트 자체를 테스트
+- [x] T2.4 (10/29 완료, `src/lib/format`: 도보 분(거리 × 1.3 ÷ 67 올림, 최소 1분), 1인 가격대와 만 원 금액, 👍%, 상대 시간(KST), 마감 카운트다운(NumberFlow용 성분 분리), 단위 테스트 56개) 숫자/단위 포매터 `src/lib/format`: "도보 약 6분", "1인 9천 원대", "1.2만 원", "12분 전", 마감 카운트다운 (구분자는 쉼표나 공백)
+
+#### 2.2 컴포넌트
+
+- [x] T2.5 (10/29 완료, `src/components/ui` 12종 + Chip/ChipGroup, Button 기본 variant secondary(올리브는 primary 명시), 포커스와 44px 터치 영역 공통 `interaction.ts`, 렌더 테스트 11개, sonner 약 9.6KB gzip, 갤러리 초안 `/design-lab/components`) shadcn 컴포넌트 설치와 토큰 재스타일: Button, Toggle/Chip, Badge, Dialog, Sheet, Tabs, Slider, Input, Skeleton, Avatar, Tooltip, Sonner. shadcn 기본 회색과 기본 라운드를 그대로 쓰지 않습니다.
+- [x] T2.6 (10/29 완료, `src/components/app-shell`, AppShell/ShellSplit/BottomTabBar/PageHeader, 경로 /today /map /poll /me, 데스크톱 1024px 이상 좌 리스트 + 우 지도이고 탭은 좌 칸 아래(사용자 확정), safe-area는 (app) viewport-fit=cover, MotionProvider와 Toaster는 (app)/layout, 플래그 appShell은 프로덕션 꺼짐) 앱 셸: 하단 탭 4개(오늘, 지도, 투표, 나), safe-area 대응, 데스크톱 좌 리스트 + 우 지도 2단 틀, 페이지 헤더
+- [x] T2.7 (10/29 완료, `src/components/states`: CardSkeleton, ListSkeleton, SheetSkeleton(SkeletonLine으로 줄 높이 고정), EmptyState, ErrorState(alert), OfflineState(status), 기본 문구 commonCopy.states, `useOnlineStatus`는 `src/lib/network`, Drawer 제목 title 세리프, 확인 `/design-lab/states`) 상태 컴포넌트: Skeleton 패턴(카드, 리스트, 시트), EmptyState, ErrorState, OfflineState
+- [x] T2.8 (10/29 완료, `src/features/place/illustrations`, `<CategoryIllustration slug size variant decorative />`, 64px 미만 icon 변형, 음식 한 곳 16% 톤 면(사용자 확정), 확인 `/design-lab/illustrations`) 카테고리 아이콘/일러스트 12종 SVG 자체 제작 (한식, 중식, 일식, 양식, 분식, 국밥/탕, 고기, 아시안, 패스트푸드, 샐러드/건강식, 카페/베이커리, 술집), 라이트/다크 대응
+- [x] T2.9 (10/29 완료, `src/components/badges` 배지 5종 + PlaceBadges/pickBadges(카드당 2개), 문구 정본 `src/copy/badges.ts`, 기본 우선순위는 T3.2에서 기피 > 웨이팅(줄 길어요 > 조금 기다려요 > 바로 입장) > 할인 > 제보로 확정, 추정은 가격 옆 표시로 이동, 배지 색은 G3에서 calm(기피 경고만 의미 색)으로 확정해 T3.8에서 기본값으로 바꿈(D-05), 확인 `/design-lab/badges`) 공통 배지: `추정`, `제보`, `할인`, 웨이팅 3단계, 투표 기피 경고
+- [x] T2.10 (10/29 완료, `/design-lab/components` 12섹션 + `data-gallery-section`, 쿼리 `?theme=light|dark&motion=reduce&static=1`로 결정적 렌더, 페이지 안 테마/모션/정지 전환, states와 badges 확인 페이지는 갤러리로 흡수, illustrations 페이지는 정밀 확인용 유지) `/design-lab/components`: 모든 공통 컴포넌트와 상태를 한 페이지에서 보는 갤러리
+
+#### 2.3 모션 시스템
+
+- [x] T2.11 (10/29 완료, `src/lib/motion` 폴더, 토큰은 `pnpm tokens`가 DESIGN.md에서 `tokens.generated.ts`로 생성하고 `--check`로 검사, 프리셋 enter, exit, fade, press, spring-sheet, spring-card, spring-bar, reveal, MotionProvider는 LazyMotion strict + domAnimation, domMax는 loadDomMax 비동기) Motion 설치, `LazyMotion` 설정, DESIGN.md 모션 토큰을 `src/lib/motion.ts` 프리셋으로 (enter, exit, press, spring-sheet, spring-card)
+- [x] T2.12 (10/29 완료, `useMotionPreset`, `useMotionReduced`, `useMotionTransition`, 축소 모드면 duration 0, transform 제거, opacity만, MotionConfig reducedMotion="user" 안전망, 앱 설정 확장은 `MotionProvider preference="reduce"` 인터페이스) `useReducedMotion` 래퍼: 모든 프리셋이 자동으로 축소 모드를 따르게 합니다.
+- [x] T2.13 (10/29 완료, `/design-lab/poc` 6종, 재사용 로직 `src/features/rec/use-swipe-stack.ts`, `src/lib/motion/celebrate.ts`, `src/components/numbers`(RollingNumber, DeadlineCountdown), `src/components/effects`(단어 페이드, 블러 페이드, 마퀴), 실측 domMax 17.0KB, PostHog 101.5KB, confetti 4.1KB 모두 비동기, iOS Safari와 카카오톡 인앱 스크롤 잠금, 키보드는 [실기기] 미확인) 동적 컴포넌트 PoC (design-lab에서, 각각 번들 증가량 기록)
+  - [x] 스와이프 카드 스택 (Motion drag, 키보드와 버튼 대체 조작 포함)
+  - [x] 바텀시트 스냅 포인트 (Base UI Drawer 기본, iOS Safari와 카카오톡 인앱 스크롤 잠금, 키보드 `[실기기]` 확인. 문제가 크면 Motion 직접 구현 예비안, T0.27)
+  - [x] Motion `domMax` 비동기 로딩, PostHog 지연 로딩의 실제 증가량을 `next analyze export`로 측정 (T0.27)
+  - [x] NumberFlow 숫자 롤링 (득표 수, 카운트다운)
+  - [x] 다시 뽑기 셔플 모션
+  - [x] 결정 축하 (canvas-confetti 동적 import)
+  - [x] 랜딩용 효과 후보 2~3개 (Magic UI, Motion Primitives, React Bits 중)
+- [x] T2.14 (10/29 완료, `src/lib/haptics` haptic(kind) 4종(tap, select, success, warning), 미지원, 축소 모드, 설정 off면 무동작, 80ms 스로틀, 실제 연결은 해당 화면 구현 때, Android 실기기 확인 필요) 햅틱 유틸: 지원 기기(Android)에서만 짧은 진동, 미지원 시 아무 동작 안 함
+- [x] T2.15 (10/29 완료, `docs/design-decisions.md` D-02 PoC 판정표(채택 5, 조건부 2, 보류 1, 제외 1, 햅틱 연결 제안, PostHog 지연 유지), D-03 2단계 기타 결정 7건) PoC 결과를 `docs/design-decisions.md`에 기록 (채택, 보류, 제외와 이유)
+
+#### 2.4 품질 장치
+
+- [x] T2.16 (10/29 완료, `e2e/visual/gallery.spec.ts` 갤러리 섹션 12개 x 라이트/다크 x 390/1280 = 48장(darwin, 약 2.1MB), `pnpm test:e2e:visual`, 갱신 `--update-snapshots`, colorScheme 일치와 하이드레이션, 폰트 대기, dev 인디케이터는 stylePath로 스냅샷에서만 숨김, 허용 오차 0.2%, `docs/e2e.md`) Playwright 시각 회귀 스냅샷: 컴포넌트 갤러리 기준
+- [x] T2.17 (10/29 완료, `@axe-core/playwright` dev, `e2e/helpers/axe.ts` WCAG 2.1 A/AA + best-practice 위반 0, `e2e/a11y.spec.ts` 갤러리, 앱 탭 4개, 404 셸 안팎, PoC x 라이트/다크 x 390/1280 = 32건, 수정: 오류와 404 제목 h1, 지도 칸 aside 랜드마크, 미리보기 탭 바 label, disableRules 없음) axe 접근성 검사를 E2E에 연결
+- [x] T2.18 (10/29 완료, src/app/error.tsx, global-error.tsx, not-found.tsx, (app)/error.tsx와 not-found.tsx로 셸 안 하단 탭 유지, 공통 ErrorScreen과 NotFoundScreen, Next 16 retry(), 메시지와 스택 비노출하고 digest만 참고 번호로, `src/lib/errors` reportError가 지연 Sentry 청크로 captureException) 공통 오류 경계와 사용자 친화적 오류 화면 (APP-06)
+- [x] T2.19 (10/29 완료, `src/lib/query` getQueryClient(서버는 요청마다, 브라우저는 싱글턴)와 QueryProvider를 (app) 레이아웃에 마운트, gcTime 5분(T10.2 답변 전), staleTime 1분, retry 1, 재연결 시 다시 불러오기, 포커스 복귀 시 다시 불러오지 않음, persist 의존성과 사용을 테스트로 금지, 단독 gzip 약 10.2KB) TanStack Query 기본 설정: 세션 메모리 캐시만, persist 플러그인 금지 (카카오 데이터 저장 금지). `gcTime`은 T10.2 카카오 답변 전까지 짧게 잡습니다 (T0.16-3)
+- [x] T2.20 (10/29 완료, `src/lib/analytics/events.ts` PRD 10.2 이벤트 24개 판별 유니언, 좌표와 개인 정보 키 never, 런타임 가드, `track.ts` 큐 포함 지연 전송, autocapture off 유지와 before_send로 요소 텍스트, 좌표 제거, 페이지뷰 Provider 마운트는 앱 셸 연결 때) 분석 이벤트 타입 `src/lib/analytics/events.ts`: PRD 10.2절 이벤트를 타입으로 정의, 좌표와 개인 식별 속성은 타입에서 막음. PostHog autocapture 속성에 좌표가 섞이지 않게 필터 (T0.18)
+- [x] T2.21 (10/29 완료, `sentry-options.ts` beforeSend, beforeBreadcrumb, beforeSendSpan(SDK 11 span 스트리밍 기본이라 beforeSendTransaction 제거) 3런타임 공통, `scrub.ts` JSON, 인코딩 URL, query_string 쌍, 접미형 키, 단독 좌표 숫자 패턴 + 테스트) Sentry 설정: `beforeSend`와 breadcrumb 필터로 좌표, 쿼리스트링 위치값 스크러빙 + 테스트 (T0.18)
+- [x] T2.22 (10/29 G2 통과, 독립 검증: lint, typecheck, test, lint:copy 경고 0, tokens, build 예산(/ 139.9KB, /today 168.5KB), visual 4/4, a11y 36/36, 수정: Tailwind v4 outline-none 탓에 사라진 포커스 링 복구와 Tab 링 E2E, 탭 아래 없는 경로도 셸 안 404, 오류 문구 자동 재시도 약속 제거, 실기기 iOS Safari와 카카오톡 인앱 확인 남음) **G2 확인**: 갤러리에서 모든 컴포넌트가 라이트/다크, 축소 모션에서 정상이고 `lint:copy`가 통과합니다.
+
+---
+
+### 3단계. 핵심 화면 시안: 홈 카드와 랜딩 (3일) ⛔ G3
+
+**목표**: 가장 중요한 화면인 오늘(홈)과 첫인상인 랜딩을 기능 개발 전에 확정합니다. 디자인 시스템이 실제로 통하는지도 여기서 검증합니다.
+
+- [x] T3.1 오늘(홈) 시안 3안 이상 (4안: D 오늘의 한 곳 + 대안 2곳 추가, 2026-10-29)
+  - A **스와이프 스택**: 한 장씩 넘기는 카드 더미, 넘긴 카드는 뒤로
+  - B **피크 캐러셀**: 가운데 카드와 양옆 일부가 보이는 가로 3장
+  - C **세로 3단 비교**: 세 곳을 한눈에, 숫자 열 정렬로 비교 중심
+  - 공통 포함: 끼니 토글, 기준 위치 칩, 다시 뽑기, 그냥 골라줘, 친구랑 정하기, 회식 모드 진입, 어제 피드백 카드, 할인/웨이팅 배지
+- [x] T3.2 (10/29 완료, 규칙 `docs/design/g3-card-rules.md`, 배지 색 current/calm은 G3 안건) 카드 정보 위계 실험: 식당명, 숫자 3개(도보, 가격, 👍 비율), 이유 1줄, 배지 최대 2개. 숫자 크기와 순서를 시안마다 다르게. 후보 배지(추정, 할인, 웨이팅, 투표 기피 경고)가 2개를 넘을 때의 **배지 우선순위 규칙**을 함께 정합니다.
+- [x] T3.3 (10/29 완료, R1 하이라이트 순회, R2 이름 롤링, R3 조용한 확정, `?roulette=`) "그냥 골라줘" 룰렛과 확정 결과 카드 모션 2안 이상 (REC-12)
+- [x] T3.4 랜딩 시안 3안 이상: 가치 제안 한 줄, 추천 체험 버튼, 카카오/네이버/구글 시작 버튼. 동적 효과는 이 화면에서 가장 적극적으로 시도합니다.
+- [x] T3.5 4상태, 다크, 360px 최소 폭 확인 (10/29 완료, `docs/design/g3-qa.md`, axe 192건 통과)
+- [x] T3.6 캡처와 비교표 작성 (번들 증가량 포함) (10/29 완료, `docs/design/g3-comparison.md`, 캡처 70장 `docs/design/shots/2026-10-29/`)
+- [x] ⛔ T3.7 (10/30 완료: 1차 홈 D, 랜딩 B 선택 → D에 어제 피드백을 첫 화면에 둔 2차 D1, D2, D3 중 D1 선택, 안건 8건은 추천안 확정) **선택 게이트 G3**: 홈과 랜딩 각각 선택을 요청하고 멈춥니다.
+- [x] T3.8 (10/30 완료, design-decisions D-05 홈 D1, D-06 랜딩 B. DESIGN.md 5장 "오늘(홈) 화면", "그냥 골라줘", "랜딩", "배지" calm 보강. 공용 배지 calm 기본값과 `EstimateMark` 승격. PRD REC-04, REC-12, FB-01 정리. 미선택 시안 코드 삭제, 남긴 확인 화면 `/design-lab/home/d1`, `/design-lab/landing/b`) 선택 기록, DESIGN.md에 카드 규칙 보강, 미선택 코드 삭제
+
+---
+
+### 4단계. 인증, 온보딩, 설정 (1.5주)
+
+#### 4.0 시안 ⛔
+
+- [x] T4.1 (10/30 완료, A 한 장씩 넘기기, B 지도 위 시트, C 답이 쌓이는 한 장, `/design-lab/onboarding/<a|b|c>`) 온보딩 3단계 시안 3안 이상 (진행 표시, 지도 핀, 슬라이더, 기피 음식 칩)
+- [x] T4.2 (10/30 완료, A 이어지는 시트, B 전용 화면, C 제자리 카드, `/design-lab/auth/<a|b|c>`, 공용 Checkbox 추가) 로그인 시트, 약관 동의(만 14세 확인 포함), 인앱 브라우저 안내 시안 3안 이상
+- [x] ⛔ T4.3 (10/30 완료, design-decisions D-07 온보딩 B 지도 위 시트 + C "여기까지 하고 시작", D-08 로그인 B 전용 화면 + 둘러보기 중 A 시트 + C 동의 버튼 문구, 안건 12건 확정(핀은 누르거나 끌어서 놓기, 약관 필수 3개만, 나중에 하기는 로그아웃, 양쪽 OS 스킴 시도). DESIGN.md 5장 "온보딩", "로그인과 약관" 추가. PRD ONB-01, ONB-02, ONB-04, AUTH-02, AUTH-04, AUTH-06, AUTH-07, 10.1절, copy-guide 4.6 정리. 미선택 시안 코드 삭제, 남긴 확인 화면 `/design-lab/onboarding/b`, `/design-lab/auth/b`, `/design-lab/auth/a`) 선택 게이트, 기록
+
+#### 4.1 데이터
+
+- [x] T4.4 (10/30 완료, 클라우드 개발 DB 적용, 공개 프로필은 private 스키마 보안 함수 + security_invoker 뷰, 테마와 모션 설정은 기기별 저장이라 DB 제외) 마이그레이션: `profiles`(role, birth_confirmed_at, terms_agreed_at, status, provider. 마케팅 동의 없음, D-08), `offices`(사용자가 놓은 핀 좌표와 이름만, 지오코딩 주소 문자열 없음, T0.16), `avoid_rules`, `preferences` + RLS. `profiles`는 본인만 읽기이므로 공개 후기 작성자와 투표 참여자 표시용 **공개 프로필 뷰**(닉네임, 아바타만)를 함께 만듭니다.
+- [x] T4.5 (10/30 완료, `pnpm test:rls` 28건 통과, 클라우드 개발 DB, test_ 계정 자동 정리) RLS 테스트 (본인, 타인, 비로그인), 마이그레이션 내용 보여주고 승인 후 `db:push`, `db:types`
+
+#### 4.2 인증
+
+- [x] T4.6 (10/30 완료, 사용자 실측: 카카오 custom:kakao, 구글 로그인 후 닉네임, 사진(kakaocdn, googleusercontent), 약관 동의 저장 확인) 카카오, 구글 로그인 (Supabase Auth): 카카오는 `signInWithOAuth({ provider: 'custom:kakao' })`, 구글은 내장 provider. 카카오 토큰 교환 인증 방식(`client_secret_post`)과 부분 동의 시 닉네임 누락 처리를 개발 프로젝트에서 실측 (AUTH-01, T0.20)
+- [x] T4.7 (10/30 완료, 사용자 실측: custom:naver 토큰 교환과 콜백 프로필 동기화 성공, pstatic 사진. 대안 설계 불필요. 네이버 BI 원문 확인은 T4.28 공식 에셋 교체와 함께 남음) 네이버 로그인: `signInWithOAuth({ provider: 'custom:naver' })`. state, PKCE, nonce는 Supabase가 처리하고, `/auth/callback` Route Handler에서 provider가 `custom:naver`이고 닉네임이 없을 때 `provider_token`으로 네이버 프로필 API를 한 번 호출해 닉네임과 사진만 `profiles`에 저장(토큰 저장, 로깅 금지). 실측에서 토큰 교환, 프로필 API, `provider_token` 중 하나라도 실패하면 research-notes T0.14 대안 설계(서버 직접 구현, `NAVER_LOGIN_*` 서버 전용 키 추가)로 전환 (AUTH-01N, T0.14). 구현 전 네이버 로그인 BI 가이드 원문(https://developers.naver.com/docs/login/bi/bi.md)을 확인해, 초록 면 흰 글자(대비 약 2.3:1, G3 브랜드 예외)보다 대비가 높은 공식 버튼 유형이 있으면 그 유형으로 교체 [확인 필요] (G3 안건 7, D-05, D-06)
+- [x] T4.8 (10/30 완료, Next 16 `src/proxy.ts`, 로그인 필요 /me, /poll, /poll/new, /welcome, /admin. /today, /map, /poll/<code>는 둘러보기 허용) 세션 처리 미들웨어, `(app)` 경로 보호
+- [x] T4.9 (10/30 완료, `sanitizeNext` 단위 테스트, 복귀 경로는 HttpOnly 쿠키 `lm_auth_next`) 로그인 후 원래 경로 복귀, redirect는 내부 경로만 허용 (AUTH-03)
+- [x] T4.10 (10/30 완료, `src/lib/inapp.ts` UA 판정, 카카오톡 양쪽 OS 스킴 시도 후 1.5초 뒤 수동 안내, 서버 /auth/sign-in에서도 UA 재확인) 인앱 브라우저 감지(카카오톡, 인스타그램, 네이버 등), 카카오 로그인 우선 노출, 구글 탭 시 iOS와 Android 모두 `kakaotalk://web/openExternal` 자동 시도 후 실패하면 수동 안내 + 링크 복사(전용 화면 B). 네이버 앱 인앱도 T4.14 확인 전까지 구글 안내 표시 (AUTH-04, D-08 안건 10, 11)
+- [x] T4.11 (10/30 완료, /welcome/terms 필수 3개, 서버 액션 저장, proxy에서 미동의 사용자 이동, 나중에 하기는 로그아웃) 첫 로그인 약관 동의와 만 14세 확인 → 온보딩 연결. 전용 화면 B, 필수 3개만(마케팅 없음), 필수 미체크 시 버튼 `aria-disabled` + "필수 항목 N개에 동의해 주세요", 버튼 문구는 하려던 일을 이음("동의하고 투표 만들기"), "나중에 하기"는 로그아웃 후 둘러보기 복귀, 위치정보는 처리방침 안 한 단락 (AUTH-02, AUTH-06, D-08 안건 6, 8, 9, 12)
+- [x] T4.12 (10/30 완료, /auth/sign-out, /auth/delete-account Admin API 완전 삭제 + cascade, 삭제 범위 주석 ACCOUNT_DELETION_SCOPE) 로그아웃, 회원 탈퇴 뼈대 (삭제 범위는 테이블이 생길 때마다 6.8, 7.x에서 확장) (AUTH-05)
+- [x] T4.13 (10/30 완료, `useLoginPrompt` 첫 호출 때 시트 지연 로딩, 실제 화면 연결은 T5, 확인 화면 /design-lab/auth/sheet) 비로그인 둘러보기와 로그인 유도 시트(A 시트, Drawer는 행동을 누른 뒤 지연 로딩해 홈 첫 로드 밖) (AUTH-07, D-08)
+- (옮김) T4.14 → 미완료, `docs/tasks.md` "이전 단계에서 남은 작업"으로 옮김
+- [x] T4.15 (10/30 완료, `t4-delete-account.rls.test.ts` 같은 이메일 재가입 시 새 id, 이전 행 없음) AC-AUTH-3 테스트: 탈퇴 후 재가입 시 새 사용자
+
+#### 4.3 온보딩
+
+- [x] T4.16 (10/30 완료, /welcome/onboarding, 저장 좌표 타입 `UserPinnedLatLng`는 지도 누르기와 핀 끌기로만 생성, 서버 strictObject 재검증) 1단계 사무실 위치: 카카오 주소/키워드 검색과 현위치 버튼은 **지도 중심 이동만**, 저장은 사용자가 핀을 직접 놓고 "이 위치로 저장"을 누를 때 핀 좌표만. 핀은 지도를 누르거나 끌어서 놓고, 검색과 현위치 직후에는 핀을 비우며 놓는 동작이 있어야만 저장 버튼이 켜짐(D-07 안건 1). 위치 권한 거부 뒤 현위치 버튼 처리도 여기서 정함. 현위치, 검색 결과 좌표가 저장 API로 가지 않도록 코드 경로를 분리하고 단위 테스트로 보장 (ONB-01, AC-ONB-3, T0.16, T0.18)
+- [x] T4.17 (10/30 완료, 근처 식당 수는 FD6 반경 1회 조회 후 슬라이더로 다시 셈, 45곳 이상 표기) 2단계 예산과 도보 거리 슬라이더, 기본값(점심 5천~3만, 저녁 1만~6만, 1천 원 단위), 반경 원과 근처 식당 수(45곳 상한이면 "45곳 이상") (ONB-02, D-07 안건 2, 5)
+- [x] T4.18 (10/30 완료) 3단계 기피 음식, 알레르기 칩(시안 목록 그대로), 직접 입력. 직접 입력 판정 규칙은 T5 하드 필터에서 정함 (ONB-03, D-07 안건 4)
+- [x] T4.19 (10/30 완료, CSS 전환, 여기까지 하고 시작은 2단계에만. 3단계는 건너뛰기와 같아 생략) 건너뛰기(기본값으로 두고 다음 단계), "여기까지 하고 시작"(C 단축), 진행 표시, 단계 전환 모션 (ONB-04, D-07)
+- [x] T4.20 (10/30 완료, 저장소 없이 next 쿼리에 lunch, dinner, walk, avoid 칩만 실어 보냄. 좌표와 직접 입력은 받지 않음. 실제 둘러보기 화면 연결은 T5) 둘러보기에서 고른 값 이어받기
+- [x] T4.21 (10/30 완료, 완료 화면 없이 저장 후 곧바로 /today. 추천 카드는 T5) 완료 즉시 첫 추천으로 이동 (ONB-05, 추천 화면은 5단계 완성 전까지 플래그로 임시 화면)
+- [x] T4.22 (10/30 완료, `pnpm test:e2e:onboarding` RUN_DB_E2E=1, 390과 1280 각 2건 통과) AC-ONB-1(60초), AC-ONB-2(권한 거부) 확인
+
+#### 4.4 설정과 랜딩
+
+- [x] T4.23 (10/30 완료, /me/offices, 기본 사무실을 지우면 가장 먼저 저장한 곳을 기본으로, 마지막 1곳은 지울 수 없음, 추가는 온보딩 핀 조각 재사용) 사무실 최대 5곳, 기본 지정, 이름 편집 (SET-01)
+- [x] T4.24 (10/30 완료, /me/budget, /me/avoid) 예산, 도보 분, 기피 음식 수정 (SET-02, SET-03)
+- [x] T4.25 (10/30 완료, 기기별 저장 lm-ui-prefs, 첫 페인트 전 인라인 스크립트, 모션 줄이기와 진동 분리 D-04) 다크 모드 시스템/라이트/다크 (SET-04)
+- [x] T4.26 (10/30 완료, /me/craving 3개까지, KST 남은 날) "요즘 이게 땡겨요" 7일 가중치 (SET-05)
+- [x] T4.27 (10/30 완료, 골격만. 시각 방향은 6단계 나 시안에서) '나' 탭 골격 (설정, 계정, 약관 링크)
+- [x] T4.28 (10/31 완료, `/` 랜딩 B, robots, sitemap, 메타. OG 이미지는 T7.4. 공식 심볼 교체와 네이버 BI 원문 확인은 사용자 결정으로 T10.4a로 이동) 랜딩 구현 (G3 선택안 B, D-06, DESIGN.md 5장 "랜딩"), SEO, OG 메타 (APP-04). 출시 전 카카오, 네이버, 구글 로그인 심볼을 각 사 공식 에셋으로 교체(시안 SVG는 다시 그린 것, G3 안건 7)
+- [x] T4.29 (10/31 완료, login_started와 login_completed는 /auth/sign-in과 /auth/callback에서 PostHog HTTP 캡처로 서버 전송, 익명 id만, onboarding_step_completed는 T4.19에서 연결) 이벤트: `login_started`, `login_completed`, `onboarding_step_completed`
+- [x] T4.30 (10/31 완료, `docs/design/g4-qa.md`. 자동 검사 전부 통과, 3종 로그인 사용자 실측. T4.14 실기기는 사용자 결정으로 뒤로 미룸) **G4 확인**: AUTH, ONB, SET P0 AC 통과, 3종 로그인 동작, E2E 온보딩 통과
+
+---
+
+### 5단계. 추천, 지도, 상세, 길찾기 (1.5주)
+
+#### 5.0 시안 ⛔
+
+- [x] T5.1 (10/31 완료, A 그림 핀 3단 시트, B 도보 분 알약 2단 시트, C 점 마커 카드 넘기기, `/design-lab/map/<a|b|c>`, `docs/design/g5-comparison-map.md`, 캡처 46장) 지도 + 바텀시트 시안 3안 이상 (마커 모양, 필터 칩 위치, 시트 높이 단계)
+- [x] T5.2 (10/31 완료, A 숫자 대시보드, B 이야기형, C 결정 집중형, `/design-lab/place/<a|b|c>`, `docs/design/g5-comparison-place.md`, 캡처 50장) 식당 상세 시안 3안 이상 (가격대 표현, 👍 비율 시각화, 후기 목록, 액션 배치)
+- [x] ⛔ T5.3 (10/31 완료, design-decisions D-09 지도 B + 고른 마커만 A 그림, D-10 상세 C + A 가격 점 분포와 예산 선 + B 이유 한 줄, 안건 20건 기본안, T5.14 마이그레이션 승인. DESIGN.md 5장 "지도", "식당 상세", PRD v0.2.3. 남긴 확인 화면 `/design-lab/map/b`, `/design-lab/place/c`) 선택 게이트, 기록
+
+#### 5.1 추천 엔진 (`src/lib/reco`, 순수 함수)
+
+- [x] T5.4 (10/31 완료, types.ts, ALGO_VERSION 2026-10-31.1) 타입 정의: 후보, 사용자 설정, 피드백, 추천 결과, `algo_version`
+- [x] T5.5 (10/31 완료, format/number 계수 재사용) 거리 유틸: 도보 분 추정, 검색 반경 계산
+- [x] T5.6 (10/31 완료, 직접 입력은 이름, 업종 조각, 카테고리 라벨 포함 시 제외. 칩 16종 키워드 표, 예산은 제보 중앙값 초과만) 하드 필터 (기피 → 다시 안 갈 곳 → 폐업 3건 → 예산 초과) + 테스트 (AC-REC-1)
+- [x] T5.7 (10/31 완료, 가중치 d.30 p.30 b.15 c.25 r.50, 웨이팅 W항 w.30 점심 피크만, 땡겨요 P +0.25, AC-REC-5 테스트) 점수 요소 D, P, B, C, R과 `constants.ts` 가중치, 콜드 스타트 중립값
+- [x] T5.8 (10/31 완료, 남은 후보가 모두 2장 찬 카테고리면 제약 완화) 다양성 제약(뽑힌 3장 중 같은 카테고리 최대 2장): 샘플링 전에 한 번 거르는 방식이 아니라 **샘플링하면서** 적용합니다. 이미 2장 뽑힌 카테고리는 남은 추첨에서 제외 + 테스트 (AC-REC-3)
+- [x] T5.9 (10/31 완료, 매 추첨 상위 10곳 재선정, 무게 max(S,0)+0.05) 시드 주입 `rng`로 상위 10곳 점수 비례 샘플링(T5.8 제약 포함), 세션 제외 목록 + 테스트 (AC-REC-2)
+- [x] T5.10 (10/31 완료, 중립 대비 기여도 상위 2개, reasonKinds 보존, recommend.ts 파이프라인) 설명 문장 생성: 기여도 상위 2요소, 2.2절 문구 규칙 적용 (중간점 대신 쉼표) + 테스트
+- [x] T5.11 (10/31 완료, deal-neutral.test.ts, AC-DEAL-2 완성은 6단계) 할인 정보 미반영 테스트 자리 마련 (AC-DEAL-2는 6단계에서 완성)
+
+#### 5.2 데이터 연결
+
+- [x] T5.12 (10/31 완료, `src/lib/kakao/local.ts` searchRestaurants 45곳 상한과 capped, rect 검색, `queries.ts` 세션 메모리 쿼리 키, 온보딩 이관) 카카오 로컬 래퍼: FD6 반경 검색, 15건 × 3페이지, 재시도 1회, 세션 메모리 캐시만
+- [x] T5.12a (10/31 완료, 세션 메모리 → 반경 1회 + 상한일 때만 사분면 rect 최대 4회 → 카카오맵 링크, 집계는 개수만. PostHog 전송은 PRD 10.2 이벤트 추가 결정 후) 장소 이름 해석 공통 모듈 `src/features/place/resolve-place-names.ts`: `place_id` 목록을 받아 (1) 세션 메모리(TanStack Query) → (2) 기준점(사무실 핀, 투표방 기준점, 현위치) 주변 FD6 거리순 매칭(45건 한계는 사분면 `rect` 추가 검색, 화면당 추가 호출 상한 4회) → (3) 미해결 시 "이름을 불러오지 못했습니다" + 카카오맵 링크(`place_url`) 순으로 반환. 결과는 저장하지 않음. 즐겨찾기, 기록, 피드백 요청, 투표방, 투표 결과가 공통으로 사용. 이름 미해결 비율을 좌표 없이 집계 + 단위 테스트 (T0.16-2, 2026-10-28)
+- [x] T5.13 (10/31 완료, src/features/place/price-estimate.ts 12종 점심/저녁 추정가, priceBadge estimate. 수치는 베타 데이터로 재조정) 카테고리별 추정 가격 상수와 `추정` 배지 로직
+- [x] T5.14 (10/31 완료, 사용자 승인 후 db:push, RLS 54건 통과(t5-places 3역할 + 탈퇴 cascade), 메모 컬럼은 만들지 않고 T10.2 답변 후 새 마이그레이션, 탈퇴 범위 확장) 마이그레이션: `visits`(status, feedback_requested_at, 출처), `favorites`, `blocklist` + RLS + 테스트. 카카오 값은 `place_id`(+ 선택 `place_url`)만. 사용자가 직접 쓰는 메모 컬럼은 카카오 답변(T10.2) 전까지 기능 플래그로 숨김 (T0.16)
+
+#### 5.3 오늘(홈) 구현
+
+- [x] T5.15 (10/31 완료, 1분 타이머로 15:00 자동 전환, 수동 선택 우선) 끼니 자동 전환과 수동 토글 (REC-01)
+- [x] T5.16 (10/31 완료, base-location.ts, 권한 거부 시 기본 사무실 + PRD 12장 문구, 사무실 없으면 로그인 유도 또는 /me/offices/new) 기준 위치 칩, 위치 권한 거부 시 기본 사무실 (REC-02, PRD 12장)
+- [x] T5.17 (10/31 완료, D1 큰 카드 + 대안 2장 + 하단 행동 줄, 데스크톱 @map 슬롯 2단, Tooltip 지연 로딩, 엔진과 카카오 모듈 지연 로딩으로 /today 195.9KB) 카드 3장 (G3 선택안 D1: 오늘의 한 곳 큰 카드 + 대안 2장 + 하단 고정 행동 줄 + 어제 피드백 띠 자리), 데스크톱 좌 세로 + 우 지도 2단 (REC-04, REC-06, D-05). **먼저** 공용 배지(`place-badges.tsx`)의 Tooltip 정적 import를 지연 로딩으로 분리합니다. 시안 코드를 그대로 옮기면 `/today` 약 307KB, D-04 방식(Motion 상호작용 뒤)이면 약 202KB로 예산 경계입니다(`docs/design/g3-comparison.md` 2절)
+- [x] T5.18 (10/31 완료, deck.ts 시드 고정, 세션 seen은 메모리 Zustand, 셔플은 CSS) 다시 뽑기와 셔플 모션 (REC-05)
+- [x] T5.19 (10/31 완료, why.ts, 큰 카드 이유 줄 아래 글자 버튼) "왜 추천했나요?" 펼치기 (REC-07)
+- [x] T5.20 (10/31 완료, 길찾기는 directions-flow.ts 공통 흐름(상세와 홈), 상세는 today-detail 지연 로딩 시트, 더 보기 메뉴(즐겨찾기, 다시 안 갈래요), 다시 안 갈래요는 refillDeck으로 그 자리만 교체 + 되돌리기, 즐겨찾기에 있으면 빼고 이동, 투표는 pollEntry 플래그) 카드 액션: 길찾기, 상세, 즐겨찾기, 다시 안 갈래요, 투표에 추가(7단계 전까지 플래그) (REC-08)
+- [x] T5.21 (10/31 완료, 0곳 EmptyDeck과 도보 넓히기, 1~2곳 ShortNote) 후보 부족과 0곳 빈 상태, 완화 제안 버튼 (REC-09)
+- [x] T5.22 (10/31 완료, R1 순회, 직전 결과 제외, 데스크톱 좌 칸 패널 + 지도 핀 강조) 그냥 골라줘 룰렛과 결과 카드 (REC-12): R1 하이라이트 순회(화면 카드 위, `src/features/rec/roulette.ts`), 다시 고르기는 직전 결과 제외, 데스크톱 결과 패널은 좌 리스트 칸 안 + 지도 핀 강조 (D-05, DESIGN.md 5장)
+- [x] T5.23 (10/31 완료, pollEntry 플래그(false), /poll?start=friends|party 자리) 하단 진입점: 친구랑 정하기, 회식 모드 (REC-10, 플래그)
+- [x] T5.24 (10/31 완료, KakaoErrorCard 다시 시도 + 네이버 지도 검색 링크, 현위치 좌표 미포함) 카카오 API 오류, 한도 초과: 재시도 1회 후 오류 안내 + "네이버 지도에서 주변 식당 보기"(네이버 지도 웹/앱 검색 링크) + 다시 시도. 즐겨찾기 기반 대체 추천은 저장 금지로 만들지 않음 (PRD 12장, T0.16-3)
+- [x] T5.25 (10/31 완료, 3곳 중 N번째 낭독, 대안 교환 시 큰 카드로 포커스, 결과 패널 dialog, 칩 목록 Esc와 방향키. D1은 넘기기 없어 스와이프 대체 해당 없음) 접근성: 스와이프 대체 버튼, 카드 순서 낭독, 포커스 이동
+
+#### 5.4 지도
+
+- [x] T5.26 (10/31 완료, map-canvas 마운트 시 import(), fit.ts로 칩 줄과 시트를 뺀 칸에 원 맞춤, MapProvider에 setZIndex, getBounds, strokeStyle 추가) 지도 SDK 동적 import, 기준 위치 마커와 반경 원 (MAP-01)
+- [x] T5.27 (10/31 완료, 자체 클러스터(알약 52x36px 상자), 고른 마커는 묶지 않음, 고른 마커만 카테고리 그림) 카테고리 아이콘 마커와 클러스터링 (MAP-02)
+- [x] T5.28 (10/31 완료, 카테고리, 1만 원 이하, 도보 5분, 👍 상위(3건 이상, 80%), 즐겨찾기(비로그인 로그인 유도)) 필터 칩: 카테고리, 가격대, 도보 분, 👍 상위, 즐겨찾기 (MAP-03)
+- [x] T5.29 (10/31 완료, 직접 구현 2단 시트(포인터 + CSS), 손잡이 버튼 + aria-live, 시트 안 PlaceDetailBody) 마커 탭 → 바텀시트 (MAP-04)
+- [x] T5.30 (10/31 완료, 40m 또는 반경 20% 이상 옮겼을 때만, 지도 가운데는 메모리에만, 이 지역 칩으로 복귀) "이 지역에서 다시 찾기" (MAP-05)
+- [x] T5.31 (10/31 완료, @map/map 슬롯 포털, 좌 칸 개수, 칩, 목록 또는 상세) 데스크톱 2단 (MAP-06)
+- [x] T5.32 (10/31 완료, mapLoadReducer, 실패 시 목록 보기 + 지도 다시 불러오기, 카카오 실패 시 네이버 지도 링크) 지도 로딩 실패 시 리스트 보기 자동 전환
+
+#### 5.5 식당 상세와 길찾기
+
+- [x] T5.33 (10/31 완료, `@/features/place/detail` PlaceDetail 본문과 홈용 usePlaceDetailSheet(Drawer 지연 로딩), 카카오 phone은 세션 메모리 값만) 상세 기본 정보, 전화 걸기 (PLACE-01)
+- [x] T5.34 (10/31 완료, detail-model 가격 사분위(5건 이상)/최소~최대, 👍 3건 미만 숨김 10칸 미터, 6단계 전 EMPTY_PLACE_STATS) 가격대(제보 중앙값 또는 추정), 👍 비율, 태그, 후기 영역 자리 (PLACE-02, PLACE-03, 데이터는 6단계)
+- [x] T5.35 (10/31 완료, 더 보기 Base UI Menu, 즐겨찾기 낙관적 반영과 다시 안 갈 곳 충돌 시 안내, 공유는 place_url Web Share/복사, 투표 플래그. 네이버 웹 URL은 공식 문서 없음 [확인 필요]) 버튼: 길찾기, 네이버 플레이스에서 보기, 즐겨찾기, 투표에 추가, 공유 (PLACE-04)
+- [x] T5.36 (10/31 완료, `src/lib/naver/directions.ts` nmapWalkUrl, appname은 siteUrl에서) `nmap://route/walk` 호출, `appname`은 `NEXT_PUBLIC_SITE_URL`에서 생성 (NAV-01)
+- [x] T5.37 (10/31 완료, 1500ms 안에 visibilitychange/pagehide 없으면 웹, 데스크톱 바로 웹, 현위치 출발은 앱과 웹 URL 모두 좌표 미포함) 앱 미설치 감지 후 네이버 지도 웹, 데스크톱은 바로 웹 (NAV-02, NAV-03)
+- [x] T5.38 (10/31 완료, saveVisitAction zod strictObject, 중복 성공 처리, 하루 20건 limit, 비로그인은 저장 없이 길찾기만) 길찾기 클릭 시 방문 후보 저장 (NAV-04)
+
+#### 5.6 마무리
+
+- [x] T5.39 (10/31 완료, todayEvent → track() 전송, recommendation_shown은 같은 묶음 한 번, algo_version 포함, card_swiped는 대안을 큰 카드로 올림, place_names_resolved는 사용처 생길 때(T6.13, T7.15) 연결) 이벤트: `recommendation_shown`, `recommendation_reshuffled`, `card_swiped`, `directions_clicked`, `just_pick_clicked`, `favorite_added`
+- [x] T5.40 (10/31 완료, `e2e/recommend.spec.ts` mobile 3/3, desktop 3/3, 비로그인 길찾기 URL에 현위치 좌표 없음, 로그인 visits source rec 생성(RLS 세션 조회), AC-REC-2 18곳 모두 다름. 공용 가짜 카카오 `e2e/helpers/kakao-places-fake.ts`) E2E: 추천 → 길찾기
+- [x] T5.41 (10/31 완료, Regular 3G 첫 방문 카드 7.43초 → 4.64초, 스켈레톤 0.71초, 재방문 카드 1.29초. 글꼴 동적 서브셋 + 첫 방문은 카드가 보인 뒤 웹 글꼴 적용, 카카오 2, 3페이지 병렬. /today 198.2KB. 4G 첫 방문 LCP 2.75초는 글꼴 교체 다시 그리기가 잡힌 값이라 실기기 필드 값으로 재판정, `docs/design/g5-qa.md` 2.6절) AC-REC-4 성능 확인 (3G 스로틀에서 3초 스켈레톤, 5초 카드), 홈 번들 200KB 확인
+- [x] T5.42 (10/31 완료, `docs/design/g5-qa.md`. P0 AC 28행 중 통과 23(AC-REC-4 포함), 부분 4(투표 플래그, 6단계 데이터, 네이버 URL [확인 필요]), 범위 밖 1. 자동 검사와 E2E 전부 통과. appShell 프로덕션 해제(auth 꺼짐 환경은 투표, 나 탭 "곧 열립니다" 안내, 로그인 행동은 토스트). `[실기기]` 길찾기와 인앱 확인은 사용자 결정으로 T4.14와 함께 7단계 또는 베타 전) **G5 확인**: REC, MAP, PLACE, NAV P0 AC 통과, `[실기기]` iOS/Android 길찾기 확인
+
+---
+
+### 6단계. 피드백, 후기, 기록, 제보 (1.5주)
+
+#### 6.0 시안 ⛔
+
+- [x] T6.1 (10/31 완료, A 띠 펼침, B 한 장 시트, C 한 번에 하나, `/design-lab/feedback/<a|b|c>`, `docs/design/g6-comparison-feedback.md`, 캡처 90장, axe 216건) 피드백 카드(한 탭 응답과 선택 입력) 시안 3안 이상
+- [x] T6.2 (10/31 완료, A 기록 일지(세 탭, 주 단위), B 달력(칸에 카테고리 그림), C 이번 달 돌아보기(숫자 3칸 + 미리보기 3개), `/design-lab/me/<a|b|c>`, `docs/design/g6-comparison-me.md`, 캡처 53장, axe 132건) '나' 탭과 기록(타임라인/캘린더) 시안 3안 이상
+- [x] T6.3 (10/31 완료, A 한 장 시트, B 제자리 펼침, C 한 질문씩, 할인 등록과 확인, 웨이팅, 정보 제보, 후기 신고 포함, `/design-lab/report/<a|b|c>`, `docs/design/g6-comparison-report.md`, 캡처 93장, axe 264건) 할인 제보, 웨이팅 제보 입력 UI 시안 3안 이상
+- [x] ⛔ T6.4 (10/31 완료, design-decisions D-11 피드백 B 한 장 시트 + C 내 후기 항목 줄 + A 머리줄 ⋯ 신고, 무시한 띠는 길찾기 뒤 한 줄로 접힘, D-12 나 탭 A 기록 일지 + C 이번 달 숫자 3칸, 늦은 답 14일, D-13 제보 C 한 질문씩(할인 3단계) + B 결과 줄 + C 끝났어요 점 3개, 안건 40건(질문 창에서 사용자가 고른 것 외에는 기본안), 게이트 전 결정 금칙어 자체 목록과 FB-04 주말, 공휴일 규칙. DESIGN.md 5장 "식후 피드백", "나 탭", "제보와 신고", PRD v0.2.5, copy-guide 4.9. 남긴 확인 화면 `/design-lab/feedback/b`, `/design-lab/me/a`, `/design-lab/report/c`) 선택 게이트, 기록
+
+#### 6.1 데이터
+
+- [x] T6.5 (11/01 완료, 사용자 승인 후 db:push, 테이블 6개 + private.daily_usage, 쓰기 함수 register_deal, report_wait, my_daily_limits, visits.source에 detail 추가, 한도 카운터는 지워도 줄지 않음) 마이그레이션: `reviews`, `review_reports`, `place_reports`, `place_deals`, `place_deal_checks`, `wait_reports` + RLS
+- [x] T6.6 (11/01 완료, place_stats(가격 점 목록, 중앙값, 👍/👎, 태그 상위 5, 폐업 3건, 30분 안 웨이팅, 할인 수), place_reviews(로그인만, 사용자 결정), place_deals_list. 집계는 사람당 그 식당 최신 값 하나(사용자 결정), 숨긴 후기 제외) 집계 뷰 또는 보안 함수: 식당별 가격 중앙값, 👍 비율, 태그 빈도 (비공개 후기 익명 포함, 텍스트 제외)
+- [x] T6.7 (11/01 완료, `src/lib/supabase/rls/t6-feedback.rls.test.ts`, 클라우드 개발 DB RLS 전체 97건 통과, AC-FB-2, AC-DEAL-1, AC-DEAL-3, 병합과 교체, 웨이팅 30분과 2분 되돌리기, 14일 경계, 한도, 탈퇴 cascade) RLS 테스트: 비공개 후기 텍스트가 어떤 응답에도 없음 (AC-FB-2)
+
+#### 6.2 피드백과 학습
+
+- [x] T6.8 (11/01 완료, 띠는 첫 로드 빈 틀 64 + 본체 지연 로딩, 물을 방문은 서버 액션 feedbackBandAction이 영업일 48시간으로 판정, 길찾기 뒤 접힘, 이름 실패 띠, 저장 실패 다시 보내기, feedback_prompt_shown 하루 1회, /today 199.9KB) "어제 ○○ 어땠어요?" 카드: 👍/👎/안 갔어요, 하루 1회, 48시간 제한. 이름은 T5.12a로 찾고, 못 찾으면 "어제 가신 곳은 어땠어요?" + 카카오맵 링크 문구 (FB-01, FB-04, FB-05, T0.16-2). 배치는 G3 D1의 홈 머리 아래 한 줄 띠(답하면 고마움 한 줄로 접힘, DESIGN.md 5장). 답한 뒤에는 그날 다시 묻지 않음(FB-04). 답하지 않고 지나간 띠는 "나중에" 없이 그날 남기되 오늘 길찾기를 누르면 한 줄로 접힘. 48시간은 주말과 공휴일을 빼고 셈(금요일 방문을 월요일에) (D-05, D-11)
+- [x] T6.9 (11/01 완료, 500원 스테퍼 + 칩 3, 태그 2열, 한 줄 후기 100자, 공개 범위와 고지, 데스크톱 가운데 대화상자, 390 x 844에서 고지까지 스크롤 없이(E2E 확인)) 선택 입력: 1인 가격, 태그 8종, 한 줄 후기 100자, 공개 토글과 집계 포함 고지 (FB-02, FB-03)
+- [x] T6.10 (11/01 완료, 상세 쓰기는 한 탭 답 필수, 내 후기 항목 줄 4개 → 그 항목으로 시트, 시트 안 삭제 확인) 상세에서 직접 후기 작성, 내 후기 수정/삭제 (FB-06, FB-07)
+- [x] T6.11 (11/01 완료, 반감기 14일과 90일 창, 다시 뽑기 3연속 카테고리 약한 부정(세션 메모리), 투표 승리 0.3 약한 긍정(입력만, 7단계가 채움), ALGO_VERSION 2026-11-01.1) 선호도 갱신: 지수 감쇠, 다시 뽑기 3연속 약한 부정, 투표 승리 약한 긍정 + 테스트 (AC-REC-5)
+- [x] T6.12 (11/01 완료, `e2e/feedback.spec.ts` 3초 안 응답, 추천 카드와 따로, 띠 데이터 실패와 오프라인은 띠만 숨김) AC-FB-1 확인 (3초 안에 응답 또는 닫기, 추천 사용을 막지 않음)
+
+#### 6.3 기록과 상세 보강
+
+- [x] T6.13 (11/01 완료, /me 기록 일지 3탭 + 이번 달 숫자, 설정 /me/settings, 화면 /me/display, 늦은 답 14일, 즐겨찾기와 다시 안 갈 곳 해제, 후기 수정은 후기 시트와 그 자리 삭제, 이름 T5.12a와 미해결 대체, place_names_resolved, 데스크톱 핀 지도) 방문 히스토리, 즐겨찾기, 다시 안 갈 곳, 내 후기 목록. 장소 이름은 T5.12a로 표시하고 미해결 항목은 날짜나 순번 + 카카오맵 링크 (HIS-01~03, T0.16-2)
+- [x] T6.14 (11/01 완료, 공개 후기 최신순, 태그, 내 방문, 내 후기, 비로그인은 후기 N건 + 로그인 유도, ⋯ 신고는 T6.16 시트) 상세에 공개 후기, 태그, 내 방문 기록 연결 (PLACE-03, PLACE-06)
+
+#### 6.4 제보, 신고, 남용 방지
+
+- [x] T6.15 (11/01 완료, 더 보기 메뉴 제보 3종 질문 시트, 가격 1천~10만, 문 닫음 3명 고지, 추천 제외는 place_stats closed 하드 필터) 폐업/가격/정보 오류 제보, 3건 누적 시 추천 제외 (PLACE-05, MOD-03)
+- [x] T6.16 (11/01 완료, 후기 5사유, 할인 4사유, 기타 100자, 3명 자동 숨김. 신고자에게 가림 + 보기는 남은 결정) 후기 신고 5개 사유, 3건 누적 자동 숨김 (MOD-01, MOD-02)
+- [x] T6.17 (11/01 완료, `src/lib/moderation` 자체 목록 193개 + 정규화(띄어쓰기, 특수문자, 숫자 끼움, 자모, 늘이기, 초성) + 연락처, 링크 패턴, 오탐 테스트. 후기, 할인 내용, 신고 기타 글, 닉네임(/me/account, 네이버 동기화)에 서버 적용, 걸린 낱말은 알리지 않음. 카카오, 구글 첫 닉네임(handle_new_user)은 후속) 금칙어 필터 (서버 검증) (MOD-04). 닉네임 저장(`/me/account`, 온보딩)에도 같은 필터 적용 (4단계 사용자 결정, 10/31)
+- [x] T6.18 (11/01 완료, DB 카운터 오류를 mapPgError limit(bucket)으로, myDailyLimitsAction과 useDailyLimits로 열 때 미리 알림, 문구 `src/copy/moderation.ts`) rate limit: Postgres 함수 기반 일일 카운트 (후기 20, 신고와 식당 정보 제보 합쳐 30, 할인 제보 10) (MOD-05, D-13)
+
+#### 6.5 할인과 웨이팅
+
+- [x] T6.19 (11/01 완료, D-13 3단계 유형 → 내용 → 확인 카드, 바꾸기로 기간과 요일, 시간대) 할인 제보 등록, 유형 5종, 종료일 기본 7일 최대 30일 (DEAL-01)
+- [x] T6.20 (11/01 완료, 카드 할인 배지, 상세 목록과 출처 배지 제보, 고지 두 줄. 지도 마커 배지는 D-09에 규칙 없어 보류) 카드, 마커의 `할인` 배지와 상세 목록, 출처 배지, 안내 문구 (DEAL-02)
+- [x] T6.21 (11/01 완료, 그 자리 결과 줄 + 되돌리기, 끝났어요 점 3개, 3명 숨김 E2E, 오늘까지 표시) "아직 해요/끝났어요" 확인, 3건 숨김, 종료일 만료 (DEAL-03, AC-DEAL-1, AC-DEAL-3)
+- [x] T6.22 (11/01 완료, 중복 단계 아직 해요로 확인 또는 바꿔 넣기(superseded E2E), 광고성, 허위) 중복 병합(같은 식당, 출처, 유형은 유효한 제보 하나. "다른 내용이라 새로 남기기"는 기존 제보를 숨기고 바꿔 넣음), 신고 사유 "광고성, 허위" 추가 (DEAL-04, D-13)
+- [x] T6.23 (11/01 완료, place_stats.deal_count부터 점수, 샘플링 50회, 이유, 다시 채우기까지 동일) AC-DEAL-2 단위 테스트 완성 (할인 유무와 무관한 동일 점수)
+- [x] T6.24 (11/01 완료, 한 탭 결과 줄, 2분 취소, 30분 1회 줄, 방금, 감점 고지 줄) 웨이팅 한 탭 제보, 30분 유효, 사용자당 식당별 30분 1회 (PLACE-07)
+- [x] T6.25 (11/01 완료, 기존 isLunchPeak 11:00~13:30 유지, 30분 안 "줄 길어요"만 감점, 경계 시각 테스트) 점심 피크 "줄 길어요" 감점 + 테스트 (PLACE-08)
+- [x] T6.26 (11/01 완료, 사용자 승인 후 db:push, lunchmate_ 작업 4개 매일 04:10~04:30 KST: 하루 지난 웨이팅 삭제, 종료 할인 expired, 지난 한도 카운터, 실행 기록 14일) pg_cron: 하루 지난 웨이팅 제보 삭제, 종료 할인 상태 갱신
+
+#### 6.6 마무리
+
+- [x] T6.27 (11/01 완료, 6단계 테이블 모두 cascade 확인, account_residue 점검 함수, 탈퇴 안내 문구 확장, 첫 로그인 금칙어 닉네임은 점심손님 NNNN으로 대체, 신고자 탈퇴해도 숨김 유지(사용자 결정). 탈퇴 RLS 테스트 통과, test:rls 99건) 탈퇴 삭제 범위 확장 (후기 삭제와 집계 제외, 웨이팅 제보, 폐업/정보 제보, 할인 제보와 확인 응답, 후기 신고 기록 삭제) (PRD 11.4)
+- [x] T6.28 (11/01 완료, 약관 화면, 후기 시트, 개인정보 처리방침 후기 집계 조항 같은 뜻) 비공개 후기 집계 포함 고지 문구를 가입과 후기 작성 화면에 반영
+- [x] T6.29 (11/01 완료, 7종 PRD 이름과 속성 일치, PRD 표를 읽어 비교하는 prd-events.test.ts, wait_reported level none/short/long 문서화) 이벤트: `feedback_prompt_shown`, `feedback_submitted`, `report_submitted`, `deal_reported`, `deal_viewed`, `deal_checked`, `wait_reported`
+- [x] T6.30 (11/01 완료, `e2e/feedback-reco.spec.ts` 3건 x 2뷰포트, 나 탭 늦은 답 👎 → 다음 묶음에서 빠짐, 👍 → 큰 카드와 이유 "최근 👍한", 안 갔어요 → 묶음 그대로(FB-05), 시드 전제 단위 테스트 `feedback-reco.test.ts`) E2E: 피드백 제출 후 다음 추천 변화 확인
+- [x] T6.31 (11/01 완료, 6단계 문구 파일 해요체 25~30%, 약관 습니다체 100%, 금지 문자 0) 문구 점검: 이 단계 화면 전체 `lint:copy` 비율 리포트 확인
+- [x] T6.32 (11/01 완료, 7개 화면 4상태와 다크, me.spec 10, report.spec 8 + PLACE-05 다크 2와 360 1, feedback.spec 10 통과, `me-live__*` 32장) 4상태와 다크 점검
+- [x] T6.33 (11/01 완료, `docs/design/g6-qa.md` AC 30행 중 통과 27, 부분 1(MOD-05 투표방 한도, 7단계), 범위 밖 2(MOD-06 관리자, DEAL-05 투표방 배지), test:rls 99, a11y 468, /today 199.8KB. `[실기기]` 카카오톡 인앱, iOS Safari 중첩 시트, field-sizing, 길찾기는 사용자 확인 남음) **G6 확인**: FB, HIS, MOD(관리자 화면 제외), DEAL P1 AC 통과, 피드백이 다음 추천에 반영
+
+---
+
+### 7단계. 투표와 회식 (1.5주)
+
+#### 7.0 시안 ⛔
+
+- [x] T7.1 (11/01 완료, A 목록과 바, B 한 장씩, C 모이는 자리, `/design-lab/poll/<a|b|c>`, `docs/design/g7-comparison-poll.md`, 캡처 111장, axe 240건) 투표방(진행 중, 결과) 시안 3안 이상: 득표 바, 참여자 아바타, 카운트다운, 확정 순간 모션
+- [x] T7.2 (11/01 완료, A 한 장 시트, B 한 질문씩, C 먼저 만들고 고치기, 빠른 투표 3/4/2탭, 보내기 단계 포함, `/design-lab/poll-create/<a|b|c>`, `docs/design/g7-comparison-poll-create.md`, 캡처 75장, axe 180건) 투표 만들기 시트 시안 3안 이상 (빠른 투표 포함)
+- [x] T7.3 (11/01 완료, A 조건 한 장, B 한 질문씩 비교, C 결과 먼저, 근거 3단계, `/design-lab/party/<a|b|c>`, `docs/design/g7-comparison-party.md`, 캡처 100장, axe 140건) 회식 모드(조건 입력, 후보 5곳) 시안 3안 이상
+- [x] T7.4 (11/01 완료, A 한 줄 제목, B 돌 한 줄, C 식권, 서버 OG 1200 x 600(카카오 2:1), 공유 이미지 1080 x 1080 canvas, `/design-lab/share/<a|b|c>`, `docs/design/g7-comparison-share.md`, 캡처 66장, axe 74건) OG 이미지와 결과 공유 이미지 시안 3안 이상 (카카오톡 미리보기 크기 기준)
+- [x] ⛔ T7.5 (11/01 완료, design-decisions D-14 투표방 A 목록과 바 + C 참여 줄 + B 결과 카드, 무기명, 색종이 없음, 카운트다운 "12분 40초", 동점 미결 30분 자동 룰렛, D-15 투표 만들기 C 먼저 만들고 고치기 + B 마감 큰 칸 + A 미리보기 고지, 빠른 투표 2탭, D-16 회식 C 결과 먼저 + B 첫 질문 2개 + A 근거 줄, 주류 카테고리 추정, 경로 `/poll/party`, D-17 서버 OG A 1200 x 600 + 결과 공유 이미지 B 1080 x 1080, 안건 55건(질문 창에서 사용자가 고른 것 외에는 기본안). DESIGN.md 5장 "투표방", "투표 만들기", "회식 모드", "공유 이미지", PRD v0.2.7, copy-guide 4.7, 4.8, 4.13. 남길 확인 화면 `/design-lab/poll/a`, `/design-lab/poll-create/c`, `/design-lab/party/c`, `/design-lab/share/a`, `/design-lab/share/b`) 선택 게이트, 기록
+
+#### 7.1 데이터와 서버 함수
+
+- [x] T7.6 (11/01 완료, 사용자 승인 후 db:push, `20261101140000_t7_6_polls.sql`, 테이블 4개 + RLS, 쓰기는 보안 함수만, poll_votes에 user_id 없음, 비참여자 미리보기 기준점은 약 150m 격자와 반경 +150m(사용자 결정), 한도 버킷 polls 추가) 마이그레이션: `polls`(kind, closed_at, closed_reason, 후보 이름 확인용 기준점 `anchor_lat`/`anchor_lng`와 `radius_m` 포함), `poll_candidates`, `poll_members`, `poll_votes` + RLS. 투표는 무기명(다른 사람의 `poll_votes` 행은 읽지 않고 득표 집계와 참여자별 투표 여부만 보안 함수로, D-14). `poll_candidates`는 `place_id`, `place_url`, 추가한 사람, 순서만 두고 이름, 좌표, 카테고리, 거리 컬럼을 만들지 않음. 기준점은 방장 사무실 핀이나 방장이 지도에서 찍은 점이며 현위치는 금지 (T0.16-1, 2026-10-28)
+- [x] T7.7 (11/01 완료, 12자 코드, poll_preview(anon), join_poll, cancel_unsent_poll 한도 반환, `src/features/poll/invite-code.ts`) 초대 코드 생성 (추측 불가 10자 이상), 코드 보유자 참여 보안 함수. 생성 함수가 하루 10개 한도를 판정하고, 보내기 전 "만들기 취소"면 방을 지우고 한도에서 뺌 (D-15)
+- [x] T7.8 (11/01 완료, poll_avoid_flags 이 방 후보만 5곳까지, 본인 포함 3명 미만이면 too_few, 사람당 방당 하루 10번(사용자 결정, 탐색 방지), 키워드 표는 avoid-match.ts와 동기화 테스트) 기피 음식 경고 보안 함수: 플래그만 반환, 누구인지와 항목은 숨김 (POLL-13)
+- [x] T7.9 (11/01 완료, get_poll과 my_polls가 조회 시 판정, lunchmate_close_polls 1분, realtime.send 비공개 채널 poll:<id>에 집계만(출처 supabase.com/docs/guides/realtime/broadcast, /authorization), 확정 시 visits source poll, 동점 30분 auto 룰렛, 표 없으면 결과 없이 closed) 마감 판정: 조회 시 확정 함수 + pg_cron 1분 + Realtime 브로드캐스트. 확정 시 참여자 전원의 `visits` 방문 후보 생성은 RLS(본인만)를 넘어야 하므로 같은 보안 함수 안에서 처리 (AC-POLL-5). 동점인데 방장이 마감 30분 뒤까지 정하지 않으면 같은 함수가 룰렛으로 확정 (D-14)
+- [x] T7.10 (11/01 완료, `src/lib/supabase/rls/t7-poll.rls.test.ts`, test:rls 전체 122건 통과, 3역할, 무기명, 30명, 24시간, AC-POLL-2, AC-POLL-5, 탈퇴, rls-cleanup 투표방 단계) RLS 테스트 (AC-POLL-3), 최대 30명, 24시간 만료
+
+#### 7.2 투표 기능
+
+- [x] T7.11 (11/01 완료, 먼저 만들고 고치기 시트(항목 줄 4개, 마감 2 x 2), 만들기 취소 한도 반환, 기준 바꾸기(사무실, 지도에서 찍기 update_poll_anchor 보내기 전만), 후보 넣기 오늘 추천/즐겨찾기/최근 간 곳, `e2e/poll-create.spec.ts`) 투표방 생성, 마감 빠른 선택, 후보 2~5곳, 생성 rate limit 하루 10개 (POLL-01, MOD-05). 기본값으로 먼저 만들고 보내기 시트의 항목 줄 4개로 고침, 마감은 큰 칸 2 x 2, 지난 고정 시각은 "1시간 뒤"로, 남은 한도 2개 이하 한 줄, 진행 중인 내 방이 있으면 "그 투표에 넣기" 메뉴, 비로그인은 돌아온 뒤 확인 한 번 (D-15)
+- [x] T7.12 (11/01 완료, 홈 진입 줄 전체 지연 로딩(home-entries), 카카오톡까지 2탭, 비로그인 ?poll=friends 복귀 확인 한 번, 상세와 지도 "투표에 추가" 그 투표/새 투표 고르기) 빠른 투표: 오늘 카드 3장으로 원탭 생성 (POLL-02). 홈 "친구랑 정하기" 한 탭에 생성, 카카오톡까지 2탭, 기준점은 방장 사무실 핀 (D-15)
+- [x] T7.13 (11/01 완료, shareInvite(카카오 피드, Web Share, 링크 복사), mark_poll_shared, 친구 미리보기 + 고지 한 줄. 카카오 공유 버튼 가이드는 공식 문서에 없어 [확인 필요] 유지) 공유: 카카오톡 공유, Web Share API, 링크 복사 (POLL-03). "카카오톡으로 보내기"는 올리브 주 버튼, Web Share 미지원이면 숨김, 친구에게 보이는 미리보기와 고지 한 줄. [확인 필요] 카카오 공유 버튼 심볼 가이드 (D-15)
+- [x] T7.14 (11/01 완료, `/api/og/poll/[code]` 1200 x 600, poll_preview(anon)만, KS X 1001 밖 제목은 기본 문구, 버전 URL 1일 immutable, 결과 OG 참여 수와 1위 표(사용자 승인 후 db:push 20261101150000)) 투표방별 동적 OG 이미지: 제목, 후보 수, 마감 시각, 브랜딩만. 식당 이름 없음, 서버에서 카카오 호출 없음 (POLL-04, AC-POLL-4, T0.16-4). 시안 A, 1200 x 600, KS X 1001 woff 두 개(밖 글자면 기본 문구), 색은 `pnpm tokens` 생성 상수, og:image 버전 주소와 1일 immutable 캐시 (D-17)
+- [x] T7.15 (11/01 완료, 미리보기 득표 숨김, 로그인 뒤 같은 주소 복귀와 자동 참여, 이름 미해결 "후보 N" + 카카오맵) 비로그인 미리보기와 로그인 후 복귀. 후보 이름은 투표방 기준점으로 T5.12a 매칭, 미해결은 "후보 2" 같은 순번과 카카오맵 링크 (POLL-05, T0.16-1). 미리보기에서 득표는 숨김 (D-14)
+- [x] T7.16 (11/01 완료, 비공개 Broadcast 집계, 구독 완료 뒤 재조회로 틈 메움(E2E 불안정 원인), 끊김 한 줄 + 다시 연결, AC-POLL-1 E2E 2초) 투표, 변경, 취소, 실시간 득표 바(NumberFlow + Motion) (POLL-06, AC-POLL-1). 무기명, 참여 줄(투표 여부 체크), 카운트다운 "12분 40초"(초는 10분 미만에서만), 끊김은 화면에 남는 한 줄 + 다시 연결, 취소는 글자 버튼 (D-14)
+- [x] T7.17 (11/01 완료) 후보 제안과 방장 승인 (POLL-07)
+- [x] T7.18 (11/01 완료, 확인 상자, 동점 직접 고르기 + 룰렛(서버 결과까지 강조 이동), 30분 자동 안내, 축하 세리프 한 줄 + 바 차오름 + 햅틱) 방장 결정, 동점 처리(방장 선택 또는 룰렛), 확정 축하 모션 (POLL-08). 결정은 확인 한 번, 동점은 직접 고르기 primary + 룰렛(R1 리듬), 축하는 색종이 없이 세리프 한 줄 + 1위 바 (D-14)
+- [x] T7.19 (11/01 완료, `/poll/[code]/result` 공개 안내(식당 이름 없음), AC-POLL-5 E2E) 결과 화면과 길찾기, 참여자 방문 후보 등록 (POLL-09, AC-POLL-5). 확정 식당은 홈 큰 카드 문법, 하단 길찾기(primary) + 결과 공유(테두리) (D-14)
+- [x] T7.20 (11/01 완료, ResultShareSheet, canvas 1080 x 1080 B 포스터, uploadImage 후 sendDefault, Kakao JS SDK 2.8.3 고정, channel kakao/save/share) 결과 공유 이미지를 **브라우저에서** 생성(세션의 실시간 이름, 서버와 CDN에 보관하지 않음), 카카오톡 공유(`Kakao.Share.uploadImage` 후 공유)와 Web Share, 저장. 링크 미리보기용 공개 OG에는 확정 식당 이름 없이 결과 안내와 득표 수만 (POLL-09S, T0.16-4)
+- [x] T7.21 (11/01 완료, my_polls 진행 중/지난, 남은 시간 단위 표기, 회식 후보 찾기 링크) 투표 탭: 진행 중, 지난 투표 (POLL-10)
+- [x] T7.22 (11/01 완료) 링크 만료, 인원 초과, 방장 탈퇴 시 자동 취소, 방장 취소 (POLL-11, POLL-12, PRD 12장)
+- [x] T7.23 (11/01 완료, 배지 최대 2개(못 먹는 분 있음, 할인, 제보 순), 기피 경고 3명 미만 숨김) 투표방 후보 카드의 `제보` 배지 표시, `제휴` 미표시 (DEAL-05)
+- [x] T7.24 (11/01 완료, RLS 테스트 + `e2e/poll-room.spec.ts` 조회 시 확정) AC-POLL-2 테스트: 아무도 열지 않은 만료 투표가 다음 조회 때 확정
+
+#### 7.3 회식 모드
+
+- [x] T7.25 (11/01 완료, 기기 저장 조건 4개, 지도에서 찍은 기준 위치는 화면 메모리만) 조건 입력: 인원, 1인 예산, 룸/단체석, 주류, 기준 위치 (PARTY-01). 경로 `/poll/party`, 첫 사용만 질문 2개(인원, 예산), 이후 지난 조건(기기 저장)으로 바로 결과, 조건 문장 낱말로 고치기 (D-16)
+- [x] T7.26 (11/01 완료, 반경 773m) 저녁 고정, 도보 15분 자동 (PARTY-02)
+- [x] T7.27 (11/01 완료, rankParty 순수 함수와 테스트, 할인 미반영, 콜드 스타트, 카카오 오류 + 네이버 지도, 데스크톱 번호 핀) 후보 5곳과 조건 충족 근거, 정보 없음 표시 (PARTY-03, PARTY-04). 근거 3단계, 주류는 카카오 카테고리 판정, 룸/단체석과 인원은 순서에만, 순서는 확인된 조건 수 → 추천 점수, 판정 순수 함수 + 단위 테스트 (D-16)
+- [x] T7.28 (11/01 완료, `e2e/party.spec.ts`) 이 후보로 투표 만들기 (PARTY-05). 결과에서 체크한 곳(2곳 이상)만 넘김, 기준점은 회식 기준 위치 (D-16)
+
+#### 7.4 마무리
+
+- [x] T7.29 (11/01 완료, ACCOUNT_DELETION_SCOPE에 poll_members, poll_votes, polls, poll_candidates, private.poll_avoid_usage, account_residue 기대 목록에 투표 테이블, 탈퇴 안내와 약관 제5조, 처리방침 보관과 파기에 투표 처리 문장, 근거 t7-poll RLS "T7.29, T7.22 탈퇴") 탈퇴 시 투표 처리 (진행 중 표 삭제, 확정 투표는 익명 참여자)
+- [x] T7.30 (11/01 완료, 8종 PRD 이름과 속성 일치(타입과 prd-events.test.ts), 투표방 안 후보 넣기와 제안 승인 source rec → map(추천 수락률 부풀림 방지), 좌표와 개인 식별 정보 없음) 이벤트: `poll_candidate_added`, `poll_created`, `poll_link_shared`, `poll_invite_opened`, `poll_voted`, `poll_closed`, `poll_result_shared`(channel kakao/save/share, D-17), `party_searched`
+- [x] T7.31 (11/01 완료, `e2e/poll-flow.spec.ts` 홈 친구랑 정하기 → 링크 복사 → 친구 참여와 투표 → 2초 갱신 → 방장 결정 → 두 화면 결과와 방문 후보, 컨텍스트 2개, 3회 반복 x 2뷰포트 6/6, `pnpm test:e2e:poll`) E2E: 투표 생성 → 2인 투표 → 확정 (Playwright 두 브라우저 컨텍스트)
+- (옮김) T7.32 → 미완료, `docs/tasks.md` "이전 단계에서 남은 작업"으로 옮김
+- [x] T7.33 (11/01 완료, 금지 문자 0, poll 28%, poll-create 27%, party 33%, share 34%, anchor-picker 30%, 카카오톡 공유 템플릿, OG 글, 메타는 share.ts) 문구 점검 (`lint:copy`), 카카오톡 공유 문구와 OG 텍스트 포함
+- [x] T7.34 (11/01 완료, `e2e/poll-states.spec.ts` 투표 탭과 투표방 로딩, 오류, 빈, 오프라인, 결과, 결과 공유 시트 x 라이트, 다크, 390, 1280, 360 + axe 8/8(2회), 캡처 `poll-states-live__*` 50장, test:e2e:a11y 468건 회귀 없음. 데스크톱 투표 탭 우측 지도 칸 비어 있음은 8단계 다듬기 후보(g7-qa.md)) 4상태와 다크 점검
+- [x] T7.35 (11/01 완료, pollEntry 개발과 Preview 켬, 프로덕션은 로그인이 필요해 auth와 함께 연다(사용자 결정): productionOff를 auth와 같이 두고 auth 해제 때 함께 지움. 카드 메뉴와 상세의 브라우저 판정을 서버 판정 props로 바꿈, 켠 상태 프리렌더에서 드러난 투표 탭 new Date() 수정, 프로덕션 빌드 auth-off E2E 22건(진입점 없음, /poll/party와 투표방 404)) 홈과 상세의 투표 관련 플래그 해제
+- [x] T7.36 (11/01 완료, `docs/design/g7-qa.md` AC 32행 중 통과 30, 부분 2(AC-POLL-4 카카오톡 실제 말풍선, AC-POLL-5 다음 날 피드백은 6단계 띠 규칙), test:rls 124, 투표 E2E 26, auth-off 22, a11y 468, /today 200.4KB(임시 예산 201, T8.11). `[실기기]` T7.32 사용자 확인 남음) **G7 확인**: POLL, PARTY P0 AC 통과, 채택된 P1(빠른 투표, 기피 경고, 결과 공유) 동작
+
+---
+
+### 8단계. 다듬기: PWA, 모션, 접근성, 성능, 관리자 (1주)
+
+- [x] T8.1 (11/01 완료, 4안 A 그릇 한 점, B 마루 부리 한 글자, C 세 장 중 한 장, D 숟가락 핀, `docs/design/g8-comparison-icon.md`, 캡처 88장. 선택 design-decisions D-18: **A + 샌드 바탕, 올리브 그릇**, 안건 12건 나머지 기본안) 앱 아이콘과 스플래시 시안 3안 이상 ⛔ 선택
+- [x] T8.2 (11/01 완료, `src/app/manifest.ts`(any, maskable, monochrome), `pnpm pwa:assets` 생성 스크립트(아이콘, iOS 시작 이미지 20기기 x 라이트/다크, icon.svg, apple-icon, favicon.ico), 아이콘 타일은 사용자 결정으로 샌드 두 단계 낮춤(track), 설치 유도는 인라인 방문 카운터 + 3번째 방문 5초 뒤 토스트 1회(Android 설치 버튼, iOS 공유 안내, 카카오톡 인앱 제외), OG 왼쪽 위 단색 그릇 기호(OG_ART_VERSION 2), sw.js 셸 경로 추가, /today 200.6 KB. [확인 필요] iOS 기기 크기 목록 재대조, 다크 시작 이미지 media 지원, [실기기] 설치 흐름) 매니페스트, 아이콘, iOS 스플래시, 3번째 방문부터 설치 유도 1회 (APP-01)
+- [x] T8.3 (11/01 완료, `/offline` 정적 폴백 화면(404, 오류 화면 문법), 오늘 카드 위 "연결 전 결과" 한 줄(지연 청크), 재연결 시 원래 주소 다시 열기와 `refetchOnReconnect`, 지도와 나 탭 기존 동작 유지, `e2e/offline.spec.ts` 4건. 앱을 오프라인으로 새로 연 경우 마지막 설정은 기기에 저장하지 않음(D-20, 사용자 결정)) 오프라인 기본 화면: 마지막 설정과 세션 중 받은 결과(탭이 열려 있을 때만, "연결 전 결과" 표시), 즐겨찾기 개수 등 비장소 데이터, 재연결 시 자동 새로고침. 장소 이름 목록은 보여주지 않음 (APP-02, T0.16-3)
+- [x] T8.4 (11/01 완료, 의존성 없는 `public/sw.js`, 같은 출처 `/_next/static`, `/fonts`, `/offline`, 파비콘만 허용 목록 캐시, 교차 출처(카카오, 네이버, Supabase, PostHog, Sentry)는 `respondWith` 미호출, `/api`, `/auth`, RSC, HTML 제외, 버전 키 `LM_SW_VERSION`, 프로덕션만 유휴 등록, `sw-policy.test.ts`, research-notes T0.16-3) 서비스 워커 캐시 범위 점검: 앱 셸(HTML, JS, CSS, 일러스트)만 캐시, `dapi.kakao.com` 등 카카오 응답은 캐시 제외 규칙 명시 (T0.16-3)
+- [x] T8.5a (11/01 완료, A 받은편지함, B 표와 일괄 처리, C 한 건씩 검토, `docs/design/g8-comparison-admin.md`, 캡처 93장. 선택 D-19: **C + B 같은 작성자 일괄 숨김 + A 단축키 안내와 이력 목록**, 정지는 쓰기 차단 + 공개 후기 숨김, 로그인 허용, 안건 15건 기본안) 관리자 화면 시안 3안 이상 (신고 목록, 처리 흐름, 데스크톱 우선) ⛔ 선택
+- [x] T8.5 (11/01 완료, D-19 C 한 건씩 + B 같은 작성자 일괄 숨김 + A 단축키와 이력 목록, 마이그레이션 `20261101180000_t8_5_admin_moderation.sql`(정지 열, 정지 쓰기 차단 트리거, moderated_at, place_moderation, private.moderation_actions, admin_* 9개, 정지 만료와 이력 정리 크론, 사용자 승인 후 적용), RLS 144건 통과(t8-admin 20), `e2e/admin.spec.ts` 360, 390, 1280 x 라이트, 다크 + axe 0, 캡처 `admin-live__*` 69장, 플래그 `adminConsole`은 프로덕션에서 로그인과 함께. 실제 관리자 지정은 사용자가 SQL 편집기에서) 관리자 화면 `/admin`: 신고 후기, 폐업 제보, 사용자 정지 (MOD-06)
+- [x] T8.6 (11/01 완료, 사용자 결정 이메일 하나, `NEXT_PUBLIC_CONTACT_EMAIL`(서버에서만 읽음), 설정 "문의와 정책" 묶음 첫 줄, `/me/contact` 주소 크게 + 주소 복사(주 동작) + 메일 앱 열기, 주소 없으면 준비 중 안내, `e2e/contact-legal.spec.ts`. 주소 값은 사용자가 .env.local과 Vercel에 등록) 문의 채널 링크 (MOD-07)
+- [x] T8.7 (11/01 완료, `docs/design/g8-motion-audit.md` 25건 중 16건 조치: 터치 기기 눌림 표시 70곳 `active:` 짝, 칩과 지도 떠 있는 버튼 `pressMotion` 통일, 없는 클래스 `duration-slow` 수정, 하드코딩 지연을 토큰으로, Drawer 닫힘 fast exit와 딤 박자, 지도 로딩 공통 Skeleton, DESIGN.md 시트 서술 정정. 토큰 값 변경 없음, /today 변화 없음) 모션 폴리싱 패스: 전 화면 전환, 눌림 피드백, 시트 스프링을 DESIGN.md 토큰과 대조
+- [x] T8.8 (11/01 완료, 탭 이동 즉시 교체 확인, 시트 닫힘 지연 120ms 제거, reduced motion 누락 없음, 다시 뽑기 길이와 실시간 점은 제안으로 사용자 결정) 마이크로 인터랙션 감사: 효과가 결정을 늦추는 곳 제거
+- [x] T8.9 (11/02 완료, `docs/design/g8-a11y-audit.md` 34경로 x 390, 1280, axe 0, 대비 미달 0(본문 최저 5.44/6.12), 발견 12건 중 중간 2건 수정(모바일 지도 "목록으로 건너뛰기", 시트 손잡이 누르는 칸 44), 홈 대안 카드 "도보" 이름과 버튼 간격, `e2e/a11y-pages.spec.ts` 회귀 스펙, VoiceOver/TalkBack 실기기 체크리스트. 남은 결정: 👍 이모지 읽힘(F6)) 접근성 감사: 키보드, 스크린리더(VoiceOver, TalkBack), 대비, 레이블
+- [x] T8.10 (11/02 완료, `docs/design/g8-lighthouse.md` 3회 중앙값: `/` 97, `/today` 86, `/login` 97, `/terms` 98, `/offline` 99, `/map` 81, 접근성 모두 96 이상. 분석과 오류 SDK 시작 지연(/today 78에서 86), 지도 상세 지연 로드(/map JS 298에서 229 KB). /map 81은 사용자 결정으로 수용, 배포 후 실측 재검토(T10.9)) Lighthouse 모바일 성능 85 이상, 접근성 90 이상
+- [x] T8.11 (11/01 완료, /today 200.7에서 199.0 KB(-1.7), `bundle-report` 기본 예산 200 KB로 복귀, 분석 시작 코드의 브라우저 환경변수 검증 제거와 PostHog 설정 지연 로드(-1.4), design-lab 전용 문구 분리(-0.3), `/` 178.7 KB, bundle-log 최근 측정 요약 표) 번들 예산 재점검과 `bundle-log.md` 정리. 7단계에서 next/og 런타임 비용(약 0.5 KB) 때문에 `bundle-report` 기본 예산을 임시 201 KB로 올림(사용자 결정 11/01): 홈 코드를 0.4 KB 이상 줄여 200 KB로 되돌리기
+- [x] T8.11b (11/01 완료, 진행 중 내 투표 가운데 마감이 가장 가까운 방의 기준점과 후보 핀(투표방 지도 문법 재사용, 1위 단독만 올리브), 진행 중 줄 호버나 초점 200ms 뒤 그 방으로 전환, 없으면 사무실 지도, 1024px 이상에서만 SDK 동적 import, /today 증가 0, `e2e/poll-tab-map.spec.ts` 4건 + 기존 투표 90건, 캡처 `t8-11b-*` 16장. [실기기] 실제 타일 위 fitBounds) 데스크톱 1280 투표 탭(`/poll`) 우측 지도 칸: 진행 중 내 투표의 후보 핀, 없으면 기본 사무실 주변 지도 (G7 점검에서 빈 칸 발견, 사용자 결정 11/01, g7-qa.md 7절)
+- [x] T8.12 (11/01 완료, `docs/design/g8-copy-audit.md`, copy 19개 파일 약 70건, 문체 경고 2건에서 0건, 전체 해요체 27%, 표기 통일(잠시 후, 새로고침), 용어 통일, 보조 용언 붙여 쓰기, copy-guide 2.2에 나 탭 인사 예외 추가(기본안)) 전 화면 문구 감사: `lint:copy` 리포트 + 소리 내어 읽기 검수, 문체 비율 조정
+- [x] T8.13 (11/01 완료, 빈 상태와 오류 목록 g8-copy-audit.md, 문장과 버튼 짝 불일치 3곳 수정(회식 주류 조건, 마감 뒤 새로 온 투표방, 취소된 투표방), 다음 행동 없던 곳 안내 추가) 빈 상태와 오류 문구가 다음 행동을 안내하는지 점검
+- [x] T8.14 (11/01 완료, 이용약관 13조, 개인정보 처리방침 16절(법 제30조 기재 항목 표는 커밋 본문), 새 페이지 `/location` 위치정보 처리 안내 8절, 모두 "초안 0.1판, 시행일 미정" 띠, 습니다체 100%. 보호책임자 자리표시, 구글 로그인 이메일은 auth 기록에 남는 사실 그대로 기재. 남은 결정: 보호책임자 실명, 끝난 투표방 보관 기간, 문의 메일 보관, 시행일(T10.3)) 약관, 개인정보처리방침, 위치정보 처리 안내 초안 (습니다체): 현위치 미전송, 사무실 핀 좌표 저장 목적과 보유기간, 탈퇴 시 삭제, 이메일 미수집(카카오, 네이버. 구글은 인증 기록에만, D-21) (APP-05, T0.18)
+- [x] T8.15 (11/01 완료, 한도 수치 PRD와 DB, 문구 일치, `limits.test.ts`로 고정, 금칙어 192개(+10), 대상 입력 전부 적용. 서버 액션만 검사해 PostgREST 직접 호출로 금칙어 우회 가능(중간) → 대응 방식 사용자 결정, research-notes "8단계 운영 점검") rate limit와 금칙어 최종 수치 점검
+- [x] T8.16 (11/01 완료, `docs/monitoring.md` PostHog 인사이트 11개와 대시보드 2개, Sentry 알림 9개 정의와 콘솔 번호 단계, PRD 10.2 이벤트 25개 발화 대조 빠짐 없음, `/welcome` 분석 연결(온보딩 완료율 측정 가능), Sentry 소음 필터. 콘솔 생성은 사용자 몫(개인 API 키 없음), 사용자 수는 기기 기준) Sentry 알림 규칙, PostHog 대시보드(2.3절 지표) 구성
+- [x] T8.17 (11/01 완료, `pnpm db:backup` 역할, 스키마, 데이터 세 덤프 gzip, 저장소 밖 `~/lunchmate-backups`, 8개 회전, 비밀번호 가림. 실제 덤프는 Docker 필요로 미실행, 주 1회 실행 방식 사용자 결정) 데이터 백업: T0.19 결과에 따라 필요하면 주 1회 `pg_dump` 스크립트
+- [x] T8.18 (11/01 완료, `pnpm test:cleanup` 기본 드라이런, `--yes`만 삭제, 닉네임 test_ + 테스트 이메일 + email provider 세 겹 판정, rls-cleanup 통합) 테스트 계정 정리 스크립트 (`test_` 접두)
+- [x] T8.19 (11/02 완료, 사용자 결정: 매트릭스 구성으로 완료 처리. `docs/design/g8-device-matrix.md` 69항목, 시나리오 S1~S6. 실제 기기 확인은 T9.0에서 사용자가 진행, Claude가 대신 확인하지 않음) `[실기기]` 매트릭스: iOS Safari, Android Chrome, 카카오톡 인앱, 데스크톱 3종
+- [x] T8.20 (11/02 완료, 기존 갤러리 48장 차이 없이 통과(갱신 0), 8단계 화면 24장 기준 추가 `e2e/visual/pages.spec.ts`(관리자 C, 앱 아이콘 A, 오프라인, 약관 3종 x 라이트, 다크 x 390, 1280, 시계와 난수 고정), 두 번 연속 통과. 문의 주소 값을 넣으면 약관 기준 이미지 갱신 필요) 시각 회귀 스냅샷 갱신
+- [x] T8.21 (11/02 완료, **조건부 통과**(사용자 결정), `docs/design/g8-qa.md`. 조건: 베타 초대 전 실기기 핵심 묶음(로그인 3종, 투표 링크, 카카오 공유, 길찾기)과 관리자 지정, 문의 이메일 등록, PostHog/Sentry IP 폐기, 백업 등록. 로그인, 투표, 관리자 플래그는 자체 도메인(T9.2) 연결 뒤 프로덕션에서 함께 켬, 베타 시작일은 실기기 확인 뒤 T9.1에서 확정) **G8 확인**: 베타 참여자에게 보여줘도 되는 완성도
+
+---
+
+### 9단계. 클로즈드 베타 (1주 이상)
+
+- [x] T9.0 (11/02 완료: 관리자 지정 완료(구글 계정), 문의 이메일 등록 완료(.env.local, Vercel Production/Preview), PostHog/Sentry IP 폐기와 스크러버 완료(monitoring.md 4장 결과, 처리방침 1년/30일 반영), 백업은 D-24로 변경(첫 덤프 완료, 자동 예약 대신 db:push 전 백업), test:cleanup --yes 완료(테스트 투표방 89개). 실기기 iPhone 핵심 묶음 통과(프로덕션, 로그인 3종과 관리자, 카카오톡 초대 말풍선, 인앱 로그인, 투표방 복귀, 실시간 2초, 길찾기, 카카오톡에서 외부 브라우저 열기, 홈 화면 설치). Android S3는 사용자 결정으로 확인 없이 진행. 실기기에서 찾은 문제 5건은 T9.10에서 수정 배포) G8 조건 해소: 실기기 핵심 묶음(g8-device-matrix S1~S4), 관리자 지정, `NEXT_PUBLIC_CONTACT_EMAIL`, PostHog/Sentry IP 폐기(monitoring.md), launchd 백업 첫 덤프, `pnpm test:cleanup --yes` (G8 조건부 통과, 11/02)
+- [x] T9.1 (11/02 확정: **2026-11-16(월) 시작**, 서울 근무 동료 20명 내외, 사용자 결정) 베타 시작일과 참여자 범위 확정 (PRD Q7). 11/02 사용자 결정(D-22): 기본안, T9.0과 플래그 공개, 실기기 핵심 묶음이 끝난 다음 주 월요일, 서울 근무 동료 20명 내외. 날짜는 조건이 끝날 때 확정
+- [x] T9.2 (11/02 완료, `flags.ts`에서 auth, pollEntry, adminConsole, betaFeedback의 `productionOff` 제거(designLab만 남음), auth-off E2E를 프로덕션 플래그 스모크 `e2e/prod-flags.spec.ts`(`pnpm test:e2e:prod-flags`)로 바꿈: 프로덕션 빌드에서 /login, /beta 200과 noindex, /poll, /me, /admin 비로그인은 로그인으로, /design-lab 404 16건 통과. 배포 뒤 lunchmate-kr.vercel.app 응답 확인. 실기기 S1~S4는 T9.0에 남음) ~~자체 도메인 구매와 연결~~ → **프로덕션 플래그 공개** (11/02 사용자 결정 D-22: 베타는 `lunchmate-kr.vercel.app` 유지, 자체 도메인은 T10.0에서 재검토). T9.0의 관리자 지정, 문의 주소, 분석 도구 개인정보 설정 뒤 auth, pollEntry, adminConsole의 `productionOff`를 함께 지우고 배포, auth-off 반대 확인 E2E, 그 주소에서 실기기 S1~S4
+- [x] T9.3 (11/02 완료, `/beta` 공개 경로(auth 플래그와 함께, noindex, 사이트맵 제외), 서버 UA 기기 판정, 인앱 주 버튼 외부 브라우저 + 실패 시 메뉴 그림과 링크 복사, standalone 설치 마침, 데스크톱 2단, `e2e/beta.spec.ts` axe 0. 카카오톡 초대 문구 문서는 T9.5 때) 베타 안내문, 설치 방법, 피드백 받을 채널 (문구 규칙 적용). 11/02 결정(D-22): 설치 방법은 앱 안 환영 페이지 `/beta`(시안 3안 ⛔ 선택 완료 D-23: A + C 제목, 인앱 주 버튼 외부 브라우저), 초대 문구는 문서
+- [x] T9.4 (11/02 완료, 마이그레이션 `20261102120000_t9_4_beta_feedback.sql`(사용자 승인 후 적용: `beta_feedback`, 본인 쓰기와 읽기, 하루 10건, 정지 차단, `admin_beta_feedback` 익명 번호, 베타 종료일 `private.beta_settings.ended_on` 기준 6개월 뒤 정리 크론), RLS 158건 통과, 시트 + 관리자 E2E 25건 통과, 처리방침 초안에 항목 추가, `betaFeedback` 플래그는 auth와 함께 프로덕션 공개, /today 199.3 KB) 베타 전용 피드백 버튼 (나 탭, 기능 플래그). 11/02 결정(D-22): 앱 안 시트 + DB 저장(`beta_feedback`, RLS 3역할 테스트), 관리자 읽기. 시안 3안 ⛔ 선택 완료 D-23: A 시트 + B 예시 문구와 첨부 기본값, 안건 모두 기본안
+- [x] T9.5 (11/04 완료, 사용자가 카카오톡으로 20명에게 발송. 시작을 11/16에서 11/04로 앞당김(사용자 결정 11/03), 일정은 `docs/beta-ops.md` 1장, 보낸 문구는 2.1 "실제 발송". 11/02 준비: 초대 문구 A안 확정 D-26. 로그인 개방: 구글 OAuth 프로덕션 게시, 카카오 동의 항목 확인, 네이버 로그인 검수 11/02 제출, 11/03 통과. 로그인 3종 모두 누구나 가능) 베타 참여자 20명 내외 초대
+- [x] T9.6 (11/18 완료: 매일 칸 대신 베타 전체 값을 PostHog SQL과 DB로 한 번에 기록, beta-ops 3.2 전체 행, 해석 `docs/beta-retro.md` 2, 3장. 수락률 38.2%, 결정 21초, 다시 뽑기 0.98, 투표 완료 9/39, 온보딩 14/18, 첫날 22대 뒤 1~3대로 급감) 매일 지표 확인: 추천 수락률, 결정 시간, 다시 뽑기, 피드백 응답률, 투표 완료율, 초대 전환율, 온보딩 완료율
+- [x] T9.7 (11/18 완료: 인앱 시작 9대 중 8대 완료 89%, 기준 10대 미만이라 판단 보류, 게스트 투표 안건 열지 않음, 출시 뒤 2주 재확인. beta-retro 4장) 인앱 브라우저 로그인 전환율 확인, 50% 미만이면 게스트 투표 재검토 안건
+- [x] T9.8 (11/18 닫음: 전환 조건 해당 없음(38.2%, 0.98회, 품질 지적 0), v2 배포 안 함, 가중치 유지, 55세션으로 비교 기준 200 미달, 실험은 출시 뒤. beta-retro 5장) 추천 가중치 조정 실험 (`algo_version` 비교)
+- [x] T9.9 (11/18 완료: 베타 할인 제보 0건, "할인 중" 필터 MVP 제외 유지. beta-retro 6장) 할인 제보 양 확인, "할인 중" 필터 도입 재검토
+- [x] T9.10 (11/18 닫음: 베타 중 1급 0, 2급 1(투표방 중복 생성 11/12 수정), 사용자 지적 끼니 필터 T9.19, 3급 불편 2건은 출시 전 과제 후보(beta-retro 9, 13장). 11/02 진행: 홈 큰 카드 긴 가게 이름이 그림 밑으로 겹침 수정(이름 길이별 그림 152/112/80px, 두 줄 줄임표, title), iOS 스크롤 흔들림 수정(모바일 하단 탭과 오늘 행동 줄을 fixed + 빈 자리, 앱 화면 문서 튕김 끔, 셸 최소 높이 svh). 로그아웃 뒤나 화면 전환 뒤 홈이 스켈레톤에 멈춤 수정(현위치 콜백이 오지 않으면 12초 상한 뒤 위치 안내, 카카오 검색 페이지 8초 상한). 나 탭 설정에 관리자 전용 "관리자 화면" 줄(서버 role 판정). 실기기 iPhone 재확인 통과(11/02: 홈 한 화면 스크롤 없음, 스크롤 흔들림 없음, 로그아웃 뒤 빈 화면 없음). 홈 한 화면 압축 D-25 구현(A + B 대안 두 줄 목록): 390x664, 360x640 문서 높이 = 화면(스크롤 0, 긴 이름과 짧은 이름), /today 199.7 KB. 11/03: /beta 아이폰 Chrome(CriOS) 설치 안내 분리, 아이폰은 홈 화면 아이콘으로 연 뒤 로그인 안내. 실기기 캡처 기준으로 아이폰 설치 순서 정정(Safari 점 세 개, 공유, 더 보기, 홈 화면에 추가 / Chrome 공유, 더 보기, 홈 화면에 추가), 실제와 다른 공유 버튼 그림 숨김. 카카오톡용 설치 안내 이미지 2장은 저장소 밖) 버그 수정 라운드
+- [x] T9.11 (11/18 완료, 설문 응답 없음, 베타 종료일 11/17 `ended_on` 기록) 베타 회고 문서 `docs/beta-retro.md`
+- [x] T9.12 (11/18 결정 D-45: main 직접 푸시 유지, 사용자가 늘면 재검토) Git 전략 재검토 (main 직접 푸시 → PR과 미리보기 배포)
+- [x] T9.13 (11/18 결정 D-45: 예정대로 공개 출시, 근거 `docs/beta-retro.md`) **G9 확인**: 2.3절 목표 대비 결과 검토, 출시 결정
+- [x] ~~T9.14~~ **철회(D-41, 11/03)**: 탭 사이 이동은 하단 탭만. 스와이프 코드, E2E, 시안 코드 삭제(캡처와 비교 자료, D-36 기록은 남김). 이전 기록: (11/03 시안 3안 → **A 선택(D-36)** → 구현: `src/features/swipe/`(판정 규칙, 첫 화면 뒤 지연 로드 제어기), `app-shell/swipe-main.tsx`(본문은 left로 밀어 오늘 행동 줄 fixed 유지), E2E `e2e/tab-swipe.spec.ts`. 시안 B, C 코드 삭제. 남은 일: 실기기 확인. 캡처와 비교 `docs/design/g9-comparison-swipe.md`) ⛔ 탭 사이 스와이프 이동(사용자 요청 11/03, 네 탭 모두). 선택 뒤 design-decisions 기록, 첫 로드 밖 지연 로드로 구현(홈 예산), 실기기 iOS Safari 가장자리 뒤로 가기와 충돌 확인
+- [x] T9.15 (11/03 시안 3안 → **C 선택(D-38)** → 구현: `app-shell/tab-bar.tsx` 활성 아이콘과 라벨 primary, 선 2px, semibold, 라벨 아래 4px 점, 비활성 아이콘 60%, 위쪽 막대 삭제. DESIGN.md 5장 갱신, 갤러리 시각 기준 갱신, /today 200.8 KB. 시안 코드 삭제, 캡처 `design-lab-tab-bar-*`와 `t9-15-impl/`, 비교 `docs/design/g9-comparison-tab-bar.md`) ⛔ 하단 탭 활성 표시 강화(사용자 지적 11/03: 지금 탭이 잘 구별되지 않음)
+- [x] T9.16 (11/03 완료, 시안 예외: 순수 로직. `constants.ts` `MEAL_EXCLUDED_CATEGORIES`(점심 pub), `MEAL_CATEGORY_PENALTY`(cafe 0.2), `filter.ts` `isOffMeal`과 `offMeal` 집계(회식 `rank.ts`는 끼니 기준을 넘기지 않아 그대로), `score.ts` P 감점, 요즘 땡겨요면 둘 다 예외, `ALGO_VERSION` 2026-11-03.1, 테스트 filter 6, score 2, recommend 1(점심 술집 절반 후보 50시드)) 끼니 적합도 (사용자 지적 11/03: 점심에 술집 추천). PRD 7장 [PRD 추가]
+- [x] T9.17 (11/03 완료: 마이그레이션 liked_categories와 띠 닫은 시각(백업 뒤 db:push, RLS 6), 추천 가산과 이유 문장(ALGO 2026-11-03.2), 온보딩 넷째 단계, 나 탭 /me/liked, 홈 띠(피드백 띠 자리, 지연 로드), E2E 온보딩 4, me 2, taste 4 통과, /today 200.2 KB, 구현 캡처 `t9-17-impl/`. 실기기 확인 남음. 시안 3안: A 좋아하는 음식 단계 / B 한 화면 취향표 / C 둘 중 고르기, `src/app/design-lab/taste/{a,b,c}`, 캡처 `taste-*` 160장, 비교 `docs/design/g9-comparison-taste.md`, Claude 추천 A + 띠는 피드백 띠 자리 공유. → **A + A 띠 선택(D-39)**, 5개까지, 띠는 둘 다 비운 사용자에게 최대 7일) ⛔ 온보딩 "좋아하는 음식" 단계와 건너뛴 사용자 다시 부르기 (사용자 지적 11/03: 설정을 건너뛰면 선호와 기피가 반영되지 않음). 카테고리 칩 2~3개로 P 시작값을 올림(만료 없음), 기피 음식을 건너뛴 사용자에게 홈 한 줄 띠. 시안 3안 선택, PRD ONB 수정(D-07 ONB-04와의 관계 기록), `preferences` 컬럼 추가 마이그레이션(승인, 백업 뒤 db:push), 추천 P 반영과 테스트, 나 탭 설정에서도 수정
+- [x] T9.18 (11/04 완료: 마이그레이션 closed_today와 2분 되돌리기(백업 뒤 db:push, RLS 5), 엔진 2명 제외 1명 감점(ALGO 2026-11-04.1), 카드 배지, 카드 더 보기 "문이 닫혀 있어요"와 "영업시간과 메뉴 보기", E2E closed 2 통과, /today 200.3 KB, 구현 캡처 `t9-18-impl/`. 실기기 확인 남음. 시안 3안: A 상세 지금 행 / B 카드에서 바로 바꾸기 / C 길찾기 뒤 확인, `src/app/design-lab/closed/{a,b,c}`, 캡처 `closed-*` 140장, 비교 `docs/design/g9-comparison-closed.md`, Claude 추천 B. 기존 "오늘만 쉬어요" 제보(place_reports closed today)가 저장만 되고 쓰이지 않음을 확인. → **B 선택(D-40)**, 안건 모두 기본안) ⛔ "지금 안 열었어요" 한 탭 제보 (사용자 질문 11/03: 영업 중인지 알 수 없음. 카카오, 네이버 API에 영업시간이 없고 페이지 수집은 약관 위반이라 사용자 제보로 대신함). 그날 그 끼니에만 유효, 그 시간대 감점, 폐업 제보(3건)와 별개. 상세의 네이버 플레이스 링크를 "영업시간 보기"로 드러내는 안 포함. 시안 3안 선택, 새 마이그레이션(RLS 3역할), PRD PLACE/MOD 추가
+- [x] T9.19 (11/13 완료, 시안 예외: 순수 로직. 새 `src/lib/reco/meal-kind.ts` 끼니 성격(meal, drink, snack: 업종 원문과 이름으로 판정), `constants.ts` `MEAL_EXCLUDED_KINDS`(점심 drink, snack, 저녁 snack)로 `MEAL_EXCLUDED_CATEGORIES`, `MEAL_CATEGORY_PENALTY` 대체, 회식 `rank.ts` `isNotPartyPlace`(간식, 분식, 치킨 아닌 패스트푸드 상시 제외, 주류 켜면 샐러드), `ALGO_VERSION` 2026-11-13.1, 테스트 meal-kind 5, filter 2, party 2) 끼니 적합도 확대 (사용자 지적 11/13: 점심에 술집, 호프, 치킨, 카페, 빵집, 저녁과 회식에도 안 맞는 곳). 원인: 점심 필터가 pub 한 종류뿐, 카카오 "치킨"은 fastfood, 카페 감점 0.2가 점수 0.06이라 효과 없음, 저녁과 회식(주류 끔)은 규칙 없음. D-44
+
+---
+
+## 4. 결정 대기 질문
+
+| # | 질문 | 기본안 (답이 없으면 적용) |
+| --- | --- | --- |
+| ~~Q-T1~~ | `plan.md`와 `tasks.md` 중 이름 통일 | **확정 (10/28)**: `tasks.md`로 통일, CLAUDE.md와 PRD 수정 완료 (T0.2, T0.3) |
+| ~~Q-T2~~ | 해요체:습니다체 3:7 적용 범위 | **확정 (10/28)**: UI 안내 문장에만 적용. 버튼과 라벨은 제외, 약관은 습니다체 100% |
+| ~~Q-T3~~ | 관리자 화면도 시안 3안을 만드는지 | **확정 (10/28)**: 관리자 화면도 예외 없이 시안 3안 |
+| ~~Q-T4~~ | 디자인 취향 (T1.1 질문지) | **확정 (10/28)**: `preferences.md` 참조 |
+| ~~Q-T5~~ | 보조 서체 허용 | **확정 (10/28)**: 제목 세리프를 시안 B에서만 시도, 나머지는 Pretendard 단일 |
+| ~~Q-T6~~ | 베타 시작 목표일 (PRD Q7) | **확정 (11/02)**: 2026-11-16(월), 동료 20명 내외 (T9.1) |
+| ~~Q-T7~~ | 시안 D(다크 우선) 포함 여부 | **확정 (10/28)**: 생략, 다크 모드는 모든 시안에서 동등 지원 (라이트 우선은 가정, G1에서 확인) |
+
+---
+
+## 5. 이 문서에서 보완하거나 제안한 것
+
+| # | 내용 | 이유 | 반영 위치 |
+| --- | --- | --- | --- |
+| S1 | DESIGN.md 프런트매터에서 토큰 CSS 자동 생성 | 문서와 코드의 디자인이 어긋나는 것을 막음 | T1.9, T1.19 |
+| S2 | 시안 실시간 스위처 | 캡처보다 같은 화면에서 바로 바꿔 보는 쪽이 판단이 빠름 | T1.14 |
+| S3 | `lint:copy` 금지 문자 검사와 문체 비율 리포트 | 문구 규칙을 사람 기억이 아니라 자동 검사로 지킴 | T0.31, T2.3 |
+| S4 | 문구 중앙화 `src/copy` | 검사와 일괄 수정, 비율 관리가 쉬워짐 | T2.2 |
+| S5 | 기존 PRD 예문의 중간점, 해요체 단일 표현 정정 | 새 문구 규칙과 충돌 | T0.3 |
+| S6 | 동적 라이브러리 PoC와 번들 기록 | 효과는 살리고 200KB 예산은 지킴 | T2.13, 2.4절 |
+| S7 | 시각 회귀 스냅샷, axe 자동 검사 | 1인 개발에서 디자인 품질이 무너지는 것을 조기 발견 | T2.16, T2.17 |
+| S8 | 검수 기간이 긴 외부 등록을 0단계 앞쪽에 (도메인 확정 직후) | 네이버 로그인 검수 대기로 4단계가 막히는 것을 방지 | T0.5, T0.6 |
+| S9 | 탈퇴 삭제 범위를 단계마다 확장 | 테이블이 늘 때 탈퇴 처리 누락 방지 | T4.12, T6.27, T7.29 |
+| S10 | 햅틱 피드백 (Android) | 스와이프, 확정 순간의 손맛 | T2.14 |
+| S11 | 앱 아이콘, 스플래시, OG 이미지도 시안 대상 | 카카오톡 공유 미리보기가 첫인상 | T7.4, T8.1 |
+| S12 | 백업과 테스트 데이터 정리 | 로컬 DB 없이 클라우드 개발 DB만 쓰는 구조의 위험 대비 | T8.17, T8.18 |
+
+---
+
+## 6. 변경 이력
+
+| 날짜 | 버전 | 내용 |
+| --- | --- | --- |
+| 2026-10-28 | v0.1 | 최초 작성 |
+| 2026-10-28 | v0.1.1 | Q-T2 확정, Q-T3 확정(관리자 화면도 시안 3안, T8.5a 추가), T1.1 질문 방식 구체화 |
+| 2026-10-28 | v0.1.2 | 디자인 선호 반영: 시안 A/B/C를 Terracotta Table, Quiet Stone, Clay Grid로 교체, 시안 D 생략, 포인트 컬러 흙빛 계열로 변경 |
+| 2026-10-28 | v0.1.3 | 문서 정합성 정리: 문서 우선순위 명시, T0.1~T0.3 완료(CLAUDE.md, PRD 반영), 외부 등록 순서 변경(Vercel 도메인 먼저), T0.16 장소명 처리 조사 확장, G1/G3 비교 범위 구분, 다양성 제약을 샘플링 중 적용, 공개 프로필 뷰, 투표 확정 시 방문 후보 보안 함수, 투표방 rate limit, 탈퇴 삭제 범위, 지표용 이벤트 3종, 진행 현황 수치와 커밋 예시 정정 |
+| 2026-10-28 | v0.1.4 | 0단계 조사 결과 반영(T0.14~T0.20, T0.27): 카카오, 네이버 커스텀 OIDC 로그인(T0.6, T0.7, T0.10, T4.6, T4.7), 장소 데이터와 위치 규칙(T4.4, T4.16, T5.14, T5.24, T6.8, T7.6, T7.14, T7.20, T8.3, T8.4, T8.14, T10.1, T10.2), T5.12a 장소 이름 해석 공통 모듈 추가, 2.4절 Base UI Drawer와 번들 규칙, T0.30 `next analyze` |
+| 2026-10-29 | v0.1.5 | 1단계 완료: G1에서 시안 B "Quiet Stone" 선택(design-decisions D-01), 루트 DESIGN.md와 생성 tokens.css, 하드코딩 색 금지 린트, 미선택 시안 코드 삭제 |
+| 2026-10-30 | v0.1.6 | 3단계 완료: G3에서 홈 D1(D + 어제 피드백 한 줄 띠), 랜딩 B 선택(design-decisions D-05, D-06), 안건 8건 확정. DESIGN.md 5장 홈, 그냥 골라줘, 랜딩, 배지 calm 보강, PRD REC-04, REC-12, FB-01 정리, 후속 메모(T4.7 네이버 BI, T4.28 공식 심볼, T5.17 배지 Tooltip 분리, T5.22 R1과 직전 제외, T6.8 띠 배치) |
+| 2026-10-30 | v0.1.7 | 4단계 시안 게이트 T4.3: 온보딩 B + C 단축(D-07), 로그인 B + A 시트 + C 버튼 문구(D-08), 안건 12건 확정. T4.4 `profiles.marketing_agreed` 제외, T4.10 양쪽 OS 스킴 시도, T4.11 약관 필수 3개와 버튼 상태, T4.13 시트 지연 로딩, T4.16 핀 놓는 동작, T4.17~T4.19 범위와 단축 반영 |
+| 2026-10-31 | v0.1.8 | 4단계 완료: T4.28 공식 심볼 교체와 네이버 BI 확인을 T10.4a로 이동, 닉네임 금칙어를 T6.17에 포함, T4.14 실기기 확인을 7단계 또는 베타 전으로 미룸 |
+| 2026-10-31 | v0.1.9 | 6단계 시안 게이트 T6.4: 식후 피드백 B + C 항목 줄 + A 머리줄 메뉴(D-11), 나 탭 A + C 숫자 3칸(D-12), 제보와 신고 C 3단계 + B 결과 줄 + C 점 3개(D-13), 안건 40건 확정. D-05 "나중에" 안건 닫음(길찾기 뒤 접힘). T6.5 스키마 입력(D-13 안건 2, 5~10), T6.18 신고와 정보 제보 합산 30건, 늦은 답 14일(T6.9, T6.13), FB-04 영업일 48시간(T6.8), 금칙어 자체 목록(T6.17) |
+| 2026-11-01 | v0.1.10 | 6단계 완료(33/33): DB 2건 적용(T6.5 후기, 제보, 할인, 웨이팅 + RLS, T6.26 pg_cron), 피드백 띠와 시트, 나 탭 기록, 제보와 신고 화면, 금칙어, 한도, 선호도 갱신과 집계 연결. 구현 중 결정은 g6-qa.md, D-11~D-13. 실기기 확인 남음 |
+| 2026-11-01 | v0.1.11 | 7단계 시안 게이트 T7.5: 투표방 A + C 참여 줄 + B 결과 카드(D-14), 투표 만들기 C + B 마감 큰 칸 + A 고지(D-15), 회식 C + B 첫 질문 2개 + A 근거 줄(D-16), 서버 OG A + 결과 공유 이미지 B(D-17), 안건 55건 확정. 무기명(T7.6, T7.16), 동점 미결 30분 자동 룰렛(T7.9), 만들기 취소와 한도 복구(T7.7), 주류 카테고리 판정(T7.27), 카운트다운 단위 표기, 2.4절 canvas-confetti 행 정정(색종이 없음) |
+| 2026-11-01 | v0.1.12 | 7단계 완료(35/36, `[실기기]` T7.32 남음): DB 3건 추가 적용(T7.14 결과 미리보기 숫자, T7.11 기준점 바꾸기(승인 전 함께 적용되어 사용자에게 보고), T7.30 poll_closed 한 번 보고), 투표방, 투표 만들기, 회식, 공유 이미지 구현. pollEntry는 개발과 Preview만 켜고 프로덕션은 auth와 함께 연다(T7.35). 홈 예산 임시 201KB(next/og 런타임, T8.11에서 200으로). 8단계 후보: 데스크톱 투표 탭 우측 지도(진행 중 투표 후보 핀, 사용자 결정) |
+| 2026-11-02 | v0.1.13 | 8단계 완료(23/23, T8.19는 매트릭스 구성으로 완료, 실제 기기 확인은 T9.0): G8 시안 D-18 앱 아이콘 A(샌드 track), D-19 관리자 C + B + A, DB 1건 적용(T8.5 관리자, 정지, 처리 이력), 서비스 워커와 오프라인, 매니페스트와 설치 유도, 문의 이메일, 약관 초안 3종, 모션, 문구, 접근성 감사, 번들 200 KB 복귀, Lighthouse, 시각 회귀, 운영 스크립트. G8 조건부 통과, 조건은 T9.0, 자체 도메인 연결 뒤 플래그 공개(T9.2) |
+| 2026-11-03 | v0.1.14 | 메뉴와 메뉴별 가격 부족 대응(사용자 제기, D-34): T10.16 메뉴 제보 하위 작업 a~h 추가(a 홈 카드 "메뉴 보기" 완료), 백로그에 공공데이터 메뉴 첫 값, 메뉴판 사진, 인허가 폐업 판정 보조 추가. PRD v0.2.8 6.6B MENU |
+| 2026-11-03 | v0.1.15 | 추천 품질 지적 3건 대응(사용자 제기): T9.16 끼니 적합도 완료(점심 술집 하드 필터, 카페류 P 감점, PRD 7장), T9.17 온보딩 좋아하는 음식 단계와 다시 부르기 띠, T9.18 지금 안 열었어요 제보 추가 |
+| 2026-11-03 | v0.1.16 | T9.17 완료(D-39): 좋아하는 음식 온보딩 4단계, 나 탭 설정, 홈 취향 띠, 추천 가산. PRD v0.2.11 ONB-06, SET-06 |
+| 2026-11-13 | v0.1.18 | T9.19 완료(D-44): 끼니 성격 하드 필터(점심 술집, 치킨, 간식, 저녁 간식, 회식 간식, 분식, 패스트푸드). PRD v0.2.14 7장, PARTY-03 |
+| 2026-11-04 | v0.1.17 | T9.18 완료(D-40): 문 닫힌 식당 제보, 카드 더 보기에서 알리며 바로 다른 곳으로, 이번 끼니 2명 제외 1명 감점. PRD v0.2.12 PLACE-09 |
