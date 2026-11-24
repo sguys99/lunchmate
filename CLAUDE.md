@@ -1,13 +1,13 @@
 # CLAUDE.md — 런치메이트(LunchMate)
 
-> 매 세션 먼저 읽는 작업 규칙. 정본: 왜 `docs/basic-plan.md`, 무엇 `docs/prd.md`, 순서와 세부 규칙 `docs/tasks.md`, 모양 `DESIGN.md`.
+> 매 세션 먼저 읽는 작업 규칙. 정본: 왜 `docs/basic-plan.md`, 무엇 `docs/prd.md`, 순서 `docs/tasks.md`, 세부 규칙 `docs/rules.md`(tasks.md 2장, 우선순위 동일), 모양 `DESIGN.md`.
 > 문서 우선순위: `tasks.md` > `CLAUDE.md` > `prd.md` > `basic-plan.md`. 충돌을 발견하면 상위 문서를 따르고 하위 문서 수정이 필요하다고 사용자에게 알린다.
 
 ## 0. 문서 읽기 규칙 (토큰 절약, 필수)
 
 큰 문서(`prd.md`, `DESIGN.md`, `research-notes.md`, `docs/archive/*`, `copy-guide.md`, `launch-ops.md`, `monitoring.md` 등)는 **통째로 읽지 않는다.**
 - 먼저 `grep -n`으로 작업 ID(`T10.12`), PRD ID(`REC-03`, `AC-POLL-4`), 결정 ID(`D-35`), 절 제목을 찾고, 해당 블록만 `Read`의 offset/limit(또는 `sed -n`)으로 읽는다.
-- `docs/tasks.md`는 진행 중 작업만 담는다. 0~9단계 완료 항목과 옛 변경 이력은 `docs/archive/tasks-done.md`에 있으니, 옛 작업 ID는 grep으로만 찾는다.
+- `docs/tasks.md`는 미완료 작업만 담는다(추가, 완료 이동 규칙은 0.2절). 완료 항목과 옛 변경 이력은 `docs/archive/tasks-done.md`에 있으니, 옛 작업 ID는 grep으로만 찾는다.
 - `docs/design-decisions.md`는 색인 표 + D-27 이후 본문이다. D-01~D-26은 `docs/archive/design-decisions-1.md`에서 grep으로 해당 항목만 읽는다.
 - 이 파일에 요약된 규칙(7장 데이터 규칙, 8장 수치, 9장 문구)으로 충분하면 원문을 다시 열지 않는다. 원문은 세부가 필요할 때만 연다.
 - 작업과 무관한 문서(베타 운영, 출시 공지, 외부 문의, 설정 가이드)는 사용자가 언급하거나 작업 ID가 가리킬 때만 연다.
@@ -28,7 +28,7 @@
 
 ## 2. 기술 스택
 
-Next.js 16 (App Router, Turbopack) + React 19 + TypeScript strict / Tailwind v4 + shadcn/ui `base-vega`(Base UI 기반, radix 아님) + Lucide + Motion(`motion/react`, `m` + `LazyMotion`) / 폰트 Pretendard Variable(본문, 숫자) + 마루 부리(제목) / Sonner, NumberFlow, 바텀시트는 Base UI Drawer(용도와 로딩 방식은 tasks.md 2.4절) / TanStack Query(서버 데이터, 세션 메모리 캐시) + Zustand(UI 상태) / Supabase **클라우드 개발 프로젝트 1개**(로컬 Docker 없음, Auth: 구글 내장, 카카오, 네이버는 커스텀 OIDC `custom:kakao`, `custom:naver`, Postgres + RLS, Realtime, pg_cron) / 네이버 Web Dynamic Map(표시) + 카카오 로컬 API(FD6) + `nmap://` 길찾기 / Kakao 공유 + Web Share + Vercel OG / zod, Vitest, Playwright / PostHog, Sentry / `main` 푸시 → Vercel 자동 배포 / pnpm
+Next.js 16 (App Router, Turbopack) + React 19 + TypeScript strict / Tailwind v4 + shadcn/ui `base-vega`(Base UI 기반, radix 아님) + Lucide + Motion(`motion/react`, `m` + `LazyMotion`) / 폰트 Pretendard Variable(본문, 숫자) + 마루 부리(제목) / Sonner, NumberFlow, 바텀시트는 Base UI Drawer(용도와 로딩 방식은 rules.md 2.4절) / TanStack Query(서버 데이터, 세션 메모리 캐시) + Zustand(UI 상태) / Supabase **클라우드 개발 프로젝트 1개**(로컬 Docker 없음, Auth: 구글 내장, 카카오, 네이버는 커스텀 OIDC `custom:kakao`, `custom:naver`, Postgres + RLS, Realtime, pg_cron) / 네이버 Web Dynamic Map(표시) + 카카오 로컬 API(FD6) + `nmap://` 길찾기 / Kakao 공유 + Web Share + Vercel OG / zod, Vitest, Playwright / PostHog, Sentry / `main` 푸시 → Vercel 자동 배포 / pnpm
 
 ## 3. 명령어
 
@@ -71,7 +71,7 @@ supabase/migrations/ 스키마 + RLS 정책 (항상 같은 파일)     docs/arch
 
 ## 6. 디자인 규칙
 
-### 6.1 시안 절차 (건너뛰지 않음, 세부와 비교표 양식은 tasks.md 2.3절)
+### 6.1 시안 절차 (건너뛰지 않음, 세부와 비교표 양식은 rules.md 2.3절)
 1. 새 화면, 주요 컴포넌트는 `src/app/design-lab/<화면>/{a,b,c}`에 **방향이 분명히 다른** 3안 이상. 색만 바꾼 변형은 시안이 아니다.
 2. 각 시안은 로딩(스켈레톤), 빈 상태, 오류, 오프라인 4상태 + 다크 모드 + 핵심 모션, 목업 데이터로 동작.
 3. `pnpm shots` 캡처 + 비교표를 붙여 선택을 요청하고 멈춘다.
@@ -131,14 +131,14 @@ supabase/migrations/ 스키마 + RLS 정책 (항상 같은 파일)     docs/arch
 - TypeScript strict, `any` 금지. DB 타입은 `pnpm db:types` 생성본만.
 - 서버 컴포넌트 기본, 상호작용 필요한 곳만 `"use client"`. 지도 SDK는 지도 탭 진입 시 동적 import.
 - 파일 kebab-case, 컴포넌트 PascalCase, 훅 `use-*.ts`. 도메인 코드는 `src/features/<도메인>`.
-- **UI 문구** (세부 tasks.md 2.2절, 예문은 `docs/copy-guide.md`에서 필요한 절만, 검사 `pnpm lint:copy`)
+- **UI 문구** (세부 rules.md 2.2절, 예문은 `docs/copy-guide.md`에서 필요한 절만, 검사 `pnpm lint:copy`)
   - 습니다체:해요체 ≈ 7:3. 안내, 결과, 설명, 오류, 빈 상태, 정책, 권한은 습니다체. 질문, 제안, 피드백 요청, 축하는 해요체. 명사형 라벨은 제외, 약관은 습니다체 100%.
   - Em dash `—`, en dash `–`, 가로줄 `―`, 중간점 `·` 금지(범위는 `~`, 나열은 쉼표, "와/과", 슬래시). 카드 메타 줄은 간격이나 얇은 세로선으로 나눈다.
   - 짧고 구체적으로, 오류는 다음 행동을 안내. 화면 문구에만 적용(문서 서술은 무관).
 - 외부 API는 `src/lib/kakao|naver` 래퍼 경유. 실패 시 재시도 1회 + PRD 12장 대체 동작.
 - 성능 예산: 홈 JS 201KB(gzip) 이하, LCP 2.5초(4G). 큰 의존성 추가 전 사용자에게 묻는다.
 
-## 10. 완료 기준 (DoD, tasks.md 2.1절)
+## 10. 완료 기준 (DoD, rules.md 2.1절)
 
 - PRD AC 통과, lint/typecheck/test/lint:copy 통과, 390px, 1280px, 다크 확인, 4상태 구현, 분석 이벤트 연결, 새 테이블 RLS 3역할(본인, 타인, 비로그인) 테스트.
 - 추천 규칙마다 단위 테스트(하드 필터, 다양성, 반복 패널티, 할인 미반영). 비공개 후기, 투표방 접근 AC는 테스트로 증명.
@@ -147,7 +147,7 @@ supabase/migrations/ 스키마 + RLS 정책 (항상 같은 파일)     docs/arch
 ## 11. Git
 
 - `main`에 바로 커밋, 푸시(푸시 = 프로덕션 배포). 푸시 전 lint, typecheck, test, lint:copy 통과(pre-push 훅).
-- 커밋 메시지 한국어, PRD ID + 작업 ID: `feat(REC-04, T5.17): 카드 스와이프 구현`. PRD ID 없으면 작업 ID만. 작업을 끝낸 커밋에서 tasks.md 체크박스도 체크. 본문에 선택 시안(D-NN), 확인 필요 항목, 공식 문서 출처.
+- 커밋 메시지 한국어, PRD ID + 작업 ID: `feat(REC-04, T5.17): 카드 스와이프 구현`. PRD ID 없으면 작업 ID만. 작업을 끝낸 커밋에서 그 항목을 tasks.md에서 `docs/archive/tasks-done.md`로 옮기고 체크(메모는 한 줄). 본문에 선택 시안(D-NN), 확인 필요 항목, 공식 문서 출처.
 - 미완성 기능은 기능 플래그로 숨긴 채 푸시. 이미 푸시된 마이그레이션은 수정 금지, 새 파일로.
 
 ## 12. 환경변수
