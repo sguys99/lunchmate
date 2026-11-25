@@ -3,7 +3,7 @@ import {
   kakaoCategorySlug,
   kakaoCategoryText,
 } from "@/features/rec/kakao-category";
-import { isChicken, mealKind } from "./meal-kind";
+import { isChicken, isGrill, mealKind } from "./meal-kind";
 
 /** 카카오 원문 업종과 이름으로 판정 */
 const kind = (categoryName: string, name = "식당") =>
@@ -35,7 +35,6 @@ describe("끼니 성격 (T9.19, D-44)", () => {
 
   it("식사 업종은 meal, 비슷한 글자에 걸리지 않는다", () => {
     expect(kind("음식점 > 분식 > 떡볶이")).toBe("meal");
-    expect(kind("음식점 > 한식 > 육류,고기", "바베큐 하우스")).toBe("meal");
     expect(kind("음식점 > 한식 > 해물,생선", "바지락 칼국수")).toBe("meal");
     expect(kind("음식점 > 패스트푸드 > 샌드위치")).toBe("meal");
     expect(kind("음식점 > 샐러드")).toBe("meal");
@@ -57,5 +56,34 @@ describe("끼니 성격 (T9.19, D-44)", () => {
   it("치킨 대분류만 치킨으로 본다", () => {
     expect(isChicken("치킨 > 치킨,닭강정")).toBe(true);
     expect(isChicken("한식 > 닭요리")).toBe(false);
+  });
+
+  it("고기 위주(세부 없는 육류,고기, 삼겹살, 갈비, 곱창, 양꼬치)는 grill (D-46)", () => {
+    expect(kind("음식점 > 한식 > 육류,고기")).toBe("grill");
+    expect(kind("음식점 > 한식 > 육류,고기", "바베큐 하우스")).toBe("grill");
+    expect(kind("음식점 > 한식 > 육류,고기 > 삼겹살")).toBe("grill");
+    expect(kind("음식점 > 한식 > 육류,고기 > 갈비")).toBe("grill");
+    expect(kind("음식점 > 한식 > 육류,고기 > 곱창,막창")).toBe("grill");
+    expect(kind("음식점 > 중식 > 양꼬치")).toBe("grill");
+  });
+
+  it("고기 업종이어도 닭요리, 탕, 이름에 식사 메뉴가 있으면 meal (D-46)", () => {
+    expect(kind("음식점 > 한식 > 육류,고기 > 닭요리 > 삼계탕")).toBe("meal");
+    expect(kind("음식점 > 한식 > 육류,고기 > 갈비 > 갈비탕")).toBe("meal");
+    expect(kind("음식점 > 한식 > 육류,고기", "OO 불고기 백반")).toBe("meal");
+    expect(kind("음식점 > 한식 > 육류,고기", "제육 두루치기 집")).toBe("meal");
+    expect(kind("음식점 > 한식 > 족발,보쌈")).toBe("meal");
+    expect(kind("음식점 > 한식 > 국밥", "갈비 국밥")).toBe("meal");
+  });
+
+  it("업종 원문 없이 카테고리 gogi만으로는 grill로 보지 않는다", () => {
+    expect(isGrill("", "삼겹살집")).toBe(false);
+    expect(mealKind({ category: "gogi", categoryText: "", name: "a" })).toBe(
+      "meal",
+    );
+  });
+
+  it("고기 술집은 drink가 먼저다", () => {
+    expect(kind("음식점 > 한식 > 육류,고기", "고기 포차")).toBe("drink");
   });
 });

@@ -48,15 +48,15 @@ export const CRAVING_BOOST = 0.25;
  */
 export const LIKED_CATEGORY_BOOST = 0.15;
 
-/* 끼니 적합도 (T9.16, T9.19 D-44: 점심 치킨, 카페 추천 지적 11/13) ------- */
+/* 끼니 적합도 (T9.16, T9.19 D-44: 점심 치킨, 카페 추천 지적 11/13, D-46: 점심 고깃집 11/26) */
 
 /**
  * 이 끼니에 하드 필터로 빼는 끼니 성격(meal-kind.ts). 점심 술집, 치킨은 대부분 저녁 영업이고,
- * 카페, 베이커리, 간식은 한 끼로 약하다(T9.16의 카페 P 감점 0.2는 점수 차이 0.06이라 효과가 없었다).
+ * 고기 위주(구이집)도 대부분 저녁 영업이며, 카페, 베이커리, 간식은 한 끼로 약하다(T9.16의 카페 P 감점 0.2는 점수 차이 0.06이라 효과가 없었다).
  * 요즘 땡겨요(SET-05)로 그 카테고리를 고른 동안은 빼지 않는다. 회식 모드(PARTY)는 rank.ts의 자기 규칙을 쓴다.
  */
 export const MEAL_EXCLUDED_KINDS = {
-  lunch: ["drink", "snack"],
+  lunch: ["drink", "snack", "grill"],
   dinner: ["snack"],
 } as const satisfies Record<Meal, readonly MealKind[]>;
 

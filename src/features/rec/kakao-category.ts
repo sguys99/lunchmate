@@ -126,8 +126,9 @@ export function kakaoCategorySlug(categoryName: string): CategorySlug {
   const sub = parts.slice(1);
   const mapped = top ? TOP[top] : undefined;
   if (mapped === "hansik" && top === "한식") {
-    if (hasWord(sub, GOGI_WORDS)) return "gogi";
+    // 탕을 먼저 본다: "육류,고기 > 닭요리 > 삼계탕"은 국밥/탕이다(D-46 실측)
     if (hasWord(sub, GUKBAP_WORDS)) return "gukbap";
+    if (hasWord(sub, GOGI_WORDS)) return "gogi";
     return "hansik";
   }
   if (mapped) return mapped;

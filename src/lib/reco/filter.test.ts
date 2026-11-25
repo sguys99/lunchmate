@@ -246,6 +246,23 @@ describe("끼니 적합도 하드 필터 (T9.16)", () => {
     expect(isOffMeal(chicken, "lunch", new Set(["fastfood"]))).toBe(false);
   });
 
+  it("점심에는 고깃집을 빼고, 저녁과 요즘 땡겨요 고기면 남긴다 (D-46)", () => {
+    const grill = makeCandidate("g", {
+      category: "gogi",
+      categoryText: "한식 > 육류,고기",
+    });
+    const lunchMeat = makeCandidate("l", {
+      name: "OO 불고기 백반",
+      category: "gogi",
+      categoryText: "한식 > 육류,고기",
+    });
+    const none = new Set<string>();
+    expect(isOffMeal(grill, "lunch", none)).toBe(true);
+    expect(isOffMeal(lunchMeat, "lunch", none)).toBe(false);
+    expect(isOffMeal(grill, "dinner", none)).toBe(false);
+    expect(isOffMeal(grill, "lunch", new Set(["gogi"]))).toBe(false);
+  });
+
   it("저녁에도 베이커리, 간식은 빼고, 요즘 땡겨요 카페면 남긴다", () => {
     const bakery = makeCandidate("b", {
       category: "cafe",
