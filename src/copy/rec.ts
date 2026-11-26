@@ -68,8 +68,6 @@ export const recCopy = {
     addToPoll: "투표에 추가",
     /** 이번 끼니 문이 닫혀 있었다(D-40). 알리면서 그 자리 카드를 다른 곳으로 바꾼다 */
     closedToday: "문이 닫혀 있어요",
-    /** 영업시간과 메뉴는 앱 안에 없어 네이버 플레이스로 보낸다(D-40에서 "메뉴 보기"를 넓힘) */
-    menu: "영업시간과 메뉴 보기",
     toasts: {
       blocked: "다시 추천하지 않습니다.",
       blockedUnfavorited: "즐겨찾기에서도 뺐습니다.",

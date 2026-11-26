@@ -10,13 +10,12 @@
 // - 문이 닫혀 있어요(맨 위, D-40): 누르면 바로 카드를 빼고 다른 곳으로 바꾼 뒤 "오늘만 쉬어요" 제보를 남긴다.
 //   같은 날 이미 알렸으면(duplicate) 그대로 성공으로 본다. 제보가 실패해도 카드는 바꾼 채 둔다(가게 앞의 사용자에게는 대안이 먼저).
 //   토스트 "닫혀 있다고 알렸습니다. 다른 곳을 골랐습니다." + 되돌리기(2분 안 제보 지우고 카드 되돌림). 비로그인은 로그인 유도.
-// - 영업시간과 메뉴 보기(둘째): 네이버 플레이스 이름 + 좌표 검색(상세의 "네이버 플레이스에서 보기"와 같은 링크).
+// - 영업시간과 메뉴 보기는 하단 줄 "식당 정보" 버튼으로 옮겼다(D-47).
 // - 투표에 추가: pollEntry 플래그가 켜지고 onAddToPoll이 있을 때만(7단계).
 // 서버로 가는 값은 place_id, place_url뿐이다(CLAUDE.md 7장).
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { Ban, DoorClosed, ExternalLink, Star, Vote } from "lucide-react";
+import { Ban, DoorClosed, Star, Vote } from "lucide-react";
 import { track } from "@/lib/analytics/track";
-import { naverPlaceSearchUrl } from "@/lib/naver/directions";
 import { toast } from "@/components/ui/lazy-toaster";
 import { recCopy } from "@/copy/rec";
 import { placeCopy } from "@/copy/place";
@@ -194,13 +193,6 @@ export default function CardMenu({
         }
         void reportClosedToday(target);
       },
-    },
-    {
-      key: "menu",
-      label: copy.menu,
-      icon: ExternalLink,
-      href: naverPlaceSearchUrl(card.name, card.position),
-      external: true,
     },
     {
       key: "favorite",

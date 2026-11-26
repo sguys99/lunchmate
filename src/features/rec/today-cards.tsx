@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   Dices,
+  FastForward,
   RotateCcw,
   ThumbsUp,
 } from "lucide-react";
@@ -27,6 +28,7 @@ import { buttonClass } from "@/components/ui/button-classes";
 import { focusRing, hitArea44 } from "@/components/ui/interaction";
 import { Skeleton } from "@/components/ui/skeleton";
 import { homeCopy } from "@/copy/home";
+import { naverPlaceSearchUrl } from "@/lib/naver/directions";
 import { cn } from "@/lib/utils";
 import {
   ArtCircle,
@@ -329,7 +331,7 @@ export function BottomDock({
   );
 }
 
-/** 길찾기(주 버튼 하나) + 그냥 골라줘 + 다시 뽑기 아이콘 */
+/** 길찾기(주 버튼 하나) + 식당 정보(네이버 지도, D-47) + 그냥 골라줘 아이콘 + 다시 뽑기 아이콘 */
 export function TodayActionBar({
   hero,
   pick,
@@ -362,23 +364,34 @@ export function TodayActionBar({
         >
           {opening ? copy.actions.opening : copy.actions.directions}
         </button>
+        {/* 영업시간, 메뉴, 사진은 앱에 없어 네이버 지도 이름 + 좌표 검색으로 보낸다(D-47, 저장 없이 그 자리에서 만든다) */}
+        <a
+          href={naverPlaceSearchUrl(hero.name, hero.position)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={copy.actions.infoOf(hero.name)}
+          className={cn(buttonClass("secondary"), "shrink-0 px-4")}
+        >
+          {copy.actions.info}
+        </a>
         <button
           type="button"
           aria-haspopup="dialog"
+          aria-label={skipping ? copy.justPick.skip : copy.actions.justPick}
+          title={skipping ? copy.justPick.skip : copy.actions.justPick}
           onPointerEnter={pick.prefetch}
           onFocus={pick.prefetch}
           onClick={(e) => {
             if (skipping) pick.skip();
             else pick.begin(e.currentTarget, heroIndex);
           }}
-          // "바로 보기"로 바뀌어도 폭이 같게(길찾기 폭이 출렁이지 않게)
-          className={cn(
-            buttonClass("secondary"),
-            "min-w-32 shrink-0 pr-5 pl-4 @max-[23.75rem]/screen:pr-4 @max-[23.75rem]/screen:pl-3",
-          )}
+          className={cn(buttonClass("secondary", "icon"), "shrink-0")}
         >
-          <Dices aria-hidden className="size-4" strokeWidth={1.5} />
-          {skipping ? copy.justPick.skip : copy.actions.justPick}
+          {skipping ? (
+            <FastForward aria-hidden strokeWidth={1.5} />
+          ) : (
+            <Dices aria-hidden strokeWidth={1.5} />
+          )}
         </button>
         <button
           type="button"
@@ -449,7 +462,8 @@ export function ActionBarSkeleton() {
     <BottomDock label={copy.single.actionsLabel}>
       <div aria-hidden className="flex items-center gap-2">
         <Skeleton className="h-12 min-w-0 flex-1 rounded-button" />
-        <Skeleton className="h-12 w-34 shrink-0 rounded-button" />
+        <Skeleton className="h-12 w-24 shrink-0 rounded-button" />
+        <Skeleton className="size-12 shrink-0 rounded-full" />
         <Skeleton className="size-12 shrink-0 rounded-full" />
       </div>
     </BottomDock>

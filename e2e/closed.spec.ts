@@ -94,8 +94,11 @@ test.describe("문 닫힌 식당 제보 (T9.18)", () => {
         .click();
       const closed = page.getByRole("menuitem", { name: "문이 닫혀 있어요" });
       await expect(closed).toBeVisible();
+      // 영업시간과 메뉴는 더 보기에서 하단 줄 "식당 정보"로 옮겼다(D-47)
       await expect(
-        page.getByRole("menuitem", { name: /영업시간과 메뉴 보기/ }),
+        page.getByRole("link", {
+          name: `${first} 식당 정보, 네이버 지도에서 열림`,
+        }),
       ).toBeVisible();
       await shot(page, "menu");
       await closed.click();

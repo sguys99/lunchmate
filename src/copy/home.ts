@@ -107,6 +107,9 @@ export const homeCopy = {
     actions: {
       ...actions,
       justPick: "그냥 골라줘",
+      /** 하단 줄 길찾기 옆(D-47). 영업시간, 메뉴, 사진은 네이버 지도에서 본다 */
+      info: "식당 정보",
+      infoOf: (name: string) => `${name} 식당 정보, 네이버 지도에서 열림`,
       detail: "상세",
       directionsTo: (name: string) => `${name} 길찾기`,
       detailOf: (name: string) => `${name} 상세`,
